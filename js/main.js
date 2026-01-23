@@ -89,12 +89,14 @@
         // Form validation and submission
         const contactForm = document.getElementById('contactForm');
 
-        contactForm?.addEventListener('submit', function(e) {
+        contactForm?.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             // Basic validation
             const name = this.querySelector('#name');
             const email = this.querySelector('#email');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn?.innerHTML;
             let isValid = true;
 
             if (!name?.value.trim()) {
@@ -112,19 +114,56 @@
             }
 
             if (isValid) {
-                // Show success message (in production, this would send to a server)
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn?.innerHTML;
-
+                // Show loading state
                 if (submitBtn) {
-                    submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Message Sent!';
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
                     submitBtn.disabled = true;
+                }
 
-                    setTimeout(() => {
-                        submitBtn.innerHTML = originalText || 'Submit';
-                        submitBtn.disabled = false;
+                try {
+                    const formData = new FormData(contactForm);
+                    const response = await fetch('https://api.web3forms.com/submit', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Success
+                        if (submitBtn) {
+                            submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Message Sent!';
+                            submitBtn.classList.remove('btn-primary');
+                            submitBtn.classList.add('btn-success');
+                        }
                         contactForm.reset();
-                    }, 3000);
+
+                        setTimeout(() => {
+                            if (submitBtn) {
+                                submitBtn.innerHTML = originalText || 'Submit';
+                                submitBtn.disabled = false;
+                                submitBtn.classList.remove('btn-success');
+                                submitBtn.classList.add('btn-primary');
+                            }
+                        }, 4000);
+                    } else {
+                        throw new Error(result.message || 'Something went wrong');
+                    }
+                } catch (error) {
+                    // Error
+                    console.error('Form submission error:', error);
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error - Try Again';
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-danger');
+
+                        setTimeout(() => {
+                            submitBtn.innerHTML = originalText || 'Submit';
+                            submitBtn.disabled = false;
+                            submitBtn.classList.remove('btn-danger');
+                            submitBtn.classList.add('btn-primary');
+                        }, 3000);
+                    }
                 }
             }
         });

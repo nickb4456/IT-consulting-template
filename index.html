@@ -2423,6 +2423,257 @@
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
+    // ========== AI ROBOTS WORKING ==========
+    const robots = [];
+
+    function createRobot(color, emissiveColor) {
+        const robotGroup = new THREE.Group();
+
+        // Body (rounded box)
+        const bodyGeometry = new THREE.BoxGeometry(0.25, 0.35, 0.15);
+        const bodyMaterial = new THREE.MeshStandardMaterial({
+            color: color,
+            roughness: 0.3,
+            metalness: 0.8
+        });
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.position.y = 0.25;
+        body.castShadow = true;
+        robotGroup.add(body);
+
+        // Chest light/core
+        const coreMaterial = new THREE.MeshStandardMaterial({
+            color: emissiveColor,
+            emissive: emissiveColor,
+            emissiveIntensity: 1,
+            roughness: 0.2,
+            metalness: 0.9
+        });
+        const core = new THREE.Mesh(
+            new THREE.SphereGeometry(0.04, 16, 16),
+            coreMaterial
+        );
+        core.position.set(0, 0.28, 0.08);
+        robotGroup.add(core);
+
+        // Head
+        const headGeometry = new THREE.BoxGeometry(0.18, 0.15, 0.12);
+        const head = new THREE.Mesh(headGeometry, bodyMaterial);
+        head.position.y = 0.5;
+        head.castShadow = true;
+        robotGroup.add(head);
+
+        // Eyes (glowing)
+        const eyeMaterial = new THREE.MeshStandardMaterial({
+            color: 0x00ffff,
+            emissive: 0x00ffff,
+            emissiveIntensity: 2,
+            roughness: 0.1,
+            metalness: 1
+        });
+        const leftEye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 8, 8),
+            eyeMaterial
+        );
+        leftEye.position.set(-0.04, 0.52, 0.06);
+        robotGroup.add(leftEye);
+
+        const rightEye = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 8, 8),
+            eyeMaterial
+        );
+        rightEye.position.set(0.04, 0.52, 0.06);
+        robotGroup.add(rightEye);
+
+        // Antenna
+        const antenna = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.01, 0.01, 0.1, 8),
+            bodyMaterial
+        );
+        antenna.position.set(0, 0.62, 0);
+        robotGroup.add(antenna);
+
+        const antennaTip = new THREE.Mesh(
+            new THREE.SphereGeometry(0.02, 8, 8),
+            coreMaterial
+        );
+        antennaTip.position.set(0, 0.68, 0);
+        robotGroup.add(antennaTip);
+
+        // Arms
+        const armMaterial = new THREE.MeshStandardMaterial({
+            color: 0x4a5568,
+            roughness: 0.4,
+            metalness: 0.7
+        });
+
+        // Left arm group (for animation)
+        const leftArmGroup = new THREE.Group();
+        const leftArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.05, 0.2, 0.05),
+            armMaterial
+        );
+        leftArm.position.y = -0.1;
+        leftArmGroup.add(leftArm);
+        leftArmGroup.position.set(-0.17, 0.35, 0);
+        robotGroup.add(leftArmGroup);
+
+        // Right arm group (for animation)
+        const rightArmGroup = new THREE.Group();
+        const rightArm = new THREE.Mesh(
+            new THREE.BoxGeometry(0.05, 0.2, 0.05),
+            armMaterial
+        );
+        rightArm.position.y = -0.1;
+        rightArmGroup.add(rightArm);
+        rightArmGroup.position.set(0.17, 0.35, 0);
+        robotGroup.add(rightArmGroup);
+
+        // Legs
+        const leftLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, 0.15, 0.06),
+            armMaterial
+        );
+        leftLeg.position.set(-0.06, 0.02, 0);
+        leftLeg.castShadow = true;
+        robotGroup.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(
+            new THREE.BoxGeometry(0.06, 0.15, 0.06),
+            armMaterial
+        );
+        rightLeg.position.set(0.06, 0.02, 0);
+        rightLeg.castShadow = true;
+        robotGroup.add(rightLeg);
+
+        // Feet
+        const footMaterial = new THREE.MeshStandardMaterial({
+            color: 0x2d3748,
+            roughness: 0.5,
+            metalness: 0.6
+        });
+        const leftFoot = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, 0.03, 0.1),
+            footMaterial
+        );
+        leftFoot.position.set(-0.06, -0.05, 0.02);
+        robotGroup.add(leftFoot);
+
+        const rightFoot = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, 0.03, 0.1),
+            footMaterial
+        );
+        rightFoot.position.set(0.06, -0.05, 0.02);
+        robotGroup.add(rightFoot);
+
+        // Store arm references for animation
+        robotGroup.userData = {
+            leftArm: leftArmGroup,
+            rightArm: rightArmGroup,
+            head: head,
+            core: core,
+            antennaTip: antennaTip,
+            phase: Math.random() * Math.PI * 2
+        };
+
+        return robotGroup;
+    }
+
+    // Robot 1: Blue robot at secondary desk (working on laptop)
+    const robot1 = createRobot(0x2563eb, 0x06b6d4);
+    robot1.position.set(-2.5, 0.05, 1.5);
+    robot1.rotation.y = Math.PI * 0.8;
+    robot1.scale.setScalar(0.9);
+    scene.add(robot1);
+    robots.push(robot1);
+
+    // Small desk for robot 1
+    const miniDesk1 = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.04, 0.5),
+        deskMaterial
+    );
+    miniDesk1.position.set(-2.5, 0.4, 1.2);
+    miniDesk1.castShadow = true;
+    scene.add(miniDesk1);
+
+    // Mini laptop for robot 1
+    const laptop1Base = new THREE.Mesh(
+        new THREE.BoxGeometry(0.25, 0.01, 0.18),
+        new THREE.MeshStandardMaterial({ color: 0x1a1a1a, metalness: 0.8, roughness: 0.3 })
+    );
+    laptop1Base.position.set(-2.5, 0.43, 1.15);
+    scene.add(laptop1Base);
+
+    const laptop1Screen = new THREE.Mesh(
+        new THREE.BoxGeometry(0.25, 0.16, 0.01),
+        new THREE.MeshStandardMaterial({ color: 0x06b6d4, emissive: 0x06b6d4, emissiveIntensity: 0.5 })
+    );
+    laptop1Screen.position.set(-2.5, 0.52, 1.05);
+    laptop1Screen.rotation.x = -0.2;
+    scene.add(laptop1Screen);
+
+    // Robot 2: Cyan robot near server rack (monitoring systems)
+    const robot2 = createRobot(0x06b6d4, 0x22c55e);
+    robot2.position.set(3, 0.05, -2);
+    robot2.rotation.y = -Math.PI * 0.3;
+    robot2.scale.setScalar(0.85);
+    scene.add(robot2);
+    robots.push(robot2);
+
+    // Server rack for robot 2
+    const serverRack = new THREE.Mesh(
+        new THREE.BoxGeometry(0.4, 1.2, 0.3),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.4 })
+    );
+    serverRack.position.set(3.5, 0.6, -2.5);
+    serverRack.castShadow = true;
+    scene.add(serverRack);
+
+    // Server lights
+    for (let i = 0; i < 5; i++) {
+        const serverLight = new THREE.Mesh(
+            new THREE.BoxGeometry(0.15, 0.02, 0.01),
+            new THREE.MeshStandardMaterial({
+                color: i % 2 === 0 ? 0x22c55e : 0x06b6d4,
+                emissive: i % 2 === 0 ? 0x22c55e : 0x06b6d4,
+                emissiveIntensity: 0.8
+            })
+        );
+        serverLight.position.set(3.5, 0.25 + i * 0.2, -2.34);
+        scene.add(serverLight);
+    }
+
+    // Robot 3: Purple robot carrying data (walking)
+    const robot3 = createRobot(0x8b5cf6, 0xec4899);
+    robot3.position.set(1.5, 0.05, 2.5);
+    robot3.rotation.y = Math.PI * 0.2;
+    robot3.scale.setScalar(0.8);
+    scene.add(robot3);
+    robots.push(robot3);
+
+    // Data tablet the robot is carrying
+    const tablet = new THREE.Mesh(
+        new THREE.BoxGeometry(0.15, 0.22, 0.01),
+        new THREE.MeshStandardMaterial({ color: 0x8b5cf6, emissive: 0x8b5cf6, emissiveIntensity: 0.4 })
+    );
+    tablet.position.set(1.5, 0.35, 2.35);
+    tablet.rotation.y = Math.PI * 0.2;
+    scene.add(tablet);
+    robot3.userData.tablet = tablet;
+
+    // Add point lights near robots for glow
+    const robotLight1 = new THREE.PointLight(0x06b6d4, 0.5, 2);
+    robotLight1.position.set(-2.5, 0.5, 1.5);
+    scene.add(robotLight1);
+
+    const robotLight2 = new THREE.PointLight(0x22c55e, 0.5, 2);
+    robotLight2.position.set(3, 0.5, -2);
+    scene.add(robotLight2);
+
+    const robotLight3 = new THREE.PointLight(0xec4899, 0.4, 2);
+    robotLight3.position.set(1.5, 0.5, 2.5);
+    scene.add(robotLight3);
+
     // ========== CLICK-TO-ZOOM SYSTEM ==========
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -2597,6 +2848,58 @@
         // Animate accent lights
         accentLight1.intensity = 2 + Math.sin(time / 500) * 0.5;
         accentLight2.intensity = 1.5 + Math.cos(time / 700) * 0.3;
+
+        // Animate robots
+        robots.forEach((robot, index) => {
+            const data = robot.userData;
+            const t = time / 1000 + data.phase;
+
+            // Arm movement (typing/working motion)
+            if (data.leftArm && data.rightArm) {
+                data.leftArm.rotation.x = Math.sin(t * 4) * 0.3;
+                data.rightArm.rotation.x = Math.sin(t * 4 + Math.PI) * 0.3;
+            }
+
+            // Subtle head bobbing
+            if (data.head) {
+                data.head.rotation.y = Math.sin(t * 2) * 0.1;
+                data.head.rotation.x = Math.sin(t * 1.5) * 0.05;
+            }
+
+            // Core pulsing
+            if (data.core) {
+                data.core.scale.setScalar(1 + Math.sin(t * 3) * 0.15);
+            }
+
+            // Antenna blinking
+            if (data.antennaTip) {
+                data.antennaTip.material.emissiveIntensity = 0.5 + Math.sin(t * 5) * 0.5;
+            }
+
+            // Robot 3 walks in a small circle
+            if (index === 2) {
+                const walkRadius = 0.5;
+                const walkSpeed = 0.5;
+                robot.position.x = 1.5 + Math.cos(t * walkSpeed) * walkRadius;
+                robot.position.z = 2.5 + Math.sin(t * walkSpeed) * walkRadius;
+                robot.rotation.y = -t * walkSpeed + Math.PI / 2;
+
+                // Move tablet with robot
+                if (data.tablet) {
+                    data.tablet.position.x = robot.position.x - Math.sin(robot.rotation.y) * 0.15;
+                    data.tablet.position.z = robot.position.z - Math.cos(robot.rotation.y) * 0.15;
+                    data.tablet.rotation.y = robot.rotation.y;
+                }
+
+                // Walking bob
+                robot.position.y = 0.05 + Math.abs(Math.sin(t * 4)) * 0.02;
+            }
+
+            // Subtle hover for stationary robots
+            if (index !== 2) {
+                robot.position.y = 0.05 + Math.sin(t * 2) * 0.01;
+            }
+        });
 
         // Render with post-processing
         composer.render();

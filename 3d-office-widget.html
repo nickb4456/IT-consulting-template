@@ -428,6 +428,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Post-processing for bloom/glow effects -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
 
   <script>
     class OfficeWidget {
@@ -539,7 +545,20 @@
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.1;
+        this.renderer.toneMappingExposure = 1.2;
+
+        // Post-processing with bloom for neon glow
+        this.composer = new THREE.EffectComposer(this.renderer);
+        const renderPass = new THREE.RenderPass(this.scene, this.camera);
+        this.composer.addPass(renderPass);
+
+        this.bloomPass = new THREE.UnrealBloomPass(
+          new THREE.Vector2(this.container.clientWidth, this.container.clientHeight),
+          0.6,   // bloom strength
+          0.4,   // radius
+          0.85   // threshold
+        );
+        this.composer.addPass(this.bloomPass);
 
         // Controls
         this.controls = new THREE.OrbitControls(this.camera, this.canvas);
@@ -1828,6 +1847,12 @@
         const receptionSign = this.createReceptionSign(new THREE.Vector3(0, 3.5, 9));
         receptionSign.rotation.y = Math.PI;
         this.scene.add(receptionSign);
+
+        // Neon accent strips on walls
+        this.createNeonStrip(new THREE.Vector3(-10, 2.5, 0), 8, 0xff00ff, 'z'); // Left wall - magenta
+        this.createNeonStrip(new THREE.Vector3(10, 2.5, 0), 8, 0x00ff00, 'z');  // Right wall - green
+        this.createNeonStrip(new THREE.Vector3(0, 4.8, -8), 6, 0x00ffff, 'x');  // Back wall top - cyan
+        this.createNeonStrip(new THREE.Vector3(0, 0.1, -8), 6, 0xff6600, 'x');  // Back wall bottom - orange
 
         // Floor lamps
         const floorLamp1 = this.createFloorLamp(new THREE.Vector3(-9, 0, -4));
@@ -3535,32 +3560,50 @@
       createReceptionSign(position) {
         const group = new THREE.Group();
 
-        // Sign board
-        const signGeo = new THREE.BoxGeometry(2, 0.5, 0.08);
+        // Dark backing board
+        const signGeo = new THREE.BoxGeometry(3, 0.8, 0.08);
         const signMat = new THREE.MeshStandardMaterial({
-          color: 0x1a1a2e,
-          metalness: 0.3
+          color: 0x0a0a15,
+          metalness: 0.5,
+          roughness: 0.8
         });
         const sign = new THREE.Mesh(signGeo, signMat);
         sign.castShadow = true;
         group.add(sign);
 
-        // LED backlight
-        const backlightGeo = new THREE.PlaneGeometry(1.9, 0.4);
-        const backlightMat = new THREE.MeshBasicMaterial({
-          color: 0x2563eb,
+        // Neon glow backing
+        const glowGeo = new THREE.PlaneGeometry(2.8, 0.6);
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: 0x00ffff,
           transparent: true,
-          opacity: 0.3
+          opacity: 0.15
         });
-        const backlight = new THREE.Mesh(backlightGeo, backlightMat);
-        backlight.position.z = -0.041;
-        group.add(backlight);
+        const glow = new THREE.Mesh(glowGeo, glowMat);
+        glow.position.z = 0.041;
+        group.add(glow);
 
-        // Text letters
+        // TECHFLOW neon letters - bright cyan
+        const neonMat = new THREE.MeshStandardMaterial({
+          color: 0x00ffff,
+          emissive: 0x00ffff,
+          emissiveIntensity: 2.0
+        });
+
+        // Add point light for neon glow
+        const neonLight = new THREE.PointLight(0x00ffff, 1.5, 5);
+        neonLight.position.set(0, 0, 0.5);
+        group.add(neonLight);
+
+        // Secondary accent light (magenta)
+        const accentLight = new THREE.PointLight(0xff00ff, 0.5, 3);
+        accentLight.position.set(1, 0, 0.3);
+        group.add(accentLight);
+
+        // Neon tube letters (simplified as glowing boxes)
         const letterMat = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          emissive: 0xffffff,
-          emissiveIntensity: 0.5
+          color: 0x00ffff,
+          emissive: 0x00ffff,
+          emissiveIntensity: 1.5
         });
         const letters = [
           { x: -0.7, w: 0.08 }, { x: -0.55, w: 0.15 }, { x: -0.25, w: 0.12 },
@@ -3576,6 +3619,55 @@
         });
 
         group.position.copy(position);
+        return group;
+      }
+
+      createNeonStrip(position, length, color, axis = 'x') {
+        const group = new THREE.Group();
+
+        // Neon tube
+        const tubeGeo = axis === 'x'
+          ? new THREE.BoxGeometry(length, 0.05, 0.05)
+          : new THREE.BoxGeometry(0.05, 0.05, length);
+
+        const tubeMat = new THREE.MeshStandardMaterial({
+          color: color,
+          emissive: color,
+          emissiveIntensity: 2.5,
+          transparent: true,
+          opacity: 0.9
+        });
+        const tube = new THREE.Mesh(tubeGeo, tubeMat);
+        group.add(tube);
+
+        // Glow effect (larger transparent tube)
+        const glowGeo = axis === 'x'
+          ? new THREE.BoxGeometry(length, 0.15, 0.15)
+          : new THREE.BoxGeometry(0.15, 0.15, length);
+
+        const glowMat = new THREE.MeshBasicMaterial({
+          color: color,
+          transparent: true,
+          opacity: 0.2
+        });
+        const glowMesh = new THREE.Mesh(glowGeo, glowMat);
+        group.add(glowMesh);
+
+        // Point lights along the strip for realistic glow
+        const numLights = Math.ceil(length / 2);
+        for (let i = 0; i < numLights; i++) {
+          const light = new THREE.PointLight(color, 0.4, 3);
+          const offset = (i - (numLights - 1) / 2) * 2;
+          if (axis === 'x') {
+            light.position.set(offset, 0, 0.1);
+          } else {
+            light.position.set(0, 0, offset);
+          }
+          group.add(light);
+        }
+
+        group.position.copy(position);
+        this.scene.add(group);
         return group;
       }
 
@@ -3811,6 +3903,14 @@
         this.camera.updateProjectionMatrix();
 
         this.renderer.setSize(width, height);
+
+        // Resize composer for bloom
+        if (this.composer) {
+          this.composer.setSize(width, height);
+        }
+        if (this.bloomPass) {
+          this.bloomPass.resolution.set(width, height);
+        }
       }
 
       animate() {
@@ -3927,7 +4027,13 @@
         }
 
         this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+
+        // Render with bloom post-processing
+        if (this.composer) {
+          this.composer.render();
+        } else {
+          this.renderer.render(this.scene, this.camera);
+        }
       }
     }
 

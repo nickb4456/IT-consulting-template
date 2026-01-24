@@ -1604,179 +1604,76 @@
         ledIndicator.position.set(0, -0.34, 0.0135);
         monitorGroup.add(ledIndicator);
 
-        // Dynamic screen content
+        // Dynamic screen content - Terminal style
         const screenCanvas = document.createElement('canvas');
         screenCanvas.width = 580;
         screenCanvas.height = 320;
         const ctx = screenCanvas.getContext('2d');
 
         function drawScreen(time) {
-            // Modern dark theme dashboard
-            ctx.fillStyle = '#0f172a';
+            // Dark terminal background
+            ctx.fillStyle = '#0a0a0a';
             ctx.fillRect(0, 0, 580, 320);
 
-            // Sidebar
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(0, 0, 55, 320);
+            // Terminal window chrome
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, 580, 30);
 
-            // Sidebar icons
-            const iconPositions = [25, 70, 115, 160, 205];
-            iconPositions.forEach((y, i) => {
-                ctx.fillStyle = i === 0 ? '#3b82f6' : '#475569';
-                ctx.beginPath();
-                ctx.roundRect(15, y, 25, 25, 5);
-                ctx.fill();
-            });
-
-            // Header
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(55, 0, 525, 45);
-
-            // Logo
-            ctx.fillStyle = '#3b82f6';
-            ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
-            ctx.fillText('TechFlow', 70, 28);
-
-            // Search bar
-            ctx.fillStyle = '#334155';
+            // Window buttons
+            ctx.fillStyle = '#ff5f57';
             ctx.beginPath();
-            ctx.roundRect(180, 10, 200, 26, 13);
-            ctx.fill();
-            ctx.fillStyle = '#64748b';
-            ctx.font = '11px -apple-system, sans-serif';
-            ctx.fillText('Search...', 200, 27);
-
-            // Status indicator
-            ctx.fillStyle = '#10b981';
-            ctx.beginPath();
-            ctx.arc(520, 23, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#94a3b8';
-            ctx.font = '10px -apple-system, sans-serif';
-            ctx.fillText('Online', 530, 27);
-
-            // Stats cards
-            const cards = [
-                { x: 70, label: 'Active Clients', value: '24', change: '+12%', color: '#3b82f6' },
-                { x: 195, label: 'Projects', value: '12', change: '+5%', color: '#10b981' },
-                { x: 320, label: 'Uptime', value: '99.9%', change: '', color: '#06b6d4' },
-                { x: 445, label: 'Rating', value: '4.9', change: '+0.2', color: '#8b5cf6' }
-            ];
-
-            cards.forEach(card => {
-                // Card background
-                ctx.fillStyle = '#1e293b';
-                ctx.beginPath();
-                ctx.roundRect(card.x, 55, 110, 70, 8);
-                ctx.fill();
-
-                // Colored accent line
-                ctx.fillStyle = card.color;
-                ctx.fillRect(card.x, 55, 110, 3);
-
-                // Label
-                ctx.fillStyle = '#64748b';
-                ctx.font = '10px -apple-system, sans-serif';
-                ctx.fillText(card.label, card.x + 12, 75);
-
-                // Value
-                ctx.fillStyle = '#f1f5f9';
-                ctx.font = 'bold 22px -apple-system, sans-serif';
-                ctx.fillText(card.value, card.x + 12, 105);
-
-                // Change indicator
-                if (card.change) {
-                    ctx.fillStyle = '#10b981';
-                    ctx.font = '10px -apple-system, sans-serif';
-                    ctx.fillText(card.change, card.x + 75, 105);
-                }
-            });
-
-            // Chart area
-            ctx.fillStyle = '#1e293b';
-            ctx.beginPath();
-            ctx.roundRect(70, 135, 300, 120, 8);
+            ctx.arc(18, 15, 6, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = '#f1f5f9';
-            ctx.font = 'bold 11px -apple-system, sans-serif';
-            ctx.fillText('Performance Overview', 85, 155);
-
-            // Animated chart bars
-            const barData = [45, 65, 55, 80, 70, 85, 60, 75];
-            barData.forEach((val, i) => {
-                const animatedVal = val + Math.sin(time * 0.003 + i * 0.5) * 5;
-                const gradient = ctx.createLinearGradient(0, 245 - animatedVal, 0, 245);
-                gradient.addColorStop(0, '#3b82f6');
-                gradient.addColorStop(1, '#1d4ed8');
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.roundRect(95 + i * 32, 245 - animatedVal, 22, animatedVal, 3);
-                ctx.fill();
-            });
-
-            // Activity feed
-            ctx.fillStyle = '#1e293b';
+            ctx.fillStyle = '#febc2e';
             ctx.beginPath();
-            ctx.roundRect(385, 135, 180, 120, 8);
+            ctx.arc(38, 15, 6, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = '#f1f5f9';
-            ctx.font = 'bold 11px -apple-system, sans-serif';
-            ctx.fillText('Recent Activity', 400, 155);
-
-            const activities = [
-                { icon: '#10b981', text: 'Backup completed' },
-                { icon: '#3b82f6', text: 'New client added' },
-                { icon: '#f59e0b', text: 'Update available' },
-                { icon: '#8b5cf6', text: 'Report generated' }
-            ];
-
-            activities.forEach((act, i) => {
-                ctx.fillStyle = act.icon;
-                ctx.beginPath();
-                ctx.arc(405, 178 + i * 22, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = '#94a3b8';
-                ctx.font = '10px -apple-system, sans-serif';
-                ctx.fillText(act.text, 418, 182 + i * 22);
-            });
-
-            // Terminal section
-            ctx.fillStyle = '#0f172a';
+            ctx.fillStyle = '#28c840';
             ctx.beginPath();
-            ctx.roundRect(70, 265, 495, 48, 8);
+            ctx.arc(58, 15, 6, 0, Math.PI * 2);
             ctx.fill();
 
-            // Terminal header
-            ctx.fillStyle = '#1e293b';
-            ctx.fillRect(70, 265, 495, 18);
-
-            // Terminal dots
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.arc(85, 274, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#f59e0b';
-            ctx.beginPath();
-            ctx.arc(98, 274, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#10b981';
-            ctx.beginPath();
-            ctx.arc(111, 274, 4, 0, Math.PI * 2);
-            ctx.fill();
-
+            // Terminal title
+            ctx.fillStyle = '#888888';
             ctx.font = '12px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('terminal — bash', 290, 19);
+            ctx.textAlign = 'left';
+
+            // Terminal prompt
             ctx.fillStyle = '#10b981';
-            ctx.fillText('$ echo "Interested in AI?"', 85, 293);
-            ctx.fillStyle = '#f1f5f9';
-            ctx.fillText('Interested in AI?', 85, 308);
+            ctx.font = '14px monospace';
+            ctx.fillText('nick@techflow ~ $', 20, 60);
+
+            // Command
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(' echo "Interested in AI?"', 165, 60);
+
+            // Output - Big centered text
+            ctx.fillStyle = '#3b82f6';
+            ctx.font = 'bold 42px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('Interested in AI?', 290, 150);
+            ctx.textAlign = 'left';
+
+            // Next prompt
+            ctx.fillStyle = '#10b981';
+            ctx.font = '14px monospace';
+            ctx.fillText('nick@techflow ~ $', 20, 220);
 
             // Blinking cursor
             if (Math.floor(time / 500) % 2 === 0) {
                 ctx.fillStyle = '#10b981';
-                ctx.fillRect(200, 298, 8, 14);
+                ctx.fillRect(175, 206, 10, 18);
             }
+
+            // Decorative text at bottom
+            ctx.fillStyle = '#4b5563';
+            ctx.font = '11px monospace';
+            ctx.fillText('AI-powered solutions for Rhode Island businesses', 20, 290);
+            ctx.fillText('Call (401) 327-2971 | techflow.solutions', 20, 308);
 
             screenTexture.needsUpdate = true;
         }
@@ -2207,21 +2104,31 @@
             renderer.render(scene, camera);
         }
 
-        // Resize handler with debounce
-        let resizeTimeout;
+        // Resize handler
         function onResize() {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(() => {
-                if (!container.offsetWidth) return;
-                camera.aspect = container.offsetWidth / container.offsetHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.offsetWidth, container.offsetHeight);
-            }, 100);
-        }
-        window.addEventListener('resize', onResize);
+            const width = container.clientWidth || container.offsetWidth;
+            const height = container.clientHeight || container.offsetHeight;
+            if (width === 0 || height === 0) return;
 
-        // Initial size check
-        onResize();
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height, false);
+        }
+
+        // Debounced resize for window events
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(onResize, 100);
+        });
+
+        // Force correct initial size after layout is computed
+        requestAnimationFrame(() => {
+            onResize();
+            // Double-check after a short delay
+            setTimeout(onResize, 100);
+            setTimeout(onResize, 500);
+        });
 
         // Start animation
         animate(0);
@@ -2265,8 +2172,6 @@
         box-shadow: inset 0 0 100px rgba(255,255,255,0.5);
     }
     #office3d {
-        width: 100%;
-        height: 100%;
         display: block;
         cursor: grab;
         touch-action: none;

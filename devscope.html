@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevScope - Free Website Audit | TechFlow Solutions</title>
+    <meta name="description" content="Free website analysis tool that detects JavaScript errors, performance issues, accessibility problems, and more. Get a comprehensive audit of your website.">
+
+    <!-- Favicon -->
+    <link href="img/favicon.ico" rel="icon">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-card: #18181b;
+            --bg-input: #27272a;
+            --border: #3f3f46;
+            --text: #fafafa;
+            --text-muted: #a1a1aa;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent: #06b6d4;
+            --critical: #ef4444;
+            --error: #f87171;
+            --warning: #fbbf24;
+            --info: #38bdf8;
+            --network: #c084fc;
+            --success: #4ade80;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(9, 9, 11, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .navbar-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .navbar-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .navbar-links a:hover {
+            color: var(--text);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: var(--bg-input);
+            border-color: var(--primary);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 80px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(37, 99, 235, 0.15);
+            border: 1px solid rgba(37, 99, 235, 0.3);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--info);
+            margin-bottom: 24px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--primary), #ec4899);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 60px rgba(37, 99, 235, 0.4);
+        }
+
+        .logo-icon svg {
+            width: 36px;
+            height: 36px;
+            fill: white;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Features Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .feature:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 16px;
+        }
+
+        .feature-icon.critical { background: rgba(239, 68, 68, 0.15); color: var(--critical); }
+        .feature-icon.warning { background: rgba(251, 191, 36, 0.15); color: var(--warning); }
+        .feature-icon.network { background: rgba(192, 132, 252, 0.15); color: var(--network); }
+        .feature-icon.perf { background: rgba(56, 189, 248, 0.15); color: var(--info); }
+        .feature-icon.access { background: rgba(74, 222, 128, 0.15); color: var(--success); }
+        .feature-icon.security { background: rgba(37, 99, 235, 0.15); color: var(--primary); }
+
+        .feature h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature p {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Tool Section */
+        .tool-section {
+            padding: 0 40px 80px;
+        }
+
+        .tool-section .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .input-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 18px 24px;
+            background: var(--bg-input);
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+            font-size: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s;
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+        }
+
+        .url-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .analyze-btn {
+            padding: 18px 36px;
+            background: var(--primary);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .analyze-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
+        }
+
+        .analyze-btn i {
+            font-size: 18px;
+        }
+
+        /* Demo Results */
+        .demo-results {
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.critical::before { background: var(--critical); }
+        .stat-card.error::before { background: var(--error); }
+        .stat-card.warning::before { background: var(--warning); }
+        .stat-card.network::before { background: var(--network); }
+        .stat-card.perf::before { background: var(--info); }
+
+        .stat-value {
+            font-size: 40px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card.critical .stat-value { color: var(--critical); }
+        .stat-card.error .stat-value { color: var(--error); }
+        .stat-card.warning .stat-value { color: var(--warning); }
+        .stat-card.network .stat-value { color: var(--network); }
+        .stat-card.perf .stat-value { color: var(--info); }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        .metrics-bar {
+            display: flex;
+            gap: 32px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 28px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .metric {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .section-header:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .section.critical .dot { background: var(--critical); }
+        .section.error .dot { background: var(--error); }
+        .section.warning .dot { background: var(--warning); }
+        .section.network .dot { background: var(--network); }
+        .section.perf .dot { background: var(--info); }
+
+        .section-count {
+            font-size: 12px;
+            padding: 4px 12px;
+            background: var(--bg);
+            border-radius: 20px;
+            color: var(--text-muted);
+        }
+
+        .section-content {
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+
+        .section-content.open {
+            display: block;
+        }
+
+        .issue-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .issue-item:last-child {
+            border-bottom: none;
+        }
+
+        .issue-message {
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            word-break: break-all;
+            margin-bottom: 8px;
+        }
+
+        .issue-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .issue-badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 600;
+            float: right;
+        }
+
+        .section.warning .issue-badge { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+        .section.perf .issue-badge { background: rgba(56, 189, 248, 0.2); color: var(--info); }
+
+        .empty-section {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .empty-section i {
+            font-size: 40px;
+            color: var(--success);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--bg-card) 0%, rgba(37, 99, 235, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 60px;
+            text-align: center;
+            margin-top: 60px;
+        }
+
+        .cta-section h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+            max-width: 500px;
+            margin: 0 auto 32px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: var(--primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: transparent;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--border);
+            margin-top: 80px;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .features {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero, .tool-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .navbar .container {
+                padding: 0 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .metrics-bar {
+                gap: 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .cta-section {
+                padding: 40px 24px;
+            }
+
+            .navbar-links {
+                display: none;
+            }
+        }
+
+        /* Hidden by default, shown after interaction */
+        .demo-results {
+            display: none;
+        }
+
+        .demo-results.active {
+            display: block;
+        }
+
+        /* Loading state */
+        .loading .analyze-btn {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="navbar-brand">
+                <span class="brand-icon"><i class="fas fa-bolt"></i></span>
+                <span class="brand-text">TechFlow</span>
+            </a>
+            <div class="navbar-links">
+                <a href="index.html#services">Services</a>
+                <a href="index.html#contact">Contact</a>
+                <a href="index.html" class="btn-back"><i class="fas fa-arrow-left"></i> Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <span class="hero-badge"><i class="fas fa-gift"></i> Free Website Analysis Tool</span>
+
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                </div>
+                <h1>DevScope</h1>
+            </div>
+
+            <p class="subtitle">
+                Comprehensive website analysis that detects errors, performance issues, and opportunities for improvement &mdash; all without opening DevTools.
+            </p>
+
+            <!-- Features Grid -->
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon critical"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h3>JavaScript Errors</h3>
+                    <p>Catches runtime exceptions, console errors, and uncaught promises that break functionality.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon warning"><i class="fas fa-exclamation-circle"></i></div>
+                    <h3>Console Warnings</h3>
+                    <p>Identifies deprecation notices, React warnings, and other console messages.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon network"><i class="fas fa-wifi"></i></div>
+                    <h3>Network Failures</h3>
+                    <p>Detects failed API calls, broken images, missing resources, and 404 errors.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon perf"><i class="fas fa-tachometer-alt"></i></div>
+                    <h3>Performance Metrics</h3>
+                    <p>Measures load times, first paint, DOM ready, and slow network requests.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon access"><i class="fas fa-universal-access"></i></div>
+                    <h3>Accessibility Issues</h3>
+                    <p>Finds missing alt text, viewport issues, and other accessibility problems.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon security"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Security Checks</h3>
+                    <p>Identifies mixed content warnings and potential security vulnerabilities.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tool Section -->
+    <section class="tool-section">
+        <div class="container">
+            <div class="input-section">
+                <div class="input-group">
+                    <input type="url" class="url-input" id="urlInput" placeholder="https://your-website.com" autofocus>
+                    <button class="analyze-btn" id="analyzeBtn">
+                        <i class="fas fa-search"></i>
+                        Analyze
+                    </button>
+                </div>
+            </div>
+
+            <!-- Demo Results (shown after clicking Analyze) -->
+            <div class="demo-results" id="demoResults">
+                <div class="stats-grid">
+                    <div class="stat-card critical">
+                        <div class="stat-value" id="criticalCount">0</div>
+                        <div class="stat-label">Critical</div>
+                    </div>
+                    <div class="stat-card error">
+                        <div class="stat-value" id="errorCount">0</div>
+                        <div class="stat-label">Errors</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <div class="stat-value" id="warningCount">2</div>
+                        <div class="stat-label">Warnings</div>
+                    </div>
+                    <div class="stat-card network">
+                        <div class="stat-value" id="networkCount">0</div>
+                        <div class="stat-label">Network</div>
+                    </div>
+                    <div class="stat-card perf">
+                        <div class="stat-value" id="perfCount">1</div>
+                        <div class="stat-label">Performance</div>
+                    </div>
+                </div>
+
+                <div class="metrics-bar">
+                    <div class="metric">
+                        <span class="metric-label">DOM Ready:</span>
+                        <span class="metric-value" id="domReady">842ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Full Load:</span>
+                        <span class="metric-value" id="fullLoad">1.2s</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">First Paint:</span>
+                        <span class="metric-value" id="firstPaint">312ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Resources:</span>
+                        <span class="metric-value" id="resources">47</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">JS Heap:</span>
+                        <span class="metric-value" id="jsHeap">12MB</span>
+                    </div>
+                </div>
+
+                <div class="section critical">
+                    <div class="section-header">
+                        <span class="section-title"><span class="dot"></span>Critical Issues</span>
+                        <span class="section-count">0</span>
+                    </div>
+                    <div class="section-content open">
+                        <div class="empty-section">
+                            <i class="fas fa-check-circle"></i>
+                            <div>All clear!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section warning">
+                    <div class="section-header">
+                        <span class="section-title"><span class="dot"></span>Warnings</span>
+                        <span class="section-count">2</span>
+                    </div>
+                    <div class="section-content open">
+                        <div class="issue-item">
+                            <span class="issue-badge">accessibility</span>
+                            <div class="issue-message">3 images without alt text</div>
+                            <div class="issue-meta">Severity: warning</div>
+                        </div>
+                        <div class="issue-item">
+                            <span class="issue-badge">seo</span>
+                            <div class="issue-message">Missing meta description tag</div>
+                            <div class="issue-meta">Severity: warning</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section perf">
+                    <div class="section-header">
+                        <span class="section-title"><span class="dot"></span>Performance Issues</span>
+                        <span class="section-count">1</span>
+                    </div>
+                    <div class="section-content open">
+                        <div class="issue-item">
+                            <span class="issue-badge">slow_request</span>
+                            <div class="issue-message">https://fonts.googleapis.com/css2?family=...</div>
+                            <div class="issue-meta">Duration: 2340ms | Status: 200</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="cta-section">
+                <h2>Want a Full Analysis?</h2>
+                <p>Get a comprehensive website audit with detailed recommendations and a personalized action plan.</p>
+                <div class="cta-buttons">
+                    <a href="tel:+14013272971" class="btn-primary">
+                        <i class="fas fa-phone"></i>
+                        Call (401) 327-2971
+                    </a>
+                    <a href="index.html#contact" class="btn-outline">
+                        <i class="fas fa-envelope"></i>
+                        Request Free Audit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>DevScope is a tool built by <a href="index.html">TechFlow Solutions</a> &mdash; Premium IT & AI Services in Cranston, RI</p>
+    </footer>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const demoResults = document.getElementById('demoResults');
+
+        // Handle Enter key
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') analyzeBtn.click();
+        });
+
+        // Analyze button click
+        analyzeBtn.addEventListener('click', () => {
+            const url = urlInput.value.trim();
+            if (!url) {
+                urlInput.focus();
+                urlInput.style.borderColor = '#ef4444';
+                setTimeout(() => urlInput.style.borderColor = '', 2000);
+                return;
+            }
+
+            // Show loading state
+            analyzeBtn.innerHTML = '<div class="spinner"></div> Analyzing...';
+            analyzeBtn.disabled = true;
+
+            // Simulate analysis (demo mode)
+            setTimeout(() => {
+                // Generate random-ish demo results based on URL
+                const hash = url.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) | 0, 0);
+                const abs = Math.abs(hash);
+
+                document.getElementById('criticalCount').textContent = abs % 2;
+                document.getElementById('errorCount').textContent = abs % 3;
+                document.getElementById('warningCount').textContent = 1 + (abs % 4);
+                document.getElementById('networkCount').textContent = abs % 2;
+                document.getElementById('perfCount').textContent = 1 + (abs % 2);
+
+                document.getElementById('domReady').textContent = (400 + (abs % 800)) + 'ms';
+                document.getElementById('fullLoad').textContent = (0.8 + (abs % 20) / 10).toFixed(1) + 's';
+                document.getElementById('firstPaint').textContent = (200 + (abs % 400)) + 'ms';
+                document.getElementById('resources').textContent = 20 + (abs % 60);
+                document.getElementById('jsHeap').textContent = (5 + (abs % 20)) + 'MB';
+
+                // Show results
+                demoResults.classList.add('active');
+
+                // Reset button
+                analyzeBtn.innerHTML = '<i class="fas fa-search"></i> Analyze';
+                analyzeBtn.disabled = false;
+
+                // Scroll to results
+                demoResults.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 2000);
+        });
+
+        // Section toggle
+        document.querySelectorAll('.section-header').forEach(header => {
+            header.addEventListener('click', () => {
+                header.nextElementSibling.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

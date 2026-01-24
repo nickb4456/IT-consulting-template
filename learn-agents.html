@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding AI Agents | Free Lesson | TechFlow Solutions - Cranston, RI</title>
+    <meta name="description" content="Learn what AI Agents are and how they can transform your business. Free interactive lesson with 3D visualization. No coding required - explained simply.">
+    <meta name="keywords" content="AI agents explained, what are AI agents, Claude AI, business AI, AI for beginners, learn AI Cranston RI">
+    <meta name="robots" content="index, follow">
+
+    <link href="img/favicon.ico" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- Three.js for 3D visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        /* Claude-inspired color palette */
+        :root {
+            --claude-cream: #FDF6E3;
+            --claude-warm: #FFFDF9;
+            --claude-charcoal: #2D2A26;
+            --claude-terracotta: #C4654A;
+            --claude-terracotta-light: #E8956F;
+            --claude-sage: #7B9E87;
+            --claude-sage-light: #A8C5B0;
+            --claude-gold: #D4A853;
+            --claude-lavender: #9B8EC4;
+        }
+
+        /* Hero Section - Claude Themed */
+        .agents-hero {
+            background: linear-gradient(135deg, var(--claude-cream) 0%, var(--claude-warm) 50%, #f0ebe0 100%);
+            min-height: 60vh;
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 0 4rem;
+        }
+
+        .agents-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        .hero-badge-claude {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--claude-warm);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--claude-sage);
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--claude-sage-light);
+        }
+
+        .hero-title-claude {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--claude-charcoal);
+        }
+
+        .hero-title-claude span {
+            color: var(--claude-terracotta);
+            position: relative;
+        }
+
+        .hero-title-claude span::after {
+            content: '';
+            position: absolute;
+            bottom: 0.1em;
+            left: 0;
+            right: 0;
+            height: 0.15em;
+            background: var(--claude-terracotta-light);
+            opacity: 0.4;
+            border-radius: 2px;
+        }
+
+        /* 3D Canvas Container */
+        .canvas-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #1a1816 0%, #2d2a26 100%);
+            box-shadow: 0 30px 60px rgba(26, 24, 22, 0.3);
+        }
+
+        #agent-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+        }
+
+        #agent-canvas:active {
+            cursor: grabbing;
+        }
+
+        .canvas-instruction {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8125rem;
+            pointer-events: none;
+        }
+
+        /* Lesson Sections */
+        .lesson-section {
+            padding: 5rem 0;
+        }
+
+        .lesson-section.cream-bg {
+            background: var(--claude-cream);
+        }
+
+        .lesson-section.warm-bg {
+            background: var(--claude-warm);
+        }
+
+        .lesson-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: var(--claude-terracotta);
+            color: white;
+            border-radius: 50%;
+            font-family: 'Fraunces', serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .lesson-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--claude-charcoal);
+            margin-bottom: 1rem;
+        }
+
+        /* Metaphor Cards */
+        .metaphor-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.4s, box-shadow 0.4s;
+            border: 1px solid rgba(45, 42, 38, 0.08);
+        }
+
+        .metaphor-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(45, 42, 38, 0.12);
+        }
+
+        .metaphor-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metaphor-card:nth-child(1) .metaphor-icon { background: linear-gradient(135deg, var(--claude-terracotta-light), var(--claude-terracotta)); }
+        .metaphor-card:nth-child(2) .metaphor-icon { background: linear-gradient(135deg, var(--claude-sage-light), var(--claude-sage)); }
+        .metaphor-card:nth-child(3) .metaphor-icon { background: linear-gradient(135deg, var(--claude-gold), #B8923D); }
+
+        .metaphor-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--claude-charcoal);
+        }
+
+        /* Interactive Flow */
+        .flow-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+
+        .flow-step {
+            background: white;
+            border: 2px solid var(--claude-charcoal);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            width: 180px;
+            cursor: pointer;
+            transition: all 0.4s;
+        }
+
+        .flow-step:hover, .flow-step.active {
+            background: var(--claude-charcoal);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(45, 42, 38, 0.2);
+        }
+
+        .flow-step.active .flow-number {
+            background: var(--claude-terracotta);
+        }
+
+        .flow-number {
+            width: 36px;
+            height: 36px;
+            background: var(--claude-sage);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin: 0 auto 1rem;
+            transition: background 0.4s;
+        }
+
+        .flow-step h4 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.125rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .flow-step p {
+            font-size: 0.875rem;
+            margin: 0;
+            opacity: 0.8;
+        }
+
+        .flow-arrow {
+            font-size: 1.5rem;
+            color: var(--claude-terracotta);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.1); }
+        }
+
+        .flow-detail {
+            background: var(--claude-charcoal);
+            color: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .flow-detail h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            color: var(--claude-terracotta-light);
+            margin-bottom: 1rem;
+        }
+
+        .flow-detail .example {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.25rem;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        /* Terminal Preview */
+        .terminal-preview {
+            background: #1a1816;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(26, 24, 22, 0.3);
+            margin: 2rem 0;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #FF6B6B; }
+        .dot-yellow { background: #FFE66D; }
+        .dot-green { background: var(--claude-sage); }
+
+        .terminal-content {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.9rem;
+            color: #E8E6E3;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.75rem;
+            opacity: 0;
+            animation: typeIn 0.5s ease forwards;
+        }
+
+        .terminal-line:nth-child(1) { animation-delay: 0.5s; }
+        .terminal-line:nth-child(2) { animation-delay: 1s; }
+        .terminal-line:nth-child(3) { animation-delay: 1.5s; }
+        .terminal-line:nth-child(4) { animation-delay: 2s; }
+        .terminal-line:nth-child(5) { animation-delay: 2.5s; }
+
+        .terminal-prompt { color: var(--claude-sage-light); }
+        .terminal-command { color: var(--claude-terracotta-light); }
+        .terminal-response { color: rgba(232, 230, 227, 0.8); padding-left: 1rem; }
+
+        @keyframes typeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* CTA Section */
+        .cta-section-claude {
+            background: var(--claude-charcoal);
+            color: white;
+            padding: 5rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section-claude::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, var(--claude-terracotta) 0%, transparent 40%),
+                        radial-gradient(circle at 70% 50%, var(--claude-sage) 0%, transparent 40%);
+            opacity: 0.1;
+        }
+
+        .cta-title {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            margin-bottom: 1rem;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--claude-terracotta);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.0625rem;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: white;
+            color: var(--claude-charcoal);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(196, 101, 74, 0.4);
+        }
+
+        /* Lead Capture Form */
+        .lead-capture-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 50px rgba(45, 42, 38, 0.15);
+            position: relative;
+            z-index: 2;
+        }
+
+        .lead-capture-card h3 {
+            font-family: 'Fraunces', serif;
+            font-size: 1.5rem;
+            color: var(--claude-charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-capture-card .form-label {
+            font-weight: 500;
+            color: var(--claude-charcoal);
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-capture-card .form-control {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .lead-capture-card .form-control:focus {
+            border-color: var(--claude-terracotta);
+            box-shadow: 0 0 0 3px rgba(196, 101, 74, 0.1);
+        }
+
+        .lead-capture-card .btn-submit {
+            background: var(--claude-terracotta);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .lead-capture-card .btn-submit:hover {
+            background: var(--claude-charcoal);
+            transform: translateY(-2px);
+        }
+
+        .benefits-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0 0;
+        }
+
+        .benefits-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+            color: rgba(45, 42, 38, 0.8);
+        }
+
+        .benefits-list li i {
+            color: var(--claude-sage);
+            margin-top: 0.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 991.98px) {
+            .flow-container {
+                flex-direction: column;
+            }
+            .flow-arrow {
+                transform: rotate(90deg);
+            }
+            .canvas-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .agents-hero {
+                padding: 4rem 0 3rem;
+            }
+            .hero-title-claude {
+                font-size: 2rem;
+            }
+            .lesson-section {
+                padding: 3rem 0;
+            }
+            .flow-step {
+                width: 100%;
+                max-width: 280px;
+            }
+            .lead-capture-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 d-none d-md-block">
+                    <div class="top-bar-left">
+                        <span><i class="fas fa-graduation-cap me-2"></i>Free AI Learning Resources</span>
+                        <span class="mx-3">|</span>
+                        <span class="trust-badge"><i class="fas fa-fire me-1"></i>No Coding Required</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end text-center">
+                    <a href="tel:+14013272971" class="top-bar-link"><i class="fas fa-phone me-2"></i>(401) 327-2971</a>
+                    <a href="mailto:nickbilodeau1150@yahoo.com" class="top-bar-link ms-3"><i class="fas fa-envelope me-2"></i>nickbilodeau1150@yahoo.com</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <span class="brand-icon"><i class="fas fa-bolt"></i></span>
+                <span class="brand-text">TechFlow</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Services</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="service-ai.html"><i class="fas fa-brain me-2 text-primary"></i>AI Services (NEW)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="service-saas.html">Custom SaaS & Apps</a></li>
+                            <li><a class="dropdown-item" href="service-mobile.html">Mobile Development</a></li>
+                            <li><a class="dropdown-item" href="service-support.html">IT Support & Helpdesk</a></li>
+                            <li><a class="dropdown-item" href="service-infrastructure.html">Server & Infrastructure</a></li>
+                            <li><a class="dropdown-item" href="service-automation.html">Business Automation</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">Learn AI</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item active" href="learn-agents.html"><i class="fas fa-robot me-2 text-primary"></i>Understanding AI Agents (Free)</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="index.html#contact">Contact</a></li>
+                </ul>
+                <a href="#get-presentation" class="btn btn-primary ms-lg-3 nav-cta"><i class="fas fa-play-circle me-2"></i>Get Full Course</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="agents-hero">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6">
+                    <div class="hero-badge-claude">
+                        <i class="fas fa-gift"></i> Free Lesson - No Sign-up Required
+                    </div>
+                    <h1 class="hero-title-claude">
+                        What Are <span>AI Agents</span>?<br>
+                        <small style="font-size: 0.6em; font-weight: 500; opacity: 0.8;">Explained Simply</small>
+                    </h1>
+                    <p style="font-size: 1.25rem; color: rgba(45, 42, 38, 0.7); margin-bottom: 2rem; max-width: 500px;">
+                        AI Agents are like having a brilliant assistant who can actually <em>do things</em> for you &mdash; not just answer questions. Learn how they work in plain English.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#lesson-start" class="cta-button">
+                            Start Learning <i class="fas fa-arrow-down"></i>
+                        </a>
+                        <a href="#get-presentation" class="btn btn-outline-dark btn-lg" style="border-radius: 100px;">
+                            Get Full Presentation
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="canvas-container">
+                        <canvas id="agent-canvas"></canvas>
+                        <div class="canvas-instruction">
+                            <i class="fas fa-hand-pointer me-2"></i>Drag to rotate the neural network
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main id="main-content">
+        <!-- Lesson 1: What is an AI Agent? -->
+        <section id="lesson-start" class="lesson-section warm-bg">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="text-center reveal">
+                            <div class="lesson-number">1</div>
+                            <h2 class="lesson-title">Think of an AI Agent as Your Digital Employee</h2>
+                            <p style="font-size: 1.125rem; color: rgba(45, 42, 38, 0.7); max-width: 700px; margin: 0 auto 3rem;">
+                                Traditional AI (like basic ChatGPT) is like a really smart consultant. You ask questions, it answers. But an <strong>AI Agent</strong>? That's like hiring someone who can actually <em>do the work</em>.
+                            </p>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="metaphor-card reveal">
+                                    <div class="metaphor-icon"><i class="fas fa-comments" style="color: white;"></i></div>
+                                    <h3>Regular AI</h3>
+                                    <p style="color: rgba(45, 42, 38, 0.7);">
+                                        <strong>You:</strong> "How do I organize these files?"<br>
+                                        <strong>AI:</strong> "Here are 5 steps to organize files..."<br><br>
+                                        <em>It tells you what to do. You still do the work.</em>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metaphor-card reveal">
+                                    <div class="metaphor-icon"><i class="fas fa-robot" style="color: white;"></i></div>
+                                    <h3>AI Agent</h3>
+                                    <p style="color: rgba(45, 42, 38, 0.7);">
+                                        <strong>You:</strong> "Organize my files by date"<br>
+                                        <strong>Agent:</strong> <em>*Actually organizes them*</em><br><br>
+                                        <em>It does the work for you. You approve the results.</em>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="metaphor-card reveal">
+                                    <div class="metaphor-icon"><i class="fas fa-lightbulb" style="color: white;"></i></div>
+                                    <h3>The Key Difference</h3>
+                                    <p style="color: rgba(45, 42, 38, 0.7);">
+                                        AI Agents can <strong>take actions</strong>: browse the web, write files, run code, send emails, interact with apps.<br><br>
+                                        <em>They're AI with hands, not just a brain.</em>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson 2: How Agents Work -->
+        <section class="lesson-section cream-bg">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="text-center reveal">
+                            <div class="lesson-number">2</div>
+                            <h2 class="lesson-title">The Four-Step Loop: How Every Agent Works</h2>
+                            <p style="font-size: 1.125rem; color: rgba(45, 42, 38, 0.7); max-width: 700px; margin: 0 auto 2rem;">
+                                Every AI Agent follows this simple pattern. Click each step to see it in action.
+                            </p>
+                        </div>
+
+                        <div class="flow-container reveal">
+                            <div class="flow-step active" data-step="1">
+                                <div class="flow-number">1</div>
+                                <h4>You Describe</h4>
+                                <p>Tell it what you want</p>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                            <div class="flow-step" data-step="2">
+                                <div class="flow-number">2</div>
+                                <h4>Agent Plans</h4>
+                                <p>Breaks it into steps</p>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                            <div class="flow-step" data-step="3">
+                                <div class="flow-number">3</div>
+                                <h4>Agent Acts</h4>
+                                <p>Executes each step</p>
+                            </div>
+                            <div class="flow-arrow"><i class="fas fa-arrow-right"></i></div>
+                            <div class="flow-step" data-step="4">
+                                <div class="flow-number">4</div>
+                                <h4>You Review</h4>
+                                <p>Approve or refine</p>
+                            </div>
+                        </div>
+
+                        <div class="flow-detail reveal" id="flowDetail">
+                            <h3>Step 1: You Describe What You Want</h3>
+                            <p>Use plain English. Don't worry about technical terms &mdash; just be specific about the outcome you want.</p>
+                            <div class="example">
+                                <span style="color: var(--claude-sage-light);">you &rarr;</span> "Create a report of all my customers who haven't ordered in 90 days, with their last order date and total spent"
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson 3: Real Example -->
+        <section class="lesson-section warm-bg">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="text-center reveal">
+                            <div class="lesson-number">3</div>
+                            <h2 class="lesson-title">See It In Action: A Real Conversation</h2>
+                            <p style="font-size: 1.125rem; color: rgba(45, 42, 38, 0.7); max-width: 700px; margin: 0 auto 2rem;">
+                                Here's what working with Claude Code (an AI Agent) actually looks like:
+                            </p>
+                        </div>
+
+                        <div class="terminal-preview reveal">
+                            <div class="terminal-dots">
+                                <span class="dot-red"></span>
+                                <span class="dot-yellow"></span>
+                                <span class="dot-green"></span>
+                            </div>
+                            <div class="terminal-content">
+                                <div class="terminal-line">
+                                    <span class="terminal-prompt">you &rarr; </span>
+                                    <span class="terminal-command">"Create a script that backs up my important files to cloud storage every night"</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response"><i class="fas fa-check text-success me-2"></i>I'll create a backup script for you. First, let me check what cloud storage you have configured...</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response"><i class="fas fa-check text-success me-2"></i>Found Dropbox installed. I'll create backup_files.py that:</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response" style="padding-left: 2rem;">1. Scans your Documents folder for changes</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response" style="padding-left: 2rem;">2. Compresses new/modified files</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response" style="padding-left: 2rem;">3. Uploads to Dropbox/Backups with date stamp</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response" style="padding-left: 2rem;">4. Sets up to run automatically at 2 AM</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response"><i class="fas fa-file-code text-success me-2"></i>Created: backup_files.py</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response"><i class="fas fa-clock text-success me-2"></i>Scheduled: Daily at 2:00 AM</span>
+                                </div>
+                                <div class="terminal-line">
+                                    <span class="terminal-response">Want me to run a test backup now?</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-4 mt-4">
+                            <div class="col-md-6 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%;">
+                                    <h4 style="font-family: 'Fraunces', serif; color: var(--claude-charcoal);"><i class="fas fa-magic text-primary me-2"></i>What Just Happened</h4>
+                                    <ul style="margin: 0; padding-left: 1.25rem; color: rgba(45, 42, 38, 0.7);">
+                                        <li>You described what you wanted in plain English</li>
+                                        <li>The agent figured out <em>how</em> to do it</li>
+                                        <li>It wrote actual working code</li>
+                                        <li>It configured your computer to run it automatically</li>
+                                        <li>It asked before doing anything permanent</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%;">
+                                    <h4 style="font-family: 'Fraunces', serif; color: var(--claude-charcoal);"><i class="fas fa-user-shield text-success me-2"></i>You're Always In Control</h4>
+                                    <ul style="margin: 0; padding-left: 1.25rem; color: rgba(45, 42, 38, 0.7);">
+                                        <li>The agent shows you what it plans to do first</li>
+                                        <li>You approve before any action is taken</li>
+                                        <li>You can say "wait, change this part"</li>
+                                        <li>Nothing happens without your permission</li>
+                                        <li>You can undo anything it does</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Business Examples Section -->
+        <section class="lesson-section cream-bg">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10">
+                        <div class="text-center reveal">
+                            <div class="lesson-number">4</div>
+                            <h2 class="lesson-title">What Can AI Agents Do for Your Business?</h2>
+                            <p style="font-size: 1.125rem; color: rgba(45, 42, 38, 0.7); max-width: 700px; margin: 0 auto 3rem;">
+                                Here are real examples of tasks AI Agents can handle for Rhode Island businesses:
+                            </p>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-terracotta);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>Invoicing</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Review my unbilled work from last week and create invoices for each client"
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-sage);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-chart-line me-2 text-success"></i>Reports</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Analyze my sales data and create a visual report comparing this quarter to last"
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-gold);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-envelope-open-text me-2" style="color: var(--claude-gold);"></i>Email</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Draft follow-up emails for everyone who attended last week's meeting"
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-lavender);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-database me-2" style="color: var(--claude-lavender);"></i>Data Entry</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Extract all the contact info from these business cards and add to my CRM"
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-terracotta-light);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-calendar-check me-2" style="color: var(--claude-terracotta-light);"></i>Scheduling</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Find a time that works for everyone on this thread and send a calendar invite"
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4 reveal">
+                                <div style="background: white; border-radius: 16px; padding: 1.5rem; height: 100%; border-left: 4px solid var(--claude-sage-light);">
+                                    <h5 style="font-family: 'Fraunces', serif;"><i class="fas fa-tools me-2" style="color: var(--claude-sage-light);"></i>Custom Tools</h5>
+                                    <p style="font-size: 0.9375rem; color: rgba(45, 42, 38, 0.7); margin: 0;">
+                                        "Build me a calculator that estimates project costs based on hours and materials"
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section with Lead Capture -->
+        <section id="get-presentation" class="cta-section-claude">
+            <div class="container">
+                <div class="row align-items-center g-5">
+                    <div class="col-lg-6 text-center text-lg-start">
+                        <span class="hero-badge-claude" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: white;">
+                            <i class="fas fa-play-circle"></i> Continue Learning
+                        </span>
+                        <h2 class="cta-title">Ready to Go Deeper?</h2>
+                        <p style="font-size: 1.125rem; color: rgba(255,255,255,0.8); max-width: 500px;">
+                            Get the full presentation covering:
+                        </p>
+                        <ul class="benefits-list" style="color: rgba(255,255,255,0.8);">
+                            <li><i class="fas fa-check-circle" style="color: var(--claude-sage-light);"></i> Hands-on demos of AI Agents in action</li>
+                            <li><i class="fas fa-check-circle" style="color: var(--claude-sage-light);"></i> Step-by-step setup guide for your business</li>
+                            <li><i class="fas fa-check-circle" style="color: var(--claude-sage-light);"></i> 10 ready-to-use prompts for common tasks</li>
+                            <li><i class="fas fa-check-circle" style="color: var(--claude-sage-light);"></i> Q&A session to address your specific needs</li>
+                        </ul>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="lead-capture-card">
+                            <h3><i class="fas fa-gift me-2 text-primary"></i>Get Your Free Presentation</h3>
+                            <p style="color: rgba(45, 42, 38, 0.7); margin-bottom: 1.5rem;">Enter your details and I'll send you the complete AI Agents presentation.</p>
+
+                            <form id="leadForm" action="https://api.web3forms.com/submit" method="POST">
+                                <input type="hidden" name="access_key" value="65e9922a-598f-4ab7-a28e-017d00fb4817">
+                                <input type="hidden" name="subject" value="AI Agents Presentation Request - TechFlow">
+                                <input type="hidden" name="from_name" value="TechFlow AI Learning">
+                                <input type="hidden" name="redirect" value="https://web3forms.com/success">
+
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Your Name *</label>
+                                        <input type="text" name="name" class="form-control" required placeholder="John Smith">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Email Address *</label>
+                                        <input type="email" name="email" class="form-control" required placeholder="john@yourcompany.com">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Business Name</label>
+                                        <input type="text" name="business" class="form-control" placeholder="Your Company LLC">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">What's your biggest interest in AI Agents?</label>
+                                        <select name="interest" class="form-control">
+                                            <option value="">Select one...</option>
+                                            <option value="automate-tasks">Automating repetitive tasks</option>
+                                            <option value="customer-service">Improving customer service</option>
+                                            <option value="data-analysis">Data analysis & reporting</option>
+                                            <option value="content-creation">Content creation</option>
+                                            <option value="general-learning">Just learning about AI</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn-submit">
+                                            <i class="fas fa-paper-plane me-2"></i>Send Me the Presentation
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <p style="font-size: 0.8125rem; color: rgba(45, 42, 38, 0.5); margin-top: 1rem; text-align: center;">
+                                <i class="fas fa-lock me-1"></i>No spam. Your information is secure.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Contact -->
+        <section class="py-5" style="background: var(--claude-warm);">
+            <div class="container text-center">
+                <p style="font-size: 1.125rem; color: rgba(45, 42, 38, 0.7); margin-bottom: 1rem;">
+                    Questions? Want a custom AI consultation for your business?
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="tel:+14013272971" class="btn btn-primary btn-lg" style="border-radius: 100px;">
+                        <i class="fas fa-phone me-2"></i>(401) 327-2971
+                    </a>
+                    <a href="service-ai.html" class="btn btn-outline-dark btn-lg" style="border-radius: 100px;">
+                        View AI Services <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand">
+                        <span class="brand-icon"><i class="fas fa-bolt"></i></span>
+                        <span class="brand-text">TechFlow</span>
+                    </div>
+                    <p class="footer-about">Enterprise-quality IT & AI solutions at small business prices. Based in Cranston, RI.</p>
+                    <div class="footer-contact-highlight">
+                        <a href="tel:+14013272971"><i class="fas fa-phone me-2"></i>(401) 327-2971</a>
+                        <a href="mailto:nickbilodeau1150@yahoo.com"><i class="fas fa-envelope me-2"></i>nickbilodeau1150@yahoo.com</a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title">Services</h5>
+                    <ul class="footer-links">
+                        <li><a href="service-ai.html">AI Services</a></li>
+                        <li><a href="service-saas.html">Custom Software</a></li>
+                        <li><a href="service-mobile.html">Mobile Apps</a></li>
+                        <li><a href="service-support.html">IT Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="footer-title">Learn</h5>
+                    <ul class="footer-links">
+                        <li><a href="learn-agents.html">AI Agents (Free)</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="footer-title">Get In Touch</h5>
+                    <ul class="footer-contact">
+                        <li><i class="fas fa-map-marker-alt"></i> Cranston, RI 02920</li>
+                        <li><i class="fas fa-phone"></i> <a href="tel:+14013272971">(401) 327-2971</a></li>
+                        <li><i class="fas fa-envelope"></i> <a href="mailto:nickbilodeau1150@yahoo.com">nickbilodeau1150@yahoo.com</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 TechFlow Solutions. All rights reserved. | Cranston, RI</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top" aria-label="Back to top"><i class="fas fa-chevron-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
+
+    <script>
+        // ==========================================
+        // 3D Neural Network Visualization
+        // ==========================================
+        (function() {
+            const canvas = document.getElementById('agent-canvas');
+            if (!canvas) return;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(0x000000, 0);
+
+            // Create neural network nodes
+            const nodes = [];
+            const connections = [];
+            const nodeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+
+            // Create layers
+            const layers = [
+                { count: 4, x: -3, color: 0xC4654A },   // Input (terracotta)
+                { count: 6, x: -1, color: 0x7B9E87 },   // Hidden 1 (sage)
+                { count: 6, x: 1, color: 0xD4A853 },    // Hidden 2 (gold)
+                { count: 3, x: 3, color: 0x9B8EC4 }     // Output (lavender)
+            ];
+
+            layers.forEach((layer, layerIndex) => {
+                const layerNodes = [];
+                for (let i = 0; i < layer.count; i++) {
+                    const material = new THREE.MeshPhongMaterial({
+                        color: layer.color,
+                        emissive: layer.color,
+                        emissiveIntensity: 0.3,
+                        shininess: 100
+                    });
+                    const node = new THREE.Mesh(nodeGeometry, material);
+                    const ySpread = (layer.count - 1) * 0.6;
+                    node.position.set(layer.x, i * 0.6 - ySpread / 2, (Math.random() - 0.5) * 0.5);
+                    scene.add(node);
+                    layerNodes.push(node);
+                }
+                nodes.push(layerNodes);
+            });
+
+            // Create connections
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x666666,
+                transparent: true,
+                opacity: 0.3
+            });
+
+            for (let l = 0; l < nodes.length - 1; l++) {
+                nodes[l].forEach(nodeA => {
+                    nodes[l + 1].forEach(nodeB => {
+                        const geometry = new THREE.BufferGeometry().setFromPoints([
+                            nodeA.position,
+                            nodeB.position
+                        ]);
+                        const line = new THREE.Line(geometry, lineMaterial.clone());
+                        scene.add(line);
+                        connections.push({
+                            line,
+                            start: nodeA,
+                            end: nodeB,
+                            progress: Math.random()
+                        });
+                    });
+                });
+            }
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const pointLight1 = new THREE.PointLight(0xC4654A, 1, 100);
+            pointLight1.position.set(5, 5, 5);
+            scene.add(pointLight1);
+
+            const pointLight2 = new THREE.PointLight(0x7B9E87, 1, 100);
+            pointLight2.position.set(-5, -5, 5);
+            scene.add(pointLight2);
+
+            camera.position.z = 6;
+
+            // Mouse interaction
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let rotationVelocity = { x: 0, y: 0 };
+
+            canvas.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+                rotationVelocity.y = deltaX * 0.005;
+                rotationVelocity.x = deltaY * 0.005;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            canvas.addEventListener('mouseup', () => isDragging = false);
+            canvas.addEventListener('mouseleave', () => isDragging = false);
+
+            // Touch support
+            canvas.addEventListener('touchstart', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+                const deltaX = e.touches[0].clientX - previousMousePosition.x;
+                const deltaY = e.touches[0].clientY - previousMousePosition.y;
+                rotationVelocity.y = deltaX * 0.005;
+                rotationVelocity.x = deltaY * 0.005;
+                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            });
+
+            canvas.addEventListener('touchend', () => isDragging = false);
+
+            // Create a group for all objects
+            const group = new THREE.Group();
+            scene.children.forEach(child => {
+                if (child !== ambientLight && child !== pointLight1 && child !== pointLight2) {
+                    // We'll handle rotation differently
+                }
+            });
+
+            // Animation
+            let time = 0;
+            function animate() {
+                requestAnimationFrame(animate);
+                time += 0.016;
+
+                // Auto-rotate when not dragging
+                if (!isDragging) {
+                    rotationVelocity.y += (0.003 - rotationVelocity.y) * 0.02;
+                    rotationVelocity.x *= 0.95;
+                }
+
+                // Apply rotation to all nodes and connections
+                nodes.flat().forEach(node => {
+                    node.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotationVelocity.y);
+                    node.position.applyAxisAngle(new THREE.Vector3(1, 0, 0), rotationVelocity.x);
+                });
+
+                // Update connections
+                connections.forEach(conn => {
+                    conn.progress += 0.01;
+                    if (conn.progress > 1) conn.progress = 0;
+
+                    const positions = conn.line.geometry.attributes.position.array;
+                    positions[0] = conn.start.position.x;
+                    positions[1] = conn.start.position.y;
+                    positions[2] = conn.start.position.z;
+                    positions[3] = conn.end.position.x;
+                    positions[4] = conn.end.position.y;
+                    positions[5] = conn.end.position.z;
+                    conn.line.geometry.attributes.position.needsUpdate = true;
+
+                    // Pulse effect
+                    const pulse = Math.sin(time * 2 + conn.progress * Math.PI * 2) * 0.3 + 0.5;
+                    conn.line.material.opacity = 0.1 + pulse * 0.2;
+                });
+
+                // Node pulse
+                nodes.flat().forEach((node, i) => {
+                    const scale = 1 + Math.sin(time * 2 + i * 0.5) * 0.1;
+                    node.scale.set(scale, scale, scale);
+                });
+
+                // Dampen velocity
+                rotationVelocity.y *= 0.98;
+                rotationVelocity.x *= 0.98;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+        })();
+
+        // ==========================================
+        // Flow Step Interaction
+        // ==========================================
+        const flowSteps = document.querySelectorAll('.flow-step');
+        const flowDetail = document.getElementById('flowDetail');
+
+        const stepDetails = {
+            1: {
+                title: "Step 1: You Describe What You Want",
+                desc: "Use plain English. Don't worry about technical terms &mdash; just be specific about the outcome you want.",
+                example: '<span style="color: #A8C5B0;">you &rarr;</span> "Create a report of all my customers who haven\'t ordered in 90 days, with their last order date and total spent"'
+            },
+            2: {
+                title: "Step 2: The Agent Makes a Plan",
+                desc: "The AI breaks your request into logical steps. It figures out what data it needs, what tools to use, and in what order.",
+                example: '<span style="color: #A8C5B0;">agent thinking &rarr;</span> "I\'ll need to: 1) Access the customer database 2) Filter by last order date 3) Calculate days since order 4) Add total spent 5) Format as a report"'
+            },
+            3: {
+                title: "Step 3: The Agent Takes Action",
+                desc: "Unlike regular AI that just talks, agents actually DO things: read files, write documents, query databases, call APIs, browse websites.",
+                example: '<span style="color: #A8C5B0;">agent action &rarr;</span> Querying database... Found 47 customers. Calculating totals... Generating report... <span style="color: #7B9E87;">[Complete]</span>'
+            },
+            4: {
+                title: "Step 4: You Review & Refine",
+                desc: "The agent shows you the result. You can approve it, ask for changes, or request something different. It's a conversation, not a one-shot deal.",
+                example: '<span style="color: #A8C5B0;">you &rarr;</span> "Perfect! But can you also add their email addresses and sort by total spent?"'
+            }
+        };
+
+        flowSteps.forEach(step => {
+            step.addEventListener('click', () => {
+                flowSteps.forEach(s => s.classList.remove('active'));
+                step.classList.add('active');
+
+                const stepNum = step.dataset.step;
+                const detail = stepDetails[stepNum];
+
+                flowDetail.innerHTML = `
+                    <h3>${detail.title}</h3>
+                    <p>${detail.desc}</p>
+                    <div class="example">${detail.example}</div>
+                `;
+            });
+        });
+
+        // Auto-cycle through steps
+        let currentStep = 1;
+        setInterval(() => {
+            if (!document.querySelector('.flow-step:hover')) {
+                currentStep = currentStep >= 4 ? 1 : currentStep + 1;
+                flowSteps.forEach(s => s.classList.remove('active'));
+                document.querySelector(`[data-step="${currentStep}"]`).classList.add('active');
+
+                const detail = stepDetails[currentStep];
+                flowDetail.innerHTML = `
+                    <h3>${detail.title}</h3>
+                    <p>${detail.desc}</p>
+                    <div class="example">${detail.example}</div>
+                `;
+            }
+        }, 5000);
+
+        // ==========================================
+        // Scroll Reveal Animation
+        // ==========================================
+        const revealElements = document.querySelectorAll('.reveal');
+
+        const revealOnScroll = () => {
+            revealElements.forEach(el => {
+                const elementTop = el.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+
+                if (elementTop < windowHeight - 100) {
+                    el.classList.add('visible');
+                }
+            });
+        };
+
+        window.addEventListener('scroll', revealOnScroll);
+        revealOnScroll();
+    </script>
+</body>
+</html>

@@ -2625,3 +2625,862 @@ a:focus-visible {
         bottom: calc(1rem + env(safe-area-inset-bottom));
     }
 }
+
+/* ============================================
+   AI ENHANCEMENT COMPONENTS
+   ============================================ */
+
+/* AI Chatbot Widget */
+.ai-chatbot {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    z-index: 9999;
+    font-family: var(--font-primary);
+}
+
+.chatbot-toggle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chatbot-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 30px rgba(37, 99, 235, 0.5);
+}
+
+.chatbot-toggle i {
+    font-size: 1.5rem;
+}
+
+.chat-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: chatPulse 2s infinite;
+    z-index: -1;
+}
+
+@keyframes chatPulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.chatbot-window {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+}
+
+.chatbot-window.active {
+    display: flex;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chatbot-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.chatbot-avatar {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chatbot-info h5 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.status-online {
+    font-size: 0.75rem;
+    opacity: 0.9;
+}
+
+.status-online i {
+    font-size: 0.5rem;
+    color: #10b981;
+    animation: pulse 2s infinite;
+}
+
+.chatbot-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.chatbot-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.chatbot-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: 280px;
+    background: #f8fafc;
+}
+
+.chat-message {
+    margin-bottom: 1rem;
+    display: flex;
+}
+
+.chat-message.bot .message-content {
+    background: white;
+    border-radius: 0 var(--radius-md) var(--radius-md) var(--radius-md);
+    padding: 0.75rem 1rem;
+    box-shadow: var(--shadow-sm);
+    max-width: 85%;
+}
+
+.chat-message.user {
+    justify-content: flex-end;
+}
+
+.chat-message.user .message-content {
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius-md) 0 var(--radius-md) var(--radius-md);
+    padding: 0.75rem 1rem;
+    max-width: 85%;
+}
+
+.chat-message .message-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.chat-message .message-content ul {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+    font-size: 0.85rem;
+}
+
+.chat-message .message-content li {
+    margin-bottom: 0.25rem;
+}
+
+.chatbot-suggestions {
+    padding: 0.5rem 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    background: white;
+    border-top: 1px solid var(--gray-200);
+}
+
+.chatbot-suggestions button {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--gray-200);
+    background: white;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--gray-600);
+}
+
+.chatbot-suggestions button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.chatbot-input {
+    display: flex;
+    padding: 1rem;
+    background: white;
+    border-top: 1px solid var(--gray-200);
+    gap: 0.5rem;
+}
+
+.chatbot-input input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.chatbot-input input:focus {
+    border-color: var(--primary);
+}
+
+.chatbot-input button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+}
+
+.chatbot-input button:hover {
+    background: var(--primary-dark);
+}
+
+/* AI Modal Styles */
+.ai-modal {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-lg);
+}
+
+.ai-modal .modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ai-modal .modal-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gradient-primary);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.ai-modal .modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.ai-modal .modal-body {
+    padding: 1.5rem;
+}
+
+.ai-modal .modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
+}
+
+/* Recommender Progress */
+.recommender-progress {
+    margin-bottom: 2rem;
+}
+
+.recommender-progress .progress {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+    margin-bottom: 0.5rem;
+}
+
+.recommender-progress .progress-bar {
+    background: var(--gradient-primary);
+    transition: width 0.5s ease;
+}
+
+.recommender-progress span {
+    font-size: 0.85rem;
+    color: var(--gray-400);
+}
+
+/* Recommender Questions */
+.recommender-question {
+    text-align: center;
+}
+
+.recommender-question h4 {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.recommender-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.recommender-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.recommender-option:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.recommender-option.selected {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.2);
+}
+
+.recommender-option i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+}
+
+.recommender-option span {
+    display: block;
+    font-weight: 500;
+}
+
+/* ROI Calculator */
+.roi-calculator {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.roi-input-group {
+    margin-bottom: 1.5rem;
+}
+
+.roi-input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--gray-300);
+}
+
+.roi-input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius);
+    color: white;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.roi-input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.roi-results {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.roi-results h4 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+}
+
+.roi-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.roi-metric {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+}
+
+.roi-metric.highlight {
+    background: var(--gradient-primary);
+}
+
+.roi-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.roi-label {
+    font-size: 0.75rem;
+    color: var(--gray-400);
+}
+
+.roi-metric.highlight .roi-label {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.roi-chart {
+    height: 150px;
+    margin: 1.5rem 0;
+}
+
+.roi-note {
+    font-size: 0.85rem;
+    color: var(--gray-400);
+    text-align: center;
+    margin: 0;
+}
+
+/* Pricing Calculator */
+.pricing-calculator {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.pricing-step {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.pricing-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pricing-step h4 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.pricing-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.pricing-option {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    color: white;
+}
+
+.pricing-option:hover {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+    transform: translateY(-2px);
+}
+
+.pricing-option.selected {
+    border-color: var(--accent);
+    background: rgba(6, 182, 212, 0.2);
+}
+
+.pricing-option i {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+    display: block;
+}
+
+.pricing-option span {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.pricing-option small {
+    display: block;
+    color: var(--gray-400);
+    font-size: 0.8rem;
+}
+
+.pricing-result {
+    text-align: center;
+}
+
+.price-range {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.price-from, .price-to {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.price-separator {
+    color: var(--gray-400);
+}
+
+.pricing-note {
+    color: var(--success);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.pricing-includes {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    text-align: left;
+}
+
+.pricing-includes h5 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: var(--gray-300);
+}
+
+.pricing-includes ul {
+    margin: 0;
+    padding-left: 1.25rem;
+}
+
+.pricing-includes li {
+    margin-bottom: 0.5rem;
+    color: var(--gray-400);
+}
+
+/* AI Interactive Demo Section */
+.ai-demo-section {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-demo-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+}
+
+.ai-demo-container {
+    position: relative;
+    z-index: 1;
+}
+
+.ai-demo-terminal {
+    background: #0a0f1a;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+    background: #1a1f2e;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.terminal-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.terminal-dot.red { background: #ef4444; }
+.terminal-dot.yellow { background: #f59e0b; }
+.terminal-dot.green { background: #10b981; }
+
+.terminal-body {
+    padding: 1.5rem;
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.9rem;
+    color: #e2e8f0;
+    min-height: 300px;
+}
+
+.terminal-line {
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: typeLine 0.3s ease forwards;
+}
+
+.terminal-line .prompt {
+    color: var(--accent);
+}
+
+.terminal-line .command {
+    color: #f8fafc;
+}
+
+.terminal-line .output {
+    color: var(--gray-400);
+}
+
+.terminal-line .success {
+    color: #10b981;
+}
+
+.terminal-line .highlight {
+    color: var(--primary);
+}
+
+@keyframes typeLine {
+    to { opacity: 1; }
+}
+
+/* AI Infographic */
+.ai-infographic {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.infographic-item {
+    text-align: center;
+    color: white;
+}
+
+.infographic-circle {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    position: relative;
+}
+
+.infographic-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.infographic-circle circle {
+    fill: none;
+    stroke-width: 8;
+}
+
+.infographic-circle .bg {
+    stroke: rgba(255, 255, 255, 0.1);
+}
+
+.infographic-circle .progress {
+    stroke: url(#infographicGradient);
+    stroke-linecap: round;
+    stroke-dasharray: 339.3;
+    stroke-dashoffset: 339.3;
+    transition: stroke-dashoffset 2s ease;
+}
+
+.infographic-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.infographic-label {
+    font-size: 0.9rem;
+    color: var(--gray-300);
+}
+
+/* Personalized Banner */
+.personalized-banner {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    display: none;
+}
+
+.personalized-banner.show {
+    display: block;
+    animation: slideDown 0.5s ease;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+.personalized-banner strong {
+    font-weight: 600;
+}
+
+/* AI CTA Buttons */
+.ai-cta-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-ai {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-ai:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-ai i {
+    font-size: 1rem;
+}
+
+/* Mobile adjustments for AI components */
+@media (max-width: 767.98px) {
+    .ai-chatbot {
+        bottom: 80px;
+        right: 20px;
+    }
+
+    .chatbot-window {
+        width: 320px;
+        right: -10px;
+    }
+
+    .ai-infographic {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .pricing-options,
+    .recommender-options {
+        grid-template-columns: 1fr;
+    }
+
+    .roi-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .price-from, .price-to {
+        font-size: 1.75rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .chatbot-window {
+        width: calc(100vw - 40px);
+        right: -10px;
+    }
+}
+
+/* AI Form Suggestions */
+.ai-form-suggestions {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(6, 182, 212, 0.1));
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+}
+
+.ai-form-suggestions small {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.ai-form-suggestions span {
+    color: var(--gray-700);
+}
+
+/* Chatbot attention animation */
+.chatbot-toggle.attention {
+    animation: attention 2s ease-in-out infinite;
+}
+
+@keyframes attention {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); box-shadow: 0 0 30px rgba(37, 99, 235, 0.6); }
+}
+
+/* Terminal typing cursor */
+.terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #06b6d4;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}

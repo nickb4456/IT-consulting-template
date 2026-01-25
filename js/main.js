@@ -1266,6 +1266,177 @@ function initPageTransitions() {
     });
 }
 
+// Live Visitor Counter
+function initLiveVisitorCounter() {
+    const counter = document.getElementById('visitorCount');
+    if (!counter) return;
+
+    // Simulate live visitors (in production, this would connect to analytics)
+    let currentCount = 8 + Math.floor(Math.random() * 10);
+    counter.textContent = currentCount;
+
+    setInterval(() => {
+        // Random fluctuation
+        const change = Math.random() > 0.5 ? 1 : -1;
+        currentCount = Math.max(5, Math.min(25, currentCount + change));
+        counter.textContent = currentCount;
+    }, 5000 + Math.random() * 5000);
+}
+
+// Scroll Progress Bar
+function initScrollProgress() {
+    const progressBar = document.createElement('div');
+    progressBar.className = 'scroll-progress';
+    document.body.appendChild(progressBar);
+
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = (scrollTop / docHeight) * 100;
+        progressBar.style.width = progress + '%';
+    }, { passive: true });
+}
+
+// Social Proof Notifications
+function initSocialProofNotifications() {
+    const notifications = [
+        { icon: 'fa-check-circle', title: 'New Project Started', text: 'AI integration for local restaurant', time: '2 minutes ago' },
+        { icon: 'fa-star', title: '5-Star Review', text: '"Excellent service, highly recommend!"', time: '15 minutes ago' },
+        { icon: 'fa-calendar-check', title: 'Consultation Booked', text: 'New client from Providence, RI', time: '32 minutes ago' },
+        { icon: 'fa-rocket', title: 'Project Completed', text: 'Mobile app launched successfully', time: '1 hour ago' },
+        { icon: 'fa-handshake', title: 'New Partnership', text: 'Local business automation project', time: '2 hours ago' }
+    ];
+
+    // Create toast container
+    const toast = document.createElement('div');
+    toast.className = 'notification-toast';
+    toast.innerHTML = `
+        <div class="toast-icon"><i class="fas fa-check"></i></div>
+        <div class="toast-content">
+            <h5></h5>
+            <p></p>
+            <div class="toast-time"></div>
+        </div>
+    `;
+    document.body.appendChild(toast);
+
+    let notificationIndex = 0;
+
+    function showNotification() {
+        const notification = notifications[notificationIndex];
+        toast.querySelector('.toast-icon i').className = 'fas ' + notification.icon;
+        toast.querySelector('h5').textContent = notification.title;
+        toast.querySelector('p').textContent = notification.text;
+        toast.querySelector('.toast-time').textContent = notification.time;
+
+        toast.classList.add('show');
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 5000);
+
+        notificationIndex = (notificationIndex + 1) % notifications.length;
+    }
+
+    // Show first notification after 10 seconds, then every 30-60 seconds
+    setTimeout(() => {
+        showNotification();
+        setInterval(showNotification, 30000 + Math.random() * 30000);
+    }, 10000);
+}
+
+// Typing Testimonials
+function initTypingTestimonials() {
+    const testimonials = document.querySelectorAll('.testimonial-text');
+    if (testimonials.length === 0) return;
+
+    testimonials.forEach(testimonial => {
+        const text = testimonial.textContent;
+        testimonial.textContent = '';
+        testimonial.classList.add('testimonial-typing');
+
+        let charIndex = 0;
+        let hasStarted = false;
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !hasStarted) {
+                hasStarted = true;
+
+                function typeChar() {
+                    if (charIndex < text.length) {
+                        testimonial.textContent = text.substring(0, charIndex + 1);
+                        charIndex++;
+                        setTimeout(typeChar, 20 + Math.random() * 30);
+                    }
+                }
+
+                typeChar();
+                observer.unobserve(testimonial);
+            }
+        }, { threshold: 0.5 });
+
+        observer.observe(testimonial);
+    });
+}
+
+// Smooth Number Counting for Stats
+function initStatCounters() {
+    const stats = document.querySelectorAll('.stat-number[data-count]');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = parseInt(entry.target.dataset.count);
+                const suffix = entry.target.dataset.suffix || '';
+                const duration = 2000;
+                const startTime = performance.now();
+
+                function updateCount(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 4);
+                    const current = Math.floor(target * eased);
+
+                    entry.target.textContent = current.toLocaleString() + suffix;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCount);
+                    } else {
+                        entry.target.textContent = target.toLocaleString() + suffix;
+                    }
+                }
+
+                requestAnimationFrame(updateCount);
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    stats.forEach(stat => observer.observe(stat));
+}
+
+// Easter Egg - Konami Code
+function initEasterEgg() {
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                // Trigger easter egg - make everything neon!
+                document.body.style.filter = 'hue-rotate(180deg)';
+                setTimeout(() => {
+                    document.body.style.filter = '';
+                }, 3000);
+                konamiIndex = 0;
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
+}
+
 // Initialize all wow factor features
 document.addEventListener('DOMContentLoaded', function() {
     initLoadingScreen();
@@ -1278,4 +1449,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initRippleEffect();
     initCounters();
     initPageTransitions();
+    initLiveVisitorCounter();
+    initScrollProgress();
+    initSocialProofNotifications();
+    initStatCounters();
+    initEasterEgg();
 });

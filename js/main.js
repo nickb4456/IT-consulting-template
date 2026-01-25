@@ -890,3 +890,392 @@ function initTerminalDemo() {
         setTimeout(runDemo, 1000);
     }
 }
+
+// ============================================
+// TECHNICAL WOW FACTOR
+// ============================================
+
+// Loading Screen
+function initLoadingScreen() {
+    const loadingScreen = document.getElementById('loadingScreen');
+    const statusText = loadingScreen?.querySelector('.loader-status');
+
+    if (!loadingScreen) return;
+
+    const statuses = [
+        'Initializing AI Systems...',
+        'Loading 3D Environment...',
+        'Connecting to Cloud...',
+        'Preparing Experience...',
+        'Almost Ready...'
+    ];
+
+    let statusIndex = 0;
+    const statusInterval = setInterval(() => {
+        statusIndex = (statusIndex + 1) % statuses.length;
+        if (statusText) statusText.textContent = statuses[statusIndex];
+    }, 400);
+
+    // Hide loading screen after everything loads
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            clearInterval(statusInterval);
+            loadingScreen.classList.add('hidden');
+            document.body.classList.add('loaded');
+
+            // Trigger entrance animations
+            document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach((el, i) => {
+                setTimeout(() => el.classList.add('active'), i * 100);
+            });
+        }, 2200); // Match the loader progress animation
+    });
+}
+
+// WebGL Shader Background
+function initShaderBackground() {
+    const canvas = document.getElementById('shaderBg');
+    if (!canvas) return;
+
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    // Vertex shader
+    const vertexShaderSource = `
+        attribute vec2 position;
+        void main() {
+            gl_Position = vec4(position, 0.0, 1.0);
+        }
+    `;
+
+    // Fragment shader - flowing gradient
+    const fragmentShaderSource = `
+        precision mediump float;
+        uniform float time;
+        uniform vec2 resolution;
+
+        void main() {
+            vec2 uv = gl_FragCoord.xy / resolution.xy;
+
+            // Create flowing waves
+            float wave1 = sin(uv.x * 3.0 + time * 0.5) * 0.5 + 0.5;
+            float wave2 = sin(uv.y * 2.0 + time * 0.3 + 1.5) * 0.5 + 0.5;
+            float wave3 = sin((uv.x + uv.y) * 2.5 + time * 0.4) * 0.5 + 0.5;
+
+            // Mix colors
+            vec3 color1 = vec3(0.145, 0.388, 0.922); // Primary blue
+            vec3 color2 = vec3(0.024, 0.714, 0.831); // Cyan
+            vec3 color3 = vec3(0.545, 0.361, 0.965); // Purple
+
+            vec3 color = mix(color1, color2, wave1);
+            color = mix(color, color3, wave2 * 0.5);
+
+            // Add noise-like variation
+            float noise = fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
+            color += noise * 0.03;
+
+            // Radial fade from center
+            float dist = distance(uv, vec2(0.5, 0.5));
+            float alpha = smoothstep(0.8, 0.2, dist) * 0.3;
+
+            gl_FragColor = vec4(color, alpha * (wave3 * 0.5 + 0.5));
+        }
+    `;
+
+    function createShader(type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        return shader;
+    }
+
+    const vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+    const program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    gl.useProgram(program);
+
+    // Create full-screen quad
+    const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    const positionLocation = gl.getAttribLocation(program, 'position');
+    gl.enableVertexAttribArray(positionLocation);
+    gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+    const timeLocation = gl.getUniformLocation(program, 'time');
+    const resolutionLocation = gl.getUniformLocation(program, 'resolution');
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    let animating = true;
+    function render(time) {
+        if (!animating) return;
+        gl.uniform1f(timeLocation, time * 0.001);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        requestAnimationFrame(render);
+    }
+
+    // Only animate when visible
+    const observer = new IntersectionObserver((entries) => {
+        animating = entries[0].isIntersecting;
+        if (animating) requestAnimationFrame(render);
+    });
+    observer.observe(canvas);
+
+    requestAnimationFrame(render);
+}
+
+// Scroll Reveal Animations
+function initScrollReveal() {
+    // Auto-add reveal classes to elements
+    const revealSelectors = [
+        '.section-header',
+        '.service-card',
+        '.industry-card',
+        '.why-card',
+        '.testimonial-card',
+        '.faq-item',
+        '.contact-info',
+        '.contact-form-wrapper'
+    ];
+
+    revealSelectors.forEach(selector => {
+        document.querySelectorAll(selector).forEach((el, index) => {
+            if (!el.classList.contains('reveal') &&
+                !el.classList.contains('reveal-left') &&
+                !el.classList.contains('reveal-right')) {
+                el.classList.add('reveal');
+                el.classList.add(`reveal-delay-${(index % 6) + 1}`);
+            }
+        });
+    });
+
+    // Intersection Observer for reveal animations
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('active');
+            }
+        });
+    }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    });
+
+    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-rotate').forEach(el => {
+        revealObserver.observe(el);
+    });
+}
+
+// Cursor Glow Effect
+function initCursorGlow() {
+    // Only on desktop
+    if (window.innerWidth < 992) return;
+
+    const glow = document.createElement('div');
+    glow.className = 'cursor-glow';
+    document.body.appendChild(glow);
+
+    let mouseX = 0, mouseY = 0;
+    let glowX = 0, glowY = 0;
+
+    document.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function animateGlow() {
+        // Smooth follow
+        glowX += (mouseX - glowX) * 0.1;
+        glowY += (mouseY - glowY) * 0.1;
+
+        glow.style.left = glowX + 'px';
+        glow.style.top = glowY + 'px';
+
+        requestAnimationFrame(animateGlow);
+    }
+
+    animateGlow();
+
+    // Hide on scroll for performance
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+        glow.style.opacity = '0';
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            glow.style.opacity = '1';
+        }, 150);
+    });
+}
+
+// Parallax Effect
+function initParallax() {
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+
+    if (parallaxElements.length === 0) return;
+
+    function updateParallax() {
+        const scrollY = window.scrollY;
+
+        parallaxElements.forEach(el => {
+            const speed = parseFloat(el.dataset.parallax) || 0.5;
+            const rect = el.getBoundingClientRect();
+            const offset = (rect.top + scrollY) * speed;
+            el.style.transform = `translateY(${scrollY * speed - offset}px)`;
+        });
+    }
+
+    window.addEventListener('scroll', updateParallax, { passive: true });
+    updateParallax();
+}
+
+// Magnetic Buttons
+function initMagneticButtons() {
+    if (window.innerWidth < 992) return;
+
+    document.querySelectorAll('.btn-primary, .btn-outline-primary, .nav-cta').forEach(btn => {
+        btn.classList.add('magnetic-btn');
+
+        btn.addEventListener('mousemove', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+
+            btn.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+        });
+
+        btn.addEventListener('mouseleave', () => {
+            btn.style.transform = 'translate(0, 0)';
+        });
+    });
+}
+
+// Tilt Cards
+function initTiltCards() {
+    if (window.innerWidth < 992) return;
+
+    document.querySelectorAll('.service-card, .industry-card, .why-card').forEach(card => {
+        card.classList.add('tilt-card');
+
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const tiltX = (y - centerY) / 10;
+            const tiltY = (centerX - x) / 10;
+
+            card.style.setProperty('--tilt-x', `${tiltX}deg`);
+            card.style.setProperty('--tilt-y', `${tiltY}deg`);
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.setProperty('--tilt-x', '0deg');
+            card.style.setProperty('--tilt-y', '0deg');
+        });
+    });
+}
+
+// Ripple Effect on Buttons
+function initRippleEffect() {
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.classList.add('ripple');
+
+        btn.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-effect';
+            ripple.style.left = (e.clientX - rect.left) + 'px';
+            ripple.style.top = (e.clientY - rect.top) + 'px';
+
+            this.appendChild(ripple);
+
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+}
+
+// Counter Animation
+function initCounters() {
+    const counters = document.querySelectorAll('[data-count]');
+
+    const counterObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const target = parseInt(entry.target.dataset.count);
+                const duration = 2000;
+                const start = performance.now();
+                const startValue = 0;
+
+                function updateCounter(currentTime) {
+                    const elapsed = currentTime - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.floor(startValue + (target - startValue) * eased);
+
+                    entry.target.textContent = current.toLocaleString();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        entry.target.textContent = target.toLocaleString();
+                    }
+                }
+
+                requestAnimationFrame(updateCounter);
+                counterObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    counters.forEach(counter => counterObserver.observe(counter));
+}
+
+// Page Transition Effect
+function initPageTransitions() {
+    const transition = document.createElement('div');
+    transition.className = 'page-transition';
+    document.body.appendChild(transition);
+
+    document.querySelectorAll('a[href]:not([href^="#"]):not([href^="tel"]):not([href^="mailto"]):not([target="_blank"])').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href && !href.startsWith('http') && !href.startsWith('//')) {
+                e.preventDefault();
+                transition.classList.add('active');
+                setTimeout(() => {
+                    window.location.href = href;
+                }, 300);
+            }
+        });
+    });
+}
+
+// Initialize all wow factor features
+document.addEventListener('DOMContentLoaded', function() {
+    initLoadingScreen();
+    initShaderBackground();
+    initScrollReveal();
+    initCursorGlow();
+    initParallax();
+    initMagneticButtons();
+    initTiltCards();
+    initRippleEffect();
+    initCounters();
+    initPageTransitions();
+});

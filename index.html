@@ -2891,6 +2891,206 @@
     plant2.position.set(-4.5, 0.79, 2);
     scene.add(plant2);
 
+    // ========== WHITEBOARD WITH ANIMATED DIAGRAMS ==========
+    const whiteboardGroup = new THREE.Group();
+
+    // Whiteboard frame
+    const wbFrame = new THREE.Mesh(
+        new THREE.BoxGeometry(1.8, 1.2, 0.05),
+        new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.3, roughness: 0.7 })
+    );
+    whiteboardGroup.add(wbFrame);
+
+    // Whiteboard surface
+    const wbCanvas = document.createElement('canvas');
+    wbCanvas.width = 512;
+    wbCanvas.height = 340;
+    const wbCtx = wbCanvas.getContext('2d');
+
+    function drawWhiteboard(time) {
+        // White background
+        wbCtx.fillStyle = '#f8fafc';
+        wbCtx.fillRect(0, 0, 512, 340);
+
+        // Grid dots
+        wbCtx.fillStyle = '#e2e8f0';
+        for (let x = 20; x < 512; x += 20) {
+            for (let y = 20; y < 340; y += 20) {
+                wbCtx.beginPath();
+                wbCtx.arc(x, y, 1, 0, Math.PI * 2);
+                wbCtx.fill();
+            }
+        }
+
+        // Title
+        wbCtx.font = 'bold 24px Arial';
+        wbCtx.fillStyle = '#1e293b';
+        wbCtx.fillText('AI Integration Plan', 30, 40);
+
+        // Animated flowchart
+        const animProgress = (time % 8000) / 8000;
+
+        // Box 1: Data Input
+        wbCtx.strokeStyle = '#2563eb';
+        wbCtx.lineWidth = 2;
+        wbCtx.strokeRect(40, 80, 100, 50);
+        wbCtx.font = '12px Arial';
+        wbCtx.fillStyle = '#1e293b';
+        wbCtx.fillText('Data Input', 55, 110);
+
+        // Arrow 1
+        if (animProgress > 0.1) {
+            const arrowLen = Math.min(1, (animProgress - 0.1) / 0.15) * 60;
+            wbCtx.beginPath();
+            wbCtx.moveTo(140, 105);
+            wbCtx.lineTo(140 + arrowLen, 105);
+            wbCtx.strokeStyle = '#06b6d4';
+            wbCtx.lineWidth = 3;
+            wbCtx.stroke();
+            if (arrowLen >= 60) {
+                wbCtx.beginPath();
+                wbCtx.moveTo(200, 105);
+                wbCtx.lineTo(190, 98);
+                wbCtx.lineTo(190, 112);
+                wbCtx.fillStyle = '#06b6d4';
+                wbCtx.fill();
+            }
+        }
+
+        // Box 2: AI Processing
+        if (animProgress > 0.25) {
+            wbCtx.strokeStyle = '#8b5cf6';
+            wbCtx.lineWidth = 2;
+            wbCtx.strokeRect(200, 80, 120, 50);
+            wbCtx.font = '12px Arial';
+            wbCtx.fillStyle = '#1e293b';
+            wbCtx.fillText('AI Processing', 215, 110);
+
+            // Spinning gear icon
+            wbCtx.save();
+            wbCtx.translate(300, 105);
+            wbCtx.rotate(time / 500);
+            wbCtx.strokeStyle = '#8b5cf6';
+            wbCtx.beginPath();
+            wbCtx.arc(0, 0, 8, 0, Math.PI * 2);
+            wbCtx.stroke();
+            wbCtx.restore();
+        }
+
+        // Arrow 2
+        if (animProgress > 0.4) {
+            const arrowLen = Math.min(1, (animProgress - 0.4) / 0.15) * 60;
+            wbCtx.beginPath();
+            wbCtx.moveTo(320, 105);
+            wbCtx.lineTo(320 + arrowLen, 105);
+            wbCtx.strokeStyle = '#06b6d4';
+            wbCtx.lineWidth = 3;
+            wbCtx.stroke();
+        }
+
+        // Box 3: Results
+        if (animProgress > 0.55) {
+            wbCtx.strokeStyle = '#22c55e';
+            wbCtx.lineWidth = 2;
+            wbCtx.strokeRect(380, 80, 100, 50);
+            wbCtx.font = '12px Arial';
+            wbCtx.fillStyle = '#1e293b';
+            wbCtx.fillText('Results', 405, 110);
+
+            // Checkmark
+            wbCtx.strokeStyle = '#22c55e';
+            wbCtx.lineWidth = 3;
+            wbCtx.beginPath();
+            wbCtx.moveTo(455, 100);
+            wbCtx.lineTo(462, 110);
+            wbCtx.lineTo(475, 90);
+            wbCtx.stroke();
+        }
+
+        // Animated bar chart
+        wbCtx.fillStyle = '#1e293b';
+        wbCtx.font = 'bold 14px Arial';
+        wbCtx.fillText('Efficiency Gains', 50, 180);
+
+        const bars = [
+            { label: 'Speed', value: 85, color: '#2563eb' },
+            { label: 'Accuracy', value: 92, color: '#06b6d4' },
+            { label: 'Cost', value: 70, color: '#22c55e' }
+        ];
+
+        bars.forEach((bar, i) => {
+            const y = 200 + i * 40;
+            wbCtx.font = '11px Arial';
+            wbCtx.fillStyle = '#64748b';
+            wbCtx.fillText(bar.label, 50, y + 12);
+
+            // Bar background
+            wbCtx.fillStyle = '#e2e8f0';
+            wbCtx.fillRect(110, y, 150, 20);
+
+            // Animated bar fill
+            const barProgress = Math.min(1, Math.max(0, (animProgress - 0.6 - i * 0.1) / 0.2));
+            wbCtx.fillStyle = bar.color;
+            wbCtx.fillRect(110, y, 150 * (bar.value / 100) * barProgress, 20);
+
+            // Value text
+            if (barProgress > 0.5) {
+                wbCtx.fillStyle = '#fff';
+                wbCtx.font = 'bold 11px Arial';
+                wbCtx.fillText(bar.value + '%', 180, y + 14);
+            }
+        });
+
+        // Decorative elements
+        wbCtx.strokeStyle = '#06b6d4';
+        wbCtx.lineWidth = 1;
+        wbCtx.setLineDash([5, 5]);
+        wbCtx.strokeRect(350, 160, 130, 140);
+        wbCtx.setLineDash([]);
+
+        wbCtx.font = '11px Arial';
+        wbCtx.fillStyle = '#64748b';
+        wbCtx.fillText('Notes:', 360, 180);
+        wbCtx.fillText('• Reduce manual work', 360, 200);
+        wbCtx.fillText('• 24/7 availability', 360, 220);
+        wbCtx.fillText('• Scale easily', 360, 240);
+
+        wbTexture.needsUpdate = true;
+    }
+
+    const wbTexture = new THREE.CanvasTexture(wbCanvas);
+    const wbSurface = new THREE.Mesh(
+        new THREE.PlaneGeometry(1.7, 1.1),
+        new THREE.MeshBasicMaterial({ map: wbTexture })
+    );
+    wbSurface.position.z = 0.03;
+    whiteboardGroup.add(wbSurface);
+
+    // Marker tray
+    const markerTray = new THREE.Mesh(
+        new THREE.BoxGeometry(0.8, 0.04, 0.08),
+        new THREE.MeshStandardMaterial({ color: 0x4b5563 })
+    );
+    markerTray.position.set(0, -0.6, 0.06);
+    whiteboardGroup.add(markerTray);
+
+    // Markers
+    const markerColors = [0x2563eb, 0xef4444, 0x22c55e, 0x1e293b];
+    markerColors.forEach((color, i) => {
+        const marker = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.015, 0.015, 0.12, 8),
+            new THREE.MeshStandardMaterial({ color: color })
+        );
+        marker.rotation.z = Math.PI / 2;
+        marker.position.set(-0.25 + i * 0.15, -0.58, 0.06);
+        whiteboardGroup.add(marker);
+    });
+
+    // Position whiteboard on left wall
+    whiteboardGroup.position.set(-4.95, 2, 0.5);
+    whiteboardGroup.rotation.y = Math.PI / 2;
+    scene.add(whiteboardGroup);
+
     // ========== AI ROBOTS WORKING ==========
     const robots = [];
 
@@ -3528,6 +3728,9 @@
         if (clockGroup.userData.hourHand) {
             clockGroup.userData.hourHand.rotation.z = -(hours / 12) * Math.PI * 2;
         }
+
+        // Update whiteboard animation
+        drawWhiteboard(time);
 
         // Render with post-processing
         composer.render();

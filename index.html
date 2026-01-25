@@ -2471,6 +2471,424 @@
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     scene.add(particles);
 
+    // ========== HOLOGRAPHIC DATA DISPLAYS ==========
+    const holoDisplays = [];
+
+    function createHolographicDisplay(width, height, color) {
+        const group = new THREE.Group();
+
+        // Hologram base ring
+        const ringGeometry = new THREE.TorusGeometry(0.15, 0.01, 8, 32);
+        const ringMaterial = new THREE.MeshStandardMaterial({
+            color: color,
+            emissive: color,
+            emissiveIntensity: 0.8,
+            transparent: true,
+            opacity: 0.8
+        });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        group.add(ring);
+
+        // Hologram projection beam
+        const beamGeometry = new THREE.CylinderGeometry(0.12, 0.02, 0.4, 16, 1, true);
+        const beamMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: 0.15,
+            side: THREE.DoubleSide
+        });
+        const beam = new THREE.Mesh(beamGeometry, beamMaterial);
+        beam.position.y = 0.2;
+        group.add(beam);
+
+        // Holographic panel
+        const panelGeometry = new THREE.PlaneGeometry(width, height);
+        const panelCanvas = document.createElement('canvas');
+        panelCanvas.width = 256;
+        panelCanvas.height = 192;
+        const panelCtx = panelCanvas.getContext('2d');
+
+        function drawHoloContent(time) {
+            panelCtx.clearRect(0, 0, 256, 192);
+
+            // Grid background
+            panelCtx.strokeStyle = `rgba(${color === 0x06b6d4 ? '6, 182, 212' : '34, 197, 94'}, 0.3)`;
+            panelCtx.lineWidth = 0.5;
+            for (let i = 0; i < 256; i += 16) {
+                panelCtx.beginPath();
+                panelCtx.moveTo(i, 0);
+                panelCtx.lineTo(i, 192);
+                panelCtx.stroke();
+            }
+            for (let i = 0; i < 192; i += 16) {
+                panelCtx.beginPath();
+                panelCtx.moveTo(0, i);
+                panelCtx.lineTo(256, i);
+                panelCtx.stroke();
+            }
+
+            // Bar chart animation
+            panelCtx.fillStyle = color === 0x06b6d4 ? 'rgba(6, 182, 212, 0.8)' : 'rgba(34, 197, 94, 0.8)';
+            for (let i = 0; i < 5; i++) {
+                const barHeight = 50 + Math.sin(time / 500 + i) * 30 + Math.random() * 10;
+                panelCtx.fillRect(30 + i * 45, 192 - barHeight, 30, barHeight);
+            }
+
+            // Title text
+            panelCtx.font = 'bold 14px monospace';
+            panelCtx.fillStyle = '#fff';
+            panelCtx.fillText('LIVE DATA', 85, 25);
+
+            // Stats
+            panelCtx.font = '10px monospace';
+            panelCtx.fillText('CPU: ' + (45 + Math.floor(Math.sin(time / 300) * 20)) + '%', 20, 50);
+            panelCtx.fillText('MEM: ' + (62 + Math.floor(Math.cos(time / 400) * 15)) + '%', 140, 50);
+
+            holoTexture.needsUpdate = true;
+        }
+
+        const holoTexture = new THREE.CanvasTexture(panelCanvas);
+        const panelMaterial = new THREE.MeshBasicMaterial({
+            map: holoTexture,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.DoubleSide
+        });
+        const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+        panel.position.y = 0.55;
+        group.add(panel);
+
+        group.userData = { drawFunc: drawHoloContent, panel: panel };
+        return group;
+    }
+
+    // Add holographic displays above desks
+    const holoDisplay1 = createHolographicDisplay(0.5, 0.35, 0x06b6d4);
+    holoDisplay1.position.set(-0.8, 1.0, 0);
+    scene.add(holoDisplay1);
+    holoDisplays.push(holoDisplay1);
+
+    const holoDisplay2 = createHolographicDisplay(0.4, 0.3, 0x22c55e);
+    holoDisplay2.position.set(0.9, 1.0, -0.2);
+    scene.add(holoDisplay2);
+    holoDisplays.push(holoDisplay2);
+
+    // ========== FLYING DRONE ==========
+    const droneGroup = new THREE.Group();
+
+    // Drone body
+    const droneBody = new THREE.Mesh(
+        new THREE.BoxGeometry(0.15, 0.05, 0.15),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 })
+    );
+    droneGroup.add(droneBody);
+
+    // Drone arms
+    const armGeometry = new THREE.BoxGeometry(0.25, 0.015, 0.02);
+    const armMaterial = new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.6 });
+    const arm1 = new THREE.Mesh(armGeometry, armMaterial);
+    arm1.rotation.y = Math.PI / 4;
+    droneGroup.add(arm1);
+    const arm2 = new THREE.Mesh(armGeometry, armMaterial);
+    arm2.rotation.y = -Math.PI / 4;
+    droneGroup.add(arm2);
+
+    // Rotors
+    const rotorGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.01, 16);
+    const rotorMaterial = new THREE.MeshStandardMaterial({
+        color: 0x06b6d4,
+        emissive: 0x06b6d4,
+        emissiveIntensity: 0.5,
+        transparent: true,
+        opacity: 0.6
+    });
+    const rotorPositions = [
+        [0.1, 0.02, 0.1], [-0.1, 0.02, 0.1],
+        [0.1, 0.02, -0.1], [-0.1, 0.02, -0.1]
+    ];
+    const rotors = [];
+    rotorPositions.forEach(pos => {
+        const rotor = new THREE.Mesh(rotorGeometry, rotorMaterial);
+        rotor.position.set(...pos);
+        droneGroup.add(rotor);
+        rotors.push(rotor);
+    });
+    droneGroup.userData.rotors = rotors;
+
+    // Drone camera/sensor light
+    const droneCam = new THREE.Mesh(
+        new THREE.SphereGeometry(0.02, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0xef4444, emissive: 0xef4444, emissiveIntensity: 1 })
+    );
+    droneCam.position.y = -0.03;
+    droneGroup.add(droneCam);
+
+    // Position drone
+    droneGroup.position.set(0, 2.5, 0);
+    scene.add(droneGroup);
+
+    // ========== COFFEE MACHINE ==========
+    const coffeeGroup = new THREE.Group();
+
+    // Machine body
+    const coffeeBody = new THREE.Mesh(
+        new THREE.BoxGeometry(0.25, 0.4, 0.2),
+        new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.7, roughness: 0.3 })
+    );
+    coffeeBody.position.y = 0.2;
+    coffeeGroup.add(coffeeBody);
+
+    // Coffee dispenser
+    const dispenser = new THREE.Mesh(
+        new THREE.BoxGeometry(0.08, 0.05, 0.08),
+        new THREE.MeshStandardMaterial({ color: 0x374151, metalness: 0.8 })
+    );
+    dispenser.position.set(0, 0.1, 0.08);
+    coffeeGroup.add(dispenser);
+
+    // Status light
+    const coffeeLight = new THREE.Mesh(
+        new THREE.SphereGeometry(0.015, 8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x22c55e, emissive: 0x22c55e, emissiveIntensity: 1 })
+    );
+    coffeeLight.position.set(0.08, 0.35, 0.1);
+    coffeeGroup.add(coffeeLight);
+
+    // Steam particles (simple cylinders)
+    const steamParticles = [];
+    for (let i = 0; i < 5; i++) {
+        const steam = new THREE.Mesh(
+            new THREE.SphereGeometry(0.015, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 })
+        );
+        steam.position.set(0, 0.15 + i * 0.05, 0.08);
+        coffeeGroup.add(steam);
+        steamParticles.push(steam);
+    }
+    coffeeGroup.userData.steam = steamParticles;
+
+    coffeeGroup.position.set(-4, 0.4, 1);
+    scene.add(coffeeGroup);
+
+    // ========== FISH TANK ==========
+    const fishTankGroup = new THREE.Group();
+
+    // Tank glass
+    const tankGeometry = new THREE.BoxGeometry(0.6, 0.4, 0.3);
+    const tankMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0ea5e9,
+        transparent: true,
+        opacity: 0.2,
+        metalness: 0.1,
+        roughness: 0.1
+    });
+    const tank = new THREE.Mesh(tankGeometry, tankMaterial);
+    tank.position.y = 0.2;
+    fishTankGroup.add(tank);
+
+    // Tank water
+    const waterGeometry = new THREE.BoxGeometry(0.55, 0.35, 0.25);
+    const waterMaterial = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        transparent: true,
+        opacity: 0.4
+    });
+    const water = new THREE.Mesh(waterGeometry, waterMaterial);
+    water.position.y = 0.18;
+    fishTankGroup.add(water);
+
+    // Fish
+    const fishColors = [0xf97316, 0xeab308, 0xef4444];
+    const fishes = [];
+    for (let i = 0; i < 3; i++) {
+        const fishGroup = new THREE.Group();
+
+        const fishBody = new THREE.Mesh(
+            new THREE.SphereGeometry(0.025, 8, 8),
+            new THREE.MeshStandardMaterial({ color: fishColors[i], emissive: fishColors[i], emissiveIntensity: 0.3 })
+        );
+        fishBody.scale.set(1.5, 1, 0.6);
+        fishGroup.add(fishBody);
+
+        const tail = new THREE.Mesh(
+            new THREE.ConeGeometry(0.02, 0.04, 4),
+            new THREE.MeshStandardMaterial({ color: fishColors[i] })
+        );
+        tail.rotation.z = Math.PI / 2;
+        tail.position.x = -0.04;
+        fishGroup.add(tail);
+
+        fishGroup.position.set(
+            (Math.random() - 0.5) * 0.4,
+            0.1 + Math.random() * 0.2,
+            (Math.random() - 0.5) * 0.15
+        );
+        fishGroup.userData.speed = 0.5 + Math.random() * 0.5;
+        fishGroup.userData.phase = Math.random() * Math.PI * 2;
+
+        fishTankGroup.add(fishGroup);
+        fishes.push(fishGroup);
+    }
+    fishTankGroup.userData.fishes = fishes;
+
+    // Tank stand
+    const tankStand = new THREE.Mesh(
+        new THREE.BoxGeometry(0.65, 0.4, 0.35),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 })
+    );
+    fishTankGroup.add(tankStand);
+
+    // Tank light
+    const tankLight = new THREE.PointLight(0x0ea5e9, 0.8, 2);
+    tankLight.position.set(0, 0.5, 0);
+    fishTankGroup.add(tankLight);
+
+    fishTankGroup.position.set(-4.3, 0.4, -3);
+    scene.add(fishTankGroup);
+
+    // ========== WALL CLOCK ==========
+    const clockGroup = new THREE.Group();
+
+    // Clock face
+    const clockFace = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.2, 0.2, 0.03, 32),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.5 })
+    );
+    clockFace.rotation.x = Math.PI / 2;
+    clockGroup.add(clockFace);
+
+    // Clock face white
+    const clockWhite = new THREE.Mesh(
+        new THREE.CircleGeometry(0.18, 32),
+        new THREE.MeshStandardMaterial({ color: 0xf8fafc })
+    );
+    clockWhite.position.z = 0.016;
+    clockGroup.add(clockWhite);
+
+    // Hour markers
+    for (let i = 0; i < 12; i++) {
+        const marker = new THREE.Mesh(
+            new THREE.BoxGeometry(0.01, 0.03, 0.005),
+            new THREE.MeshStandardMaterial({ color: 0x1e293b })
+        );
+        const angle = (i / 12) * Math.PI * 2;
+        marker.position.x = Math.sin(angle) * 0.14;
+        marker.position.y = Math.cos(angle) * 0.14;
+        marker.position.z = 0.018;
+        marker.rotation.z = -angle;
+        clockGroup.add(marker);
+    }
+
+    // Hour hand
+    const hourHand = new THREE.Mesh(
+        new THREE.BoxGeometry(0.015, 0.08, 0.005),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b })
+    );
+    hourHand.position.y = 0.04;
+    hourHand.position.z = 0.02;
+    const hourHandGroup = new THREE.Group();
+    hourHandGroup.add(hourHand);
+    clockGroup.add(hourHandGroup);
+    clockGroup.userData.hourHand = hourHandGroup;
+
+    // Minute hand
+    const minuteHand = new THREE.Mesh(
+        new THREE.BoxGeometry(0.01, 0.12, 0.005),
+        new THREE.MeshStandardMaterial({ color: 0x374151 })
+    );
+    minuteHand.position.y = 0.06;
+    minuteHand.position.z = 0.022;
+    const minuteHandGroup = new THREE.Group();
+    minuteHandGroup.add(minuteHand);
+    clockGroup.add(minuteHandGroup);
+    clockGroup.userData.minuteHand = minuteHandGroup;
+
+    // Second hand
+    const secondHand = new THREE.Mesh(
+        new THREE.BoxGeometry(0.005, 0.14, 0.005),
+        new THREE.MeshStandardMaterial({ color: 0xef4444 })
+    );
+    secondHand.position.y = 0.07;
+    secondHand.position.z = 0.024;
+    const secondHandGroup = new THREE.Group();
+    secondHandGroup.add(secondHand);
+    clockGroup.add(secondHandGroup);
+    clockGroup.userData.secondHand = secondHandGroup;
+
+    // Center cap
+    const clockCenter = new THREE.Mesh(
+        new THREE.SphereGeometry(0.015, 16, 16),
+        new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8 })
+    );
+    clockCenter.position.z = 0.025;
+    clockGroup.add(clockCenter);
+
+    clockGroup.position.set(0, 3, -4.95);
+    scene.add(clockGroup);
+
+    // ========== POTTED PLANTS ==========
+    function createPlant(potColor) {
+        const plantGroup = new THREE.Group();
+
+        // Pot
+        const pot = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.06, 0.12, 16),
+            new THREE.MeshStandardMaterial({ color: potColor, roughness: 0.8 })
+        );
+        pot.position.y = 0.06;
+        plantGroup.add(pot);
+
+        // Soil
+        const soil = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.07, 0.07, 0.02, 16),
+            new THREE.MeshStandardMaterial({ color: 0x3d2914 })
+        );
+        soil.position.y = 0.12;
+        plantGroup.add(soil);
+
+        // Plant stems and leaves
+        const leafMaterial = new THREE.MeshStandardMaterial({
+            color: 0x22c55e,
+            emissive: 0x22c55e,
+            emissiveIntensity: 0.1
+        });
+
+        for (let i = 0; i < 5; i++) {
+            const stem = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.005, 0.005, 0.15 + Math.random() * 0.1, 8),
+                leafMaterial
+            );
+            const angle = (i / 5) * Math.PI * 2;
+            stem.position.x = Math.sin(angle) * 0.03;
+            stem.position.z = Math.cos(angle) * 0.03;
+            stem.position.y = 0.2;
+            stem.rotation.x = Math.random() * 0.3 - 0.15;
+            stem.rotation.z = Math.random() * 0.3 - 0.15;
+            plantGroup.add(stem);
+
+            // Leaf
+            const leaf = new THREE.Mesh(
+                new THREE.SphereGeometry(0.03, 8, 8),
+                leafMaterial
+            );
+            leaf.scale.set(1, 0.3, 1.5);
+            leaf.position.copy(stem.position);
+            leaf.position.y += 0.1;
+            plantGroup.add(leaf);
+        }
+
+        return plantGroup;
+    }
+
+    const plant1 = createPlant(0x78350f);
+    plant1.position.set(1.2, 0.79, 0.3);
+    scene.add(plant1);
+
+    const plant2 = createPlant(0x1e3a5f);
+    plant2.position.set(-4.5, 0.79, 2);
+    scene.add(plant2);
+
     // ========== AI ROBOTS WORKING ==========
     const robots = [];
 
@@ -3045,6 +3463,69 @@
                 robot.position.y = 0.05 + Math.sin(t * 2) * 0.01;
             }
         });
+
+        // Animate holographic displays
+        holoDisplays.forEach(holo => {
+            if (holo.userData.drawFunc) {
+                holo.userData.drawFunc(time);
+            }
+            // Rotate display slowly
+            holo.rotation.y = Math.sin(time / 3000) * 0.3;
+            // Bob up and down
+            holo.position.y = 1.0 + Math.sin(time / 1000) * 0.05;
+        });
+
+        // Animate drone flying in figure-8 pattern
+        const droneT = time / 2000;
+        droneGroup.position.x = Math.sin(droneT) * 2;
+        droneGroup.position.z = Math.sin(droneT * 2) * 1.5;
+        droneGroup.position.y = 2.2 + Math.sin(droneT * 3) * 0.3;
+        droneGroup.rotation.z = Math.sin(droneT) * 0.1;
+        droneGroup.rotation.x = Math.cos(droneT * 2) * 0.1;
+        // Face direction of movement
+        droneGroup.rotation.y = Math.atan2(Math.cos(droneT), Math.cos(droneT * 2) * 2);
+        // Spin rotors
+        if (droneGroup.userData.rotors) {
+            droneGroup.userData.rotors.forEach(rotor => {
+                rotor.rotation.y += 0.5;
+            });
+        }
+
+        // Animate coffee steam
+        if (coffeeGroup.userData.steam) {
+            coffeeGroup.userData.steam.forEach((steam, i) => {
+                steam.position.y = 0.15 + ((time / 200 + i * 50) % 200) / 400;
+                steam.material.opacity = 0.4 - ((time / 200 + i * 50) % 200) / 500;
+                steam.position.x = Math.sin(time / 200 + i) * 0.02;
+            });
+        }
+
+        // Animate fish
+        if (fishTankGroup.userData.fishes) {
+            fishTankGroup.userData.fishes.forEach(fish => {
+                const ft = time / 1000 * fish.userData.speed + fish.userData.phase;
+                fish.position.x = Math.sin(ft) * 0.2;
+                fish.position.z = Math.cos(ft * 0.7) * 0.08;
+                fish.position.y = 0.15 + Math.sin(ft * 1.5) * 0.05;
+                fish.rotation.y = Math.cos(ft) > 0 ? 0 : Math.PI;
+            });
+        }
+
+        // Animate clock hands (real time)
+        const now = new Date();
+        const seconds = now.getSeconds() + now.getMilliseconds() / 1000;
+        const minutes = now.getMinutes() + seconds / 60;
+        const hours = (now.getHours() % 12) + minutes / 60;
+
+        if (clockGroup.userData.secondHand) {
+            clockGroup.userData.secondHand.rotation.z = -(seconds / 60) * Math.PI * 2;
+        }
+        if (clockGroup.userData.minuteHand) {
+            clockGroup.userData.minuteHand.rotation.z = -(minutes / 60) * Math.PI * 2;
+        }
+        if (clockGroup.userData.hourHand) {
+            clockGroup.userData.hourHand.rotation.z = -(hours / 12) * Math.PI * 2;
+        }
 
         // Render with post-processing
         composer.render();

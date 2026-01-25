@@ -854,7 +854,7 @@ function initTerminalDemo() {
         // Add command line
         const commandLine = document.createElement('div');
         commandLine.className = 'terminal-line';
-        commandLine.innerHTML = `<span class="prompt">techflow@ai:~$</span> <span class="command">${demo.command}</span>`;
+        commandLine.innerHTML = `<span class="prompt">elevate@ai:~$</span> <span class="command">${demo.command}</span>`;
         commandLine.style.animation = 'typeLine 0.3s ease forwards';
         terminalBody.appendChild(commandLine);
 
@@ -1297,54 +1297,6 @@ function initScrollProgress() {
     }, { passive: true });
 }
 
-// Social Proof Notifications
-function initSocialProofNotifications() {
-    const notifications = [
-        { icon: 'fa-check-circle', title: 'New Project Started', text: 'AI integration for local restaurant', time: '2 minutes ago' },
-        { icon: 'fa-star', title: '5-Star Review', text: '"Excellent service, highly recommend!"', time: '15 minutes ago' },
-        { icon: 'fa-calendar-check', title: 'Consultation Booked', text: 'New client from Providence, RI', time: '32 minutes ago' },
-        { icon: 'fa-rocket', title: 'Project Completed', text: 'Mobile app launched successfully', time: '1 hour ago' },
-        { icon: 'fa-handshake', title: 'New Partnership', text: 'Local business automation project', time: '2 hours ago' }
-    ];
-
-    // Create toast container
-    const toast = document.createElement('div');
-    toast.className = 'notification-toast';
-    toast.innerHTML = `
-        <div class="toast-icon"><i class="fas fa-check"></i></div>
-        <div class="toast-content">
-            <h5></h5>
-            <p></p>
-            <div class="toast-time"></div>
-        </div>
-    `;
-    document.body.appendChild(toast);
-
-    let notificationIndex = 0;
-
-    function showNotification() {
-        const notification = notifications[notificationIndex];
-        toast.querySelector('.toast-icon i').className = 'fas ' + notification.icon;
-        toast.querySelector('h5').textContent = notification.title;
-        toast.querySelector('p').textContent = notification.text;
-        toast.querySelector('.toast-time').textContent = notification.time;
-
-        toast.classList.add('show');
-
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 5000);
-
-        notificationIndex = (notificationIndex + 1) % notifications.length;
-    }
-
-    // Show first notification after 10 seconds, then every 30-60 seconds
-    setTimeout(() => {
-        showNotification();
-        setInterval(showNotification, 30000 + Math.random() * 30000);
-    }, 10000);
-}
-
 // Typing Testimonials
 function initTypingTestimonials() {
     const testimonials = document.querySelectorAll('.testimonial-text');
@@ -1451,7 +1403,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initPageTransitions();
     initLiveVisitorCounter();
     initScrollProgress();
-    initSocialProofNotifications();
     initStatCounters();
     initEasterEgg();
 });

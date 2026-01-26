@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clawdbot AWS Setup Guide | Deploy Your AI Assistant | Elevate IT Rhode Island</title>
+    <meta name="description" content="Complete step-by-step guide to deploy Clawdbot, an open-source AI assistant, on AWS. Set up WhatsApp integration, VNC access, and more.">
+    <meta name="keywords" content="Clawdbot setup, AI assistant AWS, deploy AI bot, WhatsApp bot, Claude AI assistant">
+    <meta name="robots" content="index, follow">
+
+    <link href="img/favicon.ico" rel="icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+    <style>
+        /* Guide-specific styles */
+        .guide-hero {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            padding: 6rem 0 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .guide-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        .guide-hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .guide-hero h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .guide-hero .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2rem;
+        }
+
+        .guide-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Content Area */
+        .guide-content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 50px 0 25px 0;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #a5b4fc;
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin: 0;
+        }
+
+        /* Cards */
+        .guide-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .card-header-guide {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .card-header-guide h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        /* Tags */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-mac {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .tag-server {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        /* Code Blocks */
+        .code-wrapper {
+            position: relative;
+            margin: 12px 0;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #94a3b8;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            z-index: 10;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255,255,255,0.2);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .copy-btn svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        pre {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 18px;
+            padding-top: 40px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        pre::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            width: 10px;
+            height: 10px;
+            background: #ef4444;
+            border-radius: 50%;
+            box-shadow: 16px 0 0 #f59e0b, 32px 0 0 #22c55e;
+        }
+
+        pre code {
+            display: block;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #1e293b;
+            color: #a5b4fc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        /* Alert Boxes */
+        .alert-guide {
+            padding: 16px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-icon {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #f59e0b;
+        }
+
+        .alert-warning .alert-icon {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .alert-tip {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border: 1px solid #10b981;
+        }
+
+        .alert-tip .alert-icon {
+            background: #10b981;
+            color: white;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border: 1px solid #3b82f6;
+        }
+
+        .alert-info .alert-icon {
+            background: #3b82f6;
+            color: white;
+        }
+
+        /* Paywall Section */
+        .paywall-overlay {
+            position: relative;
+            margin-top: 40px;
+        }
+
+        .locked-content {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+            opacity: 0.5;
+            max-height: 600px;
+            overflow: hidden;
+        }
+
+        .paywall-card {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            z-index: 100;
+            max-width: 500px;
+            margin: 0 auto 30px auto;
+        }
+
+        .paywall-card h3 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--gray-900);
+        }
+
+        .paywall-card .price {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 15px 0;
+        }
+
+        .paywall-card .price span {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .paywall-card p {
+            color: var(--gray-600);
+            margin-bottom: 25px;
+        }
+
+        .paywall-features {
+            text-align: left;
+            margin: 20px 0;
+        }
+
+        .paywall-features li {
+            padding: 8px 0;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .paywall-features li i {
+            color: #22c55e;
+        }
+
+        .unlock-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .unlock-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        .unlock-btn i {
+            font-size: 1.2rem;
+        }
+
+        .secure-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            color: var(--gray-500);
+            font-size: 0.85rem;
+        }
+
+        .secure-badge i {
+            color: #22c55e;
+        }
+
+        /* Unlocked state */
+        .unlocked .locked-content {
+            filter: none;
+            pointer-events: auto;
+            user-select: auto;
+            opacity: 1;
+            max-height: none;
+            overflow: visible;
+        }
+
+        .unlocked .paywall-card,
+        .unlocked #paywall-card {
+            display: none;
+        }
+
+        /* Table of Contents Preview */
+        .toc-preview {
+            background: var(--gray-50);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+
+        .toc-preview h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--gray-700);
+        }
+
+        .toc-preview ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .toc-preview li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toc-preview li:last-child {
+            border-bottom: none;
+        }
+
+        .toc-preview li.free {
+            color: var(--gray-700);
+        }
+
+        .toc-preview li.locked {
+            color: var(--gray-400);
+        }
+
+        .toc-preview li i {
+            width: 20px;
+        }
+
+        .toc-preview li.free i {
+            color: #22c55e;
+        }
+
+        .toc-preview li.locked i {
+            color: var(--gray-400);
+        }
+
+        /* Back to home link */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="guide-hero">
+        <div class="container">
+            <div class="guide-hero-content">
+                <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Elevate IT</a>
+                <h1>Clawdbot AWS Setup Guide</h1>
+                <p class="subtitle">Deploy your personal AI assistant on AWS in under an hour</p>
+                <span class="guide-badge"><i class="fas fa-robot"></i> &nbsp; Open Source &bull; Self-Hosted &bull; Private</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="guide-content">
+
+        <!-- What You'll Build -->
+        <div class="guide-card" style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white;">
+            <h3 style="color: white; margin-bottom: 15px;">What You'll Build</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                <li style="padding: 8px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check" style="color: #14b8a6;"></i> A virtual machine running 24/7 in the cloud
+                </li>
+                <li style="padding: 8px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check" style="color: #14b8a6;"></i> Clawdbot AI assistant installed and configured
+                </li>
+                <li style="padding: 8px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check" style="color: #14b8a6;"></i> Optional WhatsApp, Telegram, or other integrations
+                </li>
+                <li style="padding: 8px 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check" style="color: #14b8a6;"></i> Optional desktop access via VNC for browser login
+                </li>
+            </ul>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="toc-preview">
+            <h4><i class="fas fa-list"></i> What's Included</h4>
+            <ul>
+                <li class="free"><i class="fas fa-unlock"></i> Part 1: AWS Account & CLI Setup (Free)</li>
+                <li class="locked"><i class="fas fa-lock"></i> Part 2: Create EC2 Instance</li>
+                <li class="locked"><i class="fas fa-lock"></i> Part 3: Connect to Your Server</li>
+                <li class="locked"><i class="fas fa-lock"></i> Part 4: Install Clawdbot</li>
+                <li class="locked"><i class="fas fa-lock"></i> Part 5: Desktop Access (VNC)</li>
+                <li class="locked"><i class="fas fa-lock"></i> Part 6: Chrome Extension Setup</li>
+                <li class="locked"><i class="fas fa-lock"></i> Quick Reference Tables</li>
+            </ul>
+        </div>
+
+        <!-- ======================= -->
+        <!-- PART 1 - FREE CONTENT   -->
+        <!-- ======================= -->
+
+        <div class="section-header">
+            <div class="section-icon">1</div>
+            <h2>AWS Account & CLI Setup</h2>
+            <span style="margin-left: auto; background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">FREE</span>
+        </div>
+
+        <div class="guide-card">
+            <div class="card-header-guide">
+                <div class="step-number">1</div>
+                <h3>Create AWS Account</h3>
+            </div>
+            <ol>
+                <li>Go to <a href="https://aws.amazon.com" target="_blank">aws.amazon.com</a> and click <strong>Create an AWS Account</strong></li>
+                <li>Enter email, password, and account name</li>
+                <li>Choose "Personal" account type</li>
+                <li>Add payment method (credit/debit card required)</li>
+                <li>Complete phone verification</li>
+                <li>Select <strong>Basic support (Free)</strong></li>
+            </ol>
+        </div>
+
+        <div class="guide-card">
+            <div class="card-header-guide">
+                <div class="step-number">2</div>
+                <h3>Create IAM User with Admin Access</h3>
+            </div>
+            <ol>
+                <li>Sign in to <a href="https://console.aws.amazon.com" target="_blank">AWS Console</a></li>
+                <li>Search for <strong>IAM</strong> in the top search bar</li>
+                <li>Go to <strong>Users</strong> → <strong>Create user</strong></li>
+                <li>Create a user and attach <strong>AdministratorAccess</strong> permission</li>
+                <li>Under that user's <strong>Security credentials</strong> tab → <strong>Create access key</strong></li>
+                <li>Choose "Command Line Interface (CLI)" as the use case</li>
+                <li><strong>Save both the Access Key ID and Secret Access Key!</strong></li>
+            </ol>
+        </div>
+
+        <div class="guide-card">
+            <div class="card-header-guide">
+                <div class="step-number">3</div>
+                <h3>Install AWS CLI</h3>
+                <span class="tag tag-mac">Mac</span>
+            </div>
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy
+                </button>
+                <pre><code>brew install awscli</code></pre>
+            </div>
+            <p>Or download directly:</p>
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy
+                </button>
+                <pre><code>curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
+sudo installer -pkg AWSCLIV2.pkg -target /</code></pre>
+            </div>
+        </div>
+
+        <div class="guide-card">
+            <div class="card-header-guide">
+                <div class="step-number">4</div>
+                <h3>Configure AWS CLI</h3>
+                <span class="tag tag-mac">Mac</span>
+            </div>
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy
+                </button>
+                <pre><code>aws configure</code></pre>
+            </div>
+            <p>Enter your credentials when prompted:</p>
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy
+                </button>
+                <pre><code>AWS Access Key ID [None]: your-access-key
+AWS Secret Access Key [None]: your-secret-key
+Default region name [None]: us-east-1
+Default output format [None]: json</code></pre>
+            </div>
+            <p>Verify it works:</p>
+            <div class="code-wrapper">
+                <button class="copy-btn" onclick="copyCode(this)">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                    Copy
+                </button>
+                <pre><code>aws sts get-caller-identity</code></pre>
+            </div>
+
+            <div class="alert-guide alert-tip">
+                <div class="alert-icon">✓</div>
+                <div>
+                    <strong>You're ready!</strong> Your AWS CLI is now configured. Continue to Part 2 to create your server.
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================== -->
+        <!-- PAYWALL - LOCKED CONTENT   -->
+        <!-- ========================== -->
+
+        <div class="paywall-overlay" id="paywall-section">
+
+            <!-- Paywall Card - Shows at top -->
+            <div class="paywall-card" id="paywall-card">
+                <h3>Unlock Full Guide</h3>
+                <div class="price">$2.99 <span>one-time</span></div>
+                <p>Get instant access to all 22 steps, including:</p>
+                <ul class="paywall-features">
+                    <li><i class="fas fa-check-circle"></i> EC2 instance setup commands</li>
+                    <li><i class="fas fa-check-circle"></i> Clawdbot installation & config</li>
+                    <li><i class="fas fa-check-circle"></i> WhatsApp integration setup</li>
+                    <li><i class="fas fa-check-circle"></i> VNC desktop access</li>
+                    <li><i class="fas fa-check-circle"></i> Chrome extension setup</li>
+                    <li><i class="fas fa-check-circle"></i> Quick reference cheat sheets</li>
+                </ul>
+                <a href="#" class="unlock-btn" id="checkout-btn">
+                    <i class="fas fa-unlock"></i> Unlock Now - $2.99
+                </a>
+                <div class="secure-badge">
+                    <i class="fas fa-shield-alt"></i> Secure payment via Gumroad
+                </div>
+            </div>
+
+            <!-- Full Locked Content -->
+            <div class="locked-content">
+
+                <!-- Part 2: Create EC2 Instance -->
+                <div class="section-header">
+                    <div class="section-icon">2</div>
+                    <h2>Create EC2 Instance</h2>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">5</div>
+                        <h3>Create SSH Key Pair</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 create-key-pair \
+  --key-name clawdbot-key \
+  --query 'KeyMaterial' \
+  --output text \
+  --region us-east-1 > clawdbot-key.pem
+
+chmod 400 clawdbot-key.pem</code></pre>
+                    </div>
+                    <div class="alert-guide alert-warning">
+                        <div class="alert-icon">!</div>
+                        <div><strong>Important:</strong> Keep this .pem file safe! You need it to connect to your server.</div>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">6</div>
+                        <h3>Create Security Group</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 create-security-group \
+  --group-name clawdbot-sg \
+  --description "Clawdbot security group" \
+  --region us-east-1</code></pre>
+                    </div>
+                    <p>Allow SSH access:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 authorize-security-group-ingress \
+  --group-name clawdbot-sg \
+  --protocol tcp \
+  --port 22 \
+  --cidr 0.0.0.0/0 \
+  --region us-east-1</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">7</div>
+                        <h3>Launch EC2 Instance</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 run-instances \
+  --image-id ami-0c7217cdde317cfec \
+  --instance-type t3.micro \
+  --key-name clawdbot-key \
+  --security-groups clawdbot-sg \
+  --region us-east-1</code></pre>
+                    </div>
+                    <div class="alert-guide alert-tip">
+                        <div class="alert-icon">i</div>
+                        <div>
+                            <strong>Instance Types:</strong>
+                            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                                <li><code>t3.micro</code> - 2 vCPU, 1GB RAM (~$8/month, free tier)</li>
+                                <li><code>t3.small</code> - 2 vCPU, 2GB RAM (~$15/month)</li>
+                                <li><code>t3.medium</code> - 2 vCPU, 4GB RAM (~$30/month)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">8</div>
+                        <h3>Get Your Server's IP Address</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <p>Wait 30 seconds for the instance to start, then:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 describe-instances \
+  --filters "Name=instance-state-name,Values=running" \
+  --query 'Reservations[*].Instances[*].PublicIpAddress' \
+  --region us-east-1 \
+  --output text</code></pre>
+                    </div>
+                </div>
+
+                <!-- Part 3: Connect -->
+                <div class="section-header">
+                    <div class="section-icon">3</div>
+                    <h2>Connect to Your Server</h2>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">9</div>
+                        <h3>SSH Into Your Server</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>ssh -i clawdbot-key.pem ubuntu@YOUR_IP_ADDRESS</code></pre>
+                    </div>
+                    <p>Type <code>yes</code> when asked about host authenticity.</p>
+                    <div class="alert-guide alert-info">
+                        <div class="alert-icon">✓</div>
+                        <div><strong>Connected!</strong> You're now on your AWS server. The prompt will show <code>ubuntu@ip-xxx-xxx-xxx-xxx</code></div>
+                    </div>
+                </div>
+
+                <!-- Part 4: Install Clawdbot -->
+                <div class="section-header">
+                    <div class="section-icon">4</div>
+                    <h2>Install Clawdbot</h2>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">10</div>
+                        <h3>Install Node.js 22</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs</code></pre>
+                    </div>
+                    <p>Verify installation:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>node --version</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">11</div>
+                        <h3>Add Swap Space</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <p>Prevents memory errors on small instances:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">12</div>
+                        <h3>Install Clawdbot</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>sudo npm install -g clawdbot@latest</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">13</div>
+                        <h3>Run Onboarding Wizard</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>clawdbot onboard --install-daemon</code></pre>
+                    </div>
+                    <p>The wizard guides you through: Gateway config, Anthropic API auth, Channel setup (WhatsApp, etc.)</p>
+                    <div class="alert-guide alert-tip">
+                        <div class="alert-icon">→</div>
+                        <div><strong>Anthropic Token:</strong> On your Mac, run <code>claude setup-token</code> and paste the result into the wizard to use your Claude Max subscription.</div>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">14</div>
+                        <h3>Start Clawdbot</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <p>Run in foreground (see logs):</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>clawdbot tui</code></pre>
+                    </div>
+                    <p>Or run as background daemon:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>clawdbot gateway --daemon</code></pre>
+                    </div>
+                </div>
+
+                <!-- Part 5: VNC -->
+                <div class="section-header">
+                    <div class="section-icon">5</div>
+                    <h2>Desktop Access (VNC)</h2>
+                </div>
+
+                <div class="alert-guide alert-info">
+                    <div class="alert-icon">?</div>
+                    <div><strong>Optional:</strong> Only needed if you want to visually log into services like Gmail through a browser on the server.</div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">15</div>
+                        <h3>Expand Disk Space</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 modify-volume \
+  --volume-id $(aws ec2 describe-volumes \
+    --filters "Name=attachment.instance-id,Values=$(aws ec2 describe-instances \
+      --query 'Reservations[*].Instances[*].InstanceId' \
+      --region us-east-1 --output text)" \
+    --query 'Volumes[*].VolumeId' \
+    --region us-east-1 --output text) \
+  --size 50 --region us-east-1</code></pre>
+                    </div>
+                    <p>Then on the server, expand the partition:</p>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>sudo growpart /dev/nvme0n1 1
+sudo resize2fs /dev/root
+df -h</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">16</div>
+                        <h3>Install Desktop Environment</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>sudo apt update
+sudo apt install -y xfce4 xfce4-goodies tightvncserver dbus-x11</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">17</div>
+                        <h3>Start VNC Server</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>vncserver :1 -geometry 1280x800 -depth 24</code></pre>
+                    </div>
+                    <p>Create a password when prompted.</p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">18</div>
+                        <h3>Open VNC Port</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>aws ec2 authorize-security-group-ingress \
+  --group-name clawdbot-sg \
+  --protocol tcp --port 5901 \
+  --cidr 0.0.0.0/0 --region us-east-1</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">19</div>
+                        <h3>Connect via VNC</h3>
+                        <span class="tag tag-mac">Mac</span>
+                    </div>
+                    <ol>
+                        <li>Open <strong>Finder</strong> → <strong>Go</strong> → <strong>Connect to Server</strong> (or <code>Cmd+K</code>)</li>
+                        <li>Enter: <code>vnc://YOUR_IP:5901</code></li>
+                        <li>Enter your VNC password</li>
+                    </ol>
+                </div>
+
+                <!-- Part 6: Chrome Extension -->
+                <div class="section-header">
+                    <div class="section-icon">6</div>
+                    <h2>Chrome Extension Setup</h2>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">20</div>
+                        <h3>Install Chrome</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>sudo apt update
+sudo apt install -y wget gnupg
+
+wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+  | sudo gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+
+echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] \
+  http://dl.google.com/linux/chrome/deb/ stable main" \
+  | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+sudo apt update
+sudo apt install -y google-chrome-stable</code></pre>
+                    </div>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">21</div>
+                        <h3>Find Extension Path</h3>
+                        <span class="tag tag-server">Server</span>
+                    </div>
+                    <div class="code-wrapper">
+                        <button class="copy-btn" onclick="copyCode(this)"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy</button>
+                        <pre><code>find /usr/lib/node_modules/clawdbot -name manifest.json</code></pre>
+                    </div>
+                    <p>Result: <code>/usr/lib/node_modules/clawdbot/assets/chrome-extension</code></p>
+                </div>
+
+                <div class="guide-card">
+                    <div class="card-header-guide">
+                        <div class="step-number">22</div>
+                        <h3>Load Extension in Chrome</h3>
+                    </div>
+                    <ol>
+                        <li>Open Chrome in VNC desktop</li>
+                        <li>Go to <code>chrome://extensions</code></li>
+                        <li>Enable <strong>Developer mode</strong> (top right toggle)</li>
+                        <li>Click <strong>Load unpacked</strong></li>
+                        <li>Navigate to: <code>/usr/lib/node_modules/clawdbot/assets/chrome-extension</code></li>
+                        <li>Click <strong>Select/Open</strong></li>
+                    </ol>
+                </div>
+
+                <!-- Quick Reference -->
+                <div class="section-header">
+                    <div class="section-icon">★</div>
+                    <h2>Quick Reference</h2>
+                </div>
+
+                <div class="guide-card">
+                    <h3 style="margin-bottom: 15px;">Common Commands</h3>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <tr style="background: #0f172a; color: white;">
+                            <th style="padding: 10px; text-align: left;">Action</th>
+                            <th style="padding: 10px; text-align: left;">Command</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Connect to server</td>
+                            <td style="padding: 10px;"><code>ssh -i clawdbot-key.pem ubuntu@IP</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Chat interface</td>
+                            <td style="padding: 10px;"><code>clawdbot tui</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Start daemon</td>
+                            <td style="padding: 10px;"><code>clawdbot gateway --daemon</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Stop daemon</td>
+                            <td style="padding: 10px;"><code>clawdbot gateway stop</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Restart daemon</td>
+                            <td style="padding: 10px;"><code>clawdbot gateway restart</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Check status</td>
+                            <td style="padding: 10px;"><code>clawdbot status</code></td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px;">Start VNC</td>
+                            <td style="padding: 10px;"><code>vncserver :1 -geometry 1280x800 -depth 24</code></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px;">Stop VNC</td>
+                            <td style="padding: 10px;"><code>vncserver -kill :1</code></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="guide-card" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; text-align: center;">
+                    <h3 style="color: white;">Monthly Cost Estimate</h3>
+                    <div style="font-size: 3rem; font-weight: 800; margin: 15px 0;">~$12-14<span style="font-size: 1rem; font-weight: 400; opacity: 0.8;">/month</span></div>
+                    <p style="opacity: 0.8;">t3.micro instance + 50GB storage + data transfer</p>
+                    <p style="margin-top: 10px;"><em>Free tier: 750 hours of t3.micro free for first 12 months</em></p>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-section" style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; margin-top: 60px;">
+        <div class="container">
+            <p>&copy; 2026 Elevate IT Rhode Island. All rights reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="index.html" style="color: #a5b4fc;">Home</a> &bull;
+                <a href="contact.html" style="color: #a5b4fc;">Contact</a> &bull;
+                <a href="https://github.com/clawdbot/clawdbot" target="_blank" style="color: #a5b4fc;">Clawdbot GitHub</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.parentElement.querySelector('code');
+            const text = codeBlock.innerText;
+
+            navigator.clipboard.writeText(text).then(() => {
+                button.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                    Copied!
+                `;
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                        Copy
+                    `;
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Check for unlock status on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const unlocked = urlParams.get('unlocked');
+            const saleId = urlParams.get('sale_id');
+
+            // Check if already unlocked (localStorage) or coming from Gumroad purchase
+            if (localStorage.getItem('guide_unlocked') === 'true' || unlocked === 'true' || saleId) {
+                if (unlocked || saleId) {
+                    // Store unlock status
+                    localStorage.setItem('guide_unlocked', 'true');
+                    // Clean URL
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+                unlockContent();
+            }
+        });
+
+        function unlockContent() {
+            document.getElementById('paywall-section').classList.add('unlocked');
+            // Update TOC
+            document.querySelectorAll('.toc-preview li.locked').forEach(li => {
+                li.classList.remove('locked');
+                li.classList.add('free');
+                li.querySelector('i').classList.remove('fa-lock');
+                li.querySelector('i').classList.add('fa-unlock');
+            });
+        }
+
+        // Stripe Checkout - Replace with your actual Stripe link
+        document.getElementById('checkout-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const gumroadLink = 'https://nickster214.gumroad.com/l/ijrgxg';
+
+            // For testing, you can use this to simulate unlock:
+            // localStorage.setItem('guide_unlocked', 'true');
+            // unlockContent();
+            // return;
+
+            window.location.href = gumroadLink;
+        });
+    </script>
+
+</body>
+</html>

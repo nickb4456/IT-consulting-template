@@ -2,8 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>StaffSync - Restaurant Staff Scheduler</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Restaurant staff scheduling and shift management app">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="StaffSync">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="img/staffsync-icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="img/staffsync-icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="img/staffsync-icon-512.png">
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -6862,6 +6874,101 @@ Sarah Lee,manager,22,45,all`;
         // Initialize app
         initApp();
         initFirebase();
+
+        // ============================================
+        // PWA SERVICE WORKER REGISTRATION
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('StaffSync: Service Worker registered', registration.scope);
+
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New version available
+                                    showToast('New version available! Refresh to update.', 'info');
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('StaffSync: Service Worker registration failed', error);
+                    });
+            });
+        }
+
+        // ============================================
+        // PWA INSTALL PROMPT
+        // ============================================
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome's mini-infobar
+            e.preventDefault();
+            deferredPrompt = e;
+
+            // Show install button if user is logged in
+            if (currentUser) {
+                showInstallPrompt();
+            }
+        });
+
+        function showInstallPrompt() {
+            if (!deferredPrompt) return;
+
+            // Add install button to sidebar
+            const installBtn = document.createElement('div');
+            installBtn.id = 'pwa-install-btn';
+            installBtn.className = 'nav-item';
+            installBtn.innerHTML = '<span class="nav-icon">📲</span><span class="nav-text">Install App</span>';
+            installBtn.style.cssText = 'background: var(--accent-light); border-radius: var(--radius); margin-top: 8px; cursor: pointer;';
+            installBtn.onclick = installPWA;
+
+            const navSection = document.querySelector('.nav-section');
+            if (navSection && !document.getElementById('pwa-install-btn')) {
+                navSection.appendChild(installBtn);
+            }
+        }
+
+        async function installPWA() {
+            if (!deferredPrompt) {
+                showToast('App already installed or not supported on this browser', 'info');
+                return;
+            }
+
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                showToast('App installed successfully!', 'success');
+                const installBtn = document.getElementById('pwa-install-btn');
+                if (installBtn) installBtn.remove();
+            }
+
+            deferredPrompt = null;
+        }
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            const installBtn = document.getElementById('pwa-install-btn');
+            if (installBtn) installBtn.remove();
+            console.log('StaffSync: App installed');
+        });
+
+        // Detect if running as installed PWA
+        function isPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+        }
+
+        // Add PWA class to body for styling
+        if (isPWA()) {
+            document.body.classList.add('pwa-mode');
+        }
     </script>
 </body>
 </html>

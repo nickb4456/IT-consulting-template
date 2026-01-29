@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate StaffSync PWA Icons</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        h1 { color: #2563eb; }
+        .icon-preview { display: flex; gap: 20px; margin: 20px 0; align-items: end; }
+        .icon-box { text-align: center; }
+        canvas { border: 1px solid #ddd; border-radius: 12px; }
+        button { background: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 5px; }
+        button:hover { background: #1d4ed8; }
+        .success { color: #059669; margin-top: 20px; }
+        .instructions { background: #f3f4f6; padding: 15px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>StaffSync PWA Icon Generator</h1>
+    <p>Click the buttons below to download the PWA icons for StaffSync.</p>
+
+    <div class="icon-preview">
+        <div class="icon-box">
+            <canvas id="icon192" width="192" height="192"></canvas>
+            <p>192x192</p>
+            <button onclick="downloadIcon(192)">Download</button>
+        </div>
+        <div class="icon-box">
+            <canvas id="icon512" width="512" height="512"></canvas>
+            <p>512x512</p>
+            <button onclick="downloadIcon(512)">Download</button>
+        </div>
+    </div>
+
+    <button onclick="downloadBoth()">Download Both Icons</button>
+
+    <div id="success" class="success" style="display:none;">
+        Icons downloaded! Move them to the <code>img/</code> folder as:<br>
+        - <code>staffsync-icon-192.png</code><br>
+        - <code>staffsync-icon-512.png</code>
+    </div>
+
+    <div class="instructions">
+        <strong>After downloading:</strong>
+        <ol>
+            <li>Move the downloaded files to the <code>img/</code> folder</li>
+            <li>Rename them to <code>staffsync-icon-192.png</code> and <code>staffsync-icon-512.png</code></li>
+            <li>The PWA will be ready to install!</li>
+        </ol>
+    </div>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const scale = size / 512;
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#2563eb');
+            gradient.addColorStop(1, '#1d4ed8');
+
+            // Rounded rectangle background
+            const radius = 96 * scale;
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Calendar body (white)
+            ctx.fillStyle = 'rgba(255,255,255,0.95)';
+            ctx.beginPath();
+            ctx.roundRect(96*scale, 128*scale, 320*scale, 288*scale, 24*scale);
+            ctx.fill();
+
+            // Calendar header (dark blue)
+            ctx.fillStyle = '#1e40af';
+            ctx.beginPath();
+            ctx.roundRect(96*scale, 128*scale, 320*scale, 72*scale, [24*scale, 24*scale, 0, 0]);
+            ctx.fill();
+            ctx.fillRect(96*scale, 176*scale, 320*scale, 24*scale);
+
+            // Calendar rings
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.roundRect(160*scale, 104*scale, 24*scale, 56*scale, 12*scale);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.roundRect(328*scale, 104*scale, 24*scale, 56*scale, 12*scale);
+            ctx.fill();
+
+            // Grid lines
+            ctx.strokeStyle = '#e5e7eb';
+            ctx.lineWidth = 2 * scale;
+            ctx.beginPath();
+            ctx.moveTo(96*scale, 264*scale);
+            ctx.lineTo(416*scale, 264*scale);
+            ctx.moveTo(96*scale, 344*scale);
+            ctx.lineTo(416*scale, 344*scale);
+            ctx.moveTo(202*scale, 200*scale);
+            ctx.lineTo(202*scale, 416*scale);
+            ctx.moveTo(309*scale, 200*scale);
+            ctx.lineTo(309*scale, 416*scale);
+            ctx.stroke();
+
+            // Checkmark circle
+            ctx.fillStyle = '#059669';
+            ctx.beginPath();
+            ctx.arc(256*scale, 304*scale, 56*scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Checkmark
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 12 * scale;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            ctx.moveTo(228*scale, 304*scale);
+            ctx.lineTo(248*scale, 324*scale);
+            ctx.lineTo(284*scale, 284*scale);
+            ctx.stroke();
+
+            // Staff dots
+            const dots = [
+                {x: 149, y: 232, color: '#2563eb'},
+                {x: 256, y: 232, color: '#8b5cf6'},
+                {x: 362, y: 232, color: '#f59e0b'},
+                {x: 149, y: 384, color: '#06b6d4'},
+                {x: 362, y: 384, color: '#10b981'}
+            ];
+
+            dots.forEach(dot => {
+                ctx.fillStyle = dot.color;
+                ctx.beginPath();
+                ctx.arc(dot.x*scale, dot.y*scale, 12*scale, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function downloadIcon(size) {
+            const canvas = document.getElementById('icon' + size);
+            const link = document.createElement('a');
+            link.download = `staffsync-icon-${size}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadBoth() {
+            downloadIcon(192);
+            setTimeout(() => downloadIcon(512), 500);
+            document.getElementById('success').style.display = 'block';
+        }
+
+        // Draw icons on load
+        drawIcon(document.getElementById('icon192'), 192);
+        drawIcon(document.getElementById('icon512'), 512);
+    </script>
+</body>
+</html>

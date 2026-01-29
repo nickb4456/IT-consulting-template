@@ -3483,24 +3483,31 @@
         }
 
         function onUserLoggedOut() {
+            // Only reset if user was previously logged in (actual logout, not failed login)
+            const wasLoggedIn = currentUser !== null;
+
             currentUser = null;
             currentUserData = null;
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('appContainer').style.display = 'none';
-            showSignIn();
-            document.getElementById('loginForm').reset();
-            document.getElementById('loginBtn').disabled = false;
-            document.getElementById('loginBtn').textContent = 'Sign In';
-            // Reset state
-            state = {
-                staff: [],
-                shiftTemplates: [],
-                schedule: {},
-                holidays: [],
-                currentWeekStart: getWeekStart(new Date()),
-                selectedDay: new Date().toISOString().split('T')[0],
-                theme: 'light'
-            };
+
+            // Only reset form and show sign in if this was an actual logout
+            if (wasLoggedIn) {
+                showSignIn();
+                document.getElementById('loginForm').reset();
+                document.getElementById('loginBtn').disabled = false;
+                document.getElementById('loginBtn').textContent = 'Sign In';
+                // Reset state
+                state = {
+                    staff: [],
+                    shiftTemplates: [],
+                    schedule: {},
+                    holidays: [],
+                    currentWeekStart: getWeekStart(new Date()),
+                    selectedDay: new Date().toISOString().split('T')[0],
+                    theme: 'light'
+                };
+            }
         }
 
         // ============================================

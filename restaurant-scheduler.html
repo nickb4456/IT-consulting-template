@@ -1782,7 +1782,7 @@
         // UTILITY FUNCTIONS
         // ============================================
         function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
         }
 
         function getWeekStart(date) {
@@ -2549,8 +2549,14 @@
                 if (existingIds.includes(staff.id)) return false;
                 
                 // Check availability
+                // Day with [] = NOT available that day
+                // Day with shifts = only available for those shifts
+                // Day not specified = available for everything
                 const avail = staff.availability?.[dayIndex];
-                if (avail && !avail.includes(shiftId)) return false;
+                if (avail !== undefined) {
+                    if (avail.length === 0) return false;
+                    if (!avail.includes(shiftId)) return false;
+                }
                 
                 // Check max hours
                 const currentHours = calculateWeekHours(staff.id);
@@ -2812,8 +2818,15 @@
                                     if (currentAssignments.some(a => a.staffId === s.id)) return false;
                                     
                                     // Check availability
+                                    // Empty {} = available for everything
+                                    // Day with [] = NOT available that day
+                                    // Day with shifts = only available for those shifts
+                                    // Day not specified = available for everything that day
                                     const avail = s.availability?.[dayIndex];
-                                    if (avail && avail.length > 0 && !avail.includes(shift.id)) return false;
+                                    if (avail !== undefined) {
+                                        if (avail.length === 0) return false; // explicitly unavailable
+                                        if (!avail.includes(shift.id)) return false; // shift not allowed
+                                    }
                                     
                                     // Check max hours
                                     if (sessionHours[s.id] + shiftHours > s.maxHours) return false;
@@ -3134,7 +3147,8 @@
             a.href = url;
             a.download = `schedule-${formatDate(weekDates[0], 'iso')}.csv`;
             a.click();
-            
+            URL.revokeObjectURL(url); // Clean up to prevent memory leak
+
             showToast('CSV downloaded');
             closeModal('export-modal');
         }

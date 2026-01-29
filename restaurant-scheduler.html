@@ -506,6 +506,36 @@
             gap: 14px;
         }
 
+        .stat-card.clickable,
+        .alert-item.clickable {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card.clickable:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .alert-item.clickable:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(4px);
+        }
+
+        .alert-action-hint {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-left: auto;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .alert-item.clickable:hover .alert-action-hint {
+            opacity: 1;
+            color: var(--accent);
+        }
+
         .stat-icon {
             width: 40px;
             height: 40px;
@@ -929,6 +959,29 @@
         .modal-close:hover {
             background: var(--bg-tertiary);
             color: var(--text-primary);
+        }
+
+        .assign-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .assign-option:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .assign-option:last-child {
+            border-bottom: none;
+        }
+
+        @keyframes highlight-pulse {
+            0%, 100% { background: transparent; }
+            50% { background: var(--accent-light); }
         }
 
         .modal-footer {
@@ -3789,7 +3842,7 @@ Sarah Lee,manager,22,45,all`;
                 const hoursClass = weekHours > staff.maxHours ? 'hours-danger' : weekHours > staff.maxHours * 0.9 ? 'hours-warning' : '';
                 
                 return `
-                    <tr>
+                    <tr data-staff-id="${staff.id}">
                         <td><strong>${staff.name}</strong></td>
                         <td><span class="role-badge ${staff.role}">${ROLE_LABELS[staff.role]}</span></td>
                         <td>$${staff.hourlyRate.toFixed(2)}</td>
@@ -4402,7 +4455,7 @@ Sarah Lee,manager,22,45,all`;
             const shift = state.shiftTemplates.find(s => s.id === shiftId);
             const assignments = state.schedule[date]?.[shiftId] || [];
             const requirements = shift?.requirements || {};
-            
+
             // Check understaffing
             ROLES.forEach(role => {
                 const required = requirements[role] || 0;
@@ -4410,15 +4463,20 @@ Sarah Lee,manager,22,45,all`;
                     const staff = state.staff.find(s => s.id === a.staffId);
                     return staff?.role === role;
                 }).length;
-                
+
                 if (assigned < required) {
                     conflicts.push({
                         type: 'warning',
-                        message: `Need ${required - assigned} more ${ROLE_LABELS[role]}(s)`
+                        message: `Need ${required - assigned} more ${ROLE_LABELS[role]}(s)`,
+                        action: 'assignRole',
+                        role: role,
+                        dateKey: date,
+                        shiftId: shiftId,
+                        needed: required - assigned
                     });
                 }
             });
-            
+
             // Check overtime
             assignments.forEach(a => {
                 const staff = state.staff.find(s => s.id === a.staffId);
@@ -4427,19 +4485,22 @@ Sarah Lee,manager,22,45,all`;
                     if (hours > staff.maxHours) {
                         conflicts.push({
                             type: 'danger',
-                            message: `${staff.name} is over max hours (${hours.toFixed(1)}/${staff.maxHours}h)`
+                            message: `${staff.name} is over max hours (${hours.toFixed(1)}/${staff.maxHours}h)`,
+                            action: 'viewStaff',
+                            staffId: staff.id,
+                            staffName: staff.name
                         });
                     }
                 }
             });
-            
+
             return conflicts;
         }
 
         function getAllAlerts() {
             const alerts = [];
             const weekDates = getWeekDates(state.currentWeekStart);
-            
+
             weekDates.forEach(date => {
                 const dateKey = formatDate(date, 'iso');
                 state.shiftTemplates.forEach(shift => {
@@ -4453,7 +4514,7 @@ Sarah Lee,manager,22,45,all`;
                     });
                 });
             });
-            
+
             // Check staff with no shifts
             state.staff.forEach(staff => {
                 const hours = calculateWeekHours(staff.id);
@@ -4462,11 +4523,15 @@ Sarah Lee,manager,22,45,all`;
                         type: 'info',
                         message: `${staff.name} has no shifts this week`,
                         date: '',
-                        shift: ''
+                        shift: '',
+                        action: 'scheduleStaff',
+                        staffId: staff.id,
+                        staffName: staff.name,
+                        role: staff.role
                     });
                 }
             });
-            
+
             return alerts;
         }
 
@@ -4587,28 +4652,28 @@ Sarah Lee,manager,22,45,all`;
             const totalHours = calculateTotalWeeklyHours();
             
             document.getElementById('dashboard-stats').innerHTML = `
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="navigateTo('staff')" title="View Staff">
                     <div class="stat-icon">⚇</div>
                     <div>
                         <div class="stat-value">${state.staff.length}</div>
                         <div class="stat-label">Total Staff</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="navigateTo('schedule')" title="View Schedule">
                     <div class="stat-icon">▦</div>
                     <div>
                         <div class="stat-value">${totalShifts}</div>
                         <div class="stat-label">Scheduled Shifts</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="scrollToAlerts()" title="View Alerts">
                     <div class="stat-icon">!</div>
                     <div>
                         <div class="stat-value">${alerts.filter(a => a.type !== 'info').length}</div>
                         <div class="stat-label">Alerts</div>
                     </div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card clickable" onclick="navigateTo('labor')" title="View Labor Costs">
                     <div class="stat-icon">$</div>
                     <div>
                         <div class="stat-value">$${laborCost.toFixed(0)}</div>
@@ -4626,15 +4691,137 @@ Sarah Lee,manager,22,45,all`;
                     </div>
                 `;
             } else {
-                alertsList.innerHTML = alerts.slice(0, 5).map(alert => `
-                    <div class="alert-item ${alert.type}">
+                alertsList.innerHTML = alerts.slice(0, 5).map((alert, idx) => `
+                    <div class="alert-item ${alert.type} clickable" onclick="handleAlertClick(${idx})" title="Click to resolve">
                         <span class="alert-icon">${alert.type === 'danger' ? '!' : alert.type === 'warning' ? '!' : 'i'}</span>
                         <div class="alert-content">
                             <div class="alert-title">${alert.message}</div>
                             ${alert.date ? `<div class="alert-desc">${alert.shift} on ${alert.date}</div>` : ''}
                         </div>
+                        <span class="alert-action-hint">→</span>
                     </div>
                 `).join('');
+            }
+
+            // Store alerts for click handling
+            window.currentAlerts = alerts;
+        }
+
+        function scrollToAlerts() {
+            document.getElementById('alerts-panel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleAlertClick(alertIndex) {
+            const alert = window.currentAlerts?.[alertIndex];
+            if (!alert) return;
+
+            switch (alert.action) {
+                case 'assignRole':
+                    // Open modal to assign staff of this role to this shift
+                    openAssignRoleModal(alert);
+                    break;
+                case 'viewStaff':
+                    // Navigate to staff page and highlight/edit this person
+                    navigateTo('staff');
+                    setTimeout(() => {
+                        const row = document.querySelector(`[data-staff-id="${alert.staffId}"]`);
+                        if (row) {
+                            row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            row.style.animation = 'highlight-pulse 1s ease';
+                        }
+                    }, 100);
+                    showToast(`Viewing ${alert.staffName} - consider reducing their hours`, 'info');
+                    break;
+                case 'scheduleStaff':
+                    // Navigate to schedule and suggest adding this person
+                    navigateTo('schedule');
+                    showToast(`${alert.staffName} (${ROLE_LABELS[alert.role]}) has no shifts - drag them onto the schedule`, 'info');
+                    break;
+                default:
+                    // Default: navigate to schedule
+                    navigateTo('schedule');
+            }
+        }
+
+        function openAssignRoleModal(alert) {
+            // Find available staff for this role who aren't already assigned
+            const availableStaff = state.staff.filter(s => {
+                if (s.role !== alert.role) return false;
+                // Check if already assigned to this shift
+                const assignments = state.schedule[alert.dateKey]?.[alert.shiftId] || [];
+                if (assignments.some(a => a.staffId === s.id)) return false;
+                // Check if under max hours
+                const hours = calculateWeekHours(s.id);
+                const shift = state.shiftTemplates.find(t => t.id === alert.shiftId);
+                const shiftHours = shift ? calculateShiftHours(shift) : 0;
+                return hours + shiftHours <= s.maxHours;
+            });
+
+            const shift = state.shiftTemplates.find(t => t.id === alert.shiftId);
+
+            if (availableStaff.length === 0) {
+                showToast(`No available ${ROLE_LABELS[alert.role]}s for this shift. Consider hiring more.`, 'warning');
+                navigateTo('staff');
+                return;
+            }
+
+            // Create modal content
+            const staffOptions = availableStaff.map(s => {
+                const hours = calculateWeekHours(s.id);
+                return `
+                    <div class="assign-option" onclick="quickAssignStaff('${s.id}', '${alert.dateKey}', '${alert.shiftId}')">
+                        <div>
+                            <strong>${s.name}</strong>
+                            <div style="font-size: 12px; color: var(--text-muted);">${hours.toFixed(1)}h / ${s.maxHours}h this week</div>
+                        </div>
+                        <button class="btn btn-primary btn-sm">Assign</button>
+                    </div>
+                `;
+            }).join('');
+
+            let modal = document.getElementById('quick-assign-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'quick-assign-modal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title" id="quick-assign-title">Assign Staff</h2>
+                            <button class="modal-close" onclick="closeModal('quick-assign-modal')">×</button>
+                        </div>
+                        <div id="quick-assign-content" style="max-height: 400px; overflow-y: auto;"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            document.getElementById('quick-assign-title').textContent = `Assign ${ROLE_LABELS[alert.role]} - ${shift?.name || ''}`;
+            document.getElementById('quick-assign-content').innerHTML = `
+                <p style="padding: 12px 16px; font-size: 13px; color: var(--text-muted); border-bottom: 1px solid var(--border-color);">
+                    ${alert.date} • Need ${alert.needed} more
+                </p>
+                ${staffOptions}
+            `;
+
+            openModal('quick-assign-modal');
+        }
+
+        function quickAssignStaff(staffId, dateKey, shiftId) {
+            if (!state.schedule[dateKey]) state.schedule[dateKey] = {};
+            if (!state.schedule[dateKey][shiftId]) state.schedule[dateKey][shiftId] = [];
+
+            // Check if not already assigned
+            if (!state.schedule[dateKey][shiftId].some(a => a.staffId === staffId)) {
+                state.schedule[dateKey][shiftId].push({ staffId });
+                saveState();
+
+                const staff = state.staff.find(s => s.id === staffId);
+                showToast(`${staff?.name || 'Staff'} assigned!`, 'success');
+
+                closeModal('quick-assign-modal');
+                renderDashboard();
+                renderSchedule();
             }
         }
 

@@ -322,6 +322,74 @@
             color: var(--text-primary);
         }
 
+        /* AI Command Input */
+        .ai-command-card {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--accent-light));
+            border: 1px solid var(--accent);
+        }
+
+        .ai-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ai-icon {
+            font-size: 20px;
+        }
+
+        .ai-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .ai-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .ai-input::placeholder {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .ai-response {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .ai-response.visible {
+            display: block;
+        }
+
+        .ai-response.success {
+            background: var(--success-light);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .ai-response.info {
+            background: var(--info-light);
+            color: var(--info);
+            border: 1px solid var(--info);
+        }
+
+        .ai-response.error {
+            background: var(--danger-light);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+        }
+
         /* Stats Row */
         .stats-row {
             display: grid;
@@ -1483,6 +1551,16 @@
                             Export
                         </button>
                     </div>
+                </div>
+
+                <!-- AI Command Input -->
+                <div class="card ai-command-card">
+                    <div class="ai-input-wrapper">
+                        <span class="ai-icon">✨</span>
+                        <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;I fired Dave&quot; or &quot;Tom is sick today&quot; or &quot;Who works Friday dinner?&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
+                        <button class="btn btn-primary btn-sm" onclick="processAICommand()">Go</button>
+                    </div>
+                    <div id="ai-response" class="ai-response"></div>
                 </div>
 
                 <div class="stats-row" id="dashboard-stats">
@@ -3544,6 +3622,386 @@ Sarah Lee,manager,22,45,all`;
 
             showToast('CSV downloaded');
             closeModal('export-modal');
+        }
+
+        // ============================================
+        // AI COMMAND PROCESSING
+        // ============================================
+        function processAICommand() {
+            const input = document.getElementById('ai-command');
+            const responseEl = document.getElementById('ai-response');
+            const text = input.value.trim().toLowerCase();
+
+            if (!text) return;
+
+            const result = parseAndExecuteCommand(text);
+
+            responseEl.className = `ai-response visible ${result.type}`;
+            responseEl.innerHTML = result.message;
+
+            if (result.type === 'success') {
+                input.value = '';
+            }
+        }
+
+        function parseAndExecuteCommand(text) {
+            // FIRE/REMOVE EMPLOYEE
+            const fireMatch = text.match(/(?:fire|fired|remove|delete|let go|terminate)\s+(\w+)/i);
+            if (fireMatch) {
+                const name = fireMatch[1];
+                return fireEmployee(name);
+            }
+
+            // SICK/ABSENT TODAY
+            const sickMatch = text.match(/(\w+)\s+(?:is\s+)?(?:sick|ill|absent|out|called out|can't come|cant come|not coming)/i);
+            if (sickMatch) {
+                const name = sickMatch[1];
+                return markAbsentToday(name);
+            }
+
+            // WHO'S WORKING - specific day and shift
+            const whoWorkingMatch = text.match(/who(?:'s|s| is)?\s+(?:working|works|scheduled|on)\s+(?:(?:the|for|on)\s+)?(?:(\w+)\s+)?(?:(breakfast|lunch|dinner|close|morning|evening|afternoon))?/i);
+            if (whoWorkingMatch || text.includes("who's working") || text.includes("whos working") || text.includes("who works")) {
+                const day = whoWorkingMatch?.[1];
+                const shift = whoWorkingMatch?.[2];
+                return showWhoIsWorking(day, shift);
+            }
+
+            // ADD EMPLOYEE
+            const addMatch = text.match(/(?:add|hire|new)\s+(?:a\s+)?(\w+)\s+(?:named|called)?\s*(\w+)(?:\s+at\s+\$?(\d+))?/i);
+            if (addMatch) {
+                const role = addMatch[1];
+                const name = addMatch[2];
+                const rate = addMatch[3];
+                return addEmployee(role, name, rate);
+            }
+
+            // CLEAR DAY
+            const clearMatch = text.match(/clear\s+(\w+)(?:\s+schedule)?/i);
+            if (clearMatch) {
+                const day = clearMatch[1];
+                return clearDaySchedule(day);
+            }
+
+            // SCHEDULE/FILL DAY
+            const scheduleMatch = text.match(/(?:schedule|fill|auto.?schedule)\s+(\w+)/i);
+            if (scheduleMatch) {
+                const day = scheduleMatch[1];
+                return autoScheduleDay(day);
+            }
+
+            // GIVE EXTRA HOURS
+            const extraHoursMatch = text.match(/(?:give|add)\s+(\w+)\s+(?:more|extra)\s+(?:hours|shifts)/i);
+            if (extraHoursMatch) {
+                const name = extraHoursMatch[1];
+                return giveExtraHours(name);
+            }
+
+            // HOW MANY HOURS
+            const hoursMatch = text.match(/(?:how many hours|hours for|hours does)\s+(\w+)/i);
+            if (hoursMatch) {
+                const name = hoursMatch[1];
+                return showEmployeeHours(name);
+            }
+
+            return {
+                type: 'error',
+                message: `I didn't understand that. Try:<br>
+                • "I fired Dave"<br>
+                • "Tom is sick today"<br>
+                • "Who's working Friday dinner?"<br>
+                • "Add server named Mike at $15"<br>
+                • "Clear Saturday schedule"<br>
+                • "How many hours does Maria have?"`
+            };
+        }
+
+        function findStaffByName(name) {
+            name = name.toLowerCase();
+            return state.staff.find(s =>
+                s.name.toLowerCase().includes(name) ||
+                s.name.toLowerCase().split(' ')[0] === name
+            );
+        }
+
+        function fireEmployee(name) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}". Check the Staff page for employee names.` };
+            }
+
+            // Find who can cover their shifts
+            const coverageInfo = findCoverageForEmployee(staff.id);
+
+            // Remove from staff
+            state.staff = state.staff.filter(s => s.id !== staff.id);
+
+            // Remove from all schedules
+            Object.keys(state.schedule).forEach(date => {
+                Object.keys(state.schedule[date]).forEach(shiftId => {
+                    state.schedule[date][shiftId] = state.schedule[date][shiftId].filter(a => a.staffId !== staff.id);
+                });
+            });
+
+            saveState();
+            renderStaffTable();
+            renderSchedule();
+            renderDashboard();
+
+            return {
+                type: 'success',
+                message: `<strong>${staff.name}</strong> has been removed. ${coverageInfo}`
+            };
+        }
+
+        function findCoverageForEmployee(staffId) {
+            const staff = state.staff.find(s => s.id === staffId);
+            if (!staff) return '';
+
+            const sameRole = state.staff.filter(s => s.id !== staffId && s.role === staff.role);
+            if (sameRole.length === 0) {
+                return `⚠️ No other ${ROLE_LABELS[staff.role]}s available to cover!`;
+            }
+
+            const available = sameRole.filter(s => {
+                const hours = calculateWeekHours(s.id);
+                return hours < s.maxHours - 5;
+            });
+
+            if (available.length > 0) {
+                const names = available.slice(0, 3).map(s => s.name.split(' ')[0]).join(', ');
+                return `${names} can help cover their shifts.`;
+            }
+            return `Other ${ROLE_LABELS[staff.role]}s are near max hours.`;
+        }
+
+        function markAbsentToday(name) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            let removedCount = 0;
+
+            if (state.schedule[today]) {
+                Object.keys(state.schedule[today]).forEach(shiftId => {
+                    const before = state.schedule[today][shiftId].length;
+                    state.schedule[today][shiftId] = state.schedule[today][shiftId].filter(a => a.staffId !== staff.id);
+                    removedCount += before - state.schedule[today][shiftId].length;
+                });
+            }
+
+            saveState();
+            renderSchedule();
+            renderDashboard();
+
+            if (removedCount > 0) {
+                return {
+                    type: 'success',
+                    message: `<strong>${staff.name}</strong> removed from ${removedCount} shift(s) today. Get well soon! 🤒`
+                };
+            } else {
+                return {
+                    type: 'info',
+                    message: `<strong>${staff.name}</strong> wasn't scheduled for today anyway.`
+                };
+            }
+        }
+
+        function showWhoIsWorking(dayStr, shiftStr) {
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let targetDate = null;
+            let dayName = '';
+
+            if (!dayStr || dayStr === 'today') {
+                targetDate = new Date().toISOString().split('T')[0];
+                dayName = 'today';
+            } else {
+                const dayLower = dayStr.toLowerCase();
+                const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+                if (dayIndex >= 0) {
+                    targetDate = formatDate(weekDates[dayIndex], 'iso');
+                    dayName = DAYS[dayIndex];
+                }
+            }
+
+            if (!targetDate) {
+                return { type: 'error', message: `Couldn't understand the day "${dayStr}".` };
+            }
+
+            const daySchedule = state.schedule[targetDate];
+            if (!daySchedule || Object.keys(daySchedule).length === 0) {
+                return { type: 'info', message: `No one is scheduled for ${dayName} yet.` };
+            }
+
+            let html = `<strong>Working ${dayName}:</strong><br>`;
+            let found = false;
+
+            state.shiftTemplates.forEach(shift => {
+                if (shiftStr && !shift.name.toLowerCase().includes(shiftStr.toLowerCase())) {
+                    return;
+                }
+                const assignments = daySchedule[shift.id] || [];
+                if (assignments.length > 0) {
+                    found = true;
+                    const names = assignments.map(a => {
+                        const s = state.staff.find(st => st.id === a.staffId);
+                        return s ? s.name.split(' ')[0] : '?';
+                    }).join(', ');
+                    html += `• <strong>${shift.name}:</strong> ${names}<br>`;
+                }
+            });
+
+            if (!found) {
+                return { type: 'info', message: `No one scheduled for ${shiftStr || 'any shift'} on ${dayName}.` };
+            }
+
+            return { type: 'info', message: html };
+        }
+
+        function addEmployee(roleStr, name, rate) {
+            const roleLower = roleStr.toLowerCase();
+            const role = ROLES.find(r => r.startsWith(roleLower) || ROLE_LABELS[r].toLowerCase().startsWith(roleLower));
+
+            if (!role) {
+                return { type: 'error', message: `Unknown role "${roleStr}". Try: server, cook, host, bartender, busser, or manager.` };
+            }
+
+            const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+            const hourlyRate = parseFloat(rate) || 15;
+
+            state.staff.push({
+                id: generateId(),
+                name: capitalizedName,
+                role: role,
+                hourlyRate: hourlyRate,
+                maxHours: 40,
+                certifications: {},
+                availability: {}
+            });
+
+            saveState();
+            renderStaffTable();
+
+            return {
+                type: 'success',
+                message: `Added <strong>${capitalizedName}</strong> as a ${ROLE_LABELS[role]} at $${hourlyRate}/hr. 👋 Welcome aboard!`
+            };
+        }
+
+        function clearDaySchedule(dayStr) {
+            const weekDates = getWeekDates(state.currentWeekStart);
+            const dayLower = dayStr.toLowerCase();
+            const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+
+            if (dayIndex < 0) {
+                return { type: 'error', message: `Couldn't understand the day "${dayStr}".` };
+            }
+
+            const targetDate = formatDate(weekDates[dayIndex], 'iso');
+            delete state.schedule[targetDate];
+
+            saveState();
+            renderSchedule();
+            renderDashboard();
+
+            return {
+                type: 'success',
+                message: `Cleared all shifts for <strong>${DAYS[dayIndex]}</strong>. 🗑️`
+            };
+        }
+
+        function autoScheduleDay(dayStr) {
+            const weekDates = getWeekDates(state.currentWeekStart);
+            const dayLower = dayStr.toLowerCase();
+            const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+
+            if (dayIndex < 0) {
+                return { type: 'error', message: `Couldn't understand the day "${dayStr}".` };
+            }
+
+            const targetDate = formatDate(weekDates[dayIndex], 'iso');
+
+            // Run auto-schedule for just this day
+            if (!state.schedule[targetDate]) state.schedule[targetDate] = {};
+
+            let assigned = 0;
+            const sessionHours = {};
+            state.staff.forEach(s => sessionHours[s.id] = calculateWeekHours(s.id));
+
+            state.shiftTemplates.forEach(shift => {
+                if (!state.schedule[targetDate][shift.id]) state.schedule[targetDate][shift.id] = [];
+                const currentAssignments = state.schedule[targetDate][shift.id];
+                const shiftHours = calculateShiftHours(shift);
+
+                ROLES.forEach(role => {
+                    const required = shift.requirements?.[role] || 0;
+                    const currentCount = currentAssignments.filter(a => {
+                        const staff = state.staff.find(s => s.id === a.staffId);
+                        return staff?.role === role;
+                    }).length;
+
+                    const needed = required - currentCount;
+                    if (needed > 0) {
+                        const candidates = state.staff
+                            .filter(s => {
+                                if (s.role !== role) return false;
+                                if (currentAssignments.some(a => a.staffId === s.id)) return false;
+                                if (sessionHours[s.id] + shiftHours > s.maxHours) return false;
+                                return true;
+                            })
+                            .sort((a, b) => sessionHours[a.id] - sessionHours[b.id]);
+
+                        for (let i = 0; i < Math.min(needed, candidates.length); i++) {
+                            const staff = candidates[i];
+                            currentAssignments.push({ staffId: staff.id, role: staff.role });
+                            sessionHours[staff.id] += shiftHours;
+                            assigned++;
+                        }
+                    }
+                });
+            });
+
+            saveState();
+            renderSchedule();
+            renderDashboard();
+
+            return {
+                type: 'success',
+                message: `Auto-scheduled <strong>${DAYS[dayIndex]}</strong>: ${assigned} shifts filled. ✨`
+            };
+        }
+
+        function giveExtraHours(name) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            staff.maxHours = Math.min(staff.maxHours + 10, 60);
+            saveState();
+            renderStaffTable();
+
+            return {
+                type: 'success',
+                message: `<strong>${staff.name}</strong> can now work up to ${staff.maxHours} hours/week.`
+            };
+        }
+
+        function showEmployeeHours(name) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const hours = calculateWeekHours(staff.id);
+            const remaining = staff.maxHours - hours;
+
+            return {
+                type: 'info',
+                message: `<strong>${staff.name}</strong> has ${hours.toFixed(1)}h scheduled this week (${remaining.toFixed(1)}h remaining of ${staff.maxHours}h max).`
+            };
         }
 
         // ============================================

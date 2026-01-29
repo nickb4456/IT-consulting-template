@@ -4,6 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>StaffSync - Restaurant Staff Scheduler</title>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrBQKmHV9zzS6XUc3cleuIck2Xli30jQo",
+            authDomain: "scheduler-d2be6.firebaseapp.com",
+            projectId: "scheduler-d2be6",
+            storageBucket: "scheduler-d2be6.firebasestorage.app",
+            messagingSenderId: "752240565816",
+            appId: "1:752240565816:web:a04845e817d864a95510cd",
+            measurementId: "G-LZV3BQELLB"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+        window.firebaseCreateUser = createUserWithEmailAndPassword;
+        window.firebaseSignIn = signInWithEmailAndPassword;
+        window.firebaseSignOut = signOut;
+        window.firebaseOnAuthStateChanged = onAuthStateChanged;
+        window.firebaseDoc = doc;
+        window.firebaseGetDoc = getDoc;
+        window.firebaseSetDoc = setDoc;
+
+        // Notify app that Firebase is ready
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
     <style>
         :root {
             --bg-primary: #f8f9fa;
@@ -1467,13 +1503,216 @@
             background: var(--accent-light) !important;
             border: 1px dashed var(--accent) !important;
         }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 12px;
+        }
+
+        .login-logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .login-logo p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-input {
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .login-btn {
+            padding: 14px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .login-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .login-toggle {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .login-toggle a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .login-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .login-error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .login-error.visible {
+            display: block;
+        }
+
+        .login-loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius);
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin: 16px;
+            margin-top: auto;
+        }
+
+        .user-badge-email {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            padding: 4px 8px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .app-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 16px;
+            color: #6b7280;
+        }
     </style>
 </head>
 <body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="login-logo-icon">S</div>
+                <h1>StaffSync</h1>
+                <p>Restaurant Staff Scheduling</p>
+            </div>
+            <div class="login-error" id="loginError"></div>
+            <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+                <input type="email" class="login-input" id="loginEmail" placeholder="Email address" required>
+                <input type="password" class="login-input" id="loginPassword" placeholder="Password" required minlength="6">
+                <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+            </form>
+            <div class="login-toggle" id="loginToggle">
+                Don't have an account? <a onclick="toggleAuthMode()">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Sidebar Overlay for Mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <div class="app-container">
+    <div class="app-container" id="appContainer" style="display: none;">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="logo">
@@ -1531,6 +1770,12 @@
                     <span id="theme-icon">◐</span>
                     <span id="theme-text">Dark Mode</span>
                 </button>
+            </div>
+
+            <div class="user-badge" id="userBadge">
+                <span>👤</span>
+                <span class="user-badge-email" id="userEmail">user@email.com</span>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
         </aside>
 
@@ -2121,13 +2366,145 @@
         }
 
         // ============================================
-        // STORAGE
+        // AUTHENTICATION
         // ============================================
+        let currentUser = null;
+        let isSignUpMode = false;
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('loginBtn').textContent = isSignUpMode ? 'Create Account' : 'Sign In';
+            document.getElementById('loginToggle').innerHTML = isSignUpMode
+                ? 'Already have an account? <a onclick="toggleAuthMode()">Sign In</a>'
+                : 'Don\'t have an account? <a onclick="toggleAuthMode()">Sign Up</a>';
+            document.getElementById('loginError').classList.remove('visible');
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
+
+            btn.disabled = true;
+            btn.textContent = isSignUpMode ? 'Creating...' : 'Signing in...';
+            errorEl.classList.remove('visible');
+
+            try {
+                if (isSignUpMode) {
+                    await window.firebaseCreateUser(window.firebaseAuth, email, password);
+                } else {
+                    await window.firebaseSignIn(window.firebaseAuth, email, password);
+                }
+            } catch (error) {
+                let message = 'An error occurred';
+                if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
+                else if (error.code === 'auth/invalid-email') message = 'Invalid email address';
+                else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
+                else if (error.code === 'auth/user-not-found') message = 'No account found with this email';
+                else if (error.code === 'auth/wrong-password') message = 'Incorrect password';
+                else if (error.code === 'auth/invalid-credential') message = 'Invalid email or password';
+
+                errorEl.textContent = message;
+                errorEl.classList.add('visible');
+                btn.disabled = false;
+                btn.textContent = isSignUpMode ? 'Create Account' : 'Sign In';
+            }
+        }
+
+        async function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                await window.firebaseSignOut(window.firebaseAuth);
+            }
+        }
+
+        function onUserLoggedIn(user) {
+            currentUser = user;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('appContainer').style.display = 'flex';
+            document.getElementById('userEmail').textContent = user.email;
+            loadStateFromFirestore();
+        }
+
+        function onUserLoggedOut() {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('appContainer').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginBtn').disabled = false;
+            document.getElementById('loginBtn').textContent = 'Sign In';
+            // Reset state
+            state = {
+                staff: [],
+                shiftTemplates: [],
+                schedule: {},
+                holidays: [],
+                currentWeekStart: getWeekStart(new Date()),
+                selectedDay: new Date().toISOString().split('T')[0],
+                theme: 'light'
+            };
+        }
+
+        // ============================================
+        // STORAGE (Firebase Firestore)
+        // ============================================
+        let saveTimeout = null;
+
         function saveState() {
+            // Debounce saves to avoid too many writes
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => saveStateToFirestore(), 500);
+            // Also save to localStorage as backup
             localStorage.setItem('restaurantSchedulerPro', JSON.stringify(state));
         }
 
-        function loadState() {
+        async function saveStateToFirestore() {
+            if (!currentUser) return;
+            try {
+                const docRef = window.firebaseDoc(window.firebaseDb, 'schedules', currentUser.uid);
+                await window.firebaseSetDoc(docRef, {
+                    staff: state.staff,
+                    shiftTemplates: state.shiftTemplates,
+                    schedule: state.schedule,
+                    holidays: state.holidays,
+                    theme: state.theme,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('Error saving to Firestore:', error);
+            }
+        }
+
+        async function loadStateFromFirestore() {
+            if (!currentUser) return;
+            try {
+                const docRef = window.firebaseDoc(window.firebaseDb, 'schedules', currentUser.uid);
+                const docSnap = await window.firebaseGetDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    state.staff = data.staff || [];
+                    state.shiftTemplates = data.shiftTemplates || [];
+                    state.schedule = data.schedule || {};
+                    state.holidays = data.holidays || [];
+                    state.theme = data.theme || 'light';
+                } else {
+                    // New user - load sample data
+                    loadSampleData();
+                }
+
+                state.currentWeekStart = getWeekStart(new Date());
+                applyTheme();
+                renderAll();
+            } catch (error) {
+                console.error('Error loading from Firestore:', error);
+                // Fall back to localStorage
+                loadStateFromLocalStorage();
+            }
+        }
+
+        function loadStateFromLocalStorage() {
             const saved = localStorage.getItem('restaurantSchedulerPro');
             if (saved) {
                 const parsed = JSON.parse(saved);
@@ -2135,6 +2512,21 @@
                 state.currentWeekStart = new Date(state.currentWeekStart);
             }
             applyTheme();
+            renderAll();
+        }
+
+        function loadState() {
+            // This is now handled by loadStateFromFirestore
+            applyTheme();
+        }
+
+        function renderAll() {
+            renderDashboard();
+            renderSchedule();
+            renderStaffTable();
+            renderShiftTemplates();
+            renderHolidays();
+            renderLaborCosts();
         }
 
         // ============================================
@@ -4067,28 +4459,36 @@ Sarah Lee,manager,22,45,all`;
         // ============================================
         // INIT
         // ============================================
-        function init() {
-            loadState();
-            loadSampleData();
-            
+        function initApp() {
             // Navigation click handlers
             document.querySelectorAll('.nav-item[data-page]').forEach(item => {
                 item.addEventListener('click', () => navigateTo(item.dataset.page));
             });
-            
+
             // Initialize day picker
             document.getElementById('day-picker').value = state.selectedDay;
-            
-            // Initial render
-            renderDashboard();
-            renderSchedule();
-            renderStaffTable();
-            renderShiftTemplates();
-            renderHolidays();
-            renderLaborCosts();
         }
 
-        init();
+        function initFirebase() {
+            // Wait for Firebase to be ready
+            if (!window.firebaseAuth) {
+                window.addEventListener('firebase-ready', initFirebase);
+                return;
+            }
+
+            // Listen for auth state changes
+            window.firebaseOnAuthStateChanged(window.firebaseAuth, (user) => {
+                if (user) {
+                    onUserLoggedIn(user);
+                } else {
+                    onUserLoggedOut();
+                }
+            });
+        }
+
+        // Initialize app
+        initApp();
+        initFirebase();
     </script>
 </body>
 </html>

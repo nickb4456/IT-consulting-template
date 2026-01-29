@@ -7042,15 +7042,32 @@ Sarah Lee,manager,22,45,all`;
             recognition.onerror = (event) => {
                 console.log('Speech recognition error:', event.error);
                 stopListening();
-                if (event.error === 'no-speech') {
-                    document.getElementById('voice-status').textContent = 'No speech detected. Try again.';
-                } else {
-                    document.getElementById('voice-status').textContent = 'Error: ' + event.error;
+
+                let message = '';
+                switch(event.error) {
+                    case 'no-speech':
+                        message = 'No speech detected. Try again.';
+                        break;
+                    case 'network':
+                        message = 'Network error. Check your connection and try again.';
+                        break;
+                    case 'not-allowed':
+                    case 'permission-denied':
+                        message = 'Microphone access denied. Please allow microphone permission.';
+                        break;
+                    case 'aborted':
+                        message = 'Voice input cancelled.';
+                        break;
+                    default:
+                        message = 'Voice error. Try typing instead.';
                 }
-                document.getElementById('voice-status').className = 'voice-status visible';
+
+                const status = document.getElementById('voice-status');
+                status.textContent = message;
+                status.className = 'voice-status visible';
                 setTimeout(() => {
-                    document.getElementById('voice-status').className = 'voice-status';
-                }, 3000);
+                    status.className = 'voice-status';
+                }, 4000);
             };
 
             recognition.onend = () => {

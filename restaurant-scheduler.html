@@ -1613,7 +1613,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Availability</label>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Click cells to toggle availability</p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <button type="button" class="btn btn-sm btn-success" onclick="setAllAvailable()">Available All Shifts</button>
+                        <button type="button" class="btn btn-sm btn-secondary" onclick="clearAllAvailability()">Clear All</button>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Or click cells to toggle individual availability</p>
                     <div class="availability-grid" id="availability-grid">
                         <!-- Populated by JS -->
                     </div>
@@ -1998,6 +2002,18 @@
 
         function toggleAvailability(cell) {
             cell.classList.toggle('available');
+        }
+
+        function setAllAvailable() {
+            document.querySelectorAll('.avail-cell').forEach(cell => {
+                cell.classList.add('available');
+            });
+        }
+
+        function clearAllAvailability() {
+            document.querySelectorAll('.avail-cell').forEach(cell => {
+                cell.classList.remove('available');
+            });
         }
 
         function saveStaff(e) {

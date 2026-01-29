@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DocForge - Legal Document Automation</title>
+    
+    <!-- Office.js -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    
+    <!-- DocForge Component Styles -->
+    <link rel="stylesheet" href="modules/docforge.css">
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text: #1f2937;
+            --text-muted: #6b7280;
+            --background: #ffffff;
+            --surface: #f9fafb;
+            --border: #e5e7eb;
+            --success: #059669;
+            --warning: #d97706;
+            --error: #dc2626;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #6b7280;
+            --gray-800: #1f2937;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 13px;
+            color: var(--gray-800);
+            background: var(--gray-50);
+            line-height: 1.5;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        
+        .header .tagline {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+        
+        /* Undo/Redo Controls */
+        .undo-controls {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 4px;
+        }
+        
+        .undo-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 4px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+            color: white;
+        }
+        
+        .undo-controls button:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+        
+        .undo-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--gray-200);
+            background: white;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 10px 8px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--gray-600);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .tab:hover {
+            color: var(--primary);
+            background: var(--gray-50);
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+        
+        .tab-icon {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            padding: 16px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Sections */
+        .section {
+            background: white;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-800);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .btn-group .btn {
+            flex: 1;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Results Panel */
+        .results {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 4px;
+            padding: 12px;
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .results.hidden {
+            display: none;
+        }
+        
+        .result-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-item.error {
+            color: var(--error);
+        }
+        
+        .result-item.success {
+            color: var(--success);
+        }
+        
+        .result-item .fix-btn {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+        
+        /* Numbering issue styles */
+        .result-item .issue-main {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .result-item .issue-line {
+            font-size: 11px;
+            color: var(--gray-600);
+            min-width: 50px;
+        }
+        
+        .result-item .issue-change {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .result-item .issue-change .old {
+            color: var(--error);
+            text-decoration: line-through;
+        }
+        
+        .result-item .issue-change .new {
+            color: var(--success);
+        }
+        
+        .result-item .issue-change .arrow {
+            color: var(--gray-600);
+            font-size: 12px;
+        }
+        
+        .result-item .issue-context {
+            font-size: 11px;
+            color: var(--gray-600);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .result-item:hover {
+            background: var(--gray-100);
+            cursor: pointer;
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 4px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .stat.success .stat-value {
+            color: var(--success);
+        }
+        
+        .stat.warning .stat-value {
+            color: var(--warning);
+        }
+        
+        .stat.error .stat-value {
+            color: var(--error);
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 12px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 13px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            background: white;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        
+        .checkbox-group input {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Variable List */
+        .variable-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .variable-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+        
+        .variable-item label {
+            flex: 0 0 100px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        
+        .variable-item input {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 12px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+        }
+        
+        /* Status Toast */
+        .status {
+            position: fixed;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .status.success {
+            background: var(--success);
+            color: white;
+            display: block;
+        }
+        
+        .status.error {
+            background: var(--error);
+            color: white;
+            display: block;
+        }
+        
+        .status.info {
+            background: var(--primary);
+            color: white;
+            display: block;
+        }
+        
+        .status.warning {
+            background: var(--warning);
+            color: white;
+            display: block;
+        }
+        
+        /* Loading Overlay */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Profile Selector */
+        .profile-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--gray-200);
+        }
+        
+        .profile-row select {
+            flex: 1;
+        }
+        
+        .profile-row .btn {
+            padding: 8px 12px;
+        }
+        
+        /* Quick Fill Section */
+        .quick-fill-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+        
+        .quick-fill-section .section-title {
+            color: var(--text);
+        }
+        
+        .quick-fill-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .dataset-select {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .dataset-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .quick-fill-section .btn-group {
+            margin-bottom: 0;
+        }
+        
+        .quick-fill-section .btn-primary {
+            background: var(--primary);
+            font-weight: 500;
+        }
+        
+        .quick-fill-section .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        #quick-fill-result {
+            margin-top: 12px;
+            background: white;
+        }
+        
+        #quick-fill-result .result-item.success {
+            color: var(--success);
+            background: #f0fdf4;
+        }
+        
+        #quick-fill-result .result-item.warning {
+            color: var(--warning);
+            background: #fffbeb;
+        }
+        
+        #quick-fill-result .result-item.error {
+            color: var(--error);
+            background: #fef2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>DocForge</h1>
+        <div class="tagline">Legal document automation</div>
+        <div class="undo-controls">
+            <button id="btn-undo" title="Undo (Ctrl+Z)" onclick="handleUndo()">Undo</button>
+            <button id="btn-redo" title="Redo (Ctrl+Y)" onclick="handleRedo()">Redo</button>
+        </div>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" data-tab="numbering">
+            Numbering
+        </button>
+        <button class="tab" data-tab="toc">
+            TOC
+        </button>
+        <button class="tab" data-tab="template">
+            Template
+        </button>
+        <button class="tab" data-tab="xref">
+            Cross-Refs
+        </button>
+    </div>
+    
+    <!-- NUMBERING TAB -->
+    <div id="numbering" class="tab-content active">
+        <div class="section">
+            <div class="section-title">
+                Smart Numbering
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-analyze-numbering">
+                    Analyze
+                </button>
+                <button class="btn btn-primary" id="btn-fix-numbering">
+                    Fix All
+                </button>
+            </div>
+            
+            <div id="numbering-stats" class="stats hidden">
+                <div class="stat">
+                    <div class="stat-value" id="numbered-count">0</div>
+                    <div class="stat-label">Numbered Items</div>
+                </div>
+                <div class="stat" id="issues-stat">
+                    <div class="stat-value" id="issues-count">0</div>
+                    <div class="stat-label">Issues Found</div>
+                </div>
+            </div>
+            
+            <div id="numbering-results" class="results hidden"></div>
+            
+            <div class="checkbox-group">
+                <input type="radio" name="numbering-scope" id="scope-all" checked>
+                <label for="scope-all">Fix entire document</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="radio" name="numbering-scope" id="scope-cursor">
+                <label for="scope-cursor">Fix from cursor</label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TOC TAB -->
+    <div id="toc" class="tab-content">
+        <div class="section">
+            <div class="section-title">
+                Table of Contents
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-preview-toc">
+                    Preview
+                </button>
+                <button class="btn btn-primary" id="btn-generate-toc">
+                    Generate
+                </button>
+            </div>
+            
+            <div id="toc-preview" class="results hidden"></div>
+            
+            <div class="form-group">
+                <label>Include Levels</label>
+                <select id="toc-levels">
+                    <option value="1">Level 1 only</option>
+                    <option value="2" selected>Levels 1-2</option>
+                    <option value="3">Levels 1-3</option>
+                    <option value="4">All levels</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Insert Location</label>
+                <select id="toc-location">
+                    <option value="start" selected>Beginning of document</option>
+                    <option value="cursor">At cursor</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TEMPLATE TAB -->
+    <div id="template" class="tab-content">
+        <!-- RECREATE & TRANSFORM SECTION -->
+        <div class="section document-tools-section">
+            <div class="section-title">
+                Document Tools
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-recreate" title="Recreate document with new data">
+                    Recreate
+                </button>
+                <button class="btn btn-secondary" id="btn-transform" title="Transform to different format">
+                    Transform
+                </button>
+            </div>
+            
+            <!-- Transform Format Selector (hidden until Transform clicked) -->
+            <div id="transform-selector" class="transform-selector hidden">
+                <div class="form-group">
+                    <label>Target Format</label>
+                    <select id="transform-format">
+                        <option value="">Select format...</option>
+                    </select>
+                </div>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" id="btn-transform-preview">
+                        Preview
+                    </button>
+                    <button class="btn btn-primary" id="btn-transform-apply">
+                        Apply
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Transform Preview Panel -->
+            <div id="transform-preview-panel" class="results hidden"></div>
+        </div>
+        
+        <!-- QUICK FILL SECTION -->
+        <div class="section quick-fill-section">
+            <div class="section-title">
+                Quick Fill
+                <button id="btn-admin-toggle" class="btn-icon-small admin-toggle" title="Admin Mode (Ctrl+Shift+A)">
+                    Admin
+                </button>
+            </div>
+            
+            <div class="quick-fill-controls">
+                <select id="dataset-select" class="dataset-select">
+                    <option value="">Select client/matter...</option>
+                </select>
+                <div class="btn-group">
+                    <button class="btn btn-primary" id="btn-quick-fill">
+                        Fill All
+                    </button>
+                    <button class="btn btn-secondary" id="btn-save-dataset" title="Save current values as dataset">
+                        Save
+                    </button>
+                </div>
+            </div>
+            
+            <div id="quick-fill-result" class="results hidden"></div>
+        </div>
+        
+        <!-- ADMIN DATASET MANAGER (hidden by default) -->
+        <div id="admin-dataset-manager" class="section admin-panel hidden">
+            <div class="section-title">
+                Dataset Admin
+                <span id="sync-status" class="sync-status"></span>
+            </div>
+            
+            <!-- Shared datasets list -->
+            <div id="shared-datasets-list" class="shared-datasets-list">
+                <div class="empty-state">
+                    <p>Loading shared datasets...</p>
+                </div>
+            </div>
+            
+            <!-- Admin actions -->
+            <div class="admin-actions">
+                <button class="btn btn-primary btn-sm" id="btn-publish-dataset">
+                    Publish to Firm
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-refresh-shared" title="Refresh shared datasets">
+                    Refresh
+                </button>
+            </div>
+            
+            <div class="admin-secondary-actions">
+                <button class="btn btn-secondary btn-sm" id="btn-export-all">
+                    Export All
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-import-datasets">
+                    Import
+                </button>
+                <button class="btn btn-secondary btn-sm" id="btn-sync-datasets">
+                    Sync
+                </button>
+            </div>
+            
+            <div class="admin-config">
+                <button class="btn btn-link btn-sm" id="btn-configure-endpoint">
+                    Configure Endpoint
+                </button>
+            </div>
+            
+            <!-- Admin status -->
+            <div id="admin-status" class="admin-status" style="display: none;"></div>
+            
+            <!-- Admin loading overlay -->
+            <div id="admin-loading-overlay" class="admin-loading-overlay" style="display: none;">
+                <div class="spinner"></div>
+                <span>Loading...</span>
+            </div>
+        </div>
+        
+        <!-- VARIABLE EDITOR SECTION -->
+        <div class="section">
+            <div class="section-title">
+                Template Variables
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-scan-variables">
+                    Scan
+                </button>
+                <button class="btn btn-success" id="btn-fill-template">
+                    Fill Selected
+                </button>
+            </div>
+            
+            <div id="variable-list" class="variable-list hidden"></div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="highlight-unfilled" checked>
+                <label for="highlight-unfilled">Highlight unfilled variables</label>
+            </div>
+            
+            <div class="profile-row">
+                <select id="profile-select">
+                    <option value="">-- Saved Profiles --</option>
+                </select>
+                <button class="btn btn-secondary" id="btn-load-profile">Load</button>
+                <button class="btn btn-secondary" id="btn-save-profile">Save</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                Insert Variable
+            </div>
+            
+            <div class="form-group">
+                <label>Variable Name</label>
+                <input type="text" id="new-variable-name" placeholder="ClientName">
+            </div>
+            
+            <div class="form-group">
+                <label>Type</label>
+                <select id="new-variable-type">
+                    <option value="text">Text</option>
+                    <option value="date">Date</option>
+                    <option value="currency">Currency</option>
+                    <option value="state">State</option>
+                    <option value="party">Party Name</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary btn-block" id="btn-insert-variable">
+                Insert at Cursor
+            </button>
+        </div>
+    </div>
+    
+    <!-- CROSS-REFS TAB -->
+    <div id="xref" class="tab-content">
+        <div class="section">
+            <div class="section-title">
+                Cross-Reference Manager
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-secondary" id="btn-scan-xrefs">
+                    Scan
+                </button>
+                <button class="btn btn-primary" id="btn-fix-xrefs">
+                    Fix All
+                </button>
+            </div>
+            
+            <div id="xref-stats" class="stats hidden">
+                <div class="stat success">
+                    <div class="stat-value" id="valid-refs">0</div>
+                    <div class="stat-label">Valid References</div>
+                </div>
+                <div class="stat error">
+                    <div class="stat-value" id="invalid-refs">0</div>
+                    <div class="stat-label">Broken References</div>
+                </div>
+            </div>
+            
+            <div id="xref-results" class="results hidden"></div>
+        </div>
+        
+        <div class="section">
+            <div class="section-title">
+                Insert Reference
+            </div>
+            
+            <div class="form-group">
+                <label>Target Section</label>
+                <select id="ref-target">
+                    <option value="">-- Select Section --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Format</label>
+                <select id="ref-format">
+                    <option value="standard">Section 1.2</option>
+                    <option value="lowercase">section 1.2</option>
+                    <option value="withTitle">Section 1.2 (Title)</option>
+                    <option value="parenthetical">(Section 1.2)</option>
+                </select>
+            </div>
+            
+            <button class="btn btn-primary btn-block" id="btn-insert-reference">
+                Insert at Cursor
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+    
+    <!-- Status Toast -->
+    <div id="status" class="status"></div>
+    
+    <!-- Recreate Modal -->
+    <div id="recreate-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Recreate Document</h3>
+                <button class="btn-close" id="btn-recreate-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Enter new values to recreate this document with fresh data.</p>
+                <div id="recreate-doc-type" class="doc-type-badge"></div>
+                <div id="recreate-form" class="recreate-form">
+                    <!-- Form will be populated dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-options">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="recreate-prefill" checked>
+                        Show current values
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="btn-recreate-cancel">Cancel</button>
+                    <button class="btn btn-primary" id="btn-recreate-apply">Recreate Document</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Transform Modal -->
+    <div id="transform-modal" class="modal hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Transform Document</h3>
+                <button class="btn-close" id="btn-transform-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Transform this document to a different format.</p>
+                <div class="form-group">
+                    <label>Target Format</label>
+                    <select id="modal-transform-format" class="dataset-select">
+                        <option value="">Select format...</option>
+                    </select>
+                </div>
+                <div id="transform-form-container" class="transform-form-container hidden">
+                    <!-- Form will be populated dynamically -->
+                </div>
+                <div id="transform-preview-container" class="results hidden">
+                    <!-- Preview will be shown here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div class="modal-options">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="transform-clear-doc" checked>
+                        Replace entire document
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" id="btn-transform-modal-cancel">Cancel</button>
+                    <button class="btn btn-secondary" id="btn-transform-modal-preview">Preview</button>
+                    <button class="btn btn-primary" id="btn-transform-modal-apply" disabled>Transform</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Core Module Scripts -->
+    <script src="modules/utils.js"></script>
+    <script src="modules/document-model.js"></script>
+    <script src="modules/undo.js"></script>
+    <script src="modules/numbering.js"></script>
+    <script src="modules/numbering-ui.js"></script>
+    <script src="modules/toc.js"></script>
+    <script src="modules/toc-ui.js"></script>
+    <script src="modules/template.js"></script>
+    <script src="modules/template-ui.js"></script>
+    <script src="modules/template-admin.js"></script>
+    <script src="modules/recreate.js"></script>
+    <script src="modules/transform.js"></script>
+    <script src="modules/xref.js"></script>
+    <script src="modules/xref-ui.js"></script>
+    <script src="taskpane.js"></script>
+    
+    <script>
+        /**
+         * DocForge Taskpane Controller
+         * 
+         * Integrates all UI modules and handles tab navigation.
+         * Delegates all business logic to the UI layer classes.
+         */
+        
+        // ============================================================================
+        // TAB NAVIGATION
+        // ============================================================================
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab buttons
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // ============================================================================
+        // OFFICE.JS INITIALIZATION
+        // ============================================================================
+        
+        Office.onReady((info) => {
+            if (info.host === Office.HostType.Word) {
+                initializeDocForge();
+            }
+        });
+        
+        /**
+         * Initialize all DocForge modules
+         */
+        function initializeDocForge() {
+            console.log('DocForge initializing...');
+            
+            // Initialize Numbering UI (auto-inits, but ensure event handlers are bound)
+            initNumberingTab();
+            
+            // Initialize TOC UI
+            initTOCTab();
+            
+            // Initialize Template UI
+            initTemplateTab();
+            
+            // Initialize Document Tools (Recreate/Transform)
+            initDocumentTools();
+            
+            // Initialize XRef UI
+            initXRefTab();
+            
+            console.log('DocForge ready!');
+        }
+        
+        // ============================================================================
+        // NUMBERING TAB
+        // ============================================================================
+        
+        function initNumberingTab() {
+            // The numbering-ui.js module already exports global functions
+            // Just bind the buttons to them
+            
+            document.getElementById('btn-analyze-numbering')?.addEventListener('click', () => {
+                if (typeof analyzeNumbering === 'function') {
+                    analyzeNumbering();
+                }
+            });
+            
+            document.getElementById('btn-fix-numbering')?.addEventListener('click', () => {
+                if (typeof fixNumbering === 'function') {
+                    fixNumbering();
+                }
+            });
+        }
+        
+        // ============================================================================
+        // TOC TAB
+        // ============================================================================
+        
+        function initTOCTab() {
+            document.getElementById('btn-preview-toc')?.addEventListener('click', handlePreviewTOC);
+            document.getElementById('btn-generate-toc')?.addEventListener('click', handleGenerateTOC);
+        }
+        
+        async function handlePreviewTOC() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const maxLevel = parseInt(document.getElementById('toc-levels').value);
+                    const preview = await DocForge.TOC.previewTOC(context, { maxLevel });
+                    
+                    const entries = preview.entries || preview;
+                    
+                    if (entries.length > 0) {
+                        const previewHtml = entries.map(h => `
+                            <div class="result-item" style="padding-left: ${((h.level || 1) - 1) * 16}px">
+                                ${h.number ? `<strong>${h.number}.</strong> ` : ''}${h.title || h.text}
+                                <small>(${h.confidence || 'detected'})</small>
+                            </div>
+                        `).join('');
+                        document.getElementById('toc-preview').innerHTML = previewHtml;
+                        document.getElementById('toc-preview').classList.remove('hidden');
+                        DocForge.Utils.showStatus('info', `Found ${entries.length} headings`);
+                    } else {
+                        document.getElementById('toc-preview').innerHTML = '<div class="result-item">No headings detected. Try using Heading styles.</div>';
+                        document.getElementById('toc-preview').classList.remove('hidden');
+                    }
+                });
+            } catch (error) {
+                console.error('TOC Preview error:', error);
+                DocForge.Utils.showStatus('error', `Preview failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleGenerateTOC() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const options = {
+                        maxLevel: parseInt(document.getElementById('toc-levels').value),
+                        insertLocation: document.getElementById('toc-location').value
+                    };
+                    
+                    const result = await DocForge.TOC.generateTOC(context, options);
+                    DocForge.Utils.showStatus(result.success ? 'success' : 'error', result.message);
+                });
+            } catch (error) {
+                console.error('TOC Generate error:', error);
+                DocForge.Utils.showStatus('error', `Generation failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        // ============================================================================
+        // TEMPLATE TAB
+        // ============================================================================
+        
+        // Store scanned variables for filling
+        let templateVariables = [];
+        
+        function initTemplateTab() {
+            // Quick Fill handlers
+            document.getElementById('btn-quick-fill')?.addEventListener('click', handleQuickFill);
+            document.getElementById('btn-save-dataset')?.addEventListener('click', handleSaveDataset);
+            
+            // Variable editor handlers
+            document.getElementById('btn-scan-variables')?.addEventListener('click', handleScanVariables);
+            document.getElementById('btn-fill-template')?.addEventListener('click', handleFillTemplate);
+            document.getElementById('btn-insert-variable')?.addEventListener('click', handleInsertVariable);
+            document.getElementById('btn-load-profile')?.addEventListener('click', handleLoadProfile);
+            document.getElementById('btn-save-profile')?.addEventListener('click', handleSaveProfile);
+            
+            // Load saved profiles and datasets on init
+            updateProfileDropdown();
+            updateDatasetDropdown();
+            
+            // Initialize admin panel (if available)
+            if (DocForge.Admin?.initAdminPanel) {
+                DocForge.Admin.initAdminPanel();
+            }
+            
+            // Update admin toggle button text based on state
+            const adminToggleBtn = document.getElementById('btn-admin-toggle');
+            if (adminToggleBtn && DocForge.Template?.sharedDatasetManager) {
+                const isAdmin = DocForge.Template.sharedDatasetManager.isAdmin();
+                adminToggleBtn.innerHTML = isAdmin ? 'Admin (On)' : 'Admin';
+                adminToggleBtn.classList.toggle('active', isAdmin);
+            }
+        }
+        
+        // ============================================================================
+        // QUICK FILL HANDLERS
+        // ============================================================================
+        
+        async function updateDatasetDropdown() {
+            const select = document.getElementById('dataset-select');
+            if (!select) return;
+            
+            // Use async version to include shared datasets
+            if (DocForge.Template.generateDatasetDropdownHTMLAsync) {
+                try {
+                    select.innerHTML = await DocForge.Template.generateDatasetDropdownHTMLAsync();
+                } catch (e) {
+                    // Fallback to sync version (personal only)
+                    select.innerHTML = DocForge.Template.generateDatasetDropdownHTML();
+                }
+            } else if (DocForge.Template.generateDatasetDropdownHTML) {
+                select.innerHTML = DocForge.Template.generateDatasetDropdownHTML();
+            } else {
+                select.innerHTML = '<option value="">No datasets available</option>';
+            }
+        }
+        
+        async function handleQuickFill() {
+            const datasetName = document.getElementById('dataset-select').value;
+            
+            if (!datasetName) {
+                DocForge.Utils.showStatus('warning', 'Please select a dataset first');
+                return;
+            }
+            
+            DocForge.Utils.setLoading(true);
+            const resultContainer = document.getElementById('quick-fill-result');
+            
+            try {
+                await Word.run(async (context) => {
+                    const options = {
+                        highlightUnfilled: document.getElementById('highlight-unfilled')?.checked || false
+                    };
+                    
+                    const result = await DocForge.Template.quickFill(context, datasetName, options);
+                    
+                    // Show result in UI
+                    if (DocForge.Template.generateQuickFillResultHTML) {
+                        resultContainer.innerHTML = DocForge.Template.generateQuickFillResultHTML(result);
+                        resultContainer.classList.remove('hidden');
+                    }
+                    
+                    // Show status toast
+                    DocForge.Utils.showStatus(
+                        result.success ? 'success' : 'error',
+                        result.message
+                    );
+                    
+                    // If successful, also update the variable list if it's visible
+                    if (result.success && templateVariables.length > 0) {
+                        await handleScanVariables(); // Refresh to show filled values
+                    }
+                    
+                    // Refresh dropdown to update "recent" order (async)
+                    await updateDatasetDropdown();
+                    // Re-select the dataset we just used
+                    document.getElementById('dataset-select').value = datasetName;
+                });
+            } catch (error) {
+                console.error('Quick Fill error:', error);
+                resultContainer.innerHTML = `<div class="result-item error">${escapeHtml(error.message)}</div>`;
+                resultContainer.classList.remove('hidden');
+                DocForge.Utils.showStatus('error', `Quick Fill failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleSaveDataset() {
+            // First ensure we have variables scanned
+            if (templateVariables.length === 0) {
+                await handleScanVariables();
+            }
+            
+            // Gather current values from inputs
+            const values = {};
+            document.querySelectorAll('#variable-list input[data-var]').forEach(input => {
+                if (input.value && input.value.trim()) {
+                    values[input.dataset.var] = input.value.trim();
+                }
+            });
+            
+            // Count filled values
+            const filledCount = Object.keys(values).length;
+            if (filledCount === 0) {
+                DocForge.Utils.showStatus('warning', 'Please fill in at least one variable before saving');
+                return;
+            }
+            
+            // Prompt for dataset name
+            const defaultName = generateDefaultDatasetName(values);
+            const name = prompt('Dataset name:', defaultName);
+            
+            if (!name || !name.trim()) {
+                return; // Cancelled
+            }
+            
+            // Optional description
+            const description = prompt('Description (optional):', '');
+            
+            // Save the dataset
+            const result = DocForge.Template.saveCurrentAsDataset 
+                ? DocForge.Template.saveCurrentAsDataset(name.trim(), description || '')
+                : { success: DocForge.Template.saveDataset(name.trim(), values, { description }), message: 'Saved' };
+            
+            if (result.success !== false) {
+                DocForge.Utils.showStatus('success', `Saved dataset "${name}" with ${filledCount} values`);
+                updateDatasetDropdown();
+            } else {
+                DocForge.Utils.showStatus('error', result.message || 'Failed to save dataset');
+            }
+        }
+        
+        /**
+         * Generate a default dataset name from the values
+         */
+        function generateDefaultDatasetName(values) {
+            // Look for common client/matter name fields
+            const nameFields = ['ClientName', 'Client', 'PartyA', 'CompanyName', 'MatterName', 'Matter'];
+            
+            for (const field of nameFields) {
+                // Case-insensitive lookup
+                const key = Object.keys(values).find(k => k.toLowerCase() === field.toLowerCase());
+                if (key && values[key]) {
+                    return values[key];
+                }
+            }
+            
+            // Fallback to date-based name
+            return `Dataset ${new Date().toLocaleDateString()}`;
+        }
+        
+        async function handleScanVariables() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    templateVariables = await DocForge.Template.scanVariables(context);
+                    
+                    const listContainer = document.getElementById('variable-list');
+                    
+                    if (templateVariables.length > 0) {
+                        // Use the UI helper if available, otherwise generate our own HTML
+                        if (DocForge.Template.generateVariableListHTML) {
+                            listContainer.innerHTML = DocForge.Template.generateVariableListHTML(templateVariables);
+                        } else {
+                            listContainer.innerHTML = templateVariables.map(v => `
+                                <div class="variable-item">
+                                    <label>{{${v.name}}}</label>
+                                    <input type="text" 
+                                           data-var="${v.name}" 
+                                           placeholder="${v.placeholder || 'Enter value...'}"
+                                           value="${v.defaultValue || ''}">
+                                </div>
+                            `).join('');
+                        }
+                        listContainer.classList.remove('hidden');
+                        
+                        // Add change listeners to sync values to UI state
+                        listContainer.querySelectorAll('input[data-var]').forEach(input => {
+                            input.addEventListener('input', syncVariableToState);
+                        });
+                        
+                        DocForge.Utils.showStatus('info', `Found ${templateVariables.length} variable${templateVariables.length !== 1 ? 's' : ''}`);
+                    } else {
+                        listContainer.innerHTML = '<div class="result-item">No template variables found. Use {{VariableName}} syntax.</div>';
+                        listContainer.classList.remove('hidden');
+                    }
+                });
+            } catch (error) {
+                console.error('Scan variables error:', error);
+                DocForge.Utils.showStatus('error', `Scan failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        /**
+         * Sync a variable input change to the TemplateUI state
+         */
+        function syncVariableToState(event) {
+            const input = event.target;
+            const varName = input.dataset.var;
+            const value = input.value;
+            
+            // Update the TemplateUI state if available
+            if (DocForge.Template._ui) {
+                DocForge.Template._ui.currentValues[varName] = value;
+            }
+        }
+        
+        async function handleFillTemplate() {
+            // Scan first if not already done
+            if (templateVariables.length === 0) {
+                await handleScanVariables();
+            }
+            
+            // Gather values from inputs
+            const data = {};
+            document.querySelectorAll('#variable-list input[data-var]').forEach(input => {
+                if (input.value) {
+                    data[input.dataset.var] = input.value;
+                }
+            });
+            
+            if (Object.keys(data).length === 0) {
+                DocForge.Utils.showStatus('warning', 'Please fill in at least one variable');
+                return;
+            }
+            
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const options = {
+                        highlightUnfilled: document.getElementById('highlight-unfilled').checked
+                    };
+                    
+                    const result = await DocForge.Template.fillTemplate(context, data, options);
+                    DocForge.Utils.showStatus('success', result.message || `Filled ${Object.keys(data).length} variables`);
+                });
+            } catch (error) {
+                console.error('Fill template error:', error);
+                DocForge.Utils.showStatus('error', `Fill failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleInsertVariable() {
+            const name = document.getElementById('new-variable-name').value.trim();
+            const type = document.getElementById('new-variable-type').value;
+            
+            if (!name) {
+                DocForge.Utils.showStatus('error', 'Please enter a variable name');
+                return;
+            }
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.Template.insertVariable(context, name, type);
+                    DocForge.Utils.showStatus('success', result.message || `Inserted {{${name}}}`);
+                    document.getElementById('new-variable-name').value = '';
+                });
+            } catch (error) {
+                console.error('Insert variable error:', error);
+                DocForge.Utils.showStatus('error', `Insert failed: ${error.message}`);
+            }
+        }
+        
+        function updateProfileDropdown() {
+            const profiles = DocForge.Template.listProfiles ? DocForge.Template.listProfiles() : [];
+            const select = document.getElementById('profile-select');
+            
+            if (DocForge.Template.generateProfileDropdownHTML) {
+                select.innerHTML = DocForge.Template.generateProfileDropdownHTML(profiles);
+            } else {
+                select.innerHTML = '<option value="">-- Saved Profiles --</option>';
+                profiles.forEach(p => {
+                    const option = document.createElement('option');
+                    option.value = p.name;
+                    option.textContent = `${p.name} (${p.variableCount} vars)`;
+                    select.appendChild(option);
+                });
+            }
+        }
+        
+        function handleLoadProfile() {
+            const name = document.getElementById('profile-select').value;
+            if (!name) return;
+            
+            const result = DocForge.Template.loadProfile(name);
+            if (result.success) {
+                // Populate inputs with loaded data
+                Object.entries(result.data).forEach(([varName, value]) => {
+                    const input = document.querySelector(`input[data-var="${varName}"]`);
+                    if (input) input.value = value;
+                });
+                DocForge.Utils.showStatus('success', `Loaded profile: ${name}`);
+            } else {
+                DocForge.Utils.showStatus('error', result.message || 'Failed to load profile');
+            }
+        }
+        
+        function handleSaveProfile() {
+            const name = prompt('Profile name:');
+            if (!name) return;
+            
+            const data = {};
+            document.querySelectorAll('#variable-list input[data-var]').forEach(input => {
+                data[input.dataset.var] = input.value;
+            });
+            
+            DocForge.Template.saveProfile(name, data);
+            updateProfileDropdown();
+            DocForge.Utils.showStatus('success', `Saved profile: ${name}`);
+        }
+        
+        // ============================================================================
+        // RECREATE & TRANSFORM
+        // ============================================================================
+        
+        let recreateExtraction = null;
+        let transformAnalysis = null;
+        
+        function initDocumentTools() {
+            // Recreate button handlers
+            document.getElementById('btn-recreate')?.addEventListener('click', handleOpenRecreate);
+            document.getElementById('btn-recreate-close')?.addEventListener('click', handleCloseRecreate);
+            document.getElementById('btn-recreate-cancel')?.addEventListener('click', handleCloseRecreate);
+            document.getElementById('btn-recreate-apply')?.addEventListener('click', handleApplyRecreate);
+            document.getElementById('recreate-prefill')?.addEventListener('change', handleRecreateRefresh);
+            
+            // Transform button handlers
+            document.getElementById('btn-transform')?.addEventListener('click', handleOpenTransform);
+            document.getElementById('btn-transform-close')?.addEventListener('click', handleCloseTransform);
+            document.getElementById('btn-transform-modal-cancel')?.addEventListener('click', handleCloseTransform);
+            document.getElementById('btn-transform-modal-preview')?.addEventListener('click', handleTransformPreview);
+            document.getElementById('btn-transform-modal-apply')?.addEventListener('click', handleApplyTransform);
+            document.getElementById('modal-transform-format')?.addEventListener('change', handleTransformFormatChange);
+            
+            // Close modals on backdrop click
+            document.getElementById('recreate-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'recreate-modal') handleCloseRecreate();
+            });
+            document.getElementById('transform-modal')?.addEventListener('click', (e) => {
+                if (e.target.id === 'transform-modal') handleCloseTransform();
+            });
+        }
+        
+        // ============================================================================
+        // RECREATE HANDLERS
+        // ============================================================================
+        
+        async function handleOpenRecreate() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    // Detect template and extract values
+                    recreateExtraction = await DocForge.Recreate.extractCurrentValues(context);
+                    
+                    if (recreateExtraction.variables.length === 0) {
+                        DocForge.Utils.showStatus('warning', 'No template variables detected in this document');
+                        DocForge.Utils.setLoading(false);
+                        return;
+                    }
+                    
+                    // Show document type
+                    const docTypeEl = document.getElementById('recreate-doc-type');
+                    if (docTypeEl) {
+                        const docType = recreateExtraction.documentType;
+                        docTypeEl.textContent = `Document type: ${docType.type} (${docType.confidence} confidence)`;
+                        docTypeEl.className = `doc-type-badge confidence-${docType.confidence}`;
+                    }
+                    
+                    // Generate form
+                    const prefill = document.getElementById('recreate-prefill')?.checked;
+                    const formHtml = DocForge.Recreate.generateRecreateFormHTML(
+                        recreateExtraction.variables, 
+                        prefill
+                    );
+                    document.getElementById('recreate-form').innerHTML = formHtml;
+                    
+                    // Show modal
+                    document.getElementById('recreate-modal').classList.remove('hidden');
+                    
+                    DocForge.Utils.showStatus('info', `Found ${recreateExtraction.variables.length} template variable(s)`);
+                });
+            } catch (error) {
+                console.error('Recreate open error:', error);
+                DocForge.Utils.showStatus('error', `Failed to analyze document: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        function handleCloseRecreate() {
+            document.getElementById('recreate-modal').classList.add('hidden');
+            recreateExtraction = null;
+        }
+        
+        async function handleRecreateRefresh() {
+            if (!recreateExtraction) return;
+            
+            const prefill = document.getElementById('recreate-prefill')?.checked;
+            const formHtml = DocForge.Recreate.generateRecreateFormHTML(
+                recreateExtraction.variables, 
+                prefill
+            );
+            document.getElementById('recreate-form').innerHTML = formHtml;
+        }
+        
+        async function handleApplyRecreate() {
+            if (!recreateExtraction) return;
+            
+            // Gather values from form
+            const newValues = {};
+            document.querySelectorAll('#recreate-form input[data-var]').forEach(input => {
+                if (input.value && input.value.trim()) {
+                    newValues[input.dataset.var] = input.value.trim();
+                }
+            });
+            
+            if (Object.keys(newValues).length === 0) {
+                DocForge.Utils.showStatus('warning', 'Please enter at least one value');
+                return;
+            }
+            
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.Recreate.recreateDocument(context, newValues, {
+                        extraction: recreateExtraction
+                    });
+                    
+                    if (result.success) {
+                        DocForge.Utils.showStatus('success', result.message);
+                        handleCloseRecreate();
+                    } else {
+                        DocForge.Utils.showStatus('error', result.message);
+                    }
+                });
+            } catch (error) {
+                console.error('Recreate apply error:', error);
+                DocForge.Utils.showStatus('error', `Recreate failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        // ============================================================================
+        // TRANSFORM HANDLERS
+        // ============================================================================
+        
+        async function handleOpenTransform() {
+            // Populate format dropdown
+            const select = document.getElementById('modal-transform-format');
+            if (select && DocForge.Transform) {
+                select.innerHTML = DocForge.Transform.generateTemplateDropdownHTML();
+            }
+            
+            // Reset state
+            document.getElementById('transform-form-container').classList.add('hidden');
+            document.getElementById('transform-preview-container').classList.add('hidden');
+            document.getElementById('btn-transform-modal-apply').disabled = true;
+            transformAnalysis = null;
+            
+            // Show modal
+            document.getElementById('transform-modal').classList.remove('hidden');
+        }
+        
+        function handleCloseTransform() {
+            document.getElementById('transform-modal').classList.add('hidden');
+            transformAnalysis = null;
+        }
+        
+        async function handleTransformFormatChange() {
+            const format = document.getElementById('modal-transform-format').value;
+            if (!format) {
+                document.getElementById('transform-form-container').classList.add('hidden');
+                document.getElementById('btn-transform-modal-apply').disabled = true;
+                return;
+            }
+            
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    // Analyze document
+                    transformAnalysis = await DocForge.Transform.analyzeDocumentContent(context);
+                    
+                    // Get template
+                    const template = DocForge.Transform.getTemplate(format);
+                    
+                    // Map content to template
+                    const preview = await DocForge.Transform.previewTransform(context, format);
+                    
+                    // Generate form with mapped values
+                    const formHtml = DocForge.Transform.generateTransformFormHTML(format, preview.mappedFields);
+                    document.getElementById('transform-form-container').innerHTML = formHtml;
+                    document.getElementById('transform-form-container').classList.remove('hidden');
+                    
+                    // Enable apply button
+                    document.getElementById('btn-transform-modal-apply').disabled = false;
+                    
+                    // Show warnings if any
+                    if (preview.warnings.length > 0) {
+                        DocForge.Utils.showStatus('warning', preview.warnings[0]);
+                    }
+                });
+            } catch (error) {
+                console.error('Transform format change error:', error);
+                DocForge.Utils.showStatus('error', `Analysis failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleTransformPreview() {
+            const format = document.getElementById('modal-transform-format').value;
+            if (!format) {
+                DocForge.Utils.showStatus('warning', 'Please select a format first');
+                return;
+            }
+            
+            // Gather field values from form
+            const fieldValues = gatherTransformFormValues();
+            
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const preview = await DocForge.Transform.previewTransform(context, format);
+                    
+                    // Merge form values with preview
+                    Object.assign(preview.mappedFields, fieldValues);
+                    
+                    // Show preview
+                    const previewContainer = document.getElementById('transform-preview-container');
+                    previewContainer.innerHTML = preview.toHTML();
+                    previewContainer.classList.remove('hidden');
+                    
+                    DocForge.Utils.showStatus('info', 'Preview generated - review before applying');
+                });
+            } catch (error) {
+                console.error('Transform preview error:', error);
+                DocForge.Utils.showStatus('error', `Preview failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleApplyTransform() {
+            const format = document.getElementById('modal-transform-format').value;
+            if (!format) {
+                DocForge.Utils.showStatus('warning', 'Please select a format');
+                return;
+            }
+            
+            // Gather field values
+            const fieldValues = gatherTransformFormValues();
+            
+            // Check for required fields
+            const template = DocForge.Transform.getTemplate(format);
+            const missingRequired = template.structure
+                .filter(f => f.required && !fieldValues[f.field])
+                .map(f => f.label || f.field);
+            
+            if (missingRequired.length > 0) {
+                DocForge.Utils.showStatus('warning', `Missing required fields: ${missingRequired.join(', ')}`);
+                return;
+            }
+            
+            const clearDoc = document.getElementById('transform-clear-doc')?.checked !== false;
+            
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.Transform.transformTo(context, format, fieldValues, {
+                        clearDocument: clearDoc
+                    });
+                    
+                    if (result.success) {
+                        DocForge.Utils.showStatus('success', result.message);
+                        handleCloseTransform();
+                    } else {
+                        DocForge.Utils.showStatus('error', result.message);
+                    }
+                });
+            } catch (error) {
+                console.error('Transform apply error:', error);
+                DocForge.Utils.showStatus('error', `Transform failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        function gatherTransformFormValues() {
+            const values = {};
+            
+            // Get all inputs and textareas from transform form
+            document.querySelectorAll('#transform-form-container input, #transform-form-container textarea, #transform-form-container select').forEach(el => {
+                const name = el.name;
+                if (!name) return;
+                
+                if (el.type === 'checkbox') {
+                    values[name] = el.checked;
+                } else if (el.value && el.value.trim()) {
+                    values[name] = el.value.trim();
+                }
+            });
+            
+            return values;
+        }
+        
+        // ============================================================================
+        // CROSS-REFS TAB
+        // ============================================================================
+        
+        function initXRefTab() {
+            document.getElementById('btn-scan-xrefs')?.addEventListener('click', handleScanXRefs);
+            document.getElementById('btn-fix-xrefs')?.addEventListener('click', handleFixXRefs);
+            document.getElementById('btn-insert-reference')?.addEventListener('click', handleInsertReference);
+        }
+        
+        async function handleScanXRefs() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const validation = await DocForge.XRef.validateCrossReferences(context);
+                    
+                    // Update stats
+                    document.getElementById('valid-refs').textContent = validation.valid.length;
+                    document.getElementById('invalid-refs').textContent = validation.invalid.length;
+                    document.getElementById('xref-stats').classList.remove('hidden');
+                    
+                    // Show invalid references
+                    const resultsContainer = document.getElementById('xref-results');
+                    if (validation.invalid.length > 0) {
+                        resultsContainer.innerHTML = validation.invalid.map(ref => {
+                            const suggestion = ref.suggestions?.[0];
+                            return `
+                                <div class="result-item error">
+                                    <span>"${escapeHtml(ref.text)}" (line ${ref.lineNumber})</span>
+                                    ${suggestion ? 
+                                        `<button class="btn btn-secondary fix-btn" data-old="${escapeHtml(ref.target)}" data-new="${escapeHtml(suggestion.number)}">
+                                            → ${escapeHtml(suggestion.number)}
+                                        </button>` : 
+                                        '<span>No suggestion</span>'}
+                                </div>
+                            `;
+                        }).join('');
+                        
+                        // Attach click handlers to fix buttons
+                        resultsContainer.querySelectorAll('.fix-btn').forEach(btn => {
+                            btn.addEventListener('click', async () => {
+                                await handleFixSingleRef(btn.dataset.old, btn.dataset.new);
+                            });
+                        });
+                    } else {
+                        resultsContainer.innerHTML = '<div class="result-item success">All cross-references are valid.</div>';
+                    }
+                    resultsContainer.classList.remove('hidden');
+                    
+                    // Populate reference target dropdown
+                    const sections = await DocForge.XRef.getDocumentSections(context);
+                    const select = document.getElementById('ref-target');
+                    select.innerHTML = '<option value="">-- Select Section --</option>';
+                    sections.forEach(s => {
+                        const option = document.createElement('option');
+                        option.value = s.number;
+                        option.textContent = `${s.number}. ${(s.text || '').substring(0, 40)}...`;
+                        select.appendChild(option);
+                    });
+                    
+                    DocForge.Utils.showStatus('info', `Found ${validation.valid.length + validation.invalid.length} references`);
+                });
+            } catch (error) {
+                console.error('Scan XRefs error:', error);
+                DocForge.Utils.showStatus('error', `Scan failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleFixSingleRef(oldRef, newRef) {
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.XRef.fixCrossReference(context, oldRef, newRef);
+                    DocForge.Utils.showStatus('success', result.message || 'Fixed reference');
+                    await handleScanXRefs(); // Refresh
+                });
+            } catch (error) {
+                console.error('Fix single ref error:', error);
+                DocForge.Utils.showStatus('error', `Fix failed: ${error.message}`);
+            }
+        }
+        
+        async function handleFixXRefs() {
+            DocForge.Utils.setLoading(true);
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.XRef.fixAllCrossReferences(context);
+                    DocForge.Utils.showStatus('success', result.message || 'Fixed all references');
+                    await handleScanXRefs(); // Refresh
+                });
+            } catch (error) {
+                console.error('Fix XRefs error:', error);
+                DocForge.Utils.showStatus('error', `Fix failed: ${error.message}`);
+            }
+            
+            DocForge.Utils.setLoading(false);
+        }
+        
+        async function handleInsertReference() {
+            const target = document.getElementById('ref-target').value;
+            const format = document.getElementById('ref-format').value;
+            
+            if (!target) {
+                DocForge.Utils.showStatus('error', 'Please select a target section');
+                return;
+            }
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.XRef.insertSmartReference(context, target, format);
+                    DocForge.Utils.showStatus('success', `Inserted: ${result.text || target}`);
+                });
+            } catch (error) {
+                console.error('Insert reference error:', error);
+                DocForge.Utils.showStatus('error', `Insert failed: ${error.message}`);
+            }
+        }
+        
+        // ============================================================================
+        // UNDO/REDO HANDLERS
+        // ============================================================================
+        
+        async function handleUndo() {
+            if (!DocForge.Undo?.canUndo()) {
+                DocForge.Utils.showStatus('warning', 'Nothing to undo');
+                return;
+            }
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.Undo.undo(context);
+                    DocForge.Utils.showStatus(result.success ? 'success' : 'warning', result.message);
+                    updateUndoButtons();
+                });
+            } catch (error) {
+                console.error('Undo error:', error);
+                DocForge.Utils.showStatus('error', `Undo failed: ${error.message}`);
+            }
+        }
+        
+        async function handleRedo() {
+            if (!DocForge.Undo?.canRedo()) {
+                DocForge.Utils.showStatus('warning', 'Nothing to redo');
+                return;
+            }
+            
+            try {
+                await Word.run(async (context) => {
+                    const result = await DocForge.Undo.redo(context);
+                    DocForge.Utils.showStatus(result.success ? 'success' : 'warning', result.message);
+                    updateUndoButtons();
+                });
+            } catch (error) {
+                console.error('Redo error:', error);
+                DocForge.Utils.showStatus('error', `Redo failed: ${error.message}`);
+            }
+        }
+        
+        function updateUndoButtons() {
+            const undoBtn = document.getElementById('btn-undo');
+            const redoBtn = document.getElementById('btn-redo');
+            
+            if (undoBtn) undoBtn.disabled = !DocForge.Undo?.canUndo();
+            if (redoBtn) redoBtn.disabled = !DocForge.Undo?.canRedo();
+        }
+        
+        // Update button states periodically
+        setInterval(updateUndoButtons, 1000);
+        
+        // ============================================================================
+        // UTILITY FUNCTIONS
+        // ============================================================================
+        
+        // Use DocForge.Utils.escapeHtml - no local duplicate
+        const escapeHtml = DocForge.Utils.escapeHtml;
+    </script>
+</body>
+</html>

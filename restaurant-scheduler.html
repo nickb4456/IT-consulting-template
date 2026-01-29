@@ -1833,6 +1833,11 @@
                         <div class="role-btn-title">Manager</div>
                         <div class="role-btn-desc">Create new restaurant</div>
                     </button>
+                    <button type="button" class="role-btn" onclick="selectSignupRole('manager-join')">
+                        <div class="role-btn-icon">🤝</div>
+                        <div class="role-btn-title">Invited Manager</div>
+                        <div class="role-btn-desc">Join as manager (invited)</div>
+                    </button>
                     <button type="button" class="role-btn" onclick="selectSignupRole('employee')">
                         <div class="role-btn-icon">👤</div>
                         <div class="role-btn-title">Employee</div>
@@ -1872,6 +1877,22 @@
                     <input type="email" class="login-input" id="employeeEmail" placeholder="Your email" required>
                     <input type="password" class="login-input" id="employeePassword" placeholder="Password (min 6 chars)" required minlength="6">
                     <button type="submit" class="login-btn" id="employeeSignupBtn">Join Restaurant</button>
+                </form>
+                <div class="login-toggle">
+                    <a onclick="showSignupOptions()">← Back</a>
+                </div>
+            </div>
+
+            <!-- Manager Join (Invited) Signup -->
+            <div id="managerJoinSignupSection" class="signup-section">
+                <p style="text-align: center; margin-bottom: 16px; font-size: 14px; color: #4b5563;">Join as Manager</p>
+                <p style="text-align: center; margin-bottom: 16px; font-size: 12px; color: #6b7280;">You must be invited by an existing manager</p>
+                <form class="login-form" onsubmit="handleManagerJoinSignup(event)">
+                    <input type="text" class="login-input" id="managerJoinOrgCode" placeholder="Organization code" required style="text-transform: uppercase; font-family: monospace;">
+                    <input type="text" class="login-input" id="managerJoinName" placeholder="Your full name" required>
+                    <input type="email" class="login-input" id="managerJoinEmail" placeholder="Your email (must match invite)" required>
+                    <input type="password" class="login-input" id="managerJoinPassword" placeholder="Password (min 6 chars)" required minlength="6">
+                    <button type="submit" class="login-btn" id="managerJoinSignupBtn">Join as Manager</button>
                 </form>
                 <div class="login-toggle">
                     <a onclick="showSignupOptions()">← Back</a>
@@ -1924,6 +1945,10 @@
                     <div class="nav-item" data-page="holidays">
                         <span class="icon">◈</span>
                         Holidays
+                    </div>
+                    <div class="nav-item manager-only" data-page="team" id="navTeam" style="display: none;">
+                        <span class="icon">⚑</span>
+                        Team & Invites
                     </div>
                 </div>
 
@@ -2190,6 +2215,95 @@
                     </div>
                     <div id="labor-by-role">
                         <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Team & Invites (Manager Only) -->
+            <section class="page-section" id="page-team">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Team & Invites</h1>
+                        <p class="page-subtitle">Manage your organization</p>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--accent-light); color: var(--accent);">⚑</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="org-code-display">---</div>
+                            <div class="stat-label">Organization Code</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" onclick="copyOrgCode()" style="margin-left: auto;">Copy</button>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--success-light); color: var(--success);">👔</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="manager-count">0</div>
+                            <div class="stat-label">Managers</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--info-light); color: var(--info);">👤</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="employee-count">0</div>
+                            <div class="stat-label">Employees</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Invite Manager</h3>
+                    </div>
+                    <p style="padding: 0 16px 12px; font-size: 13px; color: var(--text-muted);">
+                        Add email addresses to allow others to join as managers. They'll need your org code and the email you enter below.
+                    </p>
+                    <div style="padding: 0 16px 16px; display: flex; gap: 8px;">
+                        <input type="email" class="form-input" id="invite-manager-email" placeholder="Email address to invite" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="inviteManager()">Invite</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Manager Invites</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Invited</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-invites-list">
+                                <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No pending invites</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Team Members</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody id="team-members-list">
+                                <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -2554,6 +2668,7 @@
             document.getElementById('signUpSection').classList.remove('visible');
             document.getElementById('managerSignupSection').classList.remove('visible');
             document.getElementById('employeeSignupSection').classList.remove('visible');
+            document.getElementById('managerJoinSignupSection').classList.remove('visible');
             document.getElementById('loginError').classList.remove('visible');
             document.getElementById('loginSuccess').classList.remove('visible');
         }
@@ -2563,16 +2678,22 @@
             document.getElementById('signUpSection').classList.add('visible');
             document.getElementById('managerSignupSection').classList.remove('visible');
             document.getElementById('employeeSignupSection').classList.remove('visible');
+            document.getElementById('managerJoinSignupSection').classList.remove('visible');
             document.getElementById('loginError').classList.remove('visible');
         }
 
         function selectSignupRole(role) {
             document.getElementById('signUpSection').classList.remove('visible');
             document.getElementById('loginError').classList.remove('visible');
+            document.getElementById('managerSignupSection').classList.remove('visible');
+            document.getElementById('employeeSignupSection').classList.remove('visible');
+            document.getElementById('managerJoinSignupSection').classList.remove('visible');
 
             if (role === 'manager') {
                 document.getElementById('managerSignupSection').classList.add('visible');
                 document.getElementById('generatedOrgCode').textContent = generateOrgCode();
+            } else if (role === 'manager-join') {
+                document.getElementById('managerJoinSignupSection').classList.add('visible');
             } else {
                 document.getElementById('employeeSignupSection').classList.add('visible');
             }
@@ -2639,6 +2760,7 @@
                     name: restaurantName,
                     code: orgCode,
                     ownerId: user.uid,
+                    managerInvites: [], // Emails allowed to join as managers
                     createdAt: new Date().toISOString()
                 });
 
@@ -2722,6 +2844,71 @@
             }
         }
 
+        async function handleManagerJoinSignup(e) {
+            e.preventDefault();
+            const orgCode = document.getElementById('managerJoinOrgCode').value.toUpperCase().trim();
+            const name = document.getElementById('managerJoinName').value;
+            const email = document.getElementById('managerJoinEmail').value.toLowerCase().trim();
+            const password = document.getElementById('managerJoinPassword').value;
+            const btn = document.getElementById('managerJoinSignupBtn');
+
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            try {
+                // Check if organization exists
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (!orgSnap.exists()) {
+                    showError('Organization code not found. Check with your manager.');
+                    btn.disabled = false;
+                    btn.textContent = 'Join as Manager';
+                    return;
+                }
+
+                const orgData = orgSnap.data();
+                const invitedEmails = (orgData.managerInvites || []).map(e => e.toLowerCase());
+
+                // Check if email is in the invite list
+                if (!invitedEmails.includes(email)) {
+                    showError('Your email is not on the manager invite list. Ask an existing manager to invite you.');
+                    btn.disabled = false;
+                    btn.textContent = 'Join as Manager';
+                    return;
+                }
+
+                btn.textContent = 'Joining...';
+
+                // Create user account
+                const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+
+                // Create user profile as manager
+                const userRef = window.firebaseDoc(window.firebaseDb, 'users', user.uid);
+                await window.firebaseSetDoc(userRef, {
+                    email: email,
+                    name: name,
+                    role: 'manager',
+                    orgCode: orgCode,
+                    createdAt: new Date().toISOString()
+                });
+
+                // Remove email from invite list (optional - they're now a manager)
+                const updatedInvites = orgData.managerInvites.filter(e => e.toLowerCase() !== email);
+                await window.firebaseSetDoc(orgRef, { ...orgData, managerInvites: updatedInvites });
+
+            } catch (error) {
+                let message = 'An error occurred';
+                if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
+                else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
+
+                showError(message);
+                btn.disabled = false;
+                btn.textContent = 'Join as Manager';
+            }
+        }
+
         async function handleLogout() {
             if (confirm('Are you sure you want to logout?')) {
                 await window.firebaseSignOut(window.firebaseAuth);
@@ -2741,6 +2928,13 @@
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('appContainer').style.display = 'flex';
                     document.getElementById('userEmail').textContent = `${currentUserData.name || user.email} (${currentUserData.role})`;
+
+                    // Show Team nav for managers only
+                    const navTeam = document.getElementById('navTeam');
+                    if (navTeam) {
+                        navTeam.style.display = currentUserData.role === 'manager' ? 'flex' : 'none';
+                    }
+
                     loadStateFromFirestore();
                 } else {
                     // User exists in auth but not in Firestore (legacy user)
@@ -2896,6 +3090,7 @@
                 case 'shifts': renderShiftTemplates(); break;
                 case 'holidays': renderHolidays(); break;
                 case 'labor': renderLaborCosts(); break;
+                case 'team': renderTeamPage(); break;
             }
         }
 
@@ -4266,6 +4461,124 @@ Sarah Lee,manager,22,45,all`;
                     `).join('')}
                 </div>
             `;
+        }
+
+        // ============================================
+        // TEAM & INVITES (Manager Only)
+        // ============================================
+        async function renderTeamPage() {
+            if (!currentUserData || currentUserData.role !== 'manager') return;
+
+            // Display org code
+            document.getElementById('org-code-display').textContent = currentUserData.orgCode;
+
+            // Load organization data for invites
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    const invites = orgData.managerInvites || [];
+
+                    // Render pending invites
+                    const invitesList = document.getElementById('pending-invites-list');
+                    if (invites.length === 0) {
+                        invitesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No pending invites</td></tr>';
+                    } else {
+                        invitesList.innerHTML = invites.map(email => `
+                            <tr>
+                                <td>${email}</td>
+                                <td>Pending</td>
+                                <td><button class="btn btn-danger btn-sm" onclick="removeInvite('${email}')">Remove</button></td>
+                            </tr>
+                        `).join('');
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading org data:', error);
+            }
+
+            // Load team members (simplified - would need Firebase query in production)
+            // For now, just show current user
+            const membersList = document.getElementById('team-members-list');
+            membersList.innerHTML = `
+                <tr>
+                    <td>${currentUserData.name || 'You'}</td>
+                    <td>${currentUserData.email || currentUser.email}</td>
+                    <td><span style="color: var(--accent); font-weight: 500;">Manager</span></td>
+                    <td>${new Date(currentUserData.createdAt).toLocaleDateString()}</td>
+                </tr>
+            `;
+
+            // Update counts (simplified)
+            document.getElementById('manager-count').textContent = '1+';
+            document.getElementById('employee-count').textContent = state.staff.length.toString();
+        }
+
+        async function inviteManager() {
+            const emailInput = document.getElementById('invite-manager-email');
+            const email = emailInput.value.toLowerCase().trim();
+
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    const invites = orgData.managerInvites || [];
+
+                    if (invites.map(e => e.toLowerCase()).includes(email)) {
+                        showToast('This email is already invited', 'warning');
+                        return;
+                    }
+
+                    invites.push(email);
+                    await window.firebaseSetDoc(orgRef, { ...orgData, managerInvites: invites });
+
+                    emailInput.value = '';
+                    showToast(`Invited ${email} as manager`, 'success');
+                    renderTeamPage();
+                }
+            } catch (error) {
+                console.error('Error inviting manager:', error);
+                showToast('Error sending invite', 'error');
+            }
+        }
+
+        async function removeInvite(email) {
+            if (!confirm(`Remove invite for ${email}?`)) return;
+
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    const invites = (orgData.managerInvites || []).filter(e => e.toLowerCase() !== email.toLowerCase());
+                    await window.firebaseSetDoc(orgRef, { ...orgData, managerInvites: invites });
+
+                    showToast('Invite removed', 'success');
+                    renderTeamPage();
+                }
+            } catch (error) {
+                console.error('Error removing invite:', error);
+                showToast('Error removing invite', 'error');
+            }
+        }
+
+        function copyOrgCode() {
+            const code = currentUserData.orgCode;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast(`Copied: ${code}`, 'success');
+            }).catch(() => {
+                showToast('Could not copy code', 'error');
+            });
         }
 
         // ============================================

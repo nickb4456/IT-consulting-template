@@ -471,47 +471,6 @@
             font-size: 12px;
         }
 
-        .btn-icon {
-            padding: 8px 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius);
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.2s;
-        }
-
-        .btn-icon:hover {
-            background: var(--bg-secondary);
-            border-color: var(--accent);
-        }
-
-        .voice-btn.listening {
-            background: var(--danger-light);
-            border-color: var(--danger);
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .voice-status {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 8px;
-            display: none;
-        }
-
-        .voice-status.visible {
-            display: block;
-        }
-
-        .voice-status.listening {
-            color: var(--danger);
-        }
-
         .ai-response {
             margin-top: 12px;
             padding: 12px;
@@ -2304,12 +2263,8 @@
                     <div class="ai-input-wrapper">
                         <span class="ai-icon">✨</span>
                         <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;Add employee named Adam&quot; or &quot;Dave has been slacking&quot; or &quot;Swap Tom and Mike on Friday&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
-                        <button class="btn btn-icon voice-btn" id="voice-btn" onclick="toggleVoiceInput()" title="Voice input">
-                            <span id="voice-icon">🎤</span>
-                        </button>
                         <button class="btn btn-primary btn-sm" onclick="processAICommand()">Go</button>
                     </div>
-                    <div id="voice-status" class="voice-status"></div>
                     <div id="ai-response" class="ai-response"></div>
                 </div>
 
@@ -6996,118 +6951,6 @@ Sarah Lee,manager,22,45,all`;
 
             return { type: 'info', message: html };
         }
-
-        // ============================================
-        // VOICE CONTROL
-        // ============================================
-        let recognition = null;
-        let isListening = false;
-
-        function initVoiceControl() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                console.log('Speech recognition not supported');
-                const voiceBtn = document.getElementById('voice-btn');
-                if (voiceBtn) voiceBtn.style.display = 'none';
-                return;
-            }
-
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-
-            recognition.onstart = () => {
-                isListening = true;
-                document.getElementById('voice-btn').classList.add('listening');
-                document.getElementById('voice-icon').textContent = '🔴';
-                const status = document.getElementById('voice-status');
-                status.textContent = 'Listening...';
-                status.className = 'voice-status visible listening';
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = Array.from(event.results)
-                    .map(result => result[0].transcript)
-                    .join('');
-
-                document.getElementById('ai-command').value = transcript;
-
-                // If this is a final result, process the command
-                if (event.results[event.results.length - 1].isFinal) {
-                    document.getElementById('voice-status').textContent = 'Processing: "' + transcript + '"';
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.log('Speech recognition error:', event.error);
-                stopListening();
-
-                let message = '';
-                switch(event.error) {
-                    case 'no-speech':
-                        message = 'No speech detected. Try again.';
-                        break;
-                    case 'network':
-                        message = 'Network error. Check your connection and try again.';
-                        break;
-                    case 'not-allowed':
-                    case 'permission-denied':
-                        message = 'Microphone access denied. Please allow microphone permission.';
-                        break;
-                    case 'aborted':
-                        message = 'Voice input cancelled.';
-                        break;
-                    default:
-                        message = 'Voice error. Try typing instead.';
-                }
-
-                const status = document.getElementById('voice-status');
-                status.textContent = message;
-                status.className = 'voice-status visible';
-                setTimeout(() => {
-                    status.className = 'voice-status';
-                }, 4000);
-            };
-
-            recognition.onend = () => {
-                const wasListening = isListening;
-                stopListening();
-
-                // Auto-process if we got a result
-                const input = document.getElementById('ai-command').value;
-                if (wasListening && input.trim()) {
-                    setTimeout(() => processAICommand(), 300);
-                }
-            };
-        }
-
-        function toggleVoiceInput() {
-            if (!recognition) {
-                initVoiceControl();
-                if (!recognition) {
-                    showToast('Voice input not supported in this browser', 'warning');
-                    return;
-                }
-            }
-
-            if (isListening) {
-                recognition.stop();
-            } else {
-                document.getElementById('ai-command').value = '';
-                recognition.start();
-            }
-        }
-
-        function stopListening() {
-            isListening = false;
-            document.getElementById('voice-btn')?.classList.remove('listening');
-            const voiceIcon = document.getElementById('voice-icon');
-            if (voiceIcon) voiceIcon.textContent = '🎤';
-        }
-
-        // Initialize voice control when page loads
-        window.addEventListener('load', initVoiceControl);
 
         // ============================================
         // ADD EMPLOYEE FLOW (with manual input)

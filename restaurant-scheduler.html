@@ -1950,11 +1950,15 @@
                     document.getElementById('cert-food-safety').checked = staff.certifications?.foodSafety;
                     document.getElementById('cert-first-aid').checked = staff.certifications?.firstAid;
                     
-                    // Set availability
+                    // Set availability - check both data-shift (name) and data-shift-id for compatibility
                     if (staff.availability) {
                         Object.entries(staff.availability).forEach(([day, shifts]) => {
                             shifts.forEach(shift => {
-                                const cell = document.querySelector(`.avail-cell[data-day="${day}"][data-shift="${shift}"]`);
+                                // Try matching by name first, then by ID
+                                let cell = document.querySelector(`.avail-cell[data-day="${day}"][data-shift="${shift}"]`);
+                                if (!cell) {
+                                    cell = document.querySelector(`.avail-cell[data-day="${day}"][data-shift-id="${shift}"]`);
+                                }
                                 if (cell) cell.classList.add('available');
                             });
                         });
@@ -1984,7 +1988,8 @@
             shifts.forEach(shift => {
                 html += `<div class="avail-label">${shift.name}</div>`;
                 DAYS.forEach((day, i) => {
-                    html += `<div class="avail-cell" data-day="${i}" data-shift="${shift.id}" onclick="toggleAvailability(this)"></div>`;
+                    // Use lowercase name for consistency with sample data
+                    html += `<div class="avail-cell" data-day="${i}" data-shift="${shift.name.toLowerCase()}" data-shift-id="${shift.id}" onclick="toggleAvailability(this)"></div>`;
                 });
             });
             
@@ -2555,7 +2560,9 @@
                 const avail = staff.availability?.[dayIndex];
                 if (avail !== undefined) {
                     if (avail.length === 0) return false;
-                    if (!avail.includes(shiftId)) return false;
+                    // Check both shift ID and name (lowercase) for compatibility
+                    const shiftMatches = avail.some(a => a === shiftId || a === shift.name.toLowerCase());
+                    if (!shiftMatches) return false;
                 }
                 
                 // Check max hours
@@ -2825,7 +2832,9 @@
                                     const avail = s.availability?.[dayIndex];
                                     if (avail !== undefined) {
                                         if (avail.length === 0) return false; // explicitly unavailable
-                                        if (!avail.includes(shift.id)) return false; // shift not allowed
+                                        // Check both shift ID and name (lowercase) for compatibility
+                                        const shiftMatches = avail.some(a => a === shift.id || a === shift.name.toLowerCase());
+                                        if (!shiftMatches) return false; // shift not allowed
                                     }
                                     
                                     // Check max hours

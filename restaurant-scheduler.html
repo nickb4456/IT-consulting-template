@@ -3302,61 +3302,93 @@
             document.getElementById('loginError').classList.remove('visible');
         }
 
-        // Lockout tracking
+        // Lockout tracking (Firestore-based for cross-device security)
         const LOCKOUT_ATTEMPTS = 5;
         const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
-        function getLoginAttempts(email) {
-            const key = `login_attempts_${email.toLowerCase()}`;
-            const data = localStorage.getItem(key);
-            if (!data) return { count: 0, firstAttempt: null, lockedUntil: null };
-            return JSON.parse(data);
+        function sanitizeEmailForDocId(email) {
+            // Firestore doc IDs can't have / so we replace @ and .
+            return email.toLowerCase().replace(/[@.]/g, '_');
         }
 
-        function recordFailedAttempt(email) {
-            const key = `login_attempts_${email.toLowerCase()}`;
-            const attempts = getLoginAttempts(email);
-            const now = Date.now();
+        async function getLoginAttempts(email) {
+            try {
+                const docId = sanitizeEmailForDocId(email);
+                const attemptsRef = window.firebaseDoc(window.firebaseDb, 'loginAttempts', docId);
+                const attemptsSnap = await window.firebaseGetDoc(attemptsRef);
 
-            // Reset if first attempt was more than lockout duration ago
-            if (attempts.firstAttempt && (now - attempts.firstAttempt) > LOCKOUT_DURATION) {
-                attempts.count = 0;
-                attempts.firstAttempt = null;
-                attempts.lockedUntil = null;
+                if (!attemptsSnap.exists()) {
+                    return { count: 0, firstAttempt: null, lockedUntil: null };
+                }
+                return attemptsSnap.data();
+            } catch (error) {
+                console.error('Error getting login attempts:', error);
+                return { count: 0, firstAttempt: null, lockedUntil: null };
             }
+        }
 
-            attempts.count++;
-            if (!attempts.firstAttempt) attempts.firstAttempt = now;
+        async function recordFailedAttempt(email) {
+            try {
+                const docId = sanitizeEmailForDocId(email);
+                const attemptsRef = window.firebaseDoc(window.firebaseDb, 'loginAttempts', docId);
+                const attempts = await getLoginAttempts(email);
+                const now = Date.now();
 
-            // Lock account after too many attempts
-            if (attempts.count >= LOCKOUT_ATTEMPTS) {
-                attempts.lockedUntil = now + LOCKOUT_DURATION;
+                // Reset if first attempt was more than lockout duration ago
+                if (attempts.firstAttempt && (now - attempts.firstAttempt) > LOCKOUT_DURATION) {
+                    attempts.count = 0;
+                    attempts.firstAttempt = null;
+                    attempts.lockedUntil = null;
+                }
+
+                attempts.count++;
+                if (!attempts.firstAttempt) attempts.firstAttempt = now;
+
+                // Lock account after too many attempts
+                if (attempts.count >= LOCKOUT_ATTEMPTS) {
+                    attempts.lockedUntil = now + LOCKOUT_DURATION;
+                }
+
+                attempts.email = email.toLowerCase();
+                attempts.lastAttempt = now;
+
+                await window.firebaseSetDoc(attemptsRef, attempts);
+                return attempts;
+            } catch (error) {
+                console.error('Error recording failed attempt:', error);
+                return { count: 1, firstAttempt: Date.now(), lockedUntil: null };
             }
-
-            localStorage.setItem(key, JSON.stringify(attempts));
-            return attempts;
         }
 
-        function clearLoginAttempts(email) {
-            const key = `login_attempts_${email.toLowerCase()}`;
-            localStorage.removeItem(key);
+        async function clearLoginAttempts(email) {
+            try {
+                const docId = sanitizeEmailForDocId(email);
+                const attemptsRef = window.firebaseDoc(window.firebaseDb, 'loginAttempts', docId);
+                await window.firebaseSetDoc(attemptsRef, {
+                    count: 0,
+                    firstAttempt: null,
+                    lockedUntil: null,
+                    email: email.toLowerCase(),
+                    clearedAt: Date.now()
+                });
+            } catch (error) {
+                console.error('Error clearing login attempts:', error);
+            }
         }
 
-        function isAccountLocked(email) {
-            const attempts = getLoginAttempts(email);
-            if (!attempts.lockedUntil) return false;
+        async function checkAccountLockout(email) {
+            const attempts = await getLoginAttempts(email);
+            if (!attempts.lockedUntil) {
+                return { locked: false, attempts };
+            }
             if (Date.now() > attempts.lockedUntil) {
-                clearLoginAttempts(email);
-                return false;
+                // Lockout expired, clear it
+                await clearLoginAttempts(email);
+                return { locked: false, attempts: { count: 0, firstAttempt: null, lockedUntil: null } };
             }
-            return true;
-        }
-
-        function getLockoutTimeRemaining(email) {
-            const attempts = getLoginAttempts(email);
-            if (!attempts.lockedUntil) return 0;
             const remaining = attempts.lockedUntil - Date.now();
-            return Math.max(0, Math.ceil(remaining / 60000)); // minutes
+            const mins = Math.max(1, Math.ceil(remaining / 60000));
+            return { locked: true, minutes: mins, attempts };
         }
 
         async function handleLogin(e) {
@@ -3365,16 +3397,20 @@
             const password = document.getElementById('loginPassword').value;
             const btn = document.getElementById('loginBtn');
 
-            // Check if account is locked
-            if (isAccountLocked(email)) {
-                const mins = getLockoutTimeRemaining(email);
-                showError(`Account temporarily locked. Try again in ${mins} minute${mins !== 1 ? 's' : ''}.`);
+            btn.disabled = true;
+            btn.textContent = 'Checking...';
+            document.getElementById('loginError').classList.remove('visible');
+
+            // Check if account is locked (server-side check)
+            const lockoutStatus = await checkAccountLockout(email);
+            if (lockoutStatus.locked) {
+                showError(`Account temporarily locked. Try again in ${lockoutStatus.minutes} minute${lockoutStatus.minutes !== 1 ? 's' : ''}.`);
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
                 return;
             }
 
-            btn.disabled = true;
             btn.textContent = 'Signing in...';
-            document.getElementById('loginError').classList.remove('visible');
 
             try {
                 const userCredential = await window.firebaseSignIn(window.firebaseAuth, email, password);
@@ -3386,12 +3422,12 @@
                 }
 
                 // Clear failed attempts on successful login
-                clearLoginAttempts(email);
+                await clearLoginAttempts(email);
             } catch (error) {
                 console.error('Login error:', error.code, error.message);
 
-                // Record failed attempt
-                const attempts = recordFailedAttempt(email);
+                // Record failed attempt (server-side)
+                const attempts = await recordFailedAttempt(email);
                 const remaining = LOCKOUT_ATTEMPTS - attempts.count;
 
                 let message = 'Invalid email or password';
@@ -3406,8 +3442,8 @@
                 if (remaining > 0 && remaining <= 3) {
                     message += ` (${remaining} attempt${remaining !== 1 ? 's' : ''} remaining)`;
                 } else if (attempts.lockedUntil) {
-                    const mins = getLockoutTimeRemaining(email);
-                    message = `Account locked for ${mins} minute${mins !== 1 ? 's' : ''} due to too many failed attempts.`;
+                    const lockCheck = await checkAccountLockout(email);
+                    message = `Account locked for ${lockCheck.minutes} minute${lockCheck.minutes !== 1 ? 's' : ''} due to too many failed attempts.`;
                 }
 
                 showError(message);

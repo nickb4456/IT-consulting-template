@@ -2471,6 +2471,32 @@
                         </table>
                     </div>
                 </div>
+
+                <div class="card" id="pending-swaps-card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Shift Swaps</h3>
+                        <span class="badge" id="pending-swaps-badge" style="display: none; background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px;">0</span>
+                    </div>
+                    <p style="padding: 0 16px 12px; font-size: 13px; color: var(--text-muted);">
+                        Shift swaps require your approval before taking effect.
+                    </p>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Shift</th>
+                                    <th>From</th>
+                                    <th>To</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-swaps-list">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending swaps</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </section>
 
             <!-- Shift Marketplace -->
@@ -4532,6 +4558,24 @@ Sarah Lee,manager,22,45,all`;
                 }
             });
 
+            // Check for pending shift swaps (manager only)
+            if (currentUserData?.role === 'manager') {
+                const pendingSwaps = (state.shiftTrades || []).filter(t => t.status === 'pending_manager_approval');
+                pendingSwaps.forEach(trade => {
+                    const fromStaff = state.staff.find(s => s.id === trade.postedBy);
+                    const toStaff = state.staff.find(s => s.id === trade.approvedRequesterId);
+                    const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+                    alerts.unshift({
+                        type: 'warning',
+                        message: `Shift swap: ${fromStaff?.name || '?'} → ${toStaff?.name || '?'}`,
+                        date: trade.date,
+                        shift: shift?.name || '',
+                        action: 'approveSwap',
+                        tradeId: trade.id
+                    });
+                });
+            }
+
             return alerts;
         }
 
@@ -4737,10 +4781,67 @@ Sarah Lee,manager,22,45,all`;
                     navigateTo('schedule');
                     showToast(`${alert.staffName} (${ROLE_LABELS[alert.role]}) has no shifts - drag them onto the schedule`, 'info');
                     break;
+                case 'approveSwap':
+                    // Show swap approval dialog
+                    openSwapApprovalModal(alert.tradeId);
+                    break;
                 default:
                     // Default: navigate to schedule
                     navigateTo('schedule');
             }
+        }
+
+        function openSwapApprovalModal(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+
+            const fromStaff = state.staff.find(s => s.id === trade.postedBy);
+            const toStaff = state.staff.find(s => s.id === trade.approvedRequesterId);
+            const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+
+            let modal = document.getElementById('swap-approval-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'swap-approval-modal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Approve Shift Swap?</h2>
+                            <button class="modal-close" onclick="closeModal('swap-approval-modal')">×</button>
+                        </div>
+                        <div id="swap-approval-content"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            document.getElementById('swap-approval-content').innerHTML = `
+                <div style="padding: 16px;">
+                    <div style="background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius); margin-bottom: 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600;">${fromStaff?.name || 'Unknown'}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Giving up shift</div>
+                            </div>
+                            <div style="font-size: 24px; color: var(--accent);">→</div>
+                            <div style="text-align: center;">
+                                <div style="font-weight: 600;">${toStaff?.name || 'Unknown'}</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Taking shift</div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="font-size: 14px; margin-bottom: 8px;"><strong>Shift:</strong> ${shift?.name || trade.shiftId}</p>
+                    <p style="font-size: 14px; margin-bottom: 8px;"><strong>Date:</strong> ${trade.date}</p>
+                    ${trade.reason ? `<p style="font-size: 14px; margin-bottom: 16px;"><strong>Reason:</strong> ${trade.reason}</p>` : ''}
+                    <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+                        <button class="btn btn-danger" onclick="managerDenySwap('${tradeId}'); closeModal('swap-approval-modal');">Deny</button>
+                        <button class="btn btn-success" onclick="managerApproveSwap('${tradeId}'); closeModal('swap-approval-modal');">Approve</button>
+                    </div>
+                </div>
+            `;
+
+            openModal('swap-approval-modal');
         }
 
         function openAssignRoleModal(alert) {
@@ -5044,6 +5145,45 @@ Sarah Lee,manager,22,45,all`;
             // Update counts (simplified)
             document.getElementById('manager-count').textContent = '1+';
             document.getElementById('employee-count').textContent = state.staff.length.toString();
+
+            // Render pending shift swaps awaiting manager approval
+            renderPendingSwaps();
+        }
+
+        function renderPendingSwaps() {
+            const pendingSwaps = (state.shiftTrades || []).filter(t => t.status === 'pending_manager_approval');
+            const swapsList = document.getElementById('pending-swaps-list');
+            const badge = document.getElementById('pending-swaps-badge');
+
+            // Update badge
+            if (pendingSwaps.length > 0) {
+                badge.textContent = pendingSwaps.length;
+                badge.style.display = 'inline';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            if (pendingSwaps.length === 0) {
+                swapsList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending swaps</td></tr>';
+            } else {
+                swapsList.innerHTML = pendingSwaps.map(trade => {
+                    const fromStaff = state.staff.find(s => s.id === trade.postedBy);
+                    const toStaff = state.staff.find(s => s.id === trade.approvedRequesterId);
+                    const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+                    return `
+                        <tr>
+                            <td>${trade.date}</td>
+                            <td>${shift?.name || trade.shiftId}</td>
+                            <td><strong>${fromStaff?.name || 'Unknown'}</strong></td>
+                            <td><strong>${toStaff?.name || 'Unknown'}</strong></td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="managerApproveSwap('${trade.id}')">Approve</button>
+                                <button class="btn btn-danger btn-sm" onclick="managerDenySwap('${trade.id}')">Deny</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
         async function inviteManager() {
@@ -5203,13 +5343,16 @@ Sarah Lee,manager,22,45,all`;
             );
             const myStaffId = myStaff?.id;
 
-            // Filter trades
-            const activeTrades = (state.shiftTrades || []).filter(t => t.status === 'open');
-            const myPosts = activeTrades.filter(t => t.postedBy === myStaffId);
-            const otherPosts = activeTrades.filter(t => t.postedBy !== myStaffId);
+            // Filter trades - only show 'open' trades as available (not pending_manager_approval)
+            const openTrades = (state.shiftTrades || []).filter(t => t.status === 'open');
+            const pendingApprovalTrades = (state.shiftTrades || []).filter(t => t.status === 'pending_manager_approval');
+            const myPosts = (state.shiftTrades || []).filter(t => t.postedBy === myStaffId && (t.status === 'open' || t.status === 'pending_manager_approval'));
+            const otherPosts = openTrades.filter(t => t.postedBy !== myStaffId);
             const myRequests = (state.shiftTrades || []).filter(t =>
-                t.requests?.some(r => r.requesterId === myStaffId)
+                t.requests?.some(r => r.requesterId === myStaffId) ||
+                t.approvedRequesterId === myStaffId
             );
+            const myPendingApproval = pendingApprovalTrades.filter(t => t.approvedRequesterId === myStaffId);
 
             // Update counts
             document.getElementById('shifts-posted-count').textContent = otherPosts.length;
@@ -5242,36 +5385,65 @@ Sarah Lee,manager,22,45,all`;
                 myPostsList.innerHTML = myPosts.map(trade => {
                     const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
                     const requestCount = trade.requests?.length || 0;
+                    const isPendingManager = trade.status === 'pending_manager_approval';
+                    const taker = isPendingManager ? state.staff.find(s => s.id === trade.approvedRequesterId) : null;
+
+                    let statusHtml, actionsHtml;
+                    if (isPendingManager) {
+                        statusHtml = `<span style="color: var(--info);">⏳ Awaiting Manager</span>`;
+                        actionsHtml = `<span style="font-size: 12px; color: var(--text-muted);">${taker?.name || 'Someone'} taking</span>`;
+                    } else {
+                        statusHtml = `<span style="color: var(--warning);">Open</span>`;
+                        actionsHtml = `
+                            ${requestCount > 0 ? `<button class="btn btn-success btn-sm" onclick="viewTradeRequests('${trade.id}')">View (${requestCount})</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="cancelTrade('${trade.id}')">Cancel</button>
+                        `;
+                    }
+
                     return `
                         <tr>
                             <td>${trade.date}</td>
                             <td>${shift?.name || trade.shiftId}</td>
-                            <td>${requestCount} request(s)</td>
-                            <td><span style="color: var(--warning);">Open</span></td>
-                            <td>
-                                ${requestCount > 0 ? `<button class="btn btn-success btn-sm" onclick="viewTradeRequests('${trade.id}')">View</button>` : ''}
-                                <button class="btn btn-danger btn-sm" onclick="cancelTrade('${trade.id}')">Cancel</button>
-                            </td>
+                            <td>${isPendingManager ? taker?.name || '-' : requestCount + ' request(s)'}</td>
+                            <td>${statusHtml}</td>
+                            <td>${actionsHtml}</td>
                         </tr>
                     `;
                 }).join('');
             }
 
-            // Render my requests
-            if (myRequests.length === 0) {
+            // Render my requests (including ones waiting for manager approval)
+            const myActiveRequests = (state.shiftTrades || []).filter(t => {
+                // Include if I'm a requester OR if I'm the approved requester waiting for manager
+                const isMyRequest = t.requests?.some(r => r.requesterId === myStaffId);
+                const isMyApprovedRequest = t.approvedRequesterId === myStaffId && t.status === 'pending_manager_approval';
+                return (isMyRequest && t.status === 'open') || isMyApprovedRequest;
+            });
+
+            if (myActiveRequests.length === 0) {
                 myRequestsList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending requests</td></tr>';
             } else {
-                myRequestsList.innerHTML = myRequests.map(trade => {
+                myRequestsList.innerHTML = myActiveRequests.map(trade => {
                     const poster = state.staff.find(s => s.id === trade.postedBy);
                     const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
-                    const myRequest = trade.requests.find(r => r.requesterId === myStaffId);
+                    const isPendingManager = trade.status === 'pending_manager_approval' && trade.approvedRequesterId === myStaffId;
+
+                    let statusHtml, actionsHtml;
+                    if (isPendingManager) {
+                        statusHtml = `<span style="color: var(--success);">✓ Approved - Awaiting Manager</span>`;
+                        actionsHtml = `<span style="font-size: 12px; color: var(--text-muted);">Manager will confirm</span>`;
+                    } else {
+                        statusHtml = `<span style="color: var(--info);">Pending</span>`;
+                        actionsHtml = `<button class="btn btn-danger btn-sm" onclick="cancelRequest('${trade.id}')">Withdraw</button>`;
+                    }
+
                     return `
                         <tr>
                             <td>${trade.date}</td>
                             <td>${shift?.name || trade.shiftId}</td>
                             <td>${poster?.name || 'Unknown'}</td>
-                            <td><span style="color: var(--info);">${myRequest?.status || 'Pending'}</span></td>
-                            <td><button class="btn btn-danger btn-sm" onclick="cancelRequest('${trade.id}')">Withdraw</button></td>
+                            <td>${statusHtml}</td>
+                            <td>${actionsHtml}</td>
                         </tr>
                     `;
                 }).join('');
@@ -5481,26 +5653,60 @@ Sarah Lee,manager,22,45,all`;
             const trade = state.shiftTrades.find(t => t.id === tradeId);
             if (!trade) return;
 
-            // Swap the shift assignment
+            // Set to pending manager approval (don't swap yet)
+            trade.status = 'pending_manager_approval';
+            trade.approvedRequesterId = requesterId;
+            trade.employeeApprovedAt = new Date().toISOString();
+
+            saveState();
+            closeModal('view-requests-modal');
+            showToast('Swap sent to manager for approval!', 'success');
+            renderShiftMarketplace();
+        }
+
+        // Manager approves the shift swap
+        function managerApproveSwap(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade || trade.status !== 'pending_manager_approval') return;
+
+            // Now actually swap the shift assignment
             const dateKey = trade.date;
             if (state.schedule[dateKey] && state.schedule[dateKey][trade.shiftId]) {
                 const assignments = state.schedule[dateKey][trade.shiftId];
                 const idx = assignments.findIndex(a => a.staffId === trade.postedBy);
                 if (idx >= 0) {
-                    assignments[idx].staffId = requesterId;
+                    assignments[idx].staffId = trade.approvedRequesterId;
                 }
             }
 
             // Mark trade as complete
             trade.status = 'completed';
-            trade.approvedRequesterId = requesterId;
+            trade.managerApprovedAt = new Date().toISOString();
 
             saveState();
-            closeModal('view-requests-modal');
-            showToast('Shift traded successfully!', 'success');
+            showToast('Shift swap approved!', 'success');
+            renderTeamPage();
             renderShiftMarketplace();
             renderSchedule();
             renderDashboard();
+        }
+
+        // Manager denies the shift swap
+        function managerDenySwap(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+
+            if (!confirm('Deny this shift swap? The shift will go back to being available for trade.')) return;
+
+            // Put it back to open status
+            trade.status = 'open';
+            trade.approvedRequesterId = null;
+            trade.employeeApprovedAt = null;
+
+            saveState();
+            showToast('Shift swap denied', 'info');
+            renderTeamPage();
+            renderShiftMarketplace();
         }
 
         // ============================================

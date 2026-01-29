@@ -239,6 +239,68 @@
             border-color: var(--text-muted);
         }
 
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-color);
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: var(--accent);
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Day Checkbox */
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .day-checkbox:has(input:checked) {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+        .day-checkbox input {
+            display: none;
+        }
+
         /* Header */
         .page-header {
             display: flex;
@@ -1953,8 +2015,20 @@
                 </div>
 
                 <div class="nav-section">
+                    <div class="nav-label">Employee</div>
+                    <div class="nav-item" data-page="shift-market">
+                        <span class="icon">↔</span>
+                        Shift Marketplace
+                    </div>
+                    <div class="nav-item" data-page="my-preferences">
+                        <span class="icon">⚙</span>
+                        My Preferences
+                    </div>
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-label">Reports</div>
-                    <div class="nav-item" data-page="labor">
+                    <div class="nav-item manager-only" data-page="labor" id="navLabor">
                         <span class="icon">◐</span>
                         Labor Costs
                     </div>
@@ -1998,7 +2072,7 @@
                 <div class="card ai-command-card">
                     <div class="ai-input-wrapper">
                         <span class="ai-icon">✨</span>
-                        <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;I fired Dave&quot; or &quot;Tom is sick today&quot; or &quot;Who works Friday dinner?&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
+                        <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;Dave has been slacking, cut his hours&quot; or &quot;Sarah is doing great, give her more shifts&quot; or &quot;Swap Tom and Mike on Friday&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
                         <button class="btn btn-primary btn-sm" onclick="processAICommand()">Go</button>
                     </div>
                     <div id="ai-response" class="ai-response"></div>
@@ -2288,6 +2362,44 @@
 
                 <div class="card">
                     <div class="card-header">
+                        <h3 class="card-title">Invite Employee</h3>
+                        <label class="toggle-switch" style="margin-left: auto;">
+                            <input type="checkbox" id="require-employee-invite" onchange="toggleEmployeeInviteRequirement()">
+                            <span class="toggle-slider"></span>
+                            <span style="margin-left: 8px; font-size: 12px;">Require invite</span>
+                        </label>
+                    </div>
+                    <p style="padding: 0 16px 12px; font-size: 13px; color: var(--text-muted);">
+                        When enabled, only invited emails can join as employees. Otherwise anyone with the org code can join.
+                    </p>
+                    <div style="padding: 0 16px 16px; display: flex; gap: 8px;">
+                        <input type="email" class="form-input" id="invite-employee-email" placeholder="Employee email address" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="inviteEmployee()">Invite</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Employee Invites</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pending-employee-invites-list">
+                                <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No pending invites</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
                         <h3 class="card-title">Team Members</h3>
                     </div>
                     <div class="table-container">
@@ -2304,6 +2416,192 @@
                                 <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Shift Marketplace -->
+            <section class="page-section" id="page-shift-market">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Shift Marketplace</h1>
+                        <p class="page-subtitle">Trade shifts with coworkers</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openPostShiftModal()">Post Shift for Trade</button>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">↑</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="shifts-posted-count">0</div>
+                            <div class="stat-label">Shifts Available</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--success-light); color: var(--success);">✓</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="my-posts-count">0</div>
+                            <div class="stat-label">My Posted Shifts</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background: var(--info-light); color: var(--info);">⏳</div>
+                        <div class="stat-content">
+                            <div class="stat-value" id="pending-requests-count">0</div>
+                            <div class="stat-label">Pending Requests</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Available Shifts</h3>
+                        <span style="font-size: 12px; color: var(--text-muted);">Click to request a shift</span>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Shift</th>
+                                    <th>Posted By</th>
+                                    <th>Reason</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="available-shifts-list">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No shifts available for trade</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Posted Shifts</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Shift</th>
+                                    <th>Requests</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="my-posted-shifts-list">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">You haven't posted any shifts</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Shift Requests</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Shift</th>
+                                    <th>Original Owner</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="my-shift-requests-list">
+                                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending requests</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Preferences -->
+            <section class="page-section" id="page-my-preferences">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">My Preferences</h1>
+                        <p class="page-subtitle">Set your availability and shift preferences</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveMyPreferences()">Save Preferences</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Extra Shift Preferences</h3>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-want-extra-shifts" onchange="updateExtraShiftUI()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">I want extra shifts</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Auto-scheduler will prioritize you for open shifts</div>
+                            </div>
+                        </div>
+
+                        <div id="extra-shift-days" style="display: none; margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius);">
+                            <div style="font-weight: 500; margin-bottom: 12px;">Which days do you want extra shifts?</div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <label class="day-checkbox"><input type="checkbox" id="extra-sun" checked> <span>Sunday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-mon" checked> <span>Monday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-tue" checked> <span>Tuesday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-wed" checked> <span>Wednesday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-thu" checked> <span>Thursday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-fri" checked> <span>Friday</span></label>
+                                <label class="day-checkbox"><input type="checkbox" id="extra-sat" checked> <span>Saturday</span></label>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <label style="font-size: 13px;">Max extra hours per week:</label>
+                                <input type="number" class="form-input" id="pref-max-extra-hours" value="10" min="0" max="40" style="width: 80px; margin-left: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Notification Preferences</h3>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-notify-new-shifts" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Notify me when new shifts are posted for trade</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-notify-schedule-change" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Notify me when my schedule changes</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="pref-notify-request-status" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <span>Notify me when my shift requests are approved/denied</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Schedule This Week</h3>
+                    </div>
+                    <div id="my-schedule-preview" style="padding: 16px;">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
             </section>
@@ -2800,12 +3098,12 @@
             e.preventDefault();
             const orgCode = document.getElementById('employeeOrgCode').value.toUpperCase().trim();
             const name = document.getElementById('employeeName').value;
-            const email = document.getElementById('employeeEmail').value;
+            const email = document.getElementById('employeeEmail').value.toLowerCase().trim();
             const password = document.getElementById('employeePassword').value;
             const btn = document.getElementById('employeeSignupBtn');
 
             btn.disabled = true;
-            btn.textContent = 'Joining...';
+            btn.textContent = 'Verifying...';
 
             try {
                 // Check if organization exists
@@ -2818,6 +3116,21 @@
                     btn.textContent = 'Join Restaurant';
                     return;
                 }
+
+                const orgData = orgSnap.data();
+
+                // Check if employee invites are required
+                if (orgData.requireEmployeeInvite) {
+                    const invitedEmails = (orgData.employeeInvites || []).map(e => e.toLowerCase());
+                    if (!invitedEmails.includes(email)) {
+                        showError('Your email is not on the invite list. Ask your manager to invite you.');
+                        btn.disabled = false;
+                        btn.textContent = 'Join Restaurant';
+                        return;
+                    }
+                }
+
+                btn.textContent = 'Joining...';
 
                 // Create user account
                 const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
@@ -2832,6 +3145,12 @@
                     orgCode: orgCode,
                     createdAt: new Date().toISOString()
                 });
+
+                // Remove from invite list if they were invited
+                if (orgData.requireEmployeeInvite && orgData.employeeInvites) {
+                    const updatedInvites = orgData.employeeInvites.filter(e => e.toLowerCase() !== email);
+                    await window.firebaseSetDoc(orgRef, { ...orgData, employeeInvites: updatedInvites });
+                }
 
             } catch (error) {
                 let message = 'An error occurred';
@@ -2992,6 +3311,8 @@
                     schedule: state.schedule,
                     holidays: state.holidays,
                     theme: state.theme,
+                    shiftTrades: state.shiftTrades || [],
+                    userPreferences: state.userPreferences || {},
                     updatedAt: new Date().toISOString()
                 });
             } catch (error) {
@@ -3012,6 +3333,8 @@
                     state.schedule = data.schedule || {};
                     state.holidays = data.holidays || [];
                     state.theme = data.theme || 'light';
+                    state.shiftTrades = data.shiftTrades || [];
+                    state.userPreferences = data.userPreferences || {};
                 } else {
                     // New user - load sample data
                     loadSampleData();
@@ -3091,6 +3414,8 @@
                 case 'holidays': renderHolidays(); break;
                 case 'labor': renderLaborCosts(); break;
                 case 'team': renderTeamPage(); break;
+                case 'shift-market': renderShiftMarketplace(); break;
+                case 'my-preferences': renderMyPreferences(); break;
             }
         }
 
@@ -4479,14 +4804,14 @@ Sarah Lee,manager,22,45,all`;
 
                 if (orgSnap.exists()) {
                     const orgData = orgSnap.data();
-                    const invites = orgData.managerInvites || [];
 
-                    // Render pending invites
+                    // Manager invites
+                    const managerInvites = orgData.managerInvites || [];
                     const invitesList = document.getElementById('pending-invites-list');
-                    if (invites.length === 0) {
+                    if (managerInvites.length === 0) {
                         invitesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No pending invites</td></tr>';
                     } else {
-                        invitesList.innerHTML = invites.map(email => `
+                        invitesList.innerHTML = managerInvites.map(email => `
                             <tr>
                                 <td>${email}</td>
                                 <td>Pending</td>
@@ -4494,6 +4819,24 @@ Sarah Lee,manager,22,45,all`;
                             </tr>
                         `).join('');
                     }
+
+                    // Employee invites
+                    const employeeInvites = orgData.employeeInvites || [];
+                    const employeeInvitesList = document.getElementById('pending-employee-invites-list');
+                    if (employeeInvites.length === 0) {
+                        employeeInvitesList.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No pending invites</td></tr>';
+                    } else {
+                        employeeInvitesList.innerHTML = employeeInvites.map(email => `
+                            <tr>
+                                <td>${email}</td>
+                                <td>Pending</td>
+                                <td><button class="btn btn-danger btn-sm" onclick="removeEmployeeInvite('${email}')">Remove</button></td>
+                            </tr>
+                        `).join('');
+                    }
+
+                    // Require employee invite toggle
+                    document.getElementById('require-employee-invite').checked = orgData.requireEmployeeInvite || false;
                 }
             } catch (error) {
                 console.error('Error loading org data:', error);
@@ -4579,6 +4922,498 @@ Sarah Lee,manager,22,45,all`;
             }).catch(() => {
                 showToast('Could not copy code', 'error');
             });
+        }
+
+        async function inviteEmployee() {
+            const emailInput = document.getElementById('invite-employee-email');
+            const email = emailInput.value.toLowerCase().trim();
+
+            if (!email || !email.includes('@')) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    const invites = orgData.employeeInvites || [];
+
+                    if (invites.map(e => e.toLowerCase()).includes(email)) {
+                        showToast('This email is already invited', 'warning');
+                        return;
+                    }
+
+                    invites.push(email);
+                    await window.firebaseSetDoc(orgRef, { ...orgData, employeeInvites: invites });
+
+                    emailInput.value = '';
+                    showToast(`Invited ${email} as employee`, 'success');
+                    renderTeamPage();
+                }
+            } catch (error) {
+                console.error('Error inviting employee:', error);
+                showToast('Error sending invite', 'error');
+            }
+        }
+
+        async function removeEmployeeInvite(email) {
+            if (!confirm(`Remove invite for ${email}?`)) return;
+
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    const invites = (orgData.employeeInvites || []).filter(e => e.toLowerCase() !== email.toLowerCase());
+                    await window.firebaseSetDoc(orgRef, { ...orgData, employeeInvites: invites });
+
+                    showToast('Invite removed', 'success');
+                    renderTeamPage();
+                }
+            } catch (error) {
+                console.error('Error removing invite:', error);
+                showToast('Error removing invite', 'error');
+            }
+        }
+
+        async function toggleEmployeeInviteRequirement() {
+            const checked = document.getElementById('require-employee-invite').checked;
+
+            try {
+                const orgRef = window.firebaseDoc(window.firebaseDb, 'organizations', currentUserData.orgCode);
+                const orgSnap = await window.firebaseGetDoc(orgRef);
+
+                if (orgSnap.exists()) {
+                    const orgData = orgSnap.data();
+                    await window.firebaseSetDoc(orgRef, { ...orgData, requireEmployeeInvite: checked });
+                    showToast(checked ? 'Employee invites now required' : 'Anyone can join as employee', 'success');
+                }
+            } catch (error) {
+                console.error('Error updating setting:', error);
+                showToast('Error updating setting', 'error');
+            }
+        }
+
+        // ============================================
+        // SHIFT MARKETPLACE
+        // ============================================
+        // Initialize shift marketplace in state
+        if (!state.shiftTrades) state.shiftTrades = [];
+
+        function renderShiftMarketplace() {
+            const availableList = document.getElementById('available-shifts-list');
+            const myPostsList = document.getElementById('my-posted-shifts-list');
+            const myRequestsList = document.getElementById('my-shift-requests-list');
+
+            // Get current user's staff record (if they're an employee)
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+            const myStaffId = myStaff?.id;
+
+            // Filter trades
+            const activeTrades = (state.shiftTrades || []).filter(t => t.status === 'open');
+            const myPosts = activeTrades.filter(t => t.postedBy === myStaffId);
+            const otherPosts = activeTrades.filter(t => t.postedBy !== myStaffId);
+            const myRequests = (state.shiftTrades || []).filter(t =>
+                t.requests?.some(r => r.requesterId === myStaffId)
+            );
+
+            // Update counts
+            document.getElementById('shifts-posted-count').textContent = otherPosts.length;
+            document.getElementById('my-posts-count').textContent = myPosts.length;
+            document.getElementById('pending-requests-count').textContent = myRequests.length;
+
+            // Render available shifts
+            if (otherPosts.length === 0) {
+                availableList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No shifts available for trade</td></tr>';
+            } else {
+                availableList.innerHTML = otherPosts.map(trade => {
+                    const poster = state.staff.find(s => s.id === trade.postedBy);
+                    const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+                    return `
+                        <tr>
+                            <td>${trade.date}</td>
+                            <td>${shift?.name || trade.shiftId} (${shift?.startTime}-${shift?.endTime})</td>
+                            <td>${poster?.name || 'Unknown'}</td>
+                            <td>${trade.reason || '-'}</td>
+                            <td><button class="btn btn-primary btn-sm" onclick="requestShift('${trade.id}')">Request</button></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render my posts
+            if (myPosts.length === 0) {
+                myPostsList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">You haven\'t posted any shifts</td></tr>';
+            } else {
+                myPostsList.innerHTML = myPosts.map(trade => {
+                    const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+                    const requestCount = trade.requests?.length || 0;
+                    return `
+                        <tr>
+                            <td>${trade.date}</td>
+                            <td>${shift?.name || trade.shiftId}</td>
+                            <td>${requestCount} request(s)</td>
+                            <td><span style="color: var(--warning);">Open</span></td>
+                            <td>
+                                ${requestCount > 0 ? `<button class="btn btn-success btn-sm" onclick="viewTradeRequests('${trade.id}')">View</button>` : ''}
+                                <button class="btn btn-danger btn-sm" onclick="cancelTrade('${trade.id}')">Cancel</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Render my requests
+            if (myRequests.length === 0) {
+                myRequestsList.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No pending requests</td></tr>';
+            } else {
+                myRequestsList.innerHTML = myRequests.map(trade => {
+                    const poster = state.staff.find(s => s.id === trade.postedBy);
+                    const shift = state.shiftTemplates.find(s => s.id === trade.shiftId);
+                    const myRequest = trade.requests.find(r => r.requesterId === myStaffId);
+                    return `
+                        <tr>
+                            <td>${trade.date}</td>
+                            <td>${shift?.name || trade.shiftId}</td>
+                            <td>${poster?.name || 'Unknown'}</td>
+                            <td><span style="color: var(--info);">${myRequest?.status || 'Pending'}</span></td>
+                            <td><button class="btn btn-danger btn-sm" onclick="cancelRequest('${trade.id}')">Withdraw</button></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        function openPostShiftModal() {
+            // Find user's scheduled shifts
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+
+            if (!myStaff) {
+                showToast('You need to be linked to a staff member to post shifts', 'error');
+                return;
+            }
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            const myShifts = [];
+
+            weekDates.forEach((date, i) => {
+                const dateKey = formatDate(date, 'iso');
+                if (state.schedule[dateKey]) {
+                    Object.entries(state.schedule[dateKey]).forEach(([shiftId, assignments]) => {
+                        if (assignments.some(a => a.staffId === myStaff.id)) {
+                            const shift = state.shiftTemplates.find(s => s.id === shiftId);
+                            myShifts.push({
+                                date: dateKey,
+                                dayName: DAYS[i],
+                                shiftId,
+                                shiftName: shift?.name || shiftId
+                            });
+                        }
+                    });
+                }
+            });
+
+            if (myShifts.length === 0) {
+                showToast('You have no scheduled shifts to post', 'info');
+                return;
+            }
+
+            // Create a simple select dialog
+            const options = myShifts.map(s =>
+                `<option value="${s.date}|${s.shiftId}">${s.dayName} - ${s.shiftName}</option>`
+            ).join('');
+
+            const html = `
+                <div style="padding: 16px;">
+                    <label class="form-label">Select shift to post:</label>
+                    <select class="form-input" id="post-shift-select">${options}</select>
+                    <label class="form-label" style="margin-top: 12px;">Reason (optional):</label>
+                    <input type="text" class="form-input" id="post-shift-reason" placeholder="e.g., Doctor appointment">
+                    <div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+                        <button class="btn btn-secondary" onclick="closeModal('post-shift-modal')">Cancel</button>
+                        <button class="btn btn-primary" onclick="submitPostShift()">Post Shift</button>
+                    </div>
+                </div>
+            `;
+
+            // Create modal dynamically
+            let modal = document.getElementById('post-shift-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'post-shift-modal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Post Shift for Trade</h2>
+                            <button class="modal-close" onclick="closeModal('post-shift-modal')">×</button>
+                        </div>
+                        <div id="post-shift-content"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            document.getElementById('post-shift-content').innerHTML = html;
+            openModal('post-shift-modal');
+        }
+
+        function submitPostShift() {
+            const select = document.getElementById('post-shift-select');
+            const reason = document.getElementById('post-shift-reason').value;
+            const [date, shiftId] = select.value.split('|');
+
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+
+            if (!state.shiftTrades) state.shiftTrades = [];
+
+            state.shiftTrades.push({
+                id: generateId(),
+                date,
+                shiftId,
+                postedBy: myStaff.id,
+                reason,
+                status: 'open',
+                requests: [],
+                createdAt: new Date().toISOString()
+            });
+
+            saveState();
+            closeModal('post-shift-modal');
+            showToast('Shift posted for trade!', 'success');
+            renderShiftMarketplace();
+        }
+
+        function requestShift(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+
+            if (!myStaff) {
+                showToast('You need to be linked to a staff member', 'error');
+                return;
+            }
+
+            if (!trade.requests) trade.requests = [];
+
+            if (trade.requests.some(r => r.requesterId === myStaff.id)) {
+                showToast('You already requested this shift', 'warning');
+                return;
+            }
+
+            trade.requests.push({
+                requesterId: myStaff.id,
+                status: 'pending',
+                requestedAt: new Date().toISOString()
+            });
+
+            saveState();
+            showToast('Shift requested! Waiting for approval.', 'success');
+            renderShiftMarketplace();
+        }
+
+        function cancelTrade(tradeId) {
+            if (!confirm('Cancel this shift posting?')) return;
+            state.shiftTrades = state.shiftTrades.filter(t => t.id !== tradeId);
+            saveState();
+            showToast('Shift posting cancelled', 'success');
+            renderShiftMarketplace();
+        }
+
+        function cancelRequest(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+
+            trade.requests = trade.requests.filter(r => r.requesterId !== myStaff.id);
+            saveState();
+            showToast('Request withdrawn', 'success');
+            renderShiftMarketplace();
+        }
+
+        function viewTradeRequests(tradeId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade || !trade.requests?.length) return;
+
+            const html = trade.requests.map(req => {
+                const requester = state.staff.find(s => s.id === req.requesterId);
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border-color);">
+                        <div>
+                            <strong>${requester?.name || 'Unknown'}</strong>
+                            <div style="font-size: 12px; color: var(--text-muted);">${requester?.role ? ROLE_LABELS[requester.role] : ''}</div>
+                        </div>
+                        <button class="btn btn-success btn-sm" onclick="approveTradeRequest('${tradeId}', '${req.requesterId}')">Approve</button>
+                    </div>
+                `;
+            }).join('');
+
+            let modal = document.getElementById('view-requests-modal');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'view-requests-modal';
+                modal.className = 'modal-overlay';
+                modal.innerHTML = `
+                    <div class="modal" style="max-width: 400px;">
+                        <div class="modal-header">
+                            <h2 class="modal-title">Shift Requests</h2>
+                            <button class="modal-close" onclick="closeModal('view-requests-modal')">×</button>
+                        </div>
+                        <div id="view-requests-content"></div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            document.getElementById('view-requests-content').innerHTML = html;
+            openModal('view-requests-modal');
+        }
+
+        function approveTradeRequest(tradeId, requesterId) {
+            const trade = state.shiftTrades.find(t => t.id === tradeId);
+            if (!trade) return;
+
+            // Swap the shift assignment
+            const dateKey = trade.date;
+            if (state.schedule[dateKey] && state.schedule[dateKey][trade.shiftId]) {
+                const assignments = state.schedule[dateKey][trade.shiftId];
+                const idx = assignments.findIndex(a => a.staffId === trade.postedBy);
+                if (idx >= 0) {
+                    assignments[idx].staffId = requesterId;
+                }
+            }
+
+            // Mark trade as complete
+            trade.status = 'completed';
+            trade.approvedRequesterId = requesterId;
+
+            saveState();
+            closeModal('view-requests-modal');
+            showToast('Shift traded successfully!', 'success');
+            renderShiftMarketplace();
+            renderSchedule();
+            renderDashboard();
+        }
+
+        // ============================================
+        // MY PREFERENCES
+        // ============================================
+        function renderMyPreferences() {
+            // Load user preferences from state or defaults
+            const prefs = state.userPreferences || {};
+
+            document.getElementById('pref-want-extra-shifts').checked = prefs.wantExtraShifts || false;
+            document.getElementById('pref-max-extra-hours').value = prefs.maxExtraHours || 10;
+
+            // Day preferences
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            days.forEach(day => {
+                const checkbox = document.getElementById(`extra-${day}`);
+                if (checkbox) {
+                    checkbox.checked = prefs.extraDays?.[day] !== false; // Default to true
+                }
+            });
+
+            // Notifications
+            document.getElementById('pref-notify-new-shifts').checked = prefs.notifyNewShifts !== false;
+            document.getElementById('pref-notify-schedule-change').checked = prefs.notifyScheduleChange !== false;
+            document.getElementById('pref-notify-request-status').checked = prefs.notifyRequestStatus !== false;
+
+            updateExtraShiftUI();
+            renderMySchedulePreview();
+        }
+
+        function updateExtraShiftUI() {
+            const wantExtra = document.getElementById('pref-want-extra-shifts').checked;
+            document.getElementById('extra-shift-days').style.display = wantExtra ? 'block' : 'none';
+        }
+
+        function saveMyPreferences() {
+            const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            const extraDays = {};
+            days.forEach(day => {
+                extraDays[day] = document.getElementById(`extra-${day}`)?.checked || false;
+            });
+
+            state.userPreferences = {
+                wantExtraShifts: document.getElementById('pref-want-extra-shifts').checked,
+                maxExtraHours: parseInt(document.getElementById('pref-max-extra-hours').value) || 10,
+                extraDays,
+                notifyNewShifts: document.getElementById('pref-notify-new-shifts').checked,
+                notifyScheduleChange: document.getElementById('pref-notify-schedule-change').checked,
+                notifyRequestStatus: document.getElementById('pref-notify-request-status').checked
+            };
+
+            saveState();
+            showToast('Preferences saved!', 'success');
+        }
+
+        function renderMySchedulePreview() {
+            const container = document.getElementById('my-schedule-preview');
+            const myStaff = state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+
+            if (!myStaff) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Link your account to a staff member to see your schedule.</p>';
+                return;
+            }
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let html = '<div style="display: grid; gap: 8px;">';
+
+            weekDates.forEach((date, i) => {
+                const dateKey = formatDate(date, 'iso');
+                const myShifts = [];
+
+                if (state.schedule[dateKey]) {
+                    Object.entries(state.schedule[dateKey]).forEach(([shiftId, assignments]) => {
+                        if (assignments.some(a => a.staffId === myStaff.id)) {
+                            const shift = state.shiftTemplates.find(s => s.id === shiftId);
+                            myShifts.push(shift);
+                        }
+                    });
+                }
+
+                const isToday = dateKey === new Date().toISOString().split('T')[0];
+
+                html += `
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 8px 12px; background: ${isToday ? 'var(--accent-light)' : 'var(--bg-tertiary)'}; border-radius: var(--radius);">
+                        <div style="width: 80px; font-weight: ${isToday ? '600' : '400'};">${DAYS[i]}</div>
+                        <div style="flex: 1;">
+                            ${myShifts.length > 0
+                                ? myShifts.map(s => `<span style="display: inline-block; padding: 2px 8px; background: var(--accent); color: white; border-radius: 4px; font-size: 12px; margin-right: 4px;">${s.name} ${s.startTime}-${s.endTime}</span>`).join('')
+                                : '<span style="color: var(--text-muted); font-size: 13px;">Off</span>'
+                            }
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
         }
 
         // ============================================
@@ -4680,17 +5515,38 @@ Sarah Lee,manager,22,45,all`;
 
         function parseAndExecuteCommand(text) {
             // FIRE/REMOVE EMPLOYEE
-            const fireMatch = text.match(/(?:fire|fired|remove|delete|let go|terminate)\s+(\w+)/i);
+            const fireMatch = text.match(/(?:fire|fired|remove|delete|let go|terminate|terminated)\s+(\w+)/i);
             if (fireMatch) {
                 const name = fireMatch[1];
                 return fireEmployee(name);
             }
 
-            // SICK/ABSENT TODAY
-            const sickMatch = text.match(/(\w+)\s+(?:is\s+)?(?:sick|ill|absent|out|called out|can't come|cant come|not coming)/i);
+            // SICK/ABSENT TODAY or specific day
+            const sickMatch = text.match(/(\w+)\s+(?:is\s+)?(?:sick|ill|absent|out|called out|can't come|cant come|not coming|won't be in|wont be in)(?:\s+(?:today|tomorrow|(\w+day)))?/i);
             if (sickMatch) {
                 const name = sickMatch[1];
-                return markAbsentToday(name);
+                const day = sickMatch[2] || 'today';
+                return markAbsent(name, day);
+            }
+
+            // CUT HOURS / REDUCE HOURS / SLACKING (negative performance)
+            const cutHoursMatch = text.match(/(?:(\w+)\s+(?:has been|is|was)\s+(?:slacking|lazy|unreliable|late|bad|terrible)|cut\s+(?:back\s+)?(\w+)(?:'s)?\s+hours|reduce\s+(?:hours\s+for\s+)?(\w+)|(\w+)\s+(?:needs?\s+)?(?:less|fewer)\s+(?:hours|shifts)|give\s+(\w+)\s+(?:less|fewer)\s+(?:hours|shifts))/i);
+            if (cutHoursMatch) {
+                const name = cutHoursMatch[1] || cutHoursMatch[2] || cutHoursMatch[3] || cutHoursMatch[4] || cutHoursMatch[5];
+                return cutEmployeeHours(name);
+            }
+
+            // GIVE MORE HOURS / BOOST HOURS / GOOD PERFORMANCE
+            const moreHoursMatch = text.match(/(?:(\w+)\s+(?:has been|is|was)\s+(?:great|awesome|amazing|excellent|killing it|doing great|fantastic|reliable)|give\s+(\w+)\s+(?:more|extra)\s+(?:hours|shifts)|(?:more|extra)\s+(?:hours|shifts)\s+(?:for|to)\s+(\w+)|(\w+)\s+(?:wants?|needs?|deserves?)\s+(?:more|extra)\s+(?:hours|shifts)|boost\s+(\w+)(?:'s)?\s+hours)/i);
+            if (moreHoursMatch) {
+                const name = moreHoursMatch[1] || moreHoursMatch[2] || moreHoursMatch[3] || moreHoursMatch[4] || moreHoursMatch[5];
+                return giveExtraHours(name);
+            }
+
+            // SWAP/TRADE SHIFTS
+            const swapMatch = text.match(/(?:swap|switch|trade)\s+(\w+)(?:'s)?\s+(?:and|with)\s+(\w+)(?:'s)?(?:\s+(?:on|for)\s+(\w+))?/i);
+            if (swapMatch) {
+                return swapShifts(swapMatch[1], swapMatch[2], swapMatch[3]);
             }
 
             // WHO'S WORKING - specific day and shift
@@ -4701,8 +5557,8 @@ Sarah Lee,manager,22,45,all`;
                 return showWhoIsWorking(day, shift);
             }
 
-            // ADD EMPLOYEE
-            const addMatch = text.match(/(?:add|hire|new)\s+(?:a\s+)?(\w+)\s+(?:named|called)?\s*(\w+)(?:\s+at\s+\$?(\d+))?/i);
+            // ADD/HIRE EMPLOYEE
+            const addMatch = text.match(/(?:add|hire|hired|new)\s+(?:a\s+)?(?:new\s+)?(\w+)\s+(?:named|called)?\s*(\w+)(?:\s+at\s+\$?(\d+))?/i);
             if (addMatch) {
                 const role = addMatch[1];
                 const name = addMatch[2];
@@ -4710,8 +5566,20 @@ Sarah Lee,manager,22,45,all`;
                 return addEmployee(role, name, rate);
             }
 
+            // PROMOTE EMPLOYEE
+            const promoteMatch = text.match(/(?:promote|make)\s+(\w+)\s+(?:to\s+)?(?:a\s+)?(\w+)/i);
+            if (promoteMatch) {
+                return promoteEmployee(promoteMatch[1], promoteMatch[2]);
+            }
+
+            // CHANGE PAY RATE
+            const payMatch = text.match(/(?:(?:change|set|update|raise|lower)\s+)?(\w+)(?:'s)?\s+(?:pay|rate|wage|hourly)\s+(?:to\s+)?\$?(\d+(?:\.\d{2})?)/i);
+            if (payMatch) {
+                return changePayRate(payMatch[1], parseFloat(payMatch[2]));
+            }
+
             // CLEAR DAY
-            const clearMatch = text.match(/clear\s+(\w+)(?:\s+schedule)?/i);
+            const clearMatch = text.match(/clear\s+(\w+)(?:'s)?\s*(?:schedule)?/i);
             if (clearMatch) {
                 const day = clearMatch[1];
                 return clearDaySchedule(day);
@@ -4724,28 +5592,36 @@ Sarah Lee,manager,22,45,all`;
                 return autoScheduleDay(day);
             }
 
-            // GIVE EXTRA HOURS
-            const extraHoursMatch = text.match(/(?:give|add)\s+(\w+)\s+(?:more|extra)\s+(?:hours|shifts)/i);
-            if (extraHoursMatch) {
-                const name = extraHoursMatch[1];
-                return giveExtraHours(name);
-            }
-
             // HOW MANY HOURS
-            const hoursMatch = text.match(/(?:how many hours|hours for|hours does)\s+(\w+)/i);
+            const hoursMatch = text.match(/(?:how many hours|hours for|hours does|what are)\s+(\w+)(?:'s)?\s*(?:hours)?/i);
             if (hoursMatch) {
                 const name = hoursMatch[1];
                 return showEmployeeHours(name);
             }
 
+            // NEED MORE STAFF
+            const needStaffMatch = text.match(/(?:need|we need|short|understaffed)\s+(?:more\s+)?(\w+)s?(?:\s+on\s+(\w+))?/i);
+            if (needStaffMatch) {
+                return analyzeStaffingNeeds(needStaffMatch[1], needStaffMatch[2]);
+            }
+
+            // WHO'S AVAILABLE
+            const availableMatch = text.match(/who(?:'s|s| is)?\s+available\s+(?:on\s+)?(\w+)?/i);
+            if (availableMatch) {
+                return showAvailable(availableMatch[1]);
+            }
+
             return {
                 type: 'error',
                 message: `I didn't understand that. Try:<br>
-                • "I fired Dave"<br>
-                • "Tom is sick today"<br>
+                • "I fired Dave" / "Let go of Sarah"<br>
+                • "Tom is sick today" / "Maria won't be in Friday"<br>
+                • "Dave has been slacking, cut his hours"<br>
+                • "Sarah is doing great, give her more shifts"<br>
                 • "Who's working Friday dinner?"<br>
                 • "Add server named Mike at $15"<br>
-                • "Clear Saturday schedule"<br>
+                • "Swap Tom and Sarah on Monday"<br>
+                • "Promote Mike to manager"<br>
                 • "How many hours does Maria have?"`
             };
         }
@@ -5036,6 +5912,296 @@ Sarah Lee,manager,22,45,all`;
                 type: 'info',
                 message: `<strong>${staff.name}</strong> has ${hours.toFixed(1)}h scheduled this week (${remaining.toFixed(1)}h remaining of ${staff.maxHours}h max).`
             };
+        }
+
+        function markAbsent(name, dayStr) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let targetDate;
+
+            if (dayStr === 'today') {
+                targetDate = new Date().toISOString().split('T')[0];
+            } else if (dayStr === 'tomorrow') {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                targetDate = tomorrow.toISOString().split('T')[0];
+            } else {
+                const dayLower = dayStr.toLowerCase().replace('day', '');
+                const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+                if (dayIndex >= 0) {
+                    targetDate = formatDate(weekDates[dayIndex], 'iso');
+                }
+            }
+
+            if (!targetDate) {
+                return { type: 'error', message: `Couldn't understand the day "${dayStr}".` };
+            }
+
+            let removedCount = 0;
+            if (state.schedule[targetDate]) {
+                Object.keys(state.schedule[targetDate]).forEach(shiftId => {
+                    const before = state.schedule[targetDate][shiftId].length;
+                    state.schedule[targetDate][shiftId] = state.schedule[targetDate][shiftId].filter(a => a.staffId !== staff.id);
+                    removedCount += before - state.schedule[targetDate][shiftId].length;
+                });
+            }
+
+            saveState();
+            renderSchedule();
+            renderDashboard();
+
+            if (removedCount > 0) {
+                return {
+                    type: 'success',
+                    message: `<strong>${staff.name}</strong> removed from ${removedCount} shift(s) on ${dayStr}. 🤒`
+                };
+            } else {
+                return {
+                    type: 'info',
+                    message: `<strong>${staff.name}</strong> wasn't scheduled for ${dayStr} anyway.`
+                };
+            }
+        }
+
+        function cutEmployeeHours(name) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const currentHours = calculateWeekHours(staff.id);
+
+            // Reduce max hours by 10 (minimum 10)
+            const oldMax = staff.maxHours;
+            staff.maxHours = Math.max(staff.maxHours - 10, 10);
+
+            // Remove from some shifts if they're over the new max
+            if (currentHours > staff.maxHours) {
+                let hoursToRemove = currentHours - staff.maxHours;
+                const weekDates = getWeekDates(state.currentWeekStart);
+
+                // Remove from end of week first
+                for (let i = weekDates.length - 1; i >= 0 && hoursToRemove > 0; i--) {
+                    const dateKey = formatDate(weekDates[i], 'iso');
+                    if (state.schedule[dateKey]) {
+                        for (const shiftId of Object.keys(state.schedule[dateKey])) {
+                            const idx = state.schedule[dateKey][shiftId].findIndex(a => a.staffId === staff.id);
+                            if (idx >= 0) {
+                                const shift = state.shiftTemplates.find(t => t.id === shiftId);
+                                if (shift) {
+                                    state.schedule[dateKey][shiftId].splice(idx, 1);
+                                    hoursToRemove -= calculateShiftHours(shift);
+                                    if (hoursToRemove <= 0) break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            saveState();
+            renderStaffTable();
+            renderSchedule();
+            renderDashboard();
+
+            const newHours = calculateWeekHours(staff.id);
+            return {
+                type: 'success',
+                message: `<strong>${staff.name}</strong>'s max hours reduced from ${oldMax}h to ${staff.maxHours}h. Now scheduled for ${newHours.toFixed(1)}h this week.`
+            };
+        }
+
+        function swapShifts(name1, name2, dayStr) {
+            const staff1 = findStaffByName(name1);
+            const staff2 = findStaffByName(name2);
+
+            if (!staff1) return { type: 'error', message: `Couldn't find anyone named "${name1}".` };
+            if (!staff2) return { type: 'error', message: `Couldn't find anyone named "${name2}".` };
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let targetDates = [];
+
+            if (!dayStr) {
+                // Swap all shifts this week
+                targetDates = weekDates.map(d => formatDate(d, 'iso'));
+            } else {
+                const dayLower = dayStr.toLowerCase();
+                const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+                if (dayIndex >= 0) {
+                    targetDates = [formatDate(weekDates[dayIndex], 'iso')];
+                }
+            }
+
+            let swapCount = 0;
+            targetDates.forEach(dateKey => {
+                if (state.schedule[dateKey]) {
+                    Object.keys(state.schedule[dateKey]).forEach(shiftId => {
+                        const assignments = state.schedule[dateKey][shiftId];
+                        const idx1 = assignments.findIndex(a => a.staffId === staff1.id);
+                        const idx2 = assignments.findIndex(a => a.staffId === staff2.id);
+
+                        if (idx1 >= 0 && idx2 < 0) {
+                            assignments[idx1].staffId = staff2.id;
+                            swapCount++;
+                        } else if (idx2 >= 0 && idx1 < 0) {
+                            assignments[idx2].staffId = staff1.id;
+                            swapCount++;
+                        } else if (idx1 >= 0 && idx2 >= 0) {
+                            // Both assigned, swap them
+                            assignments[idx1].staffId = staff2.id;
+                            assignments[idx2].staffId = staff1.id;
+                            swapCount += 2;
+                        }
+                    });
+                }
+            });
+
+            saveState();
+            renderSchedule();
+            renderDashboard();
+
+            if (swapCount > 0) {
+                return {
+                    type: 'success',
+                    message: `Swapped ${swapCount} shift assignment(s) between <strong>${staff1.name}</strong> and <strong>${staff2.name}</strong>.`
+                };
+            } else {
+                return {
+                    type: 'info',
+                    message: `${staff1.name} and ${staff2.name} don't have overlapping shifts to swap.`
+                };
+            }
+        }
+
+        function promoteEmployee(name, newRoleStr) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const roleLower = newRoleStr.toLowerCase();
+            const newRole = ROLES.find(r => r.startsWith(roleLower) || ROLE_LABELS[r].toLowerCase().startsWith(roleLower));
+
+            if (!newRole) {
+                return { type: 'error', message: `Unknown role "${newRoleStr}". Try: server, cook, host, bartender, busser, or manager.` };
+            }
+
+            const oldRole = staff.role;
+            staff.role = newRole;
+
+            // Give a small raise for promotion
+            if (newRole === 'manager') {
+                staff.hourlyRate = Math.max(staff.hourlyRate, 20);
+            }
+
+            saveState();
+            renderStaffTable();
+
+            return {
+                type: 'success',
+                message: `<strong>${staff.name}</strong> promoted from ${ROLE_LABELS[oldRole]} to ${ROLE_LABELS[newRole]}! 🎉`
+            };
+        }
+
+        function changePayRate(name, newRate) {
+            const staff = findStaffByName(name);
+            if (!staff) {
+                return { type: 'error', message: `Couldn't find anyone named "${name}".` };
+            }
+
+            const oldRate = staff.hourlyRate;
+            staff.hourlyRate = newRate;
+
+            saveState();
+            renderStaffTable();
+
+            const direction = newRate > oldRate ? '📈' : '📉';
+            return {
+                type: 'success',
+                message: `<strong>${staff.name}</strong>'s pay updated from $${oldRate.toFixed(2)} to $${newRate.toFixed(2)}/hr ${direction}`
+            };
+        }
+
+        function analyzeStaffingNeeds(roleStr, dayStr) {
+            const roleLower = roleStr.toLowerCase();
+            const role = ROLES.find(r => r.startsWith(roleLower) || ROLE_LABELS[r].toLowerCase().startsWith(roleLower));
+
+            if (!role) {
+                return { type: 'error', message: `Unknown role "${roleStr}".` };
+            }
+
+            const currentStaff = state.staff.filter(s => s.role === role);
+            const avgHours = currentStaff.reduce((sum, s) => sum + calculateWeekHours(s.id), 0);
+            const totalCapacity = currentStaff.reduce((sum, s) => sum + s.maxHours, 0);
+
+            let message = `<strong>${ROLE_LABELS[role]}s:</strong><br>`;
+            message += `• Current staff: ${currentStaff.length}<br>`;
+            message += `• Hours scheduled: ${avgHours.toFixed(1)}h<br>`;
+            message += `• Total capacity: ${totalCapacity}h<br>`;
+
+            if (avgHours >= totalCapacity * 0.9) {
+                message += `⚠️ <strong>Near capacity!</strong> Consider hiring more ${ROLE_LABELS[role]}s.`;
+            } else {
+                message += `✓ Staffing looks adequate.`;
+            }
+
+            return { type: 'info', message };
+        }
+
+        function showAvailable(dayStr) {
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let targetDate;
+            let dayName = 'today';
+
+            if (!dayStr || dayStr === 'today') {
+                targetDate = new Date().toISOString().split('T')[0];
+            } else {
+                const dayLower = dayStr.toLowerCase();
+                const dayIndex = DAYS.findIndex(d => d.toLowerCase().startsWith(dayLower));
+                if (dayIndex >= 0) {
+                    targetDate = formatDate(weekDates[dayIndex], 'iso');
+                    dayName = DAYS[dayIndex];
+                }
+            }
+
+            if (!targetDate) {
+                return { type: 'error', message: `Couldn't understand the day "${dayStr}".` };
+            }
+
+            // Find staff not scheduled that day who have hours remaining
+            const scheduledIds = new Set();
+            if (state.schedule[targetDate]) {
+                Object.values(state.schedule[targetDate]).forEach(assignments => {
+                    assignments.forEach(a => scheduledIds.add(a.staffId));
+                });
+            }
+
+            const available = state.staff.filter(s => {
+                if (scheduledIds.has(s.id)) return false;
+                const hours = calculateWeekHours(s.id);
+                return hours < s.maxHours;
+            });
+
+            if (available.length === 0) {
+                return { type: 'info', message: `Everyone is either scheduled or at max hours for ${dayName}.` };
+            }
+
+            const byRole = {};
+            available.forEach(s => {
+                if (!byRole[s.role]) byRole[s.role] = [];
+                byRole[s.role].push(s.name.split(' ')[0]);
+            });
+
+            let html = `<strong>Available on ${dayName}:</strong><br>`;
+            Object.entries(byRole).forEach(([role, names]) => {
+                html += `• <strong>${ROLE_LABELS[role]}:</strong> ${names.join(', ')}<br>`;
+            });
+
+            return { type: 'info', message: html };
         }
 
         // ============================================

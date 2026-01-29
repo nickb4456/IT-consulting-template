@@ -1868,6 +1868,39 @@
             background: #e5e7eb;
         }
 
+        .org-code-sidebar {
+            margin: 16px;
+            padding: 12px;
+            background: var(--accent-light);
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px dashed var(--accent);
+        }
+        .org-code-label-sm {
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .org-code-value-sm {
+            font-family: monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: background 0.15s;
+        }
+        .org-code-value-sm:hover {
+            background: var(--bg-secondary);
+        }
+        .org-code-hint-sm {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
         .user-badge {
             display: flex;
             align-items: center;
@@ -1973,7 +2006,7 @@
                     <div class="org-code-hint">Share this code with your staff</div>
                 </div>
                 <form class="login-form" onsubmit="handleManagerSignup(event)">
-                    <input type="text" class="login-input" id="managerRestaurantName" placeholder="Restaurant name" required>
+                    <input type="text" class="login-input" id="managerRestaurantName" placeholder="Restaurant name" required oninput="updateOrgCodeFromName()">
                     <input type="email" class="login-input" id="managerEmail" placeholder="Your email" required>
                     <input type="password" class="login-input" id="managerPassword" placeholder="Password (min 6 chars)" required minlength="6">
                     <button type="submit" class="login-btn" id="managerSignupBtn">Create Restaurant</button>
@@ -2093,6 +2126,12 @@
                     <span id="theme-icon">◐</span>
                     <span id="theme-text">Dark Mode</span>
                 </button>
+            </div>
+
+            <div class="org-code-sidebar" id="orgCodeSidebar" style="display: none;">
+                <div class="org-code-label-sm">Organization Code</div>
+                <div class="org-code-value-sm" id="sidebarOrgCode" onclick="copyOrgCodeFromSidebar()">---</div>
+                <div class="org-code-hint-sm">Click to copy</div>
             </div>
 
             <div class="user-badge" id="userBadge">
@@ -3033,11 +3072,30 @@
         let currentUser = null;
         let currentUserData = null; // Stores org code, role, name
 
-        function generateOrgCode() {
-            const words = ['BLUE', 'RED', 'GREEN', 'GOLD', 'STAR', 'MOON', 'SUN', 'CHEF', 'FORK', 'SALT'];
-            const word = words[Math.floor(Math.random() * words.length)];
+        function generateOrgCode(restaurantName) {
+            // Generate code based on restaurant name if provided
+            let prefix;
+            if (restaurantName && restaurantName.trim().length > 0) {
+                // Take first word, remove special chars, uppercase, max 8 chars
+                prefix = restaurantName.trim().split(/\s+/)[0]
+                    .replace(/[^a-zA-Z]/g, '')
+                    .toUpperCase()
+                    .substring(0, 8);
+                if (prefix.length < 2) prefix = 'REST';
+            } else {
+                const words = ['CAFE', 'DINE', 'EATS', 'CHEF', 'FORK', 'GRILL', 'BISTRO'];
+                prefix = words[Math.floor(Math.random() * words.length)];
+            }
             const num = Math.floor(1000 + Math.random() * 9000);
-            return `${word}-${num}`;
+            return `${prefix}-${num}`;
+        }
+
+        function updateOrgCodeFromName() {
+            const nameInput = document.getElementById('managerRestaurantName');
+            const codeDisplay = document.getElementById('generatedOrgCode');
+            if (nameInput && codeDisplay) {
+                codeDisplay.textContent = generateOrgCode(nameInput.value);
+            }
         }
 
         function showSignIn() {
@@ -3115,6 +3173,9 @@
             }
         }
 
+        // Flag to prevent race condition during signup
+        let signupInProgress = false;
+
         async function handleManagerSignup(e) {
             e.preventDefault();
             const restaurantName = document.getElementById('managerRestaurantName').value;
@@ -3125,6 +3186,7 @@
 
             btn.disabled = true;
             btn.textContent = 'Creating...';
+            signupInProgress = true;
 
             try {
                 // Create user account
@@ -3137,19 +3199,21 @@
                     name: restaurantName,
                     code: orgCode,
                     ownerId: user.uid,
-                    managerInvites: [], // Emails allowed to join as managers
+                    managerInvites: [],
                     createdAt: new Date().toISOString()
                 });
 
                 // Create user profile
                 const userRef = window.firebaseDoc(window.firebaseDb, 'users', user.uid);
-                await window.firebaseSetDoc(userRef, {
+                const userData = {
                     email: email,
                     name: 'Manager',
                     role: 'manager',
                     orgCode: orgCode,
+                    restaurantName: restaurantName,
                     createdAt: new Date().toISOString()
-                });
+                };
+                await window.firebaseSetDoc(userRef, userData);
 
                 // Create initial schedule data for org
                 const scheduleRef = window.firebaseDoc(window.firebaseDb, 'schedules', orgCode);
@@ -3162,10 +3226,28 @@
                     createdAt: new Date().toISOString()
                 });
 
+                // All documents created - manually complete login
+                signupInProgress = false;
+                currentUser = user;
+                currentUserData = userData;
+
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('userEmail').textContent = `${userData.name} (${userData.role})`;
+
+                const navTeam = document.getElementById('navTeam');
+                if (navTeam) navTeam.style.display = 'flex';
+
+                updateOrgCodeDisplay();
+                loadStateFromFirestore();
+                showToast(`Welcome! Your org code is ${orgCode}`, 'success');
+
             } catch (error) {
+                signupInProgress = false;
                 let message = 'An error occurred';
                 if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
                 else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
+                console.error('Signup error:', error);
 
                 showError(message);
                 btn.disabled = false;
@@ -3210,6 +3292,7 @@
                 }
 
                 btn.textContent = 'Joining...';
+                signupInProgress = true;
 
                 // Create user account
                 const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
@@ -3217,13 +3300,14 @@
 
                 // Create user profile
                 const userRef = window.firebaseDoc(window.firebaseDb, 'users', user.uid);
-                await window.firebaseSetDoc(userRef, {
+                const userData = {
                     email: email,
                     name: name,
                     role: 'employee',
                     orgCode: orgCode,
                     createdAt: new Date().toISOString()
-                });
+                };
+                await window.firebaseSetDoc(userRef, userData);
 
                 // Remove from invite list if they were invited
                 if (orgData.requireEmployeeInvite && orgData.employeeInvites) {
@@ -3231,7 +3315,23 @@
                     await window.firebaseSetDoc(orgRef, { ...orgData, employeeInvites: updatedInvites });
                 }
 
+                // Manually complete login
+                signupInProgress = false;
+                currentUser = user;
+                currentUserData = userData;
+
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('userEmail').textContent = `${name} (employee)`;
+
+                const navTeam = document.getElementById('navTeam');
+                if (navTeam) navTeam.style.display = 'none';
+
+                loadStateFromFirestore();
+                showToast(`Welcome to ${orgData.name}!`, 'success');
+
             } catch (error) {
+                signupInProgress = false;
                 let message = 'An error occurred';
                 if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
                 else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
@@ -3277,6 +3377,7 @@
                 }
 
                 btn.textContent = 'Joining...';
+                signupInProgress = true;
 
                 // Create user account
                 const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
@@ -3284,19 +3385,37 @@
 
                 // Create user profile as manager
                 const userRef = window.firebaseDoc(window.firebaseDb, 'users', user.uid);
-                await window.firebaseSetDoc(userRef, {
+                const userData = {
                     email: email,
                     name: name,
                     role: 'manager',
                     orgCode: orgCode,
                     createdAt: new Date().toISOString()
-                });
+                };
+                await window.firebaseSetDoc(userRef, userData);
 
-                // Remove email from invite list (optional - they're now a manager)
+                // Remove email from invite list
                 const updatedInvites = orgData.managerInvites.filter(e => e.toLowerCase() !== email);
                 await window.firebaseSetDoc(orgRef, { ...orgData, managerInvites: updatedInvites });
 
+                // Manually complete login
+                signupInProgress = false;
+                currentUser = user;
+                currentUserData = userData;
+
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('userEmail').textContent = `${name} (manager)`;
+
+                const navTeam = document.getElementById('navTeam');
+                if (navTeam) navTeam.style.display = 'flex';
+
+                updateOrgCodeDisplay();
+                loadStateFromFirestore();
+                showToast(`Welcome to ${orgData.name}!`, 'success');
+
             } catch (error) {
+                signupInProgress = false;
                 let message = 'An error occurred';
                 if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
                 else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
@@ -3314,6 +3433,9 @@
         }
 
         async function onUserLoggedIn(user) {
+            // Skip if signup is in progress (we handle login manually after signup)
+            if (signupInProgress) return;
+
             currentUser = user;
 
             // Get user profile to find their org
@@ -3333,12 +3455,26 @@
                         navTeam.style.display = currentUserData.role === 'manager' ? 'flex' : 'none';
                     }
 
+                    updateOrgCodeDisplay();
                     loadStateFromFirestore();
                 } else {
-                    // User exists in auth but not in Firestore (legacy user)
-                    // Create a default user profile
-                    showError('Account setup incomplete. Please sign up again.');
-                    await window.firebaseSignOut(window.firebaseAuth);
+                    // User exists in auth but not in Firestore - wait a moment and retry
+                    // This can happen due to race conditions
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    const retrySnap = await window.firebaseGetDoc(userRef);
+                    if (retrySnap.exists()) {
+                        currentUserData = retrySnap.data();
+                        document.getElementById('loginScreen').classList.add('hidden');
+                        document.getElementById('appContainer').style.display = 'flex';
+                        document.getElementById('userEmail').textContent = `${currentUserData.name || user.email} (${currentUserData.role})`;
+                        const navTeam = document.getElementById('navTeam');
+                        if (navTeam) navTeam.style.display = currentUserData.role === 'manager' ? 'flex' : 'none';
+                        updateOrgCodeDisplay();
+                        loadStateFromFirestore();
+                    } else {
+                        showError('Account setup incomplete. Please sign up again.');
+                        await window.firebaseSignOut(window.firebaseAuth);
+                    }
                 }
             } catch (error) {
                 console.error('Error loading user data:', error);
@@ -5249,6 +5385,27 @@ Sarah Lee,manager,22,45,all`;
             }).catch(() => {
                 showToast('Could not copy code', 'error');
             });
+        }
+
+        function copyOrgCodeFromSidebar() {
+            if (currentUserData?.orgCode) {
+                navigator.clipboard.writeText(currentUserData.orgCode).then(() => {
+                    showToast(`Copied: ${currentUserData.orgCode}`, 'success');
+                }).catch(() => {
+                    showToast('Could not copy code', 'error');
+                });
+            }
+        }
+
+        function updateOrgCodeDisplay() {
+            const sidebarEl = document.getElementById('orgCodeSidebar');
+            const codeEl = document.getElementById('sidebarOrgCode');
+
+            if (currentUserData?.orgCode && sidebarEl && codeEl) {
+                codeEl.textContent = currentUserData.orgCode;
+                // Only show for managers
+                sidebarEl.style.display = currentUserData.role === 'manager' ? 'block' : 'none';
+            }
         }
 
         async function inviteEmployee() {

@@ -3247,10 +3247,15 @@
 
             } catch (error) {
                 signupInProgress = false;
+                console.error('Signup error:', error.code, error.message, error);
                 let message = 'An error occurred';
                 if (error.code === 'auth/email-already-in-use') message = 'Email already in use';
                 else if (error.code === 'auth/weak-password') message = 'Password must be at least 6 characters';
-                console.error('Signup error:', error);
+                else if (error.code?.includes('permission') || error.message?.includes('permission')) {
+                    message = 'Database permission error. Check Firebase Firestore rules.';
+                } else {
+                    message = `Error: ${error.code || error.message || 'Unknown error'}`;
+                }
 
                 showError(message);
                 btn.disabled = false;

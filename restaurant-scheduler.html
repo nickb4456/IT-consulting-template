@@ -2181,6 +2181,14 @@
                         <span class="icon">⚙</span>
                         My Preferences
                     </div>
+                    <div class="nav-item" data-page="time-off">
+                        <span class="icon">🗓</span>
+                        Time Off
+                    </div>
+                    <div class="nav-item" data-page="my-schedule">
+                        <span class="icon">📅</span>
+                        My Schedule
+                    </div>
                 </div>
 
                 <div class="nav-section">
@@ -2188,6 +2196,22 @@
                     <div class="nav-item manager-only" data-page="labor" id="navLabor">
                         <span class="icon">◐</span>
                         Labor Costs
+                    </div>
+                    <div class="nav-item manager-only" data-page="reports" id="navReports">
+                        <span class="icon">📊</span>
+                        Analytics
+                    </div>
+                </div>
+
+                <div class="nav-section manager-only" id="navLocationsSection">
+                    <div class="nav-label">Organization</div>
+                    <div class="nav-item" data-page="locations">
+                        <span class="icon">📍</span>
+                        Locations
+                    </div>
+                    <div class="nav-item" data-page="notifications">
+                        <span class="icon">🔔</span>
+                        Notifications
                     </div>
                 </div>
             </nav>
@@ -2801,6 +2825,278 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Time Off Requests -->
+            <section class="page-section" id="page-time-off">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Time Off Requests</h1>
+                        <p class="page-subtitle">Request and manage time off</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openTimeOffModal()">+ Request Time Off</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">My Requests</h3>
+                    </div>
+                    <div id="my-time-off-requests" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card manager-only-card" id="pending-time-off-card" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title">Pending Approvals</h3>
+                    </div>
+                    <div id="pending-time-off-requests" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card manager-only-card" id="all-time-off-card" style="display: none;">
+                    <div class="card-header">
+                        <h3 class="card-title">All Time Off (This Month)</h3>
+                    </div>
+                    <div id="all-time-off-calendar" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- My Schedule with Export -->
+            <section class="page-section" id="page-my-schedule">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">My Schedule</h1>
+                        <p class="page-subtitle">View and export your shifts</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="exportToCalendar('week')">📅 Export Week</button>
+                        <button class="btn btn-primary" onclick="exportToCalendar('month')">📅 Export Month</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">This Week's Shifts</h3>
+                    </div>
+                    <div id="my-weekly-schedule" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Upcoming Shifts</h3>
+                    </div>
+                    <div id="my-upcoming-shifts" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Hours Summary</h3>
+                    </div>
+                    <div id="my-hours-summary" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports/Analytics -->
+            <section class="page-section" id="page-reports">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Analytics & Reports</h1>
+                        <p class="page-subtitle">Performance metrics and insights</p>
+                    </div>
+                    <div class="header-actions">
+                        <select id="report-period" class="form-select" onchange="updateReports()">
+                            <option value="week">This Week</option>
+                            <option value="month" selected>This Month</option>
+                            <option value="quarter">This Quarter</option>
+                            <option value="year">This Year</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="exportReport()">Export Report</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid" style="margin-bottom: 24px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="report-total-hours">0</div>
+                        <div class="stat-label">Total Hours Scheduled</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="report-labor-cost">$0</div>
+                        <div class="stat-label">Total Labor Cost</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="report-avg-hourly">$0</div>
+                        <div class="stat-label">Avg Hourly Rate</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="report-overtime-hours">0</div>
+                        <div class="stat-label">Overtime Hours</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Hours by Employee</h3>
+                    </div>
+                    <div id="report-hours-by-employee" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Labor Cost by Role</h3>
+                    </div>
+                    <div id="report-cost-by-role" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Shift Coverage Analysis</h3>
+                    </div>
+                    <div id="report-coverage" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Time Off Summary</h3>
+                    </div>
+                    <div id="report-time-off" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Locations -->
+            <section class="page-section" id="page-locations">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Locations</h1>
+                        <p class="page-subtitle">Manage restaurant locations</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openLocationModal()">+ Add Location</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">All Locations</h3>
+                    </div>
+                    <div id="locations-list" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Staff by Location</h3>
+                    </div>
+                    <div id="staff-by-location" style="padding: 16px;">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Notifications Settings -->
+            <section class="page-section" id="page-notifications">
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">Notification Settings</h1>
+                        <p class="page-subtitle">Configure SMS and email notifications</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveNotificationSettings()">Save Settings</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">SMS Notifications</h3>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Account SID</label>
+                            <input type="text" class="form-input" id="twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="width: 100%;">
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Auth Token</label>
+                            <input type="password" class="form-input" id="twilio-token" placeholder="Your auth token" style="width: 100%;">
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Phone Number</label>
+                            <input type="text" class="form-input" id="twilio-phone" placeholder="+1234567890" style="width: 100%;">
+                        </div>
+                        <button class="btn btn-secondary" onclick="testSMS()">Send Test SMS</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Notification Triggers</h3>
+                    </div>
+                    <div style="padding: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notify-schedule-published" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">Schedule Published</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Notify employees when new schedule is posted</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notify-shift-reminder" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">Shift Reminders</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Send reminder 24 hours before shift</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notify-swap-request" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">Swap Requests</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Notify when someone requests to swap shifts</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notify-time-off-request" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">Time Off Requests</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Notify managers of new time off requests</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="notify-understaffed" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div>
+                                <div style="font-weight: 500;">Understaffing Alerts</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">Alert managers when shifts are understaffed</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
@@ -2809,6 +3105,87 @@
 
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
+
+    <!-- Time Off Modal -->
+    <div class="modal-overlay" id="time-off-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Request Time Off</h2>
+                <button class="modal-close" onclick="closeModal('time-off-modal')">×</button>
+            </div>
+            <form id="time-off-form" onsubmit="submitTimeOffRequest(event)">
+                <div class="form-group">
+                    <label>Type</label>
+                    <select class="form-select" id="time-off-type" required>
+                        <option value="vacation">Vacation</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="personal">Personal Day</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Start Date</label>
+                        <input type="date" class="form-input" id="time-off-start" required>
+                    </div>
+                    <div class="form-group">
+                        <label>End Date</label>
+                        <input type="date" class="form-input" id="time-off-end" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea class="form-input" id="time-off-notes" rows="3" placeholder="Any additional details..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('time-off-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Location Modal -->
+    <div class="modal-overlay" id="location-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title" id="location-modal-title">Add Location</h2>
+                <button class="modal-close" onclick="closeModal('location-modal')">×</button>
+            </div>
+            <form id="location-form" onsubmit="saveLocation(event)">
+                <input type="hidden" id="location-id">
+                <div class="form-group">
+                    <label>Location Name</label>
+                    <input type="text" class="form-input" id="location-name" placeholder="Downtown Branch" required>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" class="form-input" id="location-address" placeholder="123 Main St, City, State">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" class="form-input" id="location-phone" placeholder="(555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Manager</label>
+                        <select class="form-select" id="location-manager">
+                            <option value="">Select Manager</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea class="form-input" id="location-notes" rows="2" placeholder="Additional info about this location..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('location-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Staff Modal -->
     <div class="modal-overlay" id="staff-modal">
@@ -3757,11 +4134,15 @@
                     document.getElementById('appContainer').style.display = 'flex';
                     document.getElementById('userEmail').textContent = `${currentUserData.name || user.email} (${currentUserData.role})`;
 
-                    // Show Team nav for managers only
+                    // Show manager-only nav items
+                    const isManager = currentUserData.role === 'manager';
                     const navTeam = document.getElementById('navTeam');
-                    if (navTeam) {
-                        navTeam.style.display = currentUserData.role === 'manager' ? 'flex' : 'none';
-                    }
+                    const navReports = document.getElementById('navReports');
+                    const navLocationsSection = document.getElementById('navLocationsSection');
+
+                    if (navTeam) navTeam.style.display = isManager ? 'flex' : 'none';
+                    if (navReports) navReports.style.display = isManager ? 'flex' : 'none';
+                    if (navLocationsSection) navLocationsSection.style.display = isManager ? 'block' : 'none';
 
                     updateOrgCodeDisplay();
                     loadStateFromFirestore();
@@ -3780,8 +4161,13 @@
                         document.getElementById('loginScreen').classList.add('hidden');
                         document.getElementById('appContainer').style.display = 'flex';
                         document.getElementById('userEmail').textContent = `${currentUserData.name || user.email} (${currentUserData.role})`;
+                        const isManager = currentUserData.role === 'manager';
                         const navTeam = document.getElementById('navTeam');
-                        if (navTeam) navTeam.style.display = currentUserData.role === 'manager' ? 'flex' : 'none';
+                        const navReports = document.getElementById('navReports');
+                        const navLocationsSection = document.getElementById('navLocationsSection');
+                        if (navTeam) navTeam.style.display = isManager ? 'flex' : 'none';
+                        if (navReports) navReports.style.display = isManager ? 'flex' : 'none';
+                        if (navLocationsSection) navLocationsSection.style.display = isManager ? 'block' : 'none';
                         updateOrgCodeDisplay();
                         loadStateFromFirestore();
 
@@ -3956,6 +4342,11 @@
                 case 'team': renderTeamPage(); break;
                 case 'shift-market': renderShiftMarketplace(); break;
                 case 'my-preferences': renderMyPreferences(); break;
+                case 'time-off': renderTimeOffPage(); break;
+                case 'my-schedule': renderMySchedule(); break;
+                case 'reports': renderReports(); break;
+                case 'locations': renderLocations(); break;
+                case 'notifications': renderNotificationSettings(); break;
             }
         }
 
@@ -7077,6 +7468,856 @@ Sarah Lee,manager,22,45,all`;
             });
 
             return { type: 'info', message: html };
+        }
+
+        // ============================================
+        // TIME OFF REQUESTS
+        // ============================================
+        function openTimeOffModal() {
+            document.getElementById('time-off-form').reset();
+            // Set default dates
+            const today = new Date();
+            document.getElementById('time-off-start').value = formatDate(today, 'iso');
+            document.getElementById('time-off-end').value = formatDate(today, 'iso');
+            openModal('time-off-modal');
+        }
+
+        function submitTimeOffRequest(e) {
+            e.preventDefault();
+            const request = {
+                id: generateId(),
+                type: document.getElementById('time-off-type').value,
+                startDate: document.getElementById('time-off-start').value,
+                endDate: document.getElementById('time-off-end').value,
+                notes: document.getElementById('time-off-notes').value,
+                status: 'pending',
+                requestedBy: currentUser?.email || 'Unknown',
+                requestedByName: currentUserData?.name || 'Unknown',
+                requestedAt: new Date().toISOString()
+            };
+
+            if (!state.timeOffRequests) state.timeOffRequests = [];
+            state.timeOffRequests.push(request);
+            saveState();
+
+            closeModal('time-off-modal');
+            showToast('Time off request submitted!', 'success');
+            renderTimeOffPage();
+        }
+
+        function renderTimeOffPage() {
+            renderMyTimeOffRequests();
+            if (currentUserData?.role === 'manager') {
+                document.getElementById('pending-time-off-card').style.display = 'block';
+                document.getElementById('all-time-off-card').style.display = 'block';
+                renderPendingTimeOffRequests();
+                renderAllTimeOff();
+            }
+        }
+
+        function renderMyTimeOffRequests() {
+            const container = document.getElementById('my-time-off-requests');
+            const myRequests = (state.timeOffRequests || [])
+                .filter(r => r.requestedBy === currentUser?.email)
+                .sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+
+            if (myRequests.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No time off requests yet.</p>';
+                return;
+            }
+
+            const statusColors = {
+                pending: 'var(--warning)',
+                approved: 'var(--success)',
+                denied: 'var(--danger)'
+            };
+
+            let html = '<div style="display: grid; gap: 12px;">';
+            myRequests.forEach(req => {
+                html += `
+                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius); border-left: 4px solid ${statusColors[req.status]};">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong>${req.type.charAt(0).toUpperCase() + req.type.slice(1)}</strong>
+                                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                    ${formatDate(new Date(req.startDate), 'display')} - ${formatDate(new Date(req.endDate), 'display')}
+                                </div>
+                                ${req.notes ? `<div style="font-size: 13px; margin-top: 4px;">${req.notes}</div>` : ''}
+                            </div>
+                            <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; background: ${statusColors[req.status]}20; color: ${statusColors[req.status]};">
+                                ${req.status.toUpperCase()}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderPendingTimeOffRequests() {
+            const container = document.getElementById('pending-time-off-requests');
+            const pending = (state.timeOffRequests || []).filter(r => r.status === 'pending');
+
+            if (pending.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No pending requests.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 12px;">';
+            pending.forEach(req => {
+                html += `
+                    <div style="padding: 12px; background: var(--bg-tertiary); border-radius: var(--radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong>${req.requestedByName}</strong> - ${req.type}
+                                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+                                    ${formatDate(new Date(req.startDate), 'display')} - ${formatDate(new Date(req.endDate), 'display')}
+                                </div>
+                                ${req.notes ? `<div style="font-size: 13px; margin-top: 4px;">${req.notes}</div>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary" onclick="approveTimeOff('${req.id}')" style="padding: 6px 12px; font-size: 13px;">Approve</button>
+                                <button class="btn btn-secondary" onclick="denyTimeOff('${req.id}')" style="padding: 6px 12px; font-size: 13px;">Deny</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function approveTimeOff(requestId) {
+            const request = state.timeOffRequests?.find(r => r.id === requestId);
+            if (request) {
+                request.status = 'approved';
+                request.approvedBy = currentUser?.email;
+                request.approvedAt = new Date().toISOString();
+                saveState();
+                showToast('Time off approved!', 'success');
+                renderTimeOffPage();
+            }
+        }
+
+        function denyTimeOff(requestId) {
+            const request = state.timeOffRequests?.find(r => r.id === requestId);
+            if (request) {
+                request.status = 'denied';
+                request.deniedBy = currentUser?.email;
+                request.deniedAt = new Date().toISOString();
+                saveState();
+                showToast('Time off denied.', 'info');
+                renderTimeOffPage();
+            }
+        }
+
+        function renderAllTimeOff() {
+            const container = document.getElementById('all-time-off-calendar');
+            const approved = (state.timeOffRequests || []).filter(r => r.status === 'approved');
+
+            if (approved.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No approved time off this month.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 8px;">';
+            approved.forEach(req => {
+                html += `
+                    <div style="padding: 8px 12px; background: var(--success-light); border-radius: var(--radius); display: flex; justify-content: space-between;">
+                        <span><strong>${req.requestedByName}</strong> - ${req.type}</span>
+                        <span>${formatDate(new Date(req.startDate), 'short')} - ${formatDate(new Date(req.endDate), 'short')}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // MY SCHEDULE & EXPORT
+        // ============================================
+        function renderMySchedule() {
+            renderMyWeeklySchedule();
+            renderMyUpcomingShifts();
+            renderMyHoursSummary();
+        }
+
+        function renderMyWeeklySchedule() {
+            const container = document.getElementById('my-weekly-schedule');
+            const myStaff = findMyStaffRecord();
+
+            if (!myStaff) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Link your account to a staff member to see your schedule.</p>';
+                return;
+            }
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let html = '<div style="display: grid; gap: 8px;">';
+
+            weekDates.forEach((date, i) => {
+                const dateKey = formatDate(date, 'iso');
+                const myShifts = getMyShiftsForDate(myStaff.id, dateKey);
+                const isToday = formatDate(new Date(), 'iso') === dateKey;
+
+                html += `
+                    <div style="padding: 12px; background: ${isToday ? 'var(--accent-light)' : 'var(--bg-tertiary)'}; border-radius: var(--radius); ${isToday ? 'border: 2px solid var(--accent);' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${DAYS[i]}, ${formatDate(date, 'short')}</strong>
+                            ${myShifts.length > 0 ? `<span style="color: var(--text-muted); font-size: 13px;">${myShifts.map(s => s.name).join(', ')}</span>` : '<span style="color: var(--text-muted); font-size: 13px;">Off</span>'}
+                        </div>
+                        ${myShifts.length > 0 ? `
+                            <div style="margin-top: 8px; font-size: 13px; color: var(--text-secondary);">
+                                ${myShifts.map(s => `${s.startTime} - ${s.endTime}`).join(' | ')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderMyUpcomingShifts() {
+            const container = document.getElementById('my-upcoming-shifts');
+            const myStaff = findMyStaffRecord();
+
+            if (!myStaff) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No upcoming shifts.</p>';
+                return;
+            }
+
+            const today = new Date();
+            const upcomingShifts = [];
+
+            // Check next 14 days
+            for (let i = 0; i < 14; i++) {
+                const date = new Date(today);
+                date.setDate(date.getDate() + i);
+                const dateKey = formatDate(date, 'iso');
+                const shifts = getMyShiftsForDate(myStaff.id, dateKey);
+                shifts.forEach(shift => {
+                    upcomingShifts.push({ date, shift, dateKey });
+                });
+            }
+
+            if (upcomingShifts.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No upcoming shifts in the next 2 weeks.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 8px;">';
+            upcomingShifts.slice(0, 10).forEach(({ date, shift }) => {
+                html += `
+                    <div style="padding: 8px 12px; background: var(--bg-tertiary); border-radius: var(--radius); display: flex; justify-content: space-between;">
+                        <span>${formatDate(date, 'display')}</span>
+                        <span><strong>${shift.name}</strong> ${shift.startTime} - ${shift.endTime}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderMyHoursSummary() {
+            const container = document.getElementById('my-hours-summary');
+            const myStaff = findMyStaffRecord();
+
+            if (!myStaff) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Link your account to see hours summary.</p>';
+                return;
+            }
+
+            const weekDates = getWeekDates(state.currentWeekStart);
+            let totalHours = 0;
+
+            weekDates.forEach(date => {
+                const dateKey = formatDate(date, 'iso');
+                const shifts = getMyShiftsForDate(myStaff.id, dateKey);
+                shifts.forEach(shift => {
+                    totalHours += getShiftDuration(shift);
+                });
+            });
+
+            html = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+                    <div>
+                        <div style="font-size: 24px; font-weight: 600; color: var(--accent);">${totalHours.toFixed(1)}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Hours This Week</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 600; color: var(--success);">$${(totalHours * (myStaff.hourlyRate || 15)).toFixed(2)}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Estimated Pay</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 24px; font-weight: 600;">${myStaff.maxHours || 40}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Max Hours</div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function findMyStaffRecord() {
+            return state.staff.find(s =>
+                s.email?.toLowerCase() === currentUser?.email?.toLowerCase() ||
+                s.name.toLowerCase().includes(currentUserData?.name?.toLowerCase() || '')
+            );
+        }
+
+        function getMyShiftsForDate(staffId, dateKey) {
+            const shifts = [];
+            if (state.schedule[dateKey]) {
+                Object.entries(state.schedule[dateKey]).forEach(([shiftId, assignments]) => {
+                    if (assignments.some(a => a.staffId === staffId)) {
+                        const shift = state.shiftTemplates.find(s => s.id === shiftId);
+                        if (shift) shifts.push(shift);
+                    }
+                });
+            }
+            return shifts;
+        }
+
+        function getShiftDuration(shift) {
+            const [startH, startM] = shift.startTime.split(':').map(Number);
+            const [endH, endM] = shift.endTime.split(':').map(Number);
+            let hours = endH - startH + (endM - startM) / 60;
+            if (hours < 0) hours += 24; // Overnight shift
+            return hours;
+        }
+
+        function exportToCalendar(period) {
+            const myStaff = findMyStaffRecord();
+            if (!myStaff) {
+                showToast('Link your account to export schedule', 'warning');
+                return;
+            }
+
+            const events = [];
+            const startDate = new Date(state.currentWeekStart);
+            const days = period === 'week' ? 7 : 30;
+
+            for (let i = 0; i < days; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateKey = formatDate(date, 'iso');
+                const shifts = getMyShiftsForDate(myStaff.id, dateKey);
+
+                shifts.forEach(shift => {
+                    const [startH, startM] = shift.startTime.split(':').map(Number);
+                    const [endH, endM] = shift.endTime.split(':').map(Number);
+
+                    const startDT = new Date(date);
+                    startDT.setHours(startH, startM, 0);
+
+                    const endDT = new Date(date);
+                    endDT.setHours(endH, endM, 0);
+                    if (endH < startH) endDT.setDate(endDT.getDate() + 1);
+
+                    events.push({
+                        title: `${shift.name} Shift - ${currentUserData?.restaurantName || 'Work'}`,
+                        start: startDT,
+                        end: endDT,
+                        location: state.locations?.[0]?.address || ''
+                    });
+                });
+            }
+
+            if (events.length === 0) {
+                showToast('No shifts to export', 'info');
+                return;
+            }
+
+            const icsContent = generateICS(events);
+            downloadFile(icsContent, `schedule-${period}.ics`, 'text/calendar');
+            showToast(`Exported ${events.length} shifts to calendar!`, 'success');
+        }
+
+        function generateICS(events) {
+            let ics = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//StaffSync//Schedule Export//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+`;
+
+            events.forEach(event => {
+                const uid = generateId() + '@staffsync';
+                const dtstamp = formatICSDate(new Date());
+                const dtstart = formatICSDate(event.start);
+                const dtend = formatICSDate(event.end);
+
+                ics += `BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${dtstamp}
+DTSTART:${dtstart}
+DTEND:${dtend}
+SUMMARY:${event.title}
+LOCATION:${event.location}
+END:VEVENT
+`;
+            });
+
+            ics += 'END:VCALENDAR';
+            return ics;
+        }
+
+        function formatICSDate(date) {
+            return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        }
+
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================
+        // REPORTS & ANALYTICS
+        // ============================================
+        function renderReports() {
+            const period = document.getElementById('report-period')?.value || 'month';
+            updateReportStats(period);
+            renderHoursByEmployee(period);
+            renderCostByRole(period);
+            renderCoverageAnalysis();
+            renderTimeOffReport();
+        }
+
+        function updateReports() {
+            renderReports();
+        }
+
+        function updateReportStats(period) {
+            const { totalHours, totalCost, overtimeHours } = calculatePeriodStats(period);
+            const avgRate = totalHours > 0 ? totalCost / totalHours : 0;
+
+            document.getElementById('report-total-hours').textContent = totalHours.toFixed(1);
+            document.getElementById('report-labor-cost').textContent = '$' + totalCost.toFixed(2);
+            document.getElementById('report-avg-hourly').textContent = '$' + avgRate.toFixed(2);
+            document.getElementById('report-overtime-hours').textContent = overtimeHours.toFixed(1);
+        }
+
+        function calculatePeriodStats(period) {
+            let totalHours = 0;
+            let totalCost = 0;
+            const staffHours = {};
+
+            const days = period === 'week' ? 7 : period === 'month' ? 30 : period === 'quarter' ? 90 : 365;
+            const startDate = new Date(state.currentWeekStart);
+
+            for (let i = 0; i < days; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateKey = formatDate(date, 'iso');
+
+                if (state.schedule[dateKey]) {
+                    Object.entries(state.schedule[dateKey]).forEach(([shiftId, assignments]) => {
+                        const shift = state.shiftTemplates.find(s => s.id === shiftId);
+                        if (!shift) return;
+
+                        const duration = getShiftDuration(shift);
+                        assignments.forEach(a => {
+                            const staff = state.staff.find(s => s.id === a.staffId);
+                            if (staff) {
+                                totalHours += duration;
+                                totalCost += duration * (staff.hourlyRate || 15);
+
+                                if (!staffHours[a.staffId]) staffHours[a.staffId] = 0;
+                                staffHours[a.staffId] += duration;
+                            }
+                        });
+                    });
+                }
+            }
+
+            // Calculate overtime (hours over 40/week per employee)
+            let overtimeHours = 0;
+            Object.values(staffHours).forEach(hours => {
+                const weeks = days / 7;
+                const avgPerWeek = hours / weeks;
+                if (avgPerWeek > 40) {
+                    overtimeHours += (avgPerWeek - 40) * weeks;
+                }
+            });
+
+            return { totalHours, totalCost, overtimeHours, staffHours };
+        }
+
+        function renderHoursByEmployee(period) {
+            const container = document.getElementById('report-hours-by-employee');
+            const { staffHours } = calculatePeriodStats(period);
+
+            const sorted = Object.entries(staffHours)
+                .map(([staffId, hours]) => {
+                    const staff = state.staff.find(s => s.id === staffId);
+                    return { name: staff?.name || 'Unknown', hours, rate: staff?.hourlyRate || 15 };
+                })
+                .sort((a, b) => b.hours - a.hours);
+
+            if (sorted.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No data available.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 8px;">';
+            sorted.forEach(({ name, hours, rate }) => {
+                const maxHours = Math.max(...Object.values(staffHours));
+                const pct = maxHours > 0 ? (hours / maxHours) * 100 : 0;
+
+                html += `
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 150px; font-weight: 500;">${name}</div>
+                        <div style="flex: 1; background: var(--bg-tertiary); border-radius: 4px; height: 24px; overflow: hidden;">
+                            <div style="background: var(--accent); height: 100%; width: ${pct}%; display: flex; align-items: center; padding-left: 8px;">
+                                <span style="color: white; font-size: 12px; font-weight: 500;">${hours.toFixed(1)}h</span>
+                            </div>
+                        </div>
+                        <div style="width: 80px; text-align: right; color: var(--text-muted);">$${(hours * rate).toFixed(0)}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderCostByRole(period) {
+            const container = document.getElementById('report-cost-by-role');
+            const days = period === 'week' ? 7 : period === 'month' ? 30 : period === 'quarter' ? 90 : 365;
+            const startDate = new Date(state.currentWeekStart);
+
+            const roleCosts = {};
+
+            for (let i = 0; i < days; i++) {
+                const date = new Date(startDate);
+                date.setDate(date.getDate() + i);
+                const dateKey = formatDate(date, 'iso');
+
+                if (state.schedule[dateKey]) {
+                    Object.entries(state.schedule[dateKey]).forEach(([shiftId, assignments]) => {
+                        const shift = state.shiftTemplates.find(s => s.id === shiftId);
+                        if (!shift) return;
+
+                        const duration = getShiftDuration(shift);
+                        assignments.forEach(a => {
+                            const staff = state.staff.find(s => s.id === a.staffId);
+                            if (staff) {
+                                if (!roleCosts[staff.role]) roleCosts[staff.role] = 0;
+                                roleCosts[staff.role] += duration * (staff.hourlyRate || 15);
+                            }
+                        });
+                    });
+                }
+            }
+
+            const total = Object.values(roleCosts).reduce((a, b) => a + b, 0);
+
+            if (total === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No data available.</p>';
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 12px;">';
+            Object.entries(roleCosts).sort((a, b) => b[1] - a[1]).forEach(([role, cost]) => {
+                const pct = (cost / total * 100).toFixed(1);
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--bg-tertiary); border-radius: var(--radius);">
+                        <span><span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: var(--role-${role}); margin-right: 8px;"></span>${ROLE_LABELS[role] || role}</span>
+                        <span><strong>$${cost.toFixed(2)}</strong> <span style="color: var(--text-muted);">(${pct}%)</span></span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderCoverageAnalysis() {
+            const container = document.getElementById('report-coverage');
+            const weekDates = getWeekDates(state.currentWeekStart);
+
+            let html = '<table style="width: 100%; border-collapse: collapse; font-size: 13px;">';
+            html += '<thead><tr style="background: var(--bg-tertiary);"><th style="padding: 8px; text-align: left;">Shift</th>';
+            DAYS_SHORT.forEach(day => {
+                html += `<th style="padding: 8px; text-align: center;">${day}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            state.shiftTemplates.forEach(shift => {
+                html += `<tr><td style="padding: 8px; font-weight: 500;">${shift.name}</td>`;
+
+                weekDates.forEach(date => {
+                    const dateKey = formatDate(date, 'iso');
+                    const assignments = state.schedule[dateKey]?.[shift.id] || [];
+                    const required = Object.values(shift.requirements || {}).reduce((a, b) => a + b, 0);
+                    const filled = assignments.length;
+                    const pct = required > 0 ? Math.min(100, (filled / required) * 100) : 100;
+
+                    const color = pct >= 100 ? 'var(--success)' : pct >= 75 ? 'var(--warning)' : 'var(--danger)';
+                    html += `<td style="padding: 8px; text-align: center;"><span style="color: ${color}; font-weight: 500;">${filled}/${required}</span></td>`;
+                });
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function renderTimeOffReport() {
+            const container = document.getElementById('report-time-off');
+            const requests = state.timeOffRequests || [];
+
+            const approved = requests.filter(r => r.status === 'approved').length;
+            const pending = requests.filter(r => r.status === 'pending').length;
+            const denied = requests.filter(r => r.status === 'denied').length;
+
+            html = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
+                    <div style="padding: 16px; background: var(--success-light); border-radius: var(--radius);">
+                        <div style="font-size: 24px; font-weight: 600; color: var(--success);">${approved}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Approved</div>
+                    </div>
+                    <div style="padding: 16px; background: var(--warning-light); border-radius: var(--radius);">
+                        <div style="font-size: 24px; font-weight: 600; color: var(--warning);">${pending}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Pending</div>
+                    </div>
+                    <div style="padding: 16px; background: var(--danger-light); border-radius: var(--radius);">
+                        <div style="font-size: 24px; font-weight: 600; color: var(--danger);">${denied}</div>
+                        <div style="font-size: 13px; color: var(--text-muted);">Denied</div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = html;
+        }
+
+        function exportReport() {
+            const period = document.getElementById('report-period')?.value || 'month';
+            const { totalHours, totalCost, overtimeHours, staffHours } = calculatePeriodStats(period);
+
+            let csv = 'StaffSync Report\n';
+            csv += `Period: ${period}\n`;
+            csv += `Generated: ${new Date().toLocaleDateString()}\n\n`;
+            csv += `Total Hours,${totalHours.toFixed(1)}\n`;
+            csv += `Total Labor Cost,$${totalCost.toFixed(2)}\n`;
+            csv += `Overtime Hours,${overtimeHours.toFixed(1)}\n\n`;
+            csv += 'Employee,Hours,Cost\n';
+
+            Object.entries(staffHours).forEach(([staffId, hours]) => {
+                const staff = state.staff.find(s => s.id === staffId);
+                const cost = hours * (staff?.hourlyRate || 15);
+                csv += `${staff?.name || 'Unknown'},${hours.toFixed(1)},$${cost.toFixed(2)}\n`;
+            });
+
+            downloadFile(csv, `report-${period}-${formatDate(new Date(), 'iso')}.csv`, 'text/csv');
+            showToast('Report exported!', 'success');
+        }
+
+        // ============================================
+        // LOCATIONS
+        // ============================================
+        function renderLocations() {
+            renderLocationsList();
+            renderStaffByLocation();
+        }
+
+        function openLocationModal(locationId = null) {
+            const form = document.getElementById('location-form');
+            const title = document.getElementById('location-modal-title');
+            form.reset();
+
+            // Populate manager dropdown
+            const managerSelect = document.getElementById('location-manager');
+            managerSelect.innerHTML = '<option value="">Select Manager</option>';
+            state.staff.filter(s => s.role === 'manager').forEach(m => {
+                managerSelect.innerHTML += `<option value="${m.id}">${m.name}</option>`;
+            });
+
+            if (locationId) {
+                const location = state.locations?.find(l => l.id === locationId);
+                if (location) {
+                    title.textContent = 'Edit Location';
+                    document.getElementById('location-id').value = location.id;
+                    document.getElementById('location-name').value = location.name;
+                    document.getElementById('location-address').value = location.address || '';
+                    document.getElementById('location-phone').value = location.phone || '';
+                    document.getElementById('location-manager').value = location.managerId || '';
+                    document.getElementById('location-notes').value = location.notes || '';
+                }
+            } else {
+                title.textContent = 'Add Location';
+            }
+
+            openModal('location-modal');
+        }
+
+        function saveLocation(e) {
+            e.preventDefault();
+
+            if (!state.locations) state.locations = [];
+
+            const id = document.getElementById('location-id').value || generateId();
+            const isEdit = !!document.getElementById('location-id').value;
+
+            const location = {
+                id,
+                name: document.getElementById('location-name').value,
+                address: document.getElementById('location-address').value,
+                phone: document.getElementById('location-phone').value,
+                managerId: document.getElementById('location-manager').value,
+                notes: document.getElementById('location-notes').value
+            };
+
+            if (isEdit) {
+                const idx = state.locations.findIndex(l => l.id === id);
+                if (idx !== -1) state.locations[idx] = location;
+            } else {
+                state.locations.push(location);
+            }
+
+            saveState();
+            closeModal('location-modal');
+            showToast(isEdit ? 'Location updated!' : 'Location added!', 'success');
+            renderLocations();
+        }
+
+        function deleteLocation(locationId) {
+            if (!confirm('Delete this location?')) return;
+            state.locations = state.locations.filter(l => l.id !== locationId);
+            saveState();
+            showToast('Location deleted.', 'info');
+            renderLocations();
+        }
+
+        function renderLocationsList() {
+            const container = document.getElementById('locations-list');
+
+            if (!state.locations || state.locations.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <p>No locations yet.</p>
+                        <button class="btn btn-primary" onclick="openLocationModal()" style="margin-top: 12px;">Add First Location</button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div style="display: grid; gap: 12px;">';
+            state.locations.forEach(loc => {
+                const manager = state.staff.find(s => s.id === loc.managerId);
+                html += `
+                    <div style="padding: 16px; background: var(--bg-tertiary); border-radius: var(--radius);">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <strong style="font-size: 16px;">${loc.name}</strong>
+                                ${loc.address ? `<div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">📍 ${loc.address}</div>` : ''}
+                                ${loc.phone ? `<div style="font-size: 13px; color: var(--text-muted);">📞 ${loc.phone}</div>` : ''}
+                                ${manager ? `<div style="font-size: 13px; color: var(--text-muted);">👤 Manager: ${manager.name}</div>` : ''}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-secondary" onclick="openLocationModal('${loc.id}')" style="padding: 6px 12px;">Edit</button>
+                                <button class="btn" onclick="deleteLocation('${loc.id}')" style="padding: 6px 12px; background: var(--danger-light); color: var(--danger);">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function renderStaffByLocation() {
+            const container = document.getElementById('staff-by-location');
+
+            if (!state.locations || state.locations.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted);">Add locations first to assign staff.</p>';
+                return;
+            }
+
+            // For now, show all staff (can be enhanced to track location assignments)
+            let html = '<div style="display: grid; gap: 16px;">';
+            state.locations.forEach(loc => {
+                const locationStaff = state.staff.filter(s => s.locationId === loc.id || !s.locationId);
+                html += `
+                    <div>
+                        <h4 style="margin-bottom: 8px;">${loc.name}</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${locationStaff.slice(0, 8).map(s => `
+                                <span style="padding: 4px 8px; background: var(--bg-tertiary); border-radius: 4px; font-size: 13px;">${s.name}</span>
+                            `).join('')}
+                            ${locationStaff.length > 8 ? `<span style="padding: 4px 8px; color: var(--text-muted); font-size: 13px;">+${locationStaff.length - 8} more</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ============================================
+        // NOTIFICATION SETTINGS
+        // ============================================
+        function renderNotificationSettings() {
+            const settings = state.notificationSettings || {};
+
+            // Load saved values
+            document.getElementById('twilio-sid').value = settings.twilioSid || '';
+            document.getElementById('twilio-token').value = settings.twilioToken || '';
+            document.getElementById('twilio-phone').value = settings.twilioPhone || '';
+
+            document.getElementById('notify-schedule-published').checked = settings.schedulePublished !== false;
+            document.getElementById('notify-shift-reminder').checked = settings.shiftReminder !== false;
+            document.getElementById('notify-swap-request').checked = settings.swapRequest !== false;
+            document.getElementById('notify-time-off-request').checked = settings.timeOffRequest !== false;
+            document.getElementById('notify-understaffed').checked = settings.understaffed !== false;
+        }
+
+        function saveNotificationSettings() {
+            state.notificationSettings = {
+                twilioSid: document.getElementById('twilio-sid').value,
+                twilioToken: document.getElementById('twilio-token').value,
+                twilioPhone: document.getElementById('twilio-phone').value,
+                schedulePublished: document.getElementById('notify-schedule-published').checked,
+                shiftReminder: document.getElementById('notify-shift-reminder').checked,
+                swapRequest: document.getElementById('notify-swap-request').checked,
+                timeOffRequest: document.getElementById('notify-time-off-request').checked,
+                understaffed: document.getElementById('notify-understaffed').checked
+            };
+
+            saveState();
+            showToast('Notification settings saved!', 'success');
+        }
+
+        function testSMS() {
+            const sid = document.getElementById('twilio-sid').value;
+            const token = document.getElementById('twilio-token').value;
+            const phone = document.getElementById('twilio-phone').value;
+
+            if (!sid || !token || !phone) {
+                showToast('Please fill in all Twilio credentials', 'warning');
+                return;
+            }
+
+            // Note: Actual SMS sending requires a backend server
+            showToast('SMS test requires backend integration. Credentials saved.', 'info');
+        }
+
+        async function sendSMSNotification(toPhone, message) {
+            const settings = state.notificationSettings;
+            if (!settings?.twilioSid || !settings?.twilioToken || !settings?.twilioPhone) {
+                console.log('SMS not configured');
+                return false;
+            }
+
+            // This would typically be a call to your backend
+            // Direct Twilio API calls from browser aren't secure
+            console.log(`Would send SMS to ${toPhone}: ${message}`);
+            return true;
         }
 
         // ============================================

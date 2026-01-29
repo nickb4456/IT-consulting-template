@@ -1433,6 +1433,16 @@
                         <p class="page-subtitle">Manage employees and availability</p>
                     </div>
                     <div class="header-actions">
+                        <button class="btn btn-secondary" onclick="openModal('csv-help-modal')" title="CSV Import Help">
+                            ? Help
+                        </button>
+                        <button class="btn btn-secondary" onclick="document.getElementById('csv-upload').click()">
+                            ↑ Import CSV
+                        </button>
+                        <input type="file" id="csv-upload" accept=".csv" style="display:none" onchange="importStaffCSV(event)">
+                        <button class="btn btn-danger" onclick="deleteAllEmployees()">
+                            Delete All
+                        </button>
                         <button class="btn btn-primary" onclick="openStaffModal()">
                             + Add Employee
                         </button>
@@ -1755,6 +1765,54 @@
         </div>
     </div>
 
+    <!-- CSV Import Help Modal -->
+    <div class="modal-overlay" id="csv-help-modal">
+        <div class="modal" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">CSV Import Instructions</h2>
+                <button class="modal-close" onclick="closeModal('csv-help-modal')">×</button>
+            </div>
+            <div style="font-size: 13px; line-height: 1.6;">
+                <p style="margin-bottom: 12px;"><strong>Import employees from a CSV file with the following format:</strong></p>
+
+                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 6px; font-family: monospace; font-size: 11px; margin-bottom: 16px; overflow-x: auto;">
+                    name,role,hourlyRate,maxHours,availability<br>
+                    John Smith,server,15,40,all<br>
+                    Jane Doe,cook,18,35,all<br>
+                    Bob Wilson,bartender,17,30,mon-fri<br>
+                    Amy Chen,host,14,25,weekends
+                </div>
+
+                <p style="margin-bottom: 8px;"><strong>Columns:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li><strong>name</strong> - Employee's full name (required)</li>
+                    <li><strong>role</strong> - server, cook, host, bartender, busser, or manager (required)</li>
+                    <li><strong>hourlyRate</strong> - Hourly pay rate (default: 15)</li>
+                    <li><strong>maxHours</strong> - Max hours per week (default: 40)</li>
+                    <li><strong>availability</strong> - See options below (default: all)</li>
+                </ul>
+
+                <p style="margin-bottom: 8px;"><strong>Availability Options:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 16px;">
+                    <li><strong>all</strong> - Available all days and shifts</li>
+                    <li><strong>weekdays</strong> or <strong>mon-fri</strong> - Monday through Friday only</li>
+                    <li><strong>weekends</strong> - Saturday and Sunday only</li>
+                    <li><strong>morning</strong> - Morning/breakfast shifts only</li>
+                    <li><strong>evening</strong> - Evening/dinner shifts only</li>
+                    <li><strong>0,1,2,3,4,5,6</strong> - Specific days (0=Sun, 1=Mon, etc.)</li>
+                </ul>
+
+                <p style="color: var(--text-muted); font-size: 11px;">
+                    Tip: Create your CSV in Excel or Google Sheets and export as CSV. The first row should be the header row.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="downloadSampleCSV()">Download Sample CSV</button>
+                <button class="btn btn-primary" onclick="closeModal('csv-help-modal')">Got It</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // DATA MODELS & STATE
@@ -2063,18 +2121,174 @@
         function deleteStaff(id) {
             if (confirm('Are you sure you want to delete this employee?')) {
                 state.staff = state.staff.filter(s => s.id !== id);
-                
+
                 // Remove from schedule
                 Object.keys(state.schedule).forEach(date => {
                     Object.keys(state.schedule[date]).forEach(shiftId => {
                         state.schedule[date][shiftId] = state.schedule[date][shiftId].filter(a => a.staffId !== id);
                     });
                 });
-                
+
                 saveState();
                 renderStaffTable();
                 showToast('Employee deleted', 'warning');
             }
+        }
+
+        function deleteAllEmployees() {
+            if (confirm('Are you sure you want to delete ALL employees? This will also clear the schedule.')) {
+                state.staff = [];
+                state.schedule = {};
+                saveState();
+                renderStaffTable();
+                renderSchedule();
+                renderDashboard();
+                showToast('All employees deleted', 'warning');
+            }
+        }
+
+        function importStaffCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split('\n').filter(line => line.trim());
+
+                    if (lines.length < 2) {
+                        showToast('CSV file is empty or invalid', 'error');
+                        return;
+                    }
+
+                    // Parse header
+                    const header = lines[0].toLowerCase().split(',').map(h => h.trim());
+                    const nameIdx = header.indexOf('name');
+                    const roleIdx = header.indexOf('role');
+                    const rateIdx = header.indexOf('hourlyrate');
+                    const hoursIdx = header.indexOf('maxhours');
+                    const availIdx = header.indexOf('availability');
+
+                    if (nameIdx === -1 || roleIdx === -1) {
+                        showToast('CSV must have "name" and "role" columns', 'error');
+                        return;
+                    }
+
+                    let imported = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        if (values.length < 2) continue;
+
+                        const name = values[nameIdx]?.trim();
+                        const role = values[roleIdx]?.trim().toLowerCase();
+
+                        if (!name || !ROLES.includes(role)) continue;
+
+                        const hourlyRate = parseFloat(values[rateIdx]) || 15;
+                        const maxHours = parseInt(values[hoursIdx]) || 40;
+                        const availStr = (values[availIdx] || 'all').trim().toLowerCase();
+
+                        const availability = parseAvailability(availStr);
+
+                        state.staff.push({
+                            id: generateId(),
+                            name,
+                            role,
+                            hourlyRate,
+                            maxHours,
+                            certifications: {},
+                            availability
+                        });
+                        imported++;
+                    }
+
+                    saveState();
+                    renderStaffTable();
+                    showToast(`Imported ${imported} employees`);
+                } catch (err) {
+                    showToast('Error parsing CSV file', 'error');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset file input
+        }
+
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let char of line) {
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current);
+            return values;
+        }
+
+        function parseAvailability(str) {
+            if (!str || str === 'all' || str === '') return {};
+
+            if (str === 'weekdays' || str === 'mon-fri') {
+                // Available Monday-Friday (days 1-5), not available Sunday (0) and Saturday (6)
+                return { 0: [], 6: [] };
+            }
+
+            if (str === 'weekends') {
+                // Only available Saturday and Sunday
+                return { 1: [], 2: [], 3: [], 4: [], 5: [] };
+            }
+
+            if (str === 'morning' || str === 'breakfast') {
+                // Will be available for all days but we can't restrict to specific shifts easily
+                // without knowing shift names, so return empty (all available)
+                return {};
+            }
+
+            if (str === 'evening' || str === 'dinner') {
+                return {};
+            }
+
+            // Check if it's a comma-separated list of day numbers
+            if (/^[0-6,\s]+$/.test(str)) {
+                const availableDays = str.split(',').map(d => parseInt(d.trim())).filter(d => d >= 0 && d <= 6);
+                const unavailable = {};
+                for (let i = 0; i < 7; i++) {
+                    if (!availableDays.includes(i)) {
+                        unavailable[i] = [];
+                    }
+                }
+                return unavailable;
+            }
+
+            return {}; // Default: available for everything
+        }
+
+        function downloadSampleCSV() {
+            const csv = `name,role,hourlyRate,maxHours,availability
+John Smith,server,15,40,all
+Jane Doe,cook,18,35,all
+Bob Wilson,bartender,17,30,mon-fri
+Amy Chen,host,14,25,weekends
+Mike Johnson,busser,13,35,1,2,3,4,5
+Sarah Lee,manager,22,45,all`;
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'staff-import-sample.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Sample CSV downloaded');
         }
 
         function renderStaffTable() {

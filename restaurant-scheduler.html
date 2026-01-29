@@ -471,6 +471,47 @@
             font-size: 12px;
         }
 
+        .btn-icon {
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: var(--bg-secondary);
+            border-color: var(--accent);
+        }
+
+        .voice-btn.listening {
+            background: var(--danger-light);
+            border-color: var(--danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .voice-status {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            display: none;
+        }
+
+        .voice-status.visible {
+            display: block;
+        }
+
+        .voice-status.listening {
+            color: var(--danger);
+        }
+
         .ai-response {
             margin-top: 12px;
             padding: 12px;
@@ -2262,9 +2303,13 @@
                 <div class="card ai-command-card">
                     <div class="ai-input-wrapper">
                         <span class="ai-icon">✨</span>
-                        <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;Dave has been slacking, cut his hours&quot; or &quot;Sarah is doing great, give her more shifts&quot; or &quot;Swap Tom and Mike on Friday&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
+                        <input type="text" id="ai-command" class="ai-input" placeholder="Try: &quot;Add employee named Adam&quot; or &quot;Dave has been slacking&quot; or &quot;Swap Tom and Mike on Friday&quot;" onkeydown="if(event.key==='Enter')processAICommand()">
+                        <button class="btn btn-icon voice-btn" id="voice-btn" onclick="toggleVoiceInput()" title="Voice input">
+                            <span id="voice-icon">🎤</span>
+                        </button>
                         <button class="btn btn-primary btn-sm" onclick="processAICommand()">Go</button>
                     </div>
+                    <div id="voice-status" class="voice-status"></div>
                     <div id="ai-response" class="ai-response"></div>
                 </div>
 
@@ -6729,13 +6774,22 @@ Sarah Lee,manager,22,45,all`;
                 return showWhoIsWorking(day, shift);
             }
 
-            // ADD/HIRE EMPLOYEE
+            // ADD/HIRE EMPLOYEE - "add new employee named Adam" or "add server named Mike"
+            const addEmployeeMatch = text.match(/(?:add|hire|new)\s+(?:a\s+)?(?:new\s+)?employee\s+(?:named|called)\s+(\w+(?:\s+\w+)?)/i);
+            if (addEmployeeMatch) {
+                const name = addEmployeeMatch[1];
+                return startAddEmployeeFlow(name);
+            }
+
+            // ADD/HIRE with role - "add server named Mike at $15"
             const addMatch = text.match(/(?:add|hire|hired|new)\s+(?:a\s+)?(?:new\s+)?(\w+)\s+(?:named|called)?\s*(\w+)(?:\s+at\s+\$?(\d+))?/i);
             if (addMatch) {
                 const role = addMatch[1];
                 const name = addMatch[2];
                 const rate = addMatch[3];
-                return addEmployee(role, name, rate);
+                if (['server', 'cook', 'host', 'bartender', 'busser', 'manager'].includes(role.toLowerCase())) {
+                    return addEmployee(role, name, rate);
+                }
             }
 
             // PROMOTE EMPLOYEE
@@ -6786,12 +6840,13 @@ Sarah Lee,manager,22,45,all`;
             return {
                 type: 'error',
                 message: `I didn't understand that. Try:<br>
+                • "Add new employee named Adam"<br>
+                • "Add server named Mike at $15"<br>
                 • "I fired Dave" / "Let go of Sarah"<br>
                 • "Tom is sick today" / "Maria won't be in Friday"<br>
                 • "Dave has been slacking, cut his hours"<br>
                 • "Sarah is doing great, give her more shifts"<br>
                 • "Who's working Friday dinner?"<br>
-                • "Add server named Mike at $15"<br>
                 • "Swap Tom and Sarah on Monday"<br>
                 • "Promote Mike to manager"<br>
                 • "How many hours does Maria have?"`
@@ -6940,6 +6995,247 @@ Sarah Lee,manager,22,45,all`;
             }
 
             return { type: 'info', message: html };
+        }
+
+        // ============================================
+        // VOICE CONTROL
+        // ============================================
+        let recognition = null;
+        let isListening = false;
+
+        function initVoiceControl() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                console.log('Speech recognition not supported');
+                const voiceBtn = document.getElementById('voice-btn');
+                if (voiceBtn) voiceBtn.style.display = 'none';
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                isListening = true;
+                document.getElementById('voice-btn').classList.add('listening');
+                document.getElementById('voice-icon').textContent = '🔴';
+                const status = document.getElementById('voice-status');
+                status.textContent = 'Listening...';
+                status.className = 'voice-status visible listening';
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join('');
+
+                document.getElementById('ai-command').value = transcript;
+
+                // If this is a final result, process the command
+                if (event.results[event.results.length - 1].isFinal) {
+                    document.getElementById('voice-status').textContent = 'Processing: "' + transcript + '"';
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.log('Speech recognition error:', event.error);
+                stopListening();
+                if (event.error === 'no-speech') {
+                    document.getElementById('voice-status').textContent = 'No speech detected. Try again.';
+                } else {
+                    document.getElementById('voice-status').textContent = 'Error: ' + event.error;
+                }
+                document.getElementById('voice-status').className = 'voice-status visible';
+                setTimeout(() => {
+                    document.getElementById('voice-status').className = 'voice-status';
+                }, 3000);
+            };
+
+            recognition.onend = () => {
+                const wasListening = isListening;
+                stopListening();
+
+                // Auto-process if we got a result
+                const input = document.getElementById('ai-command').value;
+                if (wasListening && input.trim()) {
+                    setTimeout(() => processAICommand(), 300);
+                }
+            };
+        }
+
+        function toggleVoiceInput() {
+            if (!recognition) {
+                initVoiceControl();
+                if (!recognition) {
+                    showToast('Voice input not supported in this browser', 'warning');
+                    return;
+                }
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                document.getElementById('ai-command').value = '';
+                recognition.start();
+            }
+        }
+
+        function stopListening() {
+            isListening = false;
+            document.getElementById('voice-btn')?.classList.remove('listening');
+            const voiceIcon = document.getElementById('voice-icon');
+            if (voiceIcon) voiceIcon.textContent = '🎤';
+        }
+
+        // Initialize voice control when page loads
+        window.addEventListener('load', initVoiceControl);
+
+        // ============================================
+        // ADD EMPLOYEE FLOW (with manual input)
+        // ============================================
+        let pendingEmployee = null;
+
+        function startAddEmployeeFlow(name) {
+            pendingEmployee = {
+                name: name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+            };
+
+            showAddEmployeePrompt();
+
+            return {
+                type: 'info',
+                message: `Adding new employee: <strong>${pendingEmployee.name}</strong><br>Please select their role below.`
+            };
+        }
+
+        function showAddEmployeePrompt() {
+            const responseEl = document.getElementById('ai-response');
+
+            let html = `
+                <div class="add-employee-flow">
+                    <div style="margin-bottom: 12px;"><strong>New Employee:</strong> ${pendingEmployee.name}</div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Role:</label>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${ROLES.map(role => `
+                                <button class="btn btn-sm ${pendingEmployee.role === role ? 'btn-primary' : 'btn-secondary'}"
+                                    onclick="selectNewEmployeeRole('${role}')">${ROLE_LABELS[role]}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Hourly Rate:</label>
+                        <input type="number" id="new-employee-rate" class="form-input"
+                            value="${pendingEmployee.hourlyRate || 15}" min="7" max="100" step="0.50"
+                            style="width: 100px;" onchange="updatePendingEmployeeRate()">
+                        <span style="color: var(--text-muted); margin-left: 8px;">/hour</span>
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Max Hours/Week:</label>
+                        <input type="number" id="new-employee-max-hours" class="form-input"
+                            value="${pendingEmployee.maxHours || 40}" min="0" max="60"
+                            style="width: 100px;" onchange="updatePendingEmployeeMaxHours()">
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Phone (optional):</label>
+                        <input type="tel" id="new-employee-phone" class="form-input"
+                            placeholder="(555) 123-4567" style="width: 160px;" onchange="updatePendingEmployeePhone()">
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-weight: 500; display: block; margin-bottom: 6px;">Email (optional):</label>
+                        <input type="email" id="new-employee-email" class="form-input"
+                            placeholder="employee@email.com" style="width: 200px;" onchange="updatePendingEmployeeEmail()">
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <button class="btn btn-primary" onclick="confirmAddEmployee()" ${!pendingEmployee.role ? 'disabled' : ''}>
+                            Add Employee
+                        </button>
+                        <button class="btn btn-secondary" onclick="cancelAddEmployee()">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            responseEl.innerHTML = html;
+            responseEl.className = 'ai-response visible info';
+        }
+
+        function selectNewEmployeeRole(role) {
+            pendingEmployee.role = role;
+
+            // Set default rate based on role
+            const defaultRates = {
+                server: 15, cook: 18, host: 14, bartender: 17, busser: 13, manager: 24
+            };
+            if (!pendingEmployee.rateManuallySet) {
+                pendingEmployee.hourlyRate = defaultRates[role] || 15;
+            }
+
+            showAddEmployeePrompt();
+        }
+
+        function updatePendingEmployeeRate() {
+            const rate = parseFloat(document.getElementById('new-employee-rate').value);
+            if (rate) {
+                pendingEmployee.hourlyRate = rate;
+                pendingEmployee.rateManuallySet = true;
+            }
+        }
+
+        function updatePendingEmployeeMaxHours() {
+            pendingEmployee.maxHours = parseInt(document.getElementById('new-employee-max-hours').value) || 40;
+        }
+
+        function updatePendingEmployeePhone() {
+            pendingEmployee.phone = document.getElementById('new-employee-phone').value;
+        }
+
+        function updatePendingEmployeeEmail() {
+            pendingEmployee.email = document.getElementById('new-employee-email').value;
+        }
+
+        function confirmAddEmployee() {
+            if (!pendingEmployee || !pendingEmployee.role) {
+                showToast('Please select a role', 'warning');
+                return;
+            }
+
+            const newEmployee = {
+                id: generateId(),
+                name: pendingEmployee.name,
+                role: pendingEmployee.role,
+                hourlyRate: pendingEmployee.hourlyRate || 15,
+                maxHours: pendingEmployee.maxHours || 40,
+                phone: pendingEmployee.phone || '',
+                email: pendingEmployee.email || '',
+                certifications: {},
+                availability: {}
+            };
+
+            state.staff.push(newEmployee);
+            saveState();
+            renderStaffTable();
+
+            const responseEl = document.getElementById('ai-response');
+            responseEl.innerHTML = `<strong>${newEmployee.name}</strong> added as ${ROLE_LABELS[newEmployee.role]} at $${newEmployee.hourlyRate}/hr. 👋 Welcome aboard!`;
+            responseEl.className = 'ai-response visible success';
+
+            pendingEmployee = null;
+            showToast('Employee added!', 'success');
+        }
+
+        function cancelAddEmployee() {
+            pendingEmployee = null;
+            const responseEl = document.getElementById('ai-response');
+            responseEl.className = 'ai-response';
+            responseEl.innerHTML = '';
         }
 
         function addEmployee(roleStr, name, rate) {

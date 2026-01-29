@@ -2209,10 +2209,6 @@
                         <span class="icon">📍</span>
                         Locations
                     </div>
-                    <div class="nav-item" data-page="notifications">
-                        <span class="icon">🔔</span>
-                        Notifications
-                    </div>
                 </div>
             </nav>
 
@@ -3008,96 +3004,7 @@
                 </div>
             </section>
 
-            <!-- Notifications Settings -->
-            <section class="page-section" id="page-notifications">
-                <div class="page-header">
-                    <div>
-                        <h1 class="page-title">Notification Settings</h1>
-                        <p class="page-subtitle">Configure SMS and email notifications</p>
-                    </div>
-                    <button class="btn btn-primary" onclick="saveNotificationSettings()">Save Settings</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">SMS Notifications</h3>
-                    </div>
-                    <div style="padding: 16px;">
-                        <div style="margin-bottom: 16px;">
-                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Account SID</label>
-                            <input type="text" class="form-input" id="twilio-sid" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" style="width: 100%;">
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Auth Token</label>
-                            <input type="password" class="form-input" id="twilio-token" placeholder="Your auth token" style="width: 100%;">
-                        </div>
-                        <div style="margin-bottom: 16px;">
-                            <label style="font-weight: 500; display: block; margin-bottom: 8px;">Twilio Phone Number</label>
-                            <input type="text" class="form-input" id="twilio-phone" placeholder="+1234567890" style="width: 100%;">
-                        </div>
-                        <button class="btn btn-secondary" onclick="testSMS()">Send Test SMS</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">Notification Triggers</h3>
-                    </div>
-                    <div style="padding: 16px;">
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="notify-schedule-published" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div style="font-weight: 500;">Schedule Published</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Notify employees when new schedule is posted</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="notify-shift-reminder" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div style="font-weight: 500;">Shift Reminders</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Send reminder 24 hours before shift</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="notify-swap-request" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div style="font-weight: 500;">Swap Requests</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Notify when someone requests to swap shifts</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="notify-time-off-request" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div style="font-weight: 500;">Time Off Requests</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Notify managers of new time off requests</div>
-                            </div>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <label class="toggle-switch">
-                                <input type="checkbox" id="notify-understaffed" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                            <div>
-                                <div style="font-weight: 500;">Understaffing Alerts</div>
-                                <div style="font-size: 12px; color: var(--text-muted);">Alert managers when shifts are understaffed</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
+                    </main>
     </div>
 
     <!-- Mobile Menu Button -->
@@ -4346,8 +4253,7 @@
                 case 'my-schedule': renderMySchedule(); break;
                 case 'reports': renderReports(); break;
                 case 'locations': renderLocations(); break;
-                case 'notifications': renderNotificationSettings(); break;
-            }
+                            }
         }
 
         function toggleSidebar() {
@@ -8257,67 +8163,6 @@ END:VEVENT
             });
             html += '</div>';
             container.innerHTML = html;
-        }
-
-        // ============================================
-        // NOTIFICATION SETTINGS
-        // ============================================
-        function renderNotificationSettings() {
-            const settings = state.notificationSettings || {};
-
-            // Load saved values
-            document.getElementById('twilio-sid').value = settings.twilioSid || '';
-            document.getElementById('twilio-token').value = settings.twilioToken || '';
-            document.getElementById('twilio-phone').value = settings.twilioPhone || '';
-
-            document.getElementById('notify-schedule-published').checked = settings.schedulePublished !== false;
-            document.getElementById('notify-shift-reminder').checked = settings.shiftReminder !== false;
-            document.getElementById('notify-swap-request').checked = settings.swapRequest !== false;
-            document.getElementById('notify-time-off-request').checked = settings.timeOffRequest !== false;
-            document.getElementById('notify-understaffed').checked = settings.understaffed !== false;
-        }
-
-        function saveNotificationSettings() {
-            state.notificationSettings = {
-                twilioSid: document.getElementById('twilio-sid').value,
-                twilioToken: document.getElementById('twilio-token').value,
-                twilioPhone: document.getElementById('twilio-phone').value,
-                schedulePublished: document.getElementById('notify-schedule-published').checked,
-                shiftReminder: document.getElementById('notify-shift-reminder').checked,
-                swapRequest: document.getElementById('notify-swap-request').checked,
-                timeOffRequest: document.getElementById('notify-time-off-request').checked,
-                understaffed: document.getElementById('notify-understaffed').checked
-            };
-
-            saveState();
-            showToast('Notification settings saved!', 'success');
-        }
-
-        function testSMS() {
-            const sid = document.getElementById('twilio-sid').value;
-            const token = document.getElementById('twilio-token').value;
-            const phone = document.getElementById('twilio-phone').value;
-
-            if (!sid || !token || !phone) {
-                showToast('Please fill in all Twilio credentials', 'warning');
-                return;
-            }
-
-            // Note: Actual SMS sending requires a backend server
-            showToast('SMS test requires backend integration. Credentials saved.', 'info');
-        }
-
-        async function sendSMSNotification(toPhone, message) {
-            const settings = state.notificationSettings;
-            if (!settings?.twilioSid || !settings?.twilioToken || !settings?.twilioPhone) {
-                console.log('SMS not configured');
-                return false;
-            }
-
-            // This would typically be a call to your backend
-            // Direct Twilio API calls from browser aren't secure
-            console.log(`Would send SMS to ${toPhone}: ${message}`);
-            return true;
         }
 
         // ============================================

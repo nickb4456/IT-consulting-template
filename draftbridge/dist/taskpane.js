@@ -910,8 +910,53 @@ async function confirmSaveClause() {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// TAB NAVIGATION
+// TAB NAVIGATION & SCROLLING
 // ═══════════════════════════════════════════════════════════════
+
+// Tab scrolling
+function scrollTabs(direction) {
+  const container = document.getElementById('tabs-scroll');
+  if (!container) return;
+  const scrollAmount = 100;
+  container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+}
+
+function updateTabArrows() {
+  const container = document.getElementById('tabs-scroll');
+  const leftArrow = document.getElementById('tab-arrow-left');
+  const rightArrow = document.getElementById('tab-arrow-right');
+  
+  if (!container || !leftArrow || !rightArrow) return;
+  
+  const scrollLeft = container.scrollLeft;
+  const scrollWidth = container.scrollWidth;
+  const clientWidth = container.clientWidth;
+  const hasOverflow = scrollWidth > clientWidth;
+  
+  // Show left arrow if scrolled right
+  leftArrow.classList.toggle('visible', hasOverflow && scrollLeft > 5);
+  
+  // Show right arrow if more content to the right
+  rightArrow.classList.toggle('visible', hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+}
+
+// Initialize tab scroll listeners
+function initTabScroll() {
+  const container = document.getElementById('tabs-scroll');
+  if (container) {
+    container.addEventListener('scroll', updateTabArrows);
+    window.addEventListener('resize', updateTabArrows);
+    // Initial check
+    setTimeout(updateTabArrows, 100);
+  }
+}
+
+// Call on load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTabScroll);
+} else {
+  initTabScroll();
+}
 
 function switchTab(tabId) {
   // Update tab buttons with ARIA

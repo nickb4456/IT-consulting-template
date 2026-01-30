@@ -26,13 +26,56 @@
         }
         .header span { color: #5C4A32; }
         
-        /* Main Tabs */
-        .main-tabs {
+        /* Main Tabs Container */
+        .tabs-container {
             display: flex;
+            align-items: center;
             background: white;
             border-bottom: 1px solid #e0e0e0;
+            position: relative;
+        }
+        .tabs-scroll {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex: 1;
+            scroll-behavior: smooth;
+        }
+        .tabs-scroll::-webkit-scrollbar {
+            display: none;
+        }
+        .tab-arrow {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 100%;
+            background: white;
+            border: none;
+            cursor: pointer;
+            color: #666;
+            font-size: 14px;
+            font-weight: bold;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .tab-arrow:hover {
+            color: #8B7355;
+            background: #f5f5f5;
+        }
+        .tab-arrow.visible {
+            display: flex;
+        }
+        .tab-arrow-left {
+            border-right: 1px solid #e0e0e0;
+        }
+        .tab-arrow-right {
+            border-left: 1px solid #e0e0e0;
+        }
+        .main-tabs {
+            display: flex;
             padding: 0 8px;
-            flex-wrap: wrap;
         }
         .main-tab {
             padding: 10px 12px;
@@ -44,6 +87,7 @@
             color: #666;
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .main-tab:hover { color: #8B7355; }
         .main-tab.active {
@@ -387,12 +431,18 @@
 <body>
     <div class="header">Draft<span>Bridge</span></div>
     
-    <div class="main-tabs">
-        <button class="main-tab active" onclick="switchPanel('generate')">Generate</button>
-        <button class="main-tab" onclick="switchPanel('edit')">Edit</button>
-        <button class="main-tab" onclick="switchPanel('library')">Library</button>
-        <button class="main-tab" onclick="switchPanel('data')">Data</button>
-        <button class="main-tab" onclick="switchPanel('admin')">Settings</button>
+    <div class="tabs-container">
+        <button class="tab-arrow tab-arrow-left" id="tab-arrow-left" onclick="scrollTabs(-1)">&lt;</button>
+        <div class="tabs-scroll" id="tabs-scroll">
+            <div class="main-tabs">
+                <button class="main-tab active" onclick="switchPanel('generate')">Generate</button>
+                <button class="main-tab" onclick="switchPanel('edit')">Edit</button>
+                <button class="main-tab" onclick="switchPanel('library')">Library</button>
+                <button class="main-tab" onclick="switchPanel('data')">Data</button>
+                <button class="main-tab" onclick="switchPanel('admin')">Settings</button>
+            </div>
+        </div>
+        <button class="tab-arrow tab-arrow-right" id="tab-arrow-right" onclick="scrollTabs(1)">&gt;</button>
     </div>
     
     <!-- GENERATE PANEL -->
@@ -955,6 +1005,166 @@ COMMENTS:
             div.textContent = text || '';
             return div.innerHTML;
         }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DATA TAB - SAVE CLAUSE FEATURE
+        // ═══════════════════════════════════════════════════════════════
+
+        let pendingSaveText = '';
+        let selectedSaveCategory = 'contracts';
+
+        async function startSaveClause() {
+            try {
+                let selectedText = '';
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.load('text');
+                    await context.sync();
+                    selectedText = selection.text.trim();
+                });
+
+                if (!selectedText) {
+                    alert('Please highlight text in your document first');
+                    return;
+                }
+
+                if (selectedText.length < 20) {
+                    alert('Please select more text (at least 20 characters)');
+                    return;
+                }
+
+                pendingSaveText = selectedText;
+                
+                // Preview (truncated)
+                document.getElementById('save-preview').textContent = 
+                    selectedText.length > 300 ? selectedText.substring(0, 300) + '...' : selectedText;
+                
+                // Generate suggested title
+                document.getElementById('save-title').value = generateTitle(selectedText);
+                
+                // Reset category selection
+                selectedSaveCategory = 'contracts';
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.toggle('selected', btn.dataset.cat === 'contracts');
+                });
+                
+                // Switch views
+                document.getElementById('data-main').style.display = 'none';
+                document.getElementById('data-save-form').style.display = 'block';
+                document.getElementById('save-title').focus();
+                
+            } catch (err) {
+                console.error('Error getting selection:', err);
+                alert('Could not read document selection');
+            }
+        }
+
+        function generateTitle(text) {
+            const firstLine = text.split('\n')[0].trim();
+            if (firstLine.length <= 50) return firstLine;
+            return firstLine.substring(0, 47) + '...';
+        }
+
+        function selectSaveCategory(category) {
+            selectedSaveCategory = category;
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.toggle('selected', btn.dataset.cat === category);
+            });
+        }
+
+        function cancelSaveClause() {
+            pendingSaveText = '';
+            document.getElementById('save-title').value = '';
+            document.getElementById('save-preview').textContent = '';
+            document.getElementById('data-main').style.display = 'block';
+            document.getElementById('data-save-form').style.display = 'none';
+        }
+
+        async function confirmSaveClause() {
+            const title = document.getElementById('save-title').value.trim();
+            
+            if (!title) {
+                alert('Please enter a title');
+                document.getElementById('save-title').focus();
+                return;
+            }
+            
+            if (!pendingSaveText) {
+                alert('No text to save');
+                cancelSaveClause();
+                return;
+            }
+            
+            const saveBtn = document.getElementById('confirm-save-btn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+            
+            try {
+                const resp = await fetch(`${API}/firms/${FIRM}/clauses`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        content: pendingSaveText,
+                        category: selectedSaveCategory,
+                        tags: [],
+                        createdBy: 'user'
+                    })
+                });
+
+                if (!resp.ok) throw new Error('Save failed');
+
+                const newClause = await resp.json();
+                allClauses.unshift(newClause);
+                renderClauses();
+                
+                alert('Saved: ' + title);
+                cancelSaveClause();
+                
+            } catch (err) {
+                console.error('Save failed:', err);
+                alert('Could not save clause');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Clause';
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // TAB SCROLL ARROWS
+        // ═══════════════════════════════════════════════════════════════
+
+        function scrollTabs(direction) {
+            const container = document.getElementById('tabs-scroll');
+            if (!container) return;
+            container.scrollBy({ left: direction * 100, behavior: 'smooth' });
+        }
+
+        function updateTabArrows() {
+            const container = document.getElementById('tabs-scroll');
+            const leftArrow = document.getElementById('tab-arrow-left');
+            const rightArrow = document.getElementById('tab-arrow-right');
+            
+            if (!container || !leftArrow || !rightArrow) return;
+            
+            const scrollLeft = container.scrollLeft;
+            const scrollWidth = container.scrollWidth;
+            const clientWidth = container.clientWidth;
+            const hasOverflow = scrollWidth > clientWidth;
+            
+            leftArrow.classList.toggle('visible', hasOverflow && scrollLeft > 5);
+            rightArrow.classList.toggle('visible', hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+        }
+
+        // Init tab scroll on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('tabs-scroll');
+            if (container) {
+                container.addEventListener('scroll', updateTabArrows);
+                window.addEventListener('resize', updateTabArrows);
+                setTimeout(updateTabArrows, 100);
+            }
+        });
     </script>
 </body>
 </html>

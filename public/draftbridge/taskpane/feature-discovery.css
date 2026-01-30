@@ -1,0 +1,530 @@
+/**
+ * Feature Discovery Panel
+ * 
+ * "What can this thing do?" — answered in 3 seconds
+ * Surface ALL 16+ features in a scannable, organized panel
+ * 
+ * @version 1.0.0
+ */
+
+/* ============================================================================
+   Tools Button - Header Addition
+   ============================================================================ */
+
+.btn-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-1);
+    padding: var(--df-space-1) var(--df-space-2);
+    font-family: inherit;
+    font-size: var(--df-text-xs);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-primary);
+    background: var(--df-primary-subtle);
+    border: 1px solid transparent;
+    border-radius: var(--df-radius-md);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    white-space: nowrap;
+}
+
+.btn-tools:hover {
+    background: var(--df-primary-glow);
+    border-color: var(--df-primary);
+}
+
+.btn-tools:active {
+    transform: scale(0.97);
+}
+
+.btn-tools svg {
+    width: 14px;
+    height: 14px;
+}
+
+.btn-tools .tools-badge {
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: var(--df-weight-bold);
+    color: var(--df-text-inverse);
+    background: var(--df-primary);
+    border-radius: var(--df-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ============================================================================
+   Feature Discovery Panel - Slide-out
+   ============================================================================ */
+
+.feature-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: var(--df-z-modal);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--df-transition-normal), visibility var(--df-transition-normal);
+}
+
+.feature-panel-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.feature-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 340px;
+    height: 100%;
+    background: var(--df-bg-base);
+    border-left: 1px solid var(--df-border-subtle);
+    box-shadow: var(--df-shadow-xl);
+    z-index: calc(var(--df-z-modal) + 1);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform var(--df-transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-panel.visible {
+    transform: translateX(0);
+}
+
+/* Panel Header */
+.feature-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-4);
+    border-bottom: 1px solid var(--df-border-subtle);
+    background: var(--df-bg-subtle);
+}
+
+.feature-panel-title {
+    font-size: var(--df-text-lg);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-primary);
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+}
+
+.feature-panel-title svg {
+    width: 20px;
+    height: 20px;
+    color: var(--df-primary);
+}
+
+.feature-panel-subtitle {
+    font-size: var(--df-text-xs);
+    color: var(--df-text-muted);
+    margin-top: 2px;
+}
+
+.feature-panel-close {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--df-radius-md);
+    color: var(--df-text-muted);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.feature-panel-close:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+}
+
+/* Panel Search */
+.feature-search {
+    padding: var(--df-space-3) var(--df-space-4);
+    border-bottom: 1px solid var(--df-border-subtle);
+}
+
+.feature-search-input {
+    width: 100%;
+    padding: var(--df-space-2) var(--df-space-3);
+    padding-left: 36px;
+    font-family: inherit;
+    font-size: var(--df-text-sm);
+    color: var(--df-text-primary);
+    background: var(--df-bg-subtle);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-md);
+    transition: all var(--df-transition-fast);
+}
+
+.feature-search-input:focus {
+    outline: none;
+    background: var(--df-bg-base);
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+.feature-search-input::placeholder {
+    color: var(--df-text-muted);
+}
+
+.feature-search-wrapper {
+    position: relative;
+}
+
+.feature-search-wrapper svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--df-text-muted);
+    pointer-events: none;
+}
+
+/* Panel Body - Scrollable Categories */
+.feature-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--df-space-3) var(--df-space-4);
+}
+
+/* Custom scrollbar for panel */
+.feature-panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.feature-panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.feature-panel-body::-webkit-scrollbar-thumb {
+    background: var(--df-border-default);
+    border-radius: 3px;
+}
+
+/* ============================================================================
+   Feature Categories
+   ============================================================================ */
+
+.feature-category {
+    margin-bottom: var(--df-space-5);
+}
+
+.feature-category:last-child {
+    margin-bottom: 0;
+}
+
+.feature-category-header {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+    margin-bottom: var(--df-space-2);
+}
+
+.feature-category-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--df-radius-sm);
+}
+
+.feature-category-icon svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Category color coding */
+.feature-category[data-category="checks"] .feature-category-icon {
+    background: var(--df-success-subtle);
+    color: var(--df-success);
+}
+
+.feature-category[data-category="formatting"] .feature-category-icon {
+    background: rgba(168, 85, 247, 0.1);
+    color: #a855f7;
+}
+
+.feature-category[data-category="templates"] .feature-category-icon {
+    background: var(--df-primary-subtle);
+    color: var(--df-primary);
+}
+
+.feature-category[data-category="versions"] .feature-category-icon {
+    background: var(--df-warning-subtle);
+    color: var(--df-warning);
+}
+
+.feature-category[data-category="navigation"] .feature-category-icon {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+}
+
+.feature-category-title {
+    font-size: var(--df-text-xs);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.feature-category-count {
+    font-size: var(--df-text-xs);
+    color: var(--df-text-muted);
+    font-weight: var(--df-weight-normal);
+}
+
+/* ============================================================================
+   Feature Cards
+   ============================================================================ */
+
+.feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-1);
+}
+
+.feature-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--df-space-3);
+    padding: var(--df-space-3);
+    background: var(--df-bg-elevated);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-lg);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+}
+
+.feature-card:hover {
+    background: var(--df-bg-hover);
+    border-color: var(--df-border-default);
+    transform: translateX(2px);
+}
+
+.feature-card:active {
+    transform: translateX(2px) scale(0.99);
+}
+
+.feature-card:focus {
+    outline: none;
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+/* Feature card hidden when filtered */
+.feature-card.hidden {
+    display: none;
+}
+
+/* Feature Icon */
+.feature-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--df-bg-subtle);
+    border-radius: var(--df-radius-md);
+    color: var(--df-text-tertiary);
+    flex-shrink: 0;
+    transition: all var(--df-transition-fast);
+}
+
+.feature-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.feature-card:hover .feature-icon {
+    background: var(--df-primary-subtle);
+    color: var(--df-primary);
+}
+
+/* Feature Content */
+.feature-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.feature-name {
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-primary);
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+}
+
+.feature-name .new-badge {
+    font-size: 9px;
+    font-weight: var(--df-weight-bold);
+    color: var(--df-text-inverse);
+    background: var(--df-primary);
+    padding: 1px 5px;
+    border-radius: var(--df-radius-full);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.feature-description {
+    font-size: var(--df-text-xs);
+    color: var(--df-text-muted);
+    line-height: var(--df-leading-relaxed);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Feature Shortcut */
+.feature-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.feature-shortcut kbd {
+    font-family: var(--df-font-mono);
+    font-size: 10px;
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-muted);
+    background: var(--df-bg-subtle);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: 3px;
+    padding: 2px 5px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Arrow indicator */
+.feature-arrow {
+    width: 16px;
+    height: 16px;
+    color: var(--df-text-muted);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all var(--df-transition-fast);
+    flex-shrink: 0;
+    margin-top: 10px;
+}
+
+.feature-card:hover .feature-arrow {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ============================================================================
+   Panel Footer - Keyboard Hint
+   ============================================================================ */
+
+.feature-panel-footer {
+    padding: var(--df-space-3) var(--df-space-4);
+    border-top: 1px solid var(--df-border-subtle);
+    background: var(--df-bg-subtle);
+}
+
+.keyboard-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--df-space-2);
+    font-size: var(--df-text-xs);
+    color: var(--df-text-muted);
+}
+
+.keyboard-hint kbd {
+    font-family: var(--df-font-mono);
+    font-size: 10px;
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-tertiary);
+    background: var(--df-bg-base);
+    border: 1px solid var(--df-border-default);
+    border-radius: 3px;
+    padding: 2px 6px;
+}
+
+/* ============================================================================
+   Empty Search State
+   ============================================================================ */
+
+.feature-empty-search {
+    text-align: center;
+    padding: var(--df-space-8) var(--df-space-4);
+    color: var(--df-text-muted);
+}
+
+.feature-empty-search svg {
+    width: 40px;
+    height: 40px;
+    margin-bottom: var(--df-space-3);
+    opacity: 0.5;
+}
+
+.feature-empty-search p {
+    font-size: var(--df-text-sm);
+}
+
+/* ============================================================================
+   Animations
+   ============================================================================ */
+
+@keyframes featureSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.feature-panel.visible .feature-category {
+    animation: featureSlideIn var(--df-transition-slow) ease-out;
+    animation-fill-mode: both;
+}
+
+.feature-panel.visible .feature-category:nth-child(1) { animation-delay: 0ms; }
+.feature-panel.visible .feature-category:nth-child(2) { animation-delay: 50ms; }
+.feature-panel.visible .feature-category:nth-child(3) { animation-delay: 100ms; }
+.feature-panel.visible .feature-category:nth-child(4) { animation-delay: 150ms; }
+.feature-panel.visible .feature-category:nth-child(5) { animation-delay: 200ms; }
+
+/* ============================================================================
+   Reduced Motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .feature-panel {
+        transition: none;
+    }
+    
+    .feature-panel.visible .feature-category {
+        animation: none;
+    }
+    
+    .feature-card:hover {
+        transform: none;
+    }
+}

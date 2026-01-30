@@ -283,6 +283,39 @@
             min-height: 80px;
         }
         
+        /* Category Selection Buttons */
+        .category-select {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .category-btn {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            transition: all 0.2s;
+        }
+        .category-btn:hover {
+            border-color: #8B7355;
+            background: #faf8f5;
+        }
+        .category-btn.selected {
+            border-color: #8B7355;
+            background: #8B7355;
+            color: white;
+        }
+        .category-btn span {
+            font-size: 16px;
+        }
+        
         /* Empty State */
         .empty {
             text-align: center;
@@ -586,10 +619,55 @@
     
     <!-- DATA PANEL -->
     <div class="panel" id="panel-data">
-        <div class="coming-soon">
-            <div class="coming-soon-icon">🗄️</div>
-            <div class="coming-soon-text">Data Management</div>
-            <div class="coming-soon-sub">Coming soon</div>
+        <!-- Main Data View -->
+        <div id="data-main" class="content">
+            <div class="section-header">Data Management</div>
+            <div class="section-desc">Save and organize your clause library</div>
+            
+            <div class="option-card" onclick="startSaveClause()">
+                <span class="option-icon">💾</span>
+                <div class="option-text">
+                    <div class="option-title">Save Highlighted Text</div>
+                    <div class="option-desc">Add selected text from your document to your library</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+        </div>
+        
+        <!-- Save Clause Form (hidden by default) -->
+        <div id="data-save-form" class="content" style="display: none;">
+            <div class="section-header">Save to Library</div>
+            <div class="section-desc">Add this clause to your collection</div>
+            
+            <div id="save-preview" class="clause-content" style="max-height: 100px; margin-bottom: 16px;"></div>
+            
+            <div class="field">
+                <label for="save-title">Title</label>
+                <input type="text" id="save-title" placeholder="e.g., Standard Indemnification Clause">
+            </div>
+            
+            <div class="field">
+                <label>Category</label>
+                <div class="category-select">
+                    <button type="button" class="category-btn" data-cat="contracts" onclick="selectSaveCategory('contracts')">
+                        <span>📄</span> Contracts
+                    </button>
+                    <button type="button" class="category-btn" data-cat="litigation" onclick="selectSaveCategory('litigation')">
+                        <span>⚖️</span> Litigation
+                    </button>
+                    <button type="button" class="category-btn" data-cat="corporate" onclick="selectSaveCategory('corporate')">
+                        <span>🏢</span> Corporate
+                    </button>
+                    <button type="button" class="category-btn" data-cat="ip" onclick="selectSaveCategory('ip')">
+                        <span>💡</span> IP
+                    </button>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn secondary" onclick="cancelSaveClause()" style="flex: 1;">Cancel</button>
+                <button class="btn" id="confirm-save-btn" onclick="confirmSaveClause()" style="flex: 1;">Save Clause</button>
+            </div>
         </div>
     </div>
     

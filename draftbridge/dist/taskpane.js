@@ -782,6 +782,134 @@ shakeStyle.textContent = `
 document.head.appendChild(shakeStyle);
 
 // ═══════════════════════════════════════════════════════════════
+// DATA TAB - SAVE CLAUSE FEATURE
+// ═══════════════════════════════════════════════════════════════
+
+let pendingSaveText = '';
+let selectedSaveCategory = 'contracts';
+
+async function startSaveClause() {
+  try {
+    // Get selected text from Word
+    let selectedText = '';
+    await Word.run(async (context) => {
+      const selection = context.document.getSelection();
+      selection.load('text');
+      await context.sync();
+      selectedText = selection.text.trim();
+    });
+
+    if (!selectedText) {
+      toast('Please highlight text in your document first', 'error', 'no-selection');
+      return;
+    }
+
+    if (selectedText.length < 20) {
+      toast('Please select more text (at least 20 characters)', 'error', 'selection-too-short');
+      return;
+    }
+
+    // Store the text and show the form
+    pendingSaveText = selectedText;
+    
+    // Preview the text (truncated)
+    const preview = document.getElementById('save-preview');
+    preview.textContent = selectedText.length > 300 
+      ? selectedText.substring(0, 300) + '...' 
+      : selectedText;
+    
+    // Generate a suggested title
+    document.getElementById('save-title').value = generateTitle(selectedText);
+    
+    // Reset category selection to default
+    selectedSaveCategory = 'contracts';
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.classList.toggle('selected', btn.dataset.cat === 'contracts');
+    });
+    
+    // Switch views
+    document.getElementById('data-main').style.display = 'none';
+    document.getElementById('data-save-form').style.display = 'block';
+    
+    // Focus the title field
+    document.getElementById('save-title').focus();
+    
+  } catch (err) {
+    console.error('Error getting selection:', err);
+    toast('Could not read document selection', 'error');
+  }
+}
+
+function selectSaveCategory(category) {
+  selectedSaveCategory = category;
+  document.querySelectorAll('.category-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.cat === category);
+  });
+}
+
+function cancelSaveClause() {
+  // Reset and go back to main view
+  pendingSaveText = '';
+  document.getElementById('save-title').value = '';
+  document.getElementById('save-preview').textContent = '';
+  document.getElementById('data-main').style.display = 'block';
+  document.getElementById('data-save-form').style.display = 'none';
+}
+
+async function confirmSaveClause() {
+  const title = document.getElementById('save-title').value.trim();
+  
+  if (!title) {
+    toast('Please enter a title', 'error');
+    document.getElementById('save-title').focus();
+    return;
+  }
+  
+  if (!pendingSaveText) {
+    toast('No text to save', 'error');
+    cancelSaveClause();
+    return;
+  }
+  
+  const saveBtn = document.getElementById('confirm-save-btn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+  
+  try {
+    const resp = await fetch(`${API}/firms/${FIRM}/clauses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        content: pendingSaveText,
+        category: selectedSaveCategory,
+        tags: extractTags(pendingSaveText),
+        createdBy: 'user'
+      })
+    });
+
+    if (!resp.ok) throw new Error('Save failed');
+
+    const newClause = await resp.json();
+    clauses.unshift(newClause);
+    renderClauses();
+    
+    toast(`Saved: ${title}`, 'success');
+    announceToScreenReader(`Clause ${title} saved to library`);
+    
+    // Return to main data view
+    cancelSaveClause();
+    
+  } catch (err) {
+    console.error('Save failed:', err);
+    toast('Could not save clause', 'error', 'save-failed');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save Clause';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // TAB NAVIGATION
 // ═══════════════════════════════════════════════════════════════
 

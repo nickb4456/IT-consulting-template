@@ -704,10 +704,18 @@ async function saveToLibrary() {
     // Show saving state immediately
     fab.classList.add('loading');
     fab.disabled = true;
+    
+    // Safety timeout
+    const safetyTimeout = setTimeout(() => {
+      fab.classList.remove('loading');
+      fab.disabled = false;
+      toast('Save timed out', 'error');
+    }, 15000);
 
     // Simple prompt for MVP - could be a modal later
     const title = prompt('Give your clause a title:', generateTitle(selectedText));
     if (!title) {
+      clearTimeout(safetyTimeout);
       fab.classList.remove('loading');
       fab.disabled = false;
       return;
@@ -736,6 +744,7 @@ async function saveToLibrary() {
     clauses.unshift(newClause);
     renderClauses();
     
+    clearTimeout(safetyTimeout);
     fab.classList.remove('loading');
     fab.disabled = false;
     
@@ -744,6 +753,7 @@ async function saveToLibrary() {
 
   } catch (err) {
     console.error('Save failed:', err);
+    clearTimeout(safetyTimeout);
     fab.classList.remove('loading');
     fab.disabled = false;
     const errorType = err?.response ? classifyApiError(err, err.response) : 'save-failed';
@@ -2710,6 +2720,12 @@ Date: _______________\t\t\tDate: _______________`;
 async function fillDocument() {
   const btn = document.getElementById('fillBtn');
   btn.classList.add('loading');
+  
+  // Safety timeout - never stay stuck more than 10s
+  const safetyTimeout = setTimeout(() => {
+    btn.classList.remove('loading');
+    toast('Operation timed out', 'error');
+  }, 10000);
 
   const inputs = document.querySelectorAll('#fieldsList input, #fieldsList textarea, #fieldsList select');
   const values = {};
@@ -2757,6 +2773,7 @@ async function fillDocument() {
     const errorType = classifyWordError(err);
     toast('Couldn\'t generate document', 'error', errorType);
   } finally {
+    clearTimeout(safetyTimeout);
     btn.classList.remove('loading');
   }
 }

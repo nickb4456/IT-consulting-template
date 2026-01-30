@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftBridge - Template Designer</title>
+    <link rel="stylesheet" href="taskpane.css">
+    <link rel="stylesheet" href="glass-buttons.css">
+    <link rel="stylesheet" href="accessibility.css">
+    <style>
+        /* ============================================================================
+           Template Designer - One-Click Field Insertion
+           ============================================================================ */
+        
+        :root {
+            --designer-accent: #0078d4;
+            --designer-accent-light: #deecf9;
+            --designer-success: #107c10;
+        }
+
+        body {
+            background: #f5f5f5;
+            margin: 0;
+            font-family: 'Segoe UI', -apple-system, system-ui, sans-serif;
+        }
+
+        .designer {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .designer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-back {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #666;
+            transition: all 0.15s;
+        }
+
+        .btn-back:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .btn-done {
+            padding: 8px 20px;
+            background: var(--designer-accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-done:hover {
+            background: #106ebe;
+        }
+
+        .btn-done:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ============================================================================
+           Common Fields - One Click to Insert
+           ============================================================================ */
+        
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .category-tab {
+            flex: 1;
+            padding: 12px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .category-tab:hover {
+            border-color: var(--designer-accent);
+            color: var(--designer-accent);
+        }
+
+        .category-tab.active {
+            background: var(--designer-accent);
+            border-color: var(--designer-accent);
+            color: white;
+        }
+
+        .field-category {
+            margin-bottom: 16px;
+        }
+
+        .common-fields {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .field-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 18px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            min-height: 70px;
+        }
+
+        .field-btn:hover {
+            border-color: var(--designer-accent);
+            background: var(--designer-accent-light);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,120,212,0.15);
+        }
+
+        .field-btn:active {
+            transform: translateY(0);
+        }
+
+        .field-btn.inserted {
+            border-color: var(--designer-success);
+            background: #f0fff0;
+        }
+
+        .field-btn.inserted .field-icon {
+            background: var(--designer-success);
+        }
+
+        .field-icon {
+            width: 44px;
+            height: 44px;
+            background: var(--designer-accent);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .field-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .field-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 3px;
+        }
+
+        .field-hint {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .field-btn.inserted .field-name::after {
+            content: ' ✓';
+            color: var(--designer-success);
+        }
+
+        /* More Fields Expander */
+        .more-fields {
+            margin-bottom: 24px;
+        }
+
+        .more-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px;
+            background: white;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            color: #666;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .more-toggle:hover {
+            border-color: var(--designer-accent);
+            color: var(--designer-accent);
+            background: #fafafa;
+        }
+
+        .more-toggle .arrow {
+            transition: transform 0.2s;
+        }
+
+        .more-toggle.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        .extra-fields {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .extra-fields.visible {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* ============================================================================
+           Custom Field Creator
+           ============================================================================ */
+        
+        .custom-field {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .custom-field-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .custom-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.15s;
+        }
+
+        .custom-input:focus {
+            outline: none;
+            border-color: var(--designer-accent);
+        }
+
+        .custom-input::placeholder {
+            color: #999;
+        }
+
+        .btn-add-custom {
+            padding: 10px 16px;
+            background: var(--designer-accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+
+        .btn-add-custom:hover {
+            background: #106ebe;
+        }
+
+        .btn-add-custom:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ============================================================================
+           Inserted Fields List
+           ============================================================================ */
+        
+        .inserted-section {
+            flex: 1;
+        }
+
+        .inserted-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .field-count {
+            background: var(--designer-accent);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        .inserted-list {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .inserted-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.1s;
+        }
+
+        .inserted-item:last-child {
+            border-bottom: none;
+        }
+
+        .inserted-item:hover {
+            background: #fafafa;
+        }
+
+        .inserted-item .field-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 14px;
+        }
+
+        .inserted-item .field-name {
+            flex: 1;
+        }
+
+        .btn-remove {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #999;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            opacity: 0;
+        }
+
+        .inserted-item:hover .btn-remove {
+            opacity: 1;
+        }
+
+        .btn-remove:hover {
+            background: #fee;
+            color: #d32f2f;
+        }
+
+        .empty-state {
+            padding: 40px 20px;
+            text-align: center;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .empty-text {
+            font-size: 14px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--designer-success);
+        }
+
+        /* Size Picker */
+        .size-picker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .size-label {
+            font-size: 13px;
+            color: #666;
+            margin-right: auto;
+        }
+
+        .size-btn {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f5f5f5;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s;
+        }
+
+        .size-btn:hover {
+            background: #e8e8e8;
+        }
+
+        .size-btn.active {
+            background: var(--designer-accent);
+            color: white;
+            border-color: var(--designer-accent);
+        }
+
+        .size-btn[data-size="normal"] { font-size: 14px; }
+        .size-btn[data-size="large"] { font-size: 18px; }
+        .size-btn[data-size="xlarge"] { font-size: 22px; }
+
+        /* Saved Templates */
+        .saved-templates {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .saved-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .saved-header-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .saved-count {
+            font-size: 11px;
+            background: #e0e0e0;
+            color: #666;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .saved-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .saved-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+
+        .saved-item:last-child {
+            border-bottom: none;
+        }
+
+        .saved-item:hover {
+            background: #f5f5f5;
+        }
+
+        .saved-item-icon {
+            font-size: 18px;
+        }
+
+        .saved-item-name {
+            flex: 1;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .saved-item-count {
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Save Button */
+        .btn-save-template {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: white;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            margin-top: 16px;
+        }
+
+        .btn-save-template:hover {
+            border-color: var(--designer-accent);
+            color: var(--designer-accent);
+            background: #f8faff;
+        }
+    </style>
+</head>
+<body>
+    <div class="designer">
+        <!-- Header -->
+        <header class="designer-header">
+            <div class="header-left">
+                <button class="btn-back" onclick="goBack()" title="Back to main panel">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <h1 class="header-title">Add Fields</h1>
+            </div>
+            <button class="btn-done" onclick="saveAndClose()" id="btnDone" disabled>
+                Done
+            </button>
+        </header>
+
+        <!-- Size Picker -->
+        <div class="size-picker">
+            <span class="size-label">Text Size</span>
+            <button class="size-btn active" data-size="normal" onclick="setUISize('normal')">A</button>
+            <button class="size-btn" data-size="large" onclick="setUISize('large')">A</button>
+            <button class="size-btn" data-size="xlarge" onclick="setUISize('xlarge')">A</button>
+        </div>
+
+        <!-- Saved Templates (Bookmarks) -->
+        <div class="saved-templates" id="savedTemplates" style="display:none">
+            <div class="saved-header">
+                <span class="saved-header-title">My Templates</span>
+                <span class="saved-count" id="savedCount">0</span>
+            </div>
+            <div class="saved-list" id="savedList"></div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-cat="letterhead" onclick="showCategory('letterhead')">
+                📨 Letterhead
+            </button>
+            <button class="category-tab" data-cat="contract" onclick="showCategory('contract')">
+                📄 Contract
+            </button>
+        </div>
+
+        <!-- Letterhead Fields -->
+        <section class="field-category" id="cat-letterhead">
+            <div class="common-fields" id="letterheadFields">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- Contract Fields -->
+        <section class="field-category" id="cat-contract" style="display:none">
+            <div class="common-fields" id="contractFields">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+
+        <!-- Custom Field -->
+        <section class="custom-field">
+            <div class="section-label" style="margin-bottom:10px">Custom Field</div>
+            <div class="custom-field-row">
+                <input type="text" class="custom-input" id="customName" placeholder="e.g., Closing Date" onkeydown="if(event.key==='Enter')addCustomField()">
+                <button class="btn-add-custom" onclick="addCustomField()" id="btnAddCustom">
+                    + Add
+                </button>
+            </div>
+        </section>
+
+        <!-- Inserted Fields -->
+        <section class="inserted-section">
+            <div class="inserted-header">
+                <div class="section-label">Fields in Document</div>
+                <span class="field-count" id="fieldCount">0</span>
+            </div>
+            <div class="inserted-list" id="insertedList">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">📝</div>
+                    <div class="empty-text">Click fields above to insert them<br>into your document</div>
+                </div>
+            </div>
+            
+            <!-- Save as Template Button -->
+            <button class="btn-save-template" onclick="saveAsTemplate()" id="btnSaveTemplate" style="display:none">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                Save as Template
+            </button>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script>
+        // =========================================================================
+        // Common Legal Fields - Main reusable fields
+        // =========================================================================
+        
+        // =========================================================================
+        // Field Categories - What law firms actually use
+        // =========================================================================
+
+        const LETTERHEAD_FIELDS = [
+            { id: 'date', name: 'Date', icon: '📅', hint: 'Letter date' },
+            { id: 'deliveryPhrases', name: 'Delivery Phrases', icon: '📨', hint: 'Via Email, etc.' },
+            { id: 'recipients', name: 'Recipients', icon: '👥', hint: 'To: names/addresses' },
+            { id: 'reLine', name: 'Re: Line', icon: '📋', hint: 'Subject line' },
+            { id: 'salutation', name: 'Salutation', icon: '👋', hint: 'Dear...' },
+            { id: 'closingPhrase', name: 'Closing Phrase', icon: '✒️', hint: 'Sincerely, etc.' },
+            { id: 'authorName', name: 'Author Name', icon: '👤', hint: 'Your name' },
+            { id: 'authorPhone', name: 'Author Phone', icon: '📞', hint: 'Direct line' },
+            { id: 'authorFax', name: 'Author Fax', icon: '📠', hint: 'Fax number' },
+            { id: 'authorEmail', name: 'Author Email', icon: '📧', hint: 'Email' },
+            { id: 'authorInitials', name: 'Author Initials', icon: '🔤', hint: 'ABC' },
+            { id: 'typistInitials', name: 'Typist Initials', icon: '⌨️', hint: 'xyz' },
+            { id: 'enclosures', name: 'Enclosures', icon: '📎', hint: 'Attachments' },
+            { id: 'cc', name: 'cc:', icon: '📋', hint: 'Carbon copy' },
+        ];
+
+        const CONTRACT_FIELDS = [
+            { id: 'clientName', name: 'Client Name', icon: '👤', hint: 'Party name' },
+            { id: 'counterparty', name: 'Other Party', icon: '🤝', hint: 'Counterparty' },
+            { id: 'effectiveDate', name: 'Effective Date', icon: '📅', hint: 'Agreement date' },
+            { id: 'state', name: 'State', icon: '🗺️', hint: 'Jurisdiction' },
+            { id: 'amount', name: 'Amount', icon: '💰', hint: 'Dollar amount' },
+            { id: 'address', name: 'Address', icon: '🏠', hint: 'Street address' },
+            { id: 'title', name: 'Title', icon: '👔', hint: 'Job title' },
+            { id: 'company', name: 'Company', icon: '🏢', hint: 'Company name' },
+            { id: 'termMonths', name: 'Term', icon: '📆', hint: 'Duration' },
+            { id: 'noticeAddress', name: 'Notice Address', icon: '📬', hint: 'For notices' },
+            { id: 'ein', name: 'EIN/Tax ID', icon: '🔢', hint: 'Tax identifier' },
+            { id: 'signature', name: 'Signature', icon: '✍️', hint: 'Signature line' },
+        ];
+
+        // Combine for backwards compat
+        const COMMON_FIELDS = LETTERHEAD_FIELDS.slice(0, 6);
+        const EXTRA_FIELDS = [...LETTERHEAD_FIELDS.slice(6), ...CONTRACT_FIELDS];
+
+        // State
+        let insertedFields = [];
+        let moreExpanded = false;
+        let currentSize = localStorage.getItem('draftbridge_ui_size') || 'normal';
+
+        // =========================================================================
+        // Initialization
+        // =========================================================================
+        
+        Office.onReady(() => {
+            applyUISize(currentSize);
+            renderLetterheadFields();
+            renderContractFields();
+            loadExistingFields();
+            loadSavedTemplates();
+        });
+
+        // =========================================================================
+        // UI Size - Make it easy for everyone
+        // =========================================================================
+
+        function setUISize(size) {
+            currentSize = size;
+            localStorage.setItem('draftbridge_ui_size', size);
+            applyUISize(size);
+        }
+
+        function applyUISize(size) {
+            document.body.setAttribute('data-size', size);
+            
+            // Update size buttons
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.size === size);
+            });
+
+            // Adjust sizes based on selection
+            const root = document.documentElement;
+            if (size === 'large') {
+                root.style.setProperty('--df-scale', '1.15');
+            } else if (size === 'xlarge') {
+                root.style.setProperty('--df-scale', '1.3');
+            } else {
+                root.style.setProperty('--df-scale', '1');
+            }
+        }
+
+        // =========================================================================
+        // Saved Templates (Bookmarks)
+        // =========================================================================
+
+        function loadSavedTemplates() {
+            const templates = JSON.parse(localStorage.getItem('draftbridge_templates') || '[]');
+            const container = document.getElementById('savedTemplates');
+            const list = document.getElementById('savedList');
+            const count = document.getElementById('savedCount');
+
+            if (templates.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            count.textContent = templates.length;
+
+            list.innerHTML = templates.map(t => `
+                <div class="saved-item" onclick="loadTemplate('${t.id}')">
+                    <span class="saved-item-icon">📄</span>
+                    <span class="saved-item-name">${t.name}</span>
+                    <span class="saved-item-count">${t.fields.length} fields</span>
+                </div>
+            `).join('');
+        }
+
+        function saveAsTemplate() {
+            const name = prompt('Name this template:', 'My Template');
+            if (!name) return;
+
+            const templates = JSON.parse(localStorage.getItem('draftbridge_templates') || '[]');
+            
+            const newTemplate = {
+                id: 'tpl_' + Date.now(),
+                name: name,
+                fields: [...insertedFields],
+                createdAt: new Date().toISOString()
+            };
+
+            templates.unshift(newTemplate);
+            
+            // Keep max 20
+            if (templates.length > 20) templates.pop();
+
+            localStorage.setItem('draftbridge_templates', JSON.stringify(templates));
+            loadSavedTemplates();
+            showToast(`Saved "${name}"!`, 'success');
+        }
+
+        async function loadTemplate(id) {
+            const templates = JSON.parse(localStorage.getItem('draftbridge_templates') || '[]');
+            const template = templates.find(t => t.id === id);
+            
+            if (!template) return;
+
+            // Insert all fields from template
+            for (const fieldId of template.fields) {
+                const field = [...COMMON_FIELDS, ...EXTRA_FIELDS].find(f => f.id === fieldId);
+                if (field && !insertedFields.includes(fieldId)) {
+                    await insertField(fieldId, field.name);
+                }
+            }
+
+            showToast(`Loaded "${template.name}"`, 'success');
+        }
+
+        function renderLetterheadFields() {
+            const container = document.getElementById('letterheadFields');
+            container.innerHTML = LETTERHEAD_FIELDS.map(f => createFieldButton(f)).join('');
+        }
+
+        function renderContractFields() {
+            const container = document.getElementById('contractFields');
+            container.innerHTML = CONTRACT_FIELDS.map(f => createFieldButton(f)).join('');
+        }
+
+        function showCategory(cat) {
+            // Update tabs
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.cat === cat);
+            });
+            
+            // Show/hide categories
+            document.getElementById('cat-letterhead').style.display = cat === 'letterhead' ? 'block' : 'none';
+            document.getElementById('cat-contract').style.display = cat === 'contract' ? 'block' : 'none';
+        }
+
+        function createFieldButton(field) {
+            const inserted = insertedFields.includes(field.id);
+            return `
+                <button class="field-btn ${inserted ? 'inserted' : ''}" 
+                        onclick="insertField('${field.id}', '${field.name}')"
+                        data-field="${field.id}">
+                    <div class="field-icon">${field.icon}</div>
+                    <div class="field-info">
+                        <div class="field-name">${field.name}</div>
+                        <div class="field-hint">${field.hint}</div>
+                    </div>
+                </button>
+            `;
+        }
+
+        // =========================================================================
+        // Field Insertion
+        // =========================================================================
+        
+        async function insertField(id, name) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    
+                    // Insert content control
+                    const cc = selection.insertContentControl();
+                    cc.tag = `template_${id}`;
+                    cc.title = name;
+                    cc.placeholderText = `{{${name}}}`;
+                    cc.appearance = Word.ContentControlAppearance.boundingBox;
+                    
+                    // Move cursor after
+                    selection.insertText(' ', Word.InsertLocation.after);
+                    
+                    await context.sync();
+                });
+
+                // Track insertion
+                if (!insertedFields.includes(id)) {
+                    insertedFields.push(id);
+                }
+                
+                // Update UI
+                updateFieldButton(id, true);
+                updateInsertedList();
+                showToast(`Added "${name}"`, 'success');
+                
+            } catch (error) {
+                showToast('Select where to insert first', 'error');
+            }
+        }
+
+        async function addCustomField() {
+            const input = document.getElementById('customName');
+            const name = input.value.trim();
+            
+            if (!name) {
+                input.focus();
+                return;
+            }
+
+            const id = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    const cc = selection.insertContentControl();
+                    cc.tag = `template_${id}`;
+                    cc.title = name;
+                    cc.placeholderText = `{{${name}}}`;
+                    cc.appearance = Word.ContentControlAppearance.boundingBox;
+                    selection.insertText(' ', Word.InsertLocation.after);
+                    await context.sync();
+                });
+
+                insertedFields.push(id);
+                updateInsertedList();
+                showToast(`Added "${name}"`, 'success');
+                input.value = '';
+                
+            } catch (error) {
+                showToast('Select where to insert first', 'error');
+            }
+        }
+
+        // =========================================================================
+        // Load Existing Fields
+        // =========================================================================
+        
+        async function loadExistingFields() {
+            try {
+                await Word.run(async (context) => {
+                    const contentControls = context.document.contentControls;
+                    contentControls.load('items/tag,items/title');
+                    await context.sync();
+
+                    for (const cc of contentControls.items) {
+                        if (cc.tag && cc.tag.startsWith('template_')) {
+                            const id = cc.tag.replace('template_', '');
+                            if (!insertedFields.includes(id)) {
+                                insertedFields.push(id);
+                            }
+                        }
+                    }
+
+                    updateAllFieldButtons();
+                    updateInsertedList();
+                });
+            } catch (error) {
+                // Document might not be ready
+            }
+        }
+
+        // =========================================================================
+        // UI Updates
+        // =========================================================================
+        
+        function updateFieldButton(id, inserted) {
+            const btn = document.querySelector(`[data-field="${id}"]`);
+            if (btn) {
+                btn.classList.toggle('inserted', inserted);
+            }
+        }
+
+        function updateAllFieldButtons() {
+            [...LETTERHEAD_FIELDS, ...CONTRACT_FIELDS].forEach(f => {
+                updateFieldButton(f.id, insertedFields.includes(f.id));
+            });
+        }
+
+        function updateInsertedList() {
+            const list = document.getElementById('insertedList');
+            const count = document.getElementById('fieldCount');
+            const emptyState = document.getElementById('emptyState');
+            const btnDone = document.getElementById('btnDone');
+            const btnSave = document.getElementById('btnSaveTemplate');
+            
+            count.textContent = insertedFields.length;
+            btnDone.disabled = insertedFields.length === 0;
+            btnSave.style.display = insertedFields.length > 0 ? 'flex' : 'none';
+
+            if (insertedFields.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            
+            const allFields = [...LETTERHEAD_FIELDS, ...CONTRACT_FIELDS];
+            const html = insertedFields.map(id => {
+                const field = allFields.find(f => f.id === id);
+                const name = field ? field.name : id;
+                const icon = field ? field.icon : '📝';
+                return `
+                    <div class="inserted-item">
+                        <div class="field-icon">${icon}</div>
+                        <div class="field-name">${name}</div>
+                        <button class="btn-remove" onclick="removeField('${id}')" title="Remove">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M18 6L6 18M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = html;
+        }
+
+        async function removeField(id) {
+            // Remove from tracking
+            insertedFields = insertedFields.filter(f => f !== id);
+            updateFieldButton(id, false);
+            updateInsertedList();
+            
+            // TODO: Remove content control from document
+            showToast('Field removed from list');
+        }
+
+        function toggleMore() {
+            moreExpanded = !moreExpanded;
+            document.getElementById('extraFields').classList.toggle('visible', moreExpanded);
+            document.getElementById('moreToggle').classList.toggle('expanded', moreExpanded);
+        }
+
+        // =========================================================================
+        // Navigation
+        // =========================================================================
+        
+        function goBack() {
+            window.location.href = 'taskpane.html';
+        }
+
+        function saveAndClose() {
+            showToast('Template fields saved!', 'success');
+            setTimeout(() => {
+                window.location.href = 'taskpane.html';
+            }, 1000);
+        }
+
+        // =========================================================================
+        // Toast
+        // =========================================================================
+        
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast visible ' + type;
+            
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

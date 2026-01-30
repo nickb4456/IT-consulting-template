@@ -1,0 +1,249 @@
+/* ============================================================================
+   DraftBridge Accessibility & Size Settings
+   "Make it easy for old ladies too"
+   ============================================================================ */
+
+/* ============================================================================
+   Size Presets - Applied via data-size attribute on body
+   ============================================================================ */
+
+/* Default (Normal) */
+body[data-size="normal"] {
+    --df-font-base: 13px;
+    --df-font-small: 11px;
+    --df-font-large: 15px;
+    --df-font-title: 18px;
+    --df-spacing: 12px;
+    --df-button-height: 40px;
+    --df-icon-size: 20px;
+    --df-input-height: 40px;
+    --df-radius: 8px;
+}
+
+/* Large - For users who need bigger text */
+body[data-size="large"] {
+    --df-font-base: 15px;
+    --df-font-small: 13px;
+    --df-font-large: 18px;
+    --df-font-title: 22px;
+    --df-spacing: 16px;
+    --df-button-height: 48px;
+    --df-icon-size: 24px;
+    --df-input-height: 48px;
+    --df-radius: 10px;
+}
+
+/* Extra Large - Maximum readability */
+body[data-size="xlarge"] {
+    --df-font-base: 17px;
+    --df-font-small: 15px;
+    --df-font-large: 20px;
+    --df-font-title: 26px;
+    --df-spacing: 20px;
+    --df-button-height: 56px;
+    --df-icon-size: 28px;
+    --df-input-height: 56px;
+    --df-radius: 12px;
+}
+
+/* ============================================================================
+   Apply sizes to elements
+   ============================================================================ */
+
+body {
+    font-size: var(--df-font-base, 13px);
+    line-height: 1.5;
+}
+
+/* Headings */
+h1, .title {
+    font-size: var(--df-font-title, 18px);
+}
+
+h2, .subtitle {
+    font-size: var(--df-font-large, 15px);
+}
+
+/* Small text */
+.hint, .caption, .label, small {
+    font-size: var(--df-font-small, 11px);
+}
+
+/* Buttons */
+button, .btn {
+    min-height: var(--df-button-height, 40px);
+    font-size: var(--df-font-base, 13px);
+    padding: calc(var(--df-spacing, 12px) * 0.75) var(--df-spacing, 12px);
+    border-radius: var(--df-radius, 8px);
+}
+
+/* Large primary buttons */
+.btn-primary, .btn-fill-all, .fill-all-btn {
+    min-height: calc(var(--df-button-height, 40px) * 1.25);
+    font-size: var(--df-font-large, 15px);
+}
+
+/* Inputs */
+input, select, textarea {
+    min-height: var(--df-input-height, 40px);
+    font-size: var(--df-font-base, 13px);
+    padding: calc(var(--df-spacing, 12px) * 0.5) var(--df-spacing, 12px);
+    border-radius: var(--df-radius, 8px);
+}
+
+/* Icons */
+.icon, svg:not(.logo) {
+    width: var(--df-icon-size, 20px);
+    height: var(--df-icon-size, 20px);
+}
+
+/* Spacing */
+.card, .panel, .section {
+    padding: var(--df-spacing, 12px);
+    margin-bottom: var(--df-spacing, 12px);
+    border-radius: var(--df-radius, 8px);
+}
+
+/* Field cards */
+.field-card, .field-btn {
+    padding: var(--df-spacing, 12px);
+    gap: var(--df-spacing, 12px);
+}
+
+/* ============================================================================
+   High Contrast Mode
+   ============================================================================ */
+
+body[data-contrast="high"] {
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-color: #000000;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f0f0f0;
+    --accent-color: #0000cc;
+}
+
+body[data-contrast="high"] button,
+body[data-contrast="high"] .btn {
+    border: 2px solid currentColor;
+    font-weight: 600;
+}
+
+body[data-contrast="high"] input,
+body[data-contrast="high"] select {
+    border: 2px solid #000000;
+}
+
+body[data-contrast="high"] a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* ============================================================================
+   Reduced Motion
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+body[data-motion="reduced"] *,
+body[data-motion="reduced"] *::before,
+body[data-motion="reduced"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* ============================================================================
+   Focus Indicators - Always visible, larger
+   ============================================================================ */
+
+*:focus-visible {
+    outline: 3px solid var(--accent-color, #0078d4);
+    outline-offset: 2px;
+}
+
+body[data-size="large"] *:focus-visible,
+body[data-size="xlarge"] *:focus-visible {
+    outline-width: 4px;
+    outline-offset: 3px;
+}
+
+/* ============================================================================
+   Size Picker Component
+   ============================================================================ */
+
+.size-picker {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.size-picker-label {
+    font-size: var(--df-font-base);
+    color: #666;
+    margin-right: auto;
+}
+
+.size-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.15s;
+}
+
+.size-btn:hover {
+    border-color: #0078d4;
+}
+
+.size-btn.active {
+    background: #0078d4;
+    border-color: #0078d4;
+    color: white;
+}
+
+.size-btn[data-size="normal"] { font-size: 12px; }
+.size-btn[data-size="large"] { font-size: 16px; }
+.size-btn[data-size="xlarge"] { font-size: 20px; }
+
+/* ============================================================================
+   Tooltip improvements for older users
+   ============================================================================ */
+
+[title] {
+    position: relative;
+}
+
+/* Bigger click targets */
+body[data-size="large"] button,
+body[data-size="large"] .clickable,
+body[data-size="xlarge"] button,
+body[data-size="xlarge"] .clickable {
+    min-width: 44px;
+    min-height: 44px;
+}
+
+/* Clearer hover states */
+body[data-size="large"] button:hover,
+body[data-size="large"] .clickable:hover,
+body[data-size="xlarge"] button:hover,
+body[data-size="xlarge"] .clickable:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}

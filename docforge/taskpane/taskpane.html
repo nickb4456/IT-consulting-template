@@ -2,147 +2,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <script>if(sessionStorage.getItem('docforge_auth')!=='true')window.location.href='../index.html';</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocForge</title>
     <link rel="stylesheet" href="taskpane.css">
 </head>
 <body>
-    <a href="#homeView" class="skip-link">Skip to main content</a>
-    
-    <div id="app" class="taskpane">
+    <div class="app">
         <header class="header">
-            <div class="brand">
-                <svg class="brand-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="12" y1="11" x2="12" y2="17"/>
-                    <line x1="9" y1="14" x2="15" y2="14"/>
-                </svg>
-                <span class="brand-name">DocForge</span>
-            </div>
+            <span class="logo">DocForge</span>
         </header>
 
-        <main class="main">
-            <!-- Home View -->
-            <section id="homeView" class="view">
-                <div class="home-header">
-                    <h1 class="page-title">New Document</h1>
-                    <p class="page-subtitle">Select a template to get started</p>
+        <nav class="tabs">
+            <button class="tab active" data-tab="generate">Generate</button>
+            <button class="tab" data-tab="edit">Edit</button>
+            <button class="tab" data-tab="data">Data</button>
+            <button class="tab" data-tab="share">Share</button>
+            <button class="tab" data-tab="admin">Admin</button>
+        </nav>
+
+        <main class="content">
+            <!-- Generate Panel -->
+            <section class="panel" id="generatePanel">
+                <div class="panel-title">Generate</div>
+                <div class="options">
+                    <button class="opt" data-template="letter">Letter</button>
+                    <button class="opt" data-template="memo">Memo</button>
+                    <button class="opt" data-template="fax">Fax</button>
+                    <button class="opt" data-action="transform">Transform</button>
+                    <button class="opt" data-action="anonymize">Anonymize</button>
                 </div>
-                
-                <div class="template-grid">
-                    <button class="template-card" data-template="nda" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">NDA</span>
-                        </div>
-                    </button>
-                    
-                    <button class="template-card" data-template="employment" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                                <circle cx="9" cy="7" r="4"/>
-                                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">Employment</span>
-                        </div>
-                    </button>
-                    
-                    <button class="template-card" data-template="service" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">Service</span>
-                        </div>
-                    </button>
-                    
-                    <button class="template-card" data-template="lease" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                                <polyline points="9 22 9 12 15 12 15 22"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">Lease</span>
-                        </div>
-                    </button>
-                    
-                    <button class="template-card" data-template="billOfSale" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <line x1="12" y1="1" x2="12" y2="23"/>
-                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">Bill of Sale</span>
-                        </div>
-                    </button>
-                    
-                    <button class="template-card" data-template="poa" type="button">
-                        <div class="template-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                            </svg>
-                        </div>
-                        <div class="template-info">
-                            <span class="template-name">Power of Attorney</span>
-                        </div>
-                    </button>
-                </div>
-                
-                <div class="scan-divider"><span>or</span></div>
-                <button class="btn-scan" id="scanDocBtn" type="button">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                    Scan Open Document
-                </button>
-                <p class="scan-hint">Detect fields in an existing template</p>
+                <button class="scan-btn" id="scanBtn">Scan Document</button>
             </section>
 
-            <!-- Fields View -->
-            <section id="fieldsView" class="view hidden">
-                <div class="fields-header">
-                    <button class="back-btn" id="backBtn" type="button" aria-label="Back">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M15 18l-6-6 6-6"/>
-                        </svg>
-                    </button>
-                    <div class="fields-title-group">
-                        <h1 class="page-title" id="templateTitle">Document</h1>
-                        <span class="field-count" id="fieldCount">0 fields</span>
-                    </div>
+            <!-- Edit Panel -->
+            <section class="panel hidden" id="editPanel">
+                <div class="panel-title">Edit</div>
+                <div class="options">
+                    <button class="opt" data-action="numbering">Numbering</button>
+                    <button class="opt" data-action="toc">TOC</button>
+                    <button class="opt" data-action="pleadings">Pleadings</button>
                 </div>
-                
-                <div class="fields-list" id="fieldsList"></div>
-                
+            </section>
+
+            <!-- Data Panel -->
+            <section class="panel hidden" id="dataPanel">
+                <div class="panel-title">Data</div>
+                <div class="options">
+                    <button class="opt" data-action="save-content">Save Content</button>
+                    <button class="opt" data-action="insert-content">Insert Content</button>
+                    <button class="opt" data-action="datasets">Datasets</button>
+                </div>
+            </section>
+
+            <!-- Share Panel -->
+            <section class="panel hidden" id="sharePanel">
+                <div class="panel-title">Share</div>
+                <div class="options">
+                    <button class="opt" data-action="share-users">Share with Users</button>
+                    <button class="opt" data-action="share-groups">Share with Groups</button>
+                    <button class="opt" data-action="export">Export</button>
+                </div>
+            </section>
+
+            <!-- Admin Panel -->
+            <section class="panel hidden" id="adminPanel">
+                <div class="panel-title">Admin</div>
+                <div class="options">
+                    <button class="opt" data-action="doc-id">Doc ID</button>
+                    <button class="opt" data-action="settings">Settings</button>
+                    <button class="opt" data-action="firm-styles">Firm Styles</button>
+                </div>
+            </section>
+
+            <!-- Fields Panel (for Letter/Memo/Fax) -->
+            <section class="panel hidden" id="fieldsPanel">
+                <div class="panel-header">
+                    <button class="back-btn" id="backBtn">Back</button>
+                    <span class="panel-title" id="templateTitle">Document</span>
+                </div>
+                <div class="fields" id="fieldsList"></div>
                 <div class="actions">
-                    <button class="btn btn-primary" id="fillAllBtn" type="button">Fill All Fields</button>
-                    <button class="btn btn-secondary" id="undoBtn" type="button" disabled>Undo</button>
+                    <button class="btn primary" id="fillBtn">Fill Document</button>
+                    <button class="btn" id="undoBtn" disabled>Undo</button>
                 </div>
             </section>
         </main>
 
-        <div id="srAnnouncements" class="sr-only" aria-live="polite"></div>
         <div id="toast" class="toast hidden"></div>
     </div>
-
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script src="taskpane.js"></script>
 </body>

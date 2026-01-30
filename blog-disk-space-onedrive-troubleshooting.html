@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disk Space & OneDrive Troubleshooting: PowerShell Commands That Actually Work | AIBridges</title>
+    <meta name="description" content="Running out of disk space? OneDrive sync issues? Get the exact PowerShell commands IT pros use to diagnose and fix Windows storage problems. Free guide with copy-paste scripts.">
+    <meta name="keywords" content="disk space PowerShell, OneDrive troubleshooting, Windows storage fix, free up disk space Windows, OneDrive sync issues, path too long Windows, OneDrive cloud-only, IT support Rhode Island, managed IT services">
+
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://aibridges.org/blog-disk-space-onedrive-troubleshooting">
+    <meta property="og:title" content="Disk Space & OneDrive Troubleshooting: PowerShell Commands That Work">
+    <meta property="og:description" content="The exact PowerShell commands IT pros use to fix Windows disk space and OneDrive issues. Copy-paste ready.">
+    <meta property="og:image" content="https://aibridges.org/img/blog-disk-space-og.png">
+    <meta property="article:published_time" content="2026-01-30">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Disk Space & OneDrive Troubleshooting Guide">
+    <meta name="twitter:description" content="PowerShell commands to fix Windows storage and OneDrive sync issues.">
+
+    <meta name="geo.region" content="US-RI">
+    <meta name="geo.placename" content="Rhode Island">
+    <link rel="canonical" href="https://aibridges.org/blog-disk-space-onedrive-troubleshooting">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #22d3ee;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 30, 0.6);
+            --text: #f8fafc;
+            --text-muted: #a1afc4;
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --code-bg: #1a1a2e;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.8; }
+        .nav { position: fixed; top: 0; width: 100%; padding: 1rem 2rem; background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid var(--border); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+        .article-header { padding: 8rem 2rem 4rem; text-align: center; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.05)); }
+        .article-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .article-meta { color: var(--text-muted); font-size: 0.9rem; }
+        .article-meta span { margin: 0 1rem; }
+        .article-content { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
+        .article-content h2 { font-size: 1.75rem; margin: 2.5rem 0 1rem; color: var(--accent); }
+        .article-content h3 { font-size: 1.25rem; margin: 2rem 0 0.75rem; color: var(--primary-light); }
+        .article-content p { margin-bottom: 1.5rem; color: var(--text-muted); }
+        .article-content ul, .article-content ol { margin: 1rem 0 1.5rem 2rem; color: var(--text-muted); }
+        .article-content li { margin-bottom: 0.5rem; }
+        .article-content strong { color: var(--text); }
+        .highlight-box { background: var(--bg-card); border-left: 4px solid var(--accent); padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0; }
+        .highlight-box p { margin: 0; }
+        .warning-box { border-left-color: var(--warning); }
+        .success-box { border-left-color: var(--success); }
+        .danger-box { border-left-color: #ef4444; }
+        .code-block { background: var(--code-bg); border-radius: 8px; padding: 1.5rem; margin: 1rem 0 1.5rem; overflow-x: auto; position: relative; border: 1px solid var(--border); }
+        .code-block code { font-family: 'Fira Code', 'Consolas', monospace; font-size: 0.9rem; color: #e2e8f0; white-space: pre-wrap; word-break: break-all; }
+        .code-block .copy-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--primary); color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; font-size: 0.75rem; opacity: 0.8; transition: opacity 0.3s; }
+        .code-block .copy-btn:hover { opacity: 1; }
+        .code-label { color: var(--success); font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem; }
+        .toc { background: var(--bg-card); border-radius: 12px; padding: 1.5rem 2rem; margin: 2rem 0; border: 1px solid var(--border); }
+        .toc h3 { color: var(--accent); margin-bottom: 1rem; font-size: 1.1rem; }
+        .toc ul { list-style: none; margin: 0; padding: 0; }
+        .toc li { margin-bottom: 0.5rem; }
+        .toc a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+        .toc a:hover { color: var(--accent); }
+        .cta-box { background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(34, 211, 238, 0.1)); padding: 2rem; border-radius: 12px; text-align: center; margin: 3rem 0; border: 1px solid var(--border); }
+        .cta-box h3 { color: var(--text); margin-bottom: 1rem; }
+        .cta-box p { color: var(--text-muted); margin-bottom: 1.5rem; }
+        .cta-button { display: inline-block; padding: 0.75rem 2rem; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; transition: transform 0.3s, box-shadow 0.3s; }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3); }
+        .footer { background: rgba(20, 20, 30, 0.8); padding: 3rem 2rem; text-align: center; border-top: 1px solid var(--border); }
+        .footer p { color: var(--text-muted); }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .breadcrumb { max-width: 800px; margin: 0 auto; padding: 1rem 2rem 0; }
+        .breadcrumb a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .breadcrumb a:hover { color: var(--accent); }
+        .breadcrumb span { color: var(--text-muted); font-size: 0.9rem; }
+        @media (max-width: 768px) { .nav-links { display: none; } .article-header { padding: 6rem 1rem 2rem; } .article-content { padding: 2rem 1rem; } .code-block { padding: 1rem; font-size: 0.8rem; } }
+    </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Disk Space & OneDrive Troubleshooting: PowerShell Commands That Actually Work",
+        "author": { "@type": "Organization", "name": "AIBridges" },
+        "publisher": { "@type": "Organization", "name": "AIBridges", "url": "https://aibridges.org" },
+        "datePublished": "2026-01-30",
+        "dateModified": "2026-01-30",
+        "description": "Complete guide to fixing Windows disk space and OneDrive sync issues using PowerShell commands.",
+        "mainEntityOfPage": "https://aibridges.org/blog-disk-space-onedrive-troubleshooting",
+        "keywords": "disk space, PowerShell, OneDrive, Windows troubleshooting, IT support"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Free Up Disk Space and Fix OneDrive Issues",
+        "description": "Step-by-step PowerShell commands to diagnose and fix Windows storage problems",
+        "step": [
+            {"@type": "HowToStep", "name": "Check Disk Space", "text": "Use Get-PSDrive to check available disk space"},
+            {"@type": "HowToStep", "name": "Find Large Folders", "text": "Identify which folders are consuming the most space"},
+            {"@type": "HowToStep", "name": "Move to Cloud", "text": "Move files to OneDrive cloud-only storage"},
+            {"@type": "HowToStep", "name": "Fix Path Issues", "text": "Resolve path too long errors"},
+            {"@type": "HowToStep", "name": "Clean Up", "text": "Empty recycle bin and restart OneDrive"}
+        ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "AIBridges",
+        "description": "IT and AI services for Rhode Island businesses",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cranston",
+            "addressRegion": "RI",
+            "addressCountry": "US"
+        },
+        "areaServed": ["Cranston", "Providence", "Warwick", "Pawtucket", "Rhode Island", "Massachusetts", "Boston"],
+        "url": "https://aibridges.org"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "Why is OneDrive using so much disk space?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "OneDrive keeps local copies of files by default. Use the 'Free up space' option or the attrib +U -P command to make files cloud-only and reclaim local storage."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I fix 'path too long' errors in Windows?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Enable long paths system-wide with: Set-ItemProperty -Path 'HKLM:\\SYSTEM\\CurrentControlSet\\Control\\FileSystem' -Name 'LongPathsEnabled' -Value 1. Requires admin rights and a reboot."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What characters are invalid for OneDrive file names?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "OneDrive doesn't allow these characters in file names: \\ / : * ? \" < > |. Additionally, # % & { } are problematic for OneDrive sync."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="logo">AIBridges</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/service-support">IT Support</a></li>
+                <li><a href="/service-ai">AI Services</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="/">Home</a> <span>/</span> <a href="/blog">Blog</a> <span>/</span> <span>Disk Space & OneDrive Troubleshooting</span>
+    </div>
+
+    <header class="article-header">
+        <h1>Disk Space & OneDrive Troubleshooting</h1>
+        <p class="article-meta">
+            <span><i class="far fa-calendar"></i> January 30, 2026</span>
+            <span><i class="far fa-clock"></i> 10 min read</span>
+            <span><i class="far fa-folder"></i> IT Guides</span>
+        </p>
+    </header>
+
+    <article class="article-content">
+        <p>Running out of disk space on Windows? OneDrive sync acting up? These are the <strong>exact PowerShell commands</strong> our IT team uses every day to diagnose and fix storage issues for businesses across Rhode Island and beyond.</p>
+
+        <p>Bookmark this page. You'll need it.</p>
+
+        <nav class="toc">
+            <h3><i class="fas fa-list"></i> Quick Navigation</h3>
+            <ul>
+                <li><a href="#check-disk-space">Check Disk Space</a></li>
+                <li><a href="#move-to-cloud">Move Files to OneDrive (Cloud-Only)</a></li>
+                <li><a href="#path-too-long">Fix Path Too Long Issues</a></li>
+                <li><a href="#invalid-characters">Fix Invalid Characters</a></li>
+                <li><a href="#free-up-space">Free Up Space Fast</a></li>
+                <li><a href="#onedrive-settings">OneDrive Settings to Check</a></li>
+            </ul>
+        </nav>
+
+        <h2 id="check-disk-space"><i class="fas fa-hard-drive"></i> Check Disk Space</h2>
+
+        <p>Before fixing anything, know where you stand. These commands give you the full picture in seconds.</p>
+
+        <h3>Quick Space Check (in GB)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-PSDrive C | Select-Object @{N='UsedGB';E={[math]::Round($_.Used/1GB,2)}}, @{N='FreeGB';E={[math]::Round($_.Free/1GB,2)}}</code>
+        </div>
+
+        <h3>What's Eating Space? (Top Folders)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-ChildItem "C:\Users\USERNAME" -Directory -Force | ForEach-Object {
+    $size = (Get-ChildItem $_.FullName -Recurse -Force -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+    [PSCustomObject]@{Folder=$_.Name; GB=[math]::Round($size/1GB,2)}
+} | Sort-Object GB -Descending | Select-Object -First 10</code>
+        </div>
+
+        <h3>OneDrive Folder Breakdown</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-ChildItem "$env:USERPROFILE\OneDrive" -Directory | ForEach-Object {
+    $size = (Get-ChildItem $_.FullName -Recurse -File -ErrorAction SilentlyContinue | Measure-Object -Property Length -Sum).Sum
+    [PSCustomObject]@{Folder=$_.Name; SizeGB=[math]::Round($size/1GB,2)}
+} | Sort-Object SizeGB -Descending | Format-Table -AutoSize</code>
+        </div>
+
+        <div class="highlight-box">
+            <p><strong><i class="fas fa-lightbulb"></i> Pro Tip:</strong> Replace <code>USERNAME</code> with your actual Windows username, or use <code>$env:USERNAME</code> to auto-detect it.</p>
+        </div>
+
+        <h2 id="move-to-cloud"><i class="fas fa-cloud-upload-alt"></i> Move Files to OneDrive (Cloud-Only)</h2>
+
+        <p>This is the big one. Moving files to OneDrive's cloud-only mode frees up local disk space while keeping everything accessible. Here's the safe, step-by-step process.</p>
+
+        <h3>Step 1: Create Destination Folder</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>New-Item -Path "C:\Users\USERNAME\OneDrive\Downloads-Archive" -ItemType Directory -Force</code>
+        </div>
+
+        <h3>Step 2: Preview What Will Move (Dry Run)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>robocopy "C:\Users\USERNAME\Downloads" "C:\Users\USERNAME\OneDrive\Downloads-Archive" /E /MOV /L</code>
+        </div>
+
+        <h3>Step 3: Actually Move the Files</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>robocopy "C:\Users\USERNAME\Downloads" "C:\Users\USERNAME\OneDrive\Downloads-Archive" /E /MOV</code>
+        </div>
+
+        <h3>Step 4: Set Folder to Cloud-Only (Free Local Space)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>attrib +U -P "C:\Users\USERNAME\OneDrive\Downloads-Archive" /S /D</code>
+        </div>
+
+        <div class="highlight-box warning-box">
+            <p><strong><i class="fas fa-exclamation-triangle"></i> Important:</strong> OneDrive must finish syncing to cloud BEFORE local space is freed. Check the OneDrive tray icon for sync progress. This can take hours for large folders.</p>
+        </div>
+
+        <h2 id="path-too-long"><i class="fas fa-ruler"></i> Fix Path Too Long Issues</h2>
+
+        <p>Windows has a 260-character path limit that causes sync failures and "file not found" errors. Here's how to find and fix them.</p>
+
+        <h3>Find Paths Exceeding 260 Characters</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-ChildItem "C:\Users" -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName.Length -gt 260 } |
+    Select-Object FullName, @{N='Length';E={$_.FullName.Length}} |
+    Sort-Object Length -Descending</code>
+        </div>
+
+        <h3>Fix: Map a Drive Letter to Shorten Path</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code># Map Z: to the deep folder
+subst Z: "C:\Users\Username\OneDrive\Really\Deep\Folder\Structure"
+
+# Work from Z:\ instead
+# Remove when done:
+subst Z: /D</code>
+        </div>
+
+        <h3>Fix: Use Robocopy with Long Path Support</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>robocopy "\\?\C:\VeryLongPath\Folder" "C:\Shorter\Path" /E /COPYALL /R:0</code>
+        </div>
+
+        <h3>Fix: Delete Stubborn Long Path Folders</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code># Create empty folder, mirror it (deletes everything)
+mkdir C:\empty
+robocopy C:\empty "\\?\C:\Path\To\Problem\Folder" /MIR
+rmdir C:\empty</code>
+        </div>
+
+        <h3>Fix: Enable Long Paths System-Wide (Requires Admin + Reboot)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem" -Name "LongPathsEnabled" -Value 1</code>
+        </div>
+
+        <h2 id="invalid-characters"><i class="fas fa-ban"></i> Fix Invalid Characters</h2>
+
+        <p>OneDrive won't sync files with certain characters. Find them before they cause problems.</p>
+
+        <h3>Find Files with Problematic Characters</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-ChildItem "C:\Users" -Recurse -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '[#%&{}\\<>*?/$!''":@+`|=]' } |
+    Select-Object FullName, Name</code>
+        </div>
+
+        <div class="highlight-box danger-box">
+            <p><strong><i class="fas fa-times-circle"></i> Invalid Characters for Windows/OneDrive:</strong> <code>\ / : * ? " < > |</code></p>
+            <p><strong>Problematic for OneDrive:</strong> <code># % & { }</code></p>
+        </div>
+
+        <h2 id="free-up-space"><i class="fas fa-broom"></i> Free Up Space Fast</h2>
+
+        <h3>Empty Recycle Bin</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Clear-RecycleBin -Force</code>
+        </div>
+
+        <h3>Restart OneDrive (Force Sync/Release)</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Stop-Process -Name "OneDrive" -Force
+Start-Process "$env:LOCALAPPDATA\Microsoft\OneDrive\OneDrive.exe"</code>
+        </div>
+
+        <h3>Find OneDrive Conflict Files</h3>
+        <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            <code>Get-ChildItem "$env:USERPROFILE\OneDrive" -Recurse -File -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -match '\(1\)|\-conflict\-|\.conflicted' } |
+    Select-Object FullName</code>
+        </div>
+
+        <h2 id="onedrive-settings"><i class="fas fa-cog"></i> OneDrive Settings to Check</h2>
+
+        <ul>
+            <li><strong>Files On-Demand:</strong> Settings → Sync and backup → Advanced settings → Files On-Demand</li>
+            <li><strong>PC Folder Backup:</strong> Settings → Sync and backup → Manage backup (can auto-redirect Downloads)</li>
+            <li><strong>Free up space:</strong> Right-click any OneDrive folder → "Free up space"</li>
+        </ul>
+
+        <div class="highlight-box success-box">
+            <p><strong><i class="fas fa-check-circle"></i> Key Insight:</strong> If you move files to OneDrive but space doesn't free up, OneDrive is keeping local copies. Use "Free up space" or the <code>attrib +U -P</code> command to make them cloud-only.</p>
+        </div>
+
+        <div class="cta-box">
+            <h3>Still Struggling with Storage Issues?</h3>
+            <p>These commands work great for one-off fixes. But if your business is constantly battling disk space, sync failures, or OneDrive headaches—it's time for proactive IT management.</p>
+            <p><strong>AIBridges provides managed IT services</strong> for businesses in Rhode Island and Massachusetts. We monitor storage, automate cleanups, and prevent these issues before they slow you down.</p>
+            <a href="/contact" class="cta-button"><i class="fas fa-phone"></i> Get a Free IT Assessment</a>
+        </div>
+
+        <h2>Related Guides</h2>
+        <ul>
+            <li><a href="/blog-it-support-rhode-island">How to Choose the Right IT Support Partner in Rhode Island</a></li>
+            <li><a href="/service-support">Our Managed IT Support Services</a></li>
+            <li><a href="/guide-clawdbot">ClawdBot AI Assistant Guide</a></li>
+        </ul>
+
+    </article>
+
+    <footer class="footer">
+        <p>&copy; 2026 <a href="/">AIBridges</a> | IT & AI Services for Rhode Island Businesses</p>
+        <p style="margin-top: 0.5rem;"><a href="/contact">Contact Us</a> | <a href="/blog">More Guides</a> | <a href="/cranston-ri">Cranston, RI</a> | <a href="/boston-ma">Boston, MA</a></p>
+    </footer>
+
+    <script>
+        function copyCode(btn) {
+            const code = btn.parentElement.querySelector('code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = 'Copy', 2000);
+            });
+        }
+    </script>
+</body>
+</html>

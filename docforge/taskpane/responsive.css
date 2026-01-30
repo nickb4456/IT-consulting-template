@@ -1,0 +1,844 @@
+/**
+ * DocForge Responsive Styles - Narrow Panel Support
+ * 
+ * Office task panes can be as narrow as 280-300px.
+ * These styles ensure usability at all widths.
+ * 
+ * BREAKPOINTS:
+ * - Default: Mobile-first (< 320px base styles)
+ * - 320px+: Slightly more breathing room
+ * - 350px+: Standard narrow task pane
+ * - 400px+: Wide task pane (max width)
+ * 
+ * DESIGN PRINCIPLES:
+ * - Mobile-first: Start narrow, add complexity at larger sizes
+ * - Touch-first: Min 44px touch targets (Apple HIG / WCAG 2.5.5)
+ * - Graceful overflow: Text truncates, never breaks layout
+ * - Vertical stacking: Horizontal layouts stack on narrow screens
+ * 
+ * @version 1.0.0
+ */
+
+/* ============================================================================
+   Responsive Design Tokens
+   ============================================================================ */
+
+:root {
+    /* Responsive spacing scale */
+    --df-space-responsive-1: clamp(2px, 1vw, 4px);
+    --df-space-responsive-2: clamp(4px, 2vw, 8px);
+    --df-space-responsive-3: clamp(8px, 3vw, 12px);
+    --df-space-responsive-4: clamp(12px, 4vw, 16px);
+    
+    /* Touch target minimum (WCAG 2.5.5 / Apple HIG) */
+    --df-touch-target-min: 44px;
+    
+    /* Narrow panel threshold */
+    --df-narrow-threshold: 350px;
+}
+
+/* ============================================================================
+   BASE STYLES - Mobile-First (Narrowest: < 320px)
+   ============================================================================ */
+
+/* 
+ * Taskpane Container
+ * Ensure it works at minimum widths
+ */
+.taskpane {
+    min-width: 280px;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+/* 
+ * Header - Compact on narrow screens
+ */
+.taskpane-header {
+    padding: var(--df-space-2) var(--df-space-3);
+    gap: var(--df-space-2);
+    flex-wrap: wrap;
+}
+
+.brand-name {
+    font-size: var(--df-text-sm);
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Header actions stack if needed */
+.header-actions {
+    display: flex;
+    gap: var(--df-space-1);
+    flex-shrink: 0;
+}
+
+/* Icon buttons - ensure touch targets */
+.btn-icon {
+    width: var(--df-touch-target-min);
+    height: var(--df-touch-target-min);
+    min-width: var(--df-touch-target-min);
+    min-height: var(--df-touch-target-min);
+}
+
+/*
+ * Main Content - Reduced padding on narrow
+ */
+.main-content {
+    padding: var(--df-space-3);
+}
+
+/* ============================================================================
+   BUTTONS - Touch-Friendly Sizing
+   ============================================================================ */
+
+/*
+ * All interactive buttons must meet touch target minimums
+ * 44px is the Apple HIG / WCAG 2.5.5 recommended minimum
+ */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-preview,
+.btn-preflight {
+    min-height: var(--df-touch-target-min);
+    padding: var(--df-space-2) var(--df-space-3);
+    font-size: var(--df-text-sm);
+}
+
+/* Fill All button - Hero CTA, always prominent */
+.btn-fill-all {
+    min-height: 48px;
+    padding: var(--df-space-3);
+    font-size: var(--df-text-base);
+    width: 100%;
+}
+
+/* 
+ * Primary Actions Bar - Stack vertically on narrow 
+ */
+.primary-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-2);
+    padding: var(--df-space-3) 0;
+}
+
+/* All action buttons full-width on narrow */
+.primary-actions .btn,
+.primary-actions .btn-secondary,
+.primary-actions .btn-preview,
+.primary-actions .btn-preflight {
+    flex: none;
+    width: 100%;
+    justify-content: center;
+}
+
+/* Undo button inline with others */
+#undoBtn {
+    width: 100%;
+}
+
+/* ============================================================================
+   FIELDS - Compact Layout
+   ============================================================================ */
+
+/* Status Badge - Stack on narrow */
+.status-badge {
+    flex-wrap: wrap;
+    padding: var(--df-space-2);
+    gap: var(--df-space-2);
+}
+
+.badge-count {
+    font-size: var(--df-text-md);
+}
+
+.badge-text {
+    flex: 1 1 auto;
+    min-width: 100px;
+}
+
+/* Rescan button - touch friendly */
+.btn-rescan {
+    width: var(--df-touch-target-min);
+    height: var(--df-touch-target-min);
+    min-width: var(--df-touch-target-min);
+}
+
+/* Field items - compact but touch-friendly */
+.field-item {
+    padding: var(--df-space-2);
+}
+
+.field-label {
+    font-size: 10px;
+    margin-bottom: var(--df-space-1);
+}
+
+.field-input {
+    min-height: var(--df-touch-target-min);
+    padding: var(--df-space-2);
+    font-size: var(--df-text-base);
+}
+
+/* ============================================================================
+   TEXT OVERFLOW - Prevent Breaking Layout
+   ============================================================================ */
+
+/* Generic text overflow handling */
+.truncate,
+.brand-name,
+.dataset-name,
+.modal-title,
+.dropdown-item {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Allow wrapping for descriptions but limit lines */
+.modal-description,
+.empty-text,
+.onboarding-subtitle {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Prevent horizontal scroll from long words */
+.main-content,
+.modal-body,
+.fields-list {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+/* ============================================================================
+   MODALS - Full Width on Narrow Panels
+   ============================================================================ */
+
+.modal {
+    padding: var(--df-space-2);
+}
+
+/* Modal fills available width on narrow screens */
+.modal-content {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - var(--df-space-4));
+    margin: 0;
+    border-radius: var(--df-radius-lg);
+}
+
+.modal-header {
+    padding: var(--df-space-3);
+}
+
+.modal-title {
+    font-size: var(--df-text-md);
+}
+
+.modal-close {
+    width: var(--df-touch-target-min);
+    height: var(--df-touch-target-min);
+    min-width: var(--df-touch-target-min);
+}
+
+.modal-body {
+    padding: var(--df-space-3);
+    max-height: calc(100vh - 160px);
+}
+
+/* Form elements in modals */
+.form-group {
+    margin-bottom: var(--df-space-3);
+}
+
+.form-input,
+.form-select,
+.glass-input,
+.glass-select {
+    min-height: var(--df-touch-target-min);
+}
+
+/* ============================================================================
+   DROPDOWN - Constrain to Panel Width
+   ============================================================================ */
+
+.dropdown-menu {
+    width: calc(100vw - var(--df-space-4) * 2);
+    max-width: 220px;
+    right: var(--df-space-2);
+}
+
+.dropdown-item {
+    min-height: var(--df-touch-target-min);
+    padding: var(--df-space-2) var(--df-space-3);
+}
+
+/* ============================================================================
+   EMPTY STATE - Compact on Narrow
+   ============================================================================ */
+
+.empty-state {
+    padding: var(--df-space-6) var(--df-space-3);
+    min-height: auto;
+}
+
+.empty-state-content {
+    max-width: 100%;
+}
+
+.empty-icon {
+    width: 64px;
+    height: 64px;
+}
+
+.empty-icon svg {
+    width: 28px;
+    height: 28px;
+}
+
+.empty-title {
+    font-size: var(--df-text-md);
+}
+
+/* ============================================================================
+   TOAST & OVERLAYS - Full Width on Narrow
+   ============================================================================ */
+
+.toast-container {
+    left: var(--df-space-2);
+    right: var(--df-space-2);
+    bottom: var(--df-space-2);
+}
+
+.toast {
+    padding: var(--df-space-2) var(--df-space-3);
+    font-size: var(--df-text-sm);
+}
+
+/* Fill progress overlay */
+.fill-progress {
+    padding: var(--df-space-4);
+}
+
+.fill-progress-bar {
+    max-width: 100%;
+}
+
+/* Loading overlay */
+.loading-overlay {
+    padding: var(--df-space-4);
+}
+
+/* ============================================================================
+   ONBOARDING - Compact for Narrow
+   ============================================================================ */
+
+.onboarding-content {
+    padding: var(--df-space-4);
+    max-width: 100%;
+}
+
+.onboarding-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+}
+
+.onboarding-title {
+    font-size: 18px;
+}
+
+.onboarding-subtitle {
+    font-size: 13px;
+}
+
+.onboarding-actions {
+    gap: var(--df-space-2);
+}
+
+.btn-lg {
+    min-height: 48px;
+    padding: var(--df-space-3);
+    font-size: 14px;
+}
+
+/* Step indicators - smaller on narrow */
+.step-indicators {
+    gap: var(--df-space-1);
+}
+
+.step-dot {
+    width: 6px;
+    height: 6px;
+}
+
+.step-dot.active {
+    width: 18px;
+}
+
+/* ============================================================================
+   NUMBERING OPTIONS - Stack Vertically
+   ============================================================================ */
+
+.numbering-options {
+    gap: var(--df-space-2);
+}
+
+.numbering-option {
+    padding: var(--df-space-2);
+    min-height: var(--df-touch-target-min);
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.numbering-preview {
+    min-width: auto;
+    width: 100%;
+    margin-bottom: var(--df-space-1);
+}
+
+/* ============================================================================
+   DATASET LIST - Compact
+   ============================================================================ */
+
+.dataset-list {
+    max-height: 200px;
+}
+
+.dataset-item,
+.dataset-item-manage {
+    padding: var(--df-space-2);
+    min-height: var(--df-touch-target-min);
+}
+
+.dataset-name {
+    font-size: var(--df-text-sm);
+}
+
+.btn-delete-dataset {
+    width: var(--df-touch-target-min);
+    height: var(--df-touch-target-min);
+}
+
+/* ============================================================================
+   CHECKBOX & RADIO - Touch Friendly
+   ============================================================================ */
+
+.checkbox-label {
+    min-height: var(--df-touch-target-min);
+    padding: var(--df-space-2) 0;
+}
+
+.checkbox-label input[type="checkbox"],
+.checkbox-label input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+}
+
+/* ============================================================================
+   320px+ BREAKPOINT - Slightly Wider
+   Provides a bit more breathing room
+   ============================================================================ */
+
+@media (min-width: 320px) {
+    .main-content {
+        padding: var(--df-space-3) var(--df-space-4);
+    }
+    
+    .field-item {
+        padding: var(--df-space-3);
+    }
+    
+    .modal-body {
+        max-height: calc(100vh - 140px);
+    }
+    
+    .empty-icon {
+        width: 72px;
+        height: 72px;
+    }
+}
+
+/* ============================================================================
+   350px+ BREAKPOINT - Standard Narrow Task Pane
+   Horizontal layouts can start appearing
+   ============================================================================ */
+
+@media (min-width: 350px) {
+    /* Header can be more spacious */
+    .taskpane-header {
+        padding: var(--df-space-3) var(--df-space-4);
+    }
+    
+    .brand-name {
+        font-size: var(--df-text-md);
+        max-width: 150px;
+    }
+    
+    /* Primary actions can go horizontal (2-column) */
+    .primary-actions {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .btn-fill-all {
+        flex: 1 1 100%;
+        order: -1; /* Fill All stays on top */
+    }
+    
+    .primary-actions .btn-secondary,
+    .primary-actions .btn-preview,
+    .primary-actions .btn-preflight,
+    #undoBtn {
+        flex: 1 1 calc(50% - var(--df-space-1));
+        width: auto;
+    }
+    
+    /* Modal can have some margins */
+    .modal {
+        padding: var(--df-space-3);
+    }
+    
+    .modal-content {
+        border-radius: var(--df-radius-xl);
+    }
+    
+    /* Empty state more spacious */
+    .empty-state {
+        padding: var(--df-space-8) var(--df-space-4);
+    }
+    
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .empty-icon svg {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .empty-title {
+        font-size: var(--df-text-lg);
+    }
+    
+    /* Numbering options can be horizontal */
+    .numbering-option {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .numbering-preview {
+        width: auto;
+        min-width: 80px;
+        margin-bottom: 0;
+    }
+    
+    /* Onboarding more spacious */
+    .onboarding-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+    }
+    
+    .onboarding-title {
+        font-size: 20px;
+    }
+}
+
+/* ============================================================================
+   400px+ BREAKPOINT - Wide Task Pane (Maximum)
+   Full desktop-like experience
+   ============================================================================ */
+
+@media (min-width: 400px) {
+    /* Main content full padding */
+    .main-content {
+        padding: var(--df-space-4);
+    }
+    
+    /* Modal constrained to reasonable width */
+    .modal-content {
+        max-width: 360px;
+        margin: auto;
+    }
+    
+    /* Dropdown at full width */
+    .dropdown-menu {
+        width: 220px;
+        right: var(--df-space-4);
+    }
+    
+    /* Onboarding at full styling */
+    .onboarding-content {
+        padding: var(--df-space-6) var(--df-space-5);
+        max-width: 340px;
+    }
+    
+    .onboarding-icon {
+        width: 88px;
+        height: 88px;
+        border-radius: 24px;
+    }
+    
+    .onboarding-title {
+        font-size: 22px;
+    }
+    
+    .onboarding-subtitle {
+        font-size: 15px;
+    }
+    
+    /* Empty state at full styling */
+    .empty-state-content {
+        max-width: 280px;
+    }
+}
+
+/* ============================================================================
+   SPECIAL: Very Narrow Override (< 300px)
+   Emergency fallbacks for extremely narrow panels
+   ============================================================================ */
+
+@media (max-width: 299px) {
+    /* Ultra-compact mode */
+    .taskpane-header {
+        padding: var(--df-space-2);
+    }
+    
+    .brand-name {
+        font-size: 11px;
+        max-width: 80px;
+    }
+    
+    .main-content {
+        padding: var(--df-space-2);
+    }
+    
+    /* Hide less critical UI elements */
+    .btn-rescan svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .badge-text {
+        font-size: 11px;
+    }
+    
+    /* Buttons still touch-friendly but tighter */
+    .btn-fill-all {
+        font-size: var(--df-text-sm);
+        padding: var(--df-space-2);
+    }
+    
+    /* Modal takes all available space */
+    .modal {
+        padding: 0;
+    }
+    
+    .modal-content {
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    /* Toast minimal */
+    .toast-container {
+        left: var(--df-space-1);
+        right: var(--df-space-1);
+    }
+    
+    /* Onboarding ultra-compact */
+    .onboarding-content {
+        padding: var(--df-space-3);
+    }
+    
+    .onboarding-icon {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .onboarding-title {
+        font-size: 16px;
+    }
+}
+
+/* ============================================================================
+   LANDSCAPE ORIENTATION
+   Handle when panel is wider than tall (unusual but possible)
+   ============================================================================ */
+
+@media (max-height: 400px) and (orientation: landscape) {
+    .empty-state {
+        min-height: auto;
+        padding: var(--df-space-4);
+    }
+    
+    .empty-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .onboarding-overlay {
+        overflow-y: auto;
+    }
+    
+    .onboarding-icon {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .modal-body {
+        max-height: calc(100vh - 100px);
+    }
+}
+
+/* ============================================================================
+   TOUCH DEVICE DETECTION
+   Ensure all interactive elements are properly sized
+   ============================================================================ */
+
+@media (pointer: coarse) {
+    /* Coarse pointer = touch device, ensure all targets are big enough */
+    
+    .btn,
+    .btn-icon,
+    .dropdown-item,
+    .field-input,
+    .form-input,
+    .form-select,
+    .checkbox-label,
+    .dataset-item,
+    .numbering-option,
+    .modal-close,
+    .btn-rescan,
+    .btn-delete-dataset {
+        min-height: var(--df-touch-target-min);
+    }
+    
+    /* Add some spacing between touch targets */
+    .primary-actions {
+        gap: var(--df-space-2);
+    }
+    
+    .fields-list {
+        gap: var(--df-space-3);
+    }
+    
+    .dropdown-item + .dropdown-item {
+        margin-top: 2px;
+    }
+}
+
+/* ============================================================================
+   HIGH CONTRAST SUPPORT
+   Ensure responsive styles work with high contrast
+   ============================================================================ */
+
+@media (prefers-contrast: high) {
+    .btn,
+    .btn-icon,
+    .field-input,
+    .modal-content {
+        border-width: 2px;
+    }
+    
+    /* Ensure focus is visible at all sizes */
+    *:focus-visible {
+        outline-width: 3px;
+        outline-offset: 2px;
+    }
+}
+
+/* ============================================================================
+   REDUCED MOTION
+   Respect user preferences for animations
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    /* Already handled in accessibility.css, but reinforce here */
+    .modal-content,
+    .dropdown-menu,
+    .toast {
+        animation: none;
+        transition: opacity 0.01ms;
+    }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   Hide taskpane when printing (already in taskpane.css)
+   ============================================================================ */
+
+@media print {
+    .taskpane,
+    .modal,
+    .toast-container {
+        display: none !important;
+    }
+}
+
+/* ============================================================================
+   UTILITY CLASSES FOR RESPONSIVE BEHAVIOR
+   ============================================================================ */
+
+/* Hide on narrow */
+.hide-narrow {
+    display: block;
+}
+
+@media (max-width: 349px) {
+    .hide-narrow {
+        display: none !important;
+    }
+}
+
+/* Show only on narrow */
+.show-narrow {
+    display: none;
+}
+
+@media (max-width: 349px) {
+    .show-narrow {
+        display: block;
+    }
+}
+
+/* Stack horizontal on narrow */
+.stack-narrow {
+    display: flex;
+    flex-direction: row;
+    gap: var(--df-space-2);
+}
+
+@media (max-width: 349px) {
+    .stack-narrow {
+        flex-direction: column;
+    }
+    
+    .stack-narrow > * {
+        width: 100%;
+    }
+}
+
+/* Full width on narrow */
+.full-narrow {
+    width: auto;
+}
+
+@media (max-width: 349px) {
+    .full-narrow {
+        width: 100%;
+    }
+}

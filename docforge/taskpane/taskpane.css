@@ -1,0 +1,1532 @@
+/**
+ * DocForge - Premium Legal Document Automation
+ * 
+ * Design Philosophy:
+ * - Premium, professional feel worth $29/month
+ * - Instant clarity - lawyer knows what to do in 3 seconds
+ * - Native Office feel with modern polish
+ * - Subtle glass morphism touches
+ * 
+ * Inspiration: Linear, Notion, Raycast, modern Mac apps
+ * 
+ * @version 3.0.0 - Premium Edition
+ */
+
+/* Import glass effect utilities */
+@import url('glass-buttons.css');
+
+/* Import responsive/narrow panel styles */
+@import url('responsive.css');
+
+/* ============================================================================
+   Design Tokens
+   ============================================================================ */
+
+:root {
+    /* Brand Colors - Premium Blue */
+    --df-primary: #2563eb;
+    --df-primary-hover: #1d4ed8;
+    --df-primary-light: #3b82f6;
+    --df-primary-subtle: rgba(37, 99, 235, 0.08);
+    --df-primary-glow: rgba(37, 99, 235, 0.15);
+    
+    /* Semantic Colors */
+    --df-success: #059669;
+    --df-success-light: #10b981;
+    --df-success-subtle: rgba(5, 150, 105, 0.1);
+    --df-warning: #d97706;
+    --df-warning-subtle: rgba(217, 119, 6, 0.1);
+    --df-error: #dc2626;
+    --df-error-subtle: rgba(220, 38, 38, 0.1);
+    
+    /* Text Hierarchy - WCAG AA compliant (4.5:1 min contrast) */
+    --df-text-primary: #111827;      /* 16.5:1 on white */
+    --df-text-secondary: #374151;    /* 10.9:1 on white */
+    --df-text-tertiary: #525252;     /* 7.5:1 on white - improved from #6b7280 */
+    --df-text-muted: #6b7280;        /* 5.0:1 on white - improved from #9ca3af */
+    --df-text-inverse: #ffffff;
+    
+    /* Surfaces - Light Theme */
+    --df-bg-base: #ffffff;
+    --df-bg-subtle: #fafafa;
+    --df-bg-elevated: #ffffff;
+    --df-bg-overlay: rgba(255, 255, 255, 0.85);
+    --df-bg-hover: rgba(0, 0, 0, 0.03);
+    --df-bg-active: rgba(0, 0, 0, 0.05);
+    
+    /* Borders */
+    --df-border-subtle: rgba(0, 0, 0, 0.06);
+    --df-border-default: rgba(0, 0, 0, 0.1);
+    --df-border-strong: rgba(0, 0, 0, 0.15);
+    --df-border-focus: rgba(37, 99, 235, 0.5);
+    
+    /* Spacing Scale (4px base) */
+    --df-space-1: 4px;
+    --df-space-2: 8px;
+    --df-space-3: 12px;
+    --df-space-4: 16px;
+    --df-space-5: 20px;
+    --df-space-6: 24px;
+    --df-space-8: 32px;
+    --df-space-10: 40px;
+    --df-space-12: 48px;
+    
+    /* Typography Scale */
+    --df-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --df-font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
+    
+    --df-text-xs: 11px;
+    --df-text-sm: 12px;
+    --df-text-base: 13px;
+    --df-text-md: 14px;
+    --df-text-lg: 16px;
+    --df-text-xl: 18px;
+    --df-text-2xl: 20px;
+    --df-text-3xl: 24px;
+    
+    --df-leading-tight: 1.25;
+    --df-leading-normal: 1.5;
+    --df-leading-relaxed: 1.625;
+    
+    /* Font Weights */
+    --df-weight-normal: 400;
+    --df-weight-medium: 500;
+    --df-weight-semibold: 600;
+    --df-weight-bold: 700;
+    
+    /* Border Radius - Consistent scale (6/8/12) */
+    --df-radius-sm: 6px;
+    --df-radius-md: 8px;
+    --df-radius-lg: 12px;
+    --df-radius-xl: 16px;
+    --df-radius-full: 9999px;
+    
+    /* Shadows - Layered for depth */
+    --df-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+    --df-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    --df-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+    --df-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+    --df-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    --df-shadow-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+    
+    /* Transitions */
+    --df-transition-fast: 100ms ease;
+    --df-transition-normal: 150ms ease;
+    --df-transition-slow: 250ms ease;
+    --df-transition-spring: 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Z-Index Scale */
+    --df-z-base: 0;
+    --df-z-dropdown: 100;
+    --df-z-sticky: 200;
+    --df-z-modal: 500;
+    --df-z-toast: 1000;
+}
+
+/* ============================================================================
+   Dark Mode
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Text - Dark Theme (WCAG AA compliant) */
+        --df-text-primary: #f9fafb;      /* 18.1:1 on #111111 */
+        --df-text-secondary: #e5e7eb;    /* 14.4:1 on #111111 */
+        --df-text-tertiary: #a1a1aa;     /* 6.3:1 on #111111 - improved */
+        --df-text-muted: #71717a;        /* 4.6:1 on #111111 - improved */
+        
+        /* Surfaces - Dark Theme */
+        --df-bg-base: #111111;
+        --df-bg-subtle: #171717;
+        --df-bg-elevated: #1f1f1f;
+        --df-bg-overlay: rgba(17, 17, 17, 0.9);
+        --df-bg-hover: rgba(255, 255, 255, 0.05);
+        --df-bg-active: rgba(255, 255, 255, 0.08);
+        
+        /* Borders - Dark Theme */
+        --df-border-subtle: rgba(255, 255, 255, 0.06);
+        --df-border-default: rgba(255, 255, 255, 0.1);
+        --df-border-strong: rgba(255, 255, 255, 0.15);
+        
+        /* Adjusted Brand Colors for Dark */
+        --df-primary-subtle: rgba(59, 130, 246, 0.15);
+        --df-primary-glow: rgba(59, 130, 246, 0.25);
+        
+        /* Shadows - Dark Theme */
+        --df-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+        --df-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        --df-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* ============================================================================
+   Base Reset & Foundations
+   ============================================================================ */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: var(--df-font-family);
+    font-size: var(--df-text-base);
+    line-height: var(--df-leading-normal);
+    color: var(--df-text-primary);
+    background: var(--df-bg-base);
+}
+
+/* ============================================================================
+   Taskpane Container
+   ============================================================================ */
+
+.taskpane {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-width: 280px;
+    max-width: 400px;
+    background: var(--df-bg-base);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ============================================================================
+   Header - Minimal, Premium
+   ============================================================================ */
+
+.taskpane-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-3) var(--df-space-4);
+    background: var(--df-bg-base);
+    border-bottom: 1px solid var(--df-border-subtle);
+    position: relative;
+    z-index: var(--df-z-sticky);
+    
+    /* Subtle glass effect on scroll */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+}
+
+.brand-icon {
+    width: 22px;
+    height: 22px;
+    color: var(--df-primary);
+    transition: transform var(--df-transition-spring);
+}
+
+.header-brand:hover .brand-icon {
+    transform: scale(1.05);
+}
+
+.brand-name {
+    font-size: var(--df-text-md);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-1);
+}
+
+/* Icon Button - Refined */
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--df-radius-md);
+    color: var(--df-text-tertiary);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.btn-icon:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+}
+
+.btn-icon:active {
+    background: var(--df-bg-active);
+    transform: scale(0.95);
+}
+
+.btn-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ============================================================================
+   Dropdown Menu - Premium Feel
+   ============================================================================ */
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: var(--df-space-4);
+    width: 220px;
+    background: var(--df-bg-elevated);
+    border: 1px solid var(--df-border-default);
+    border-radius: var(--df-radius-lg);
+    box-shadow: var(--df-shadow-xl);
+    z-index: var(--df-z-dropdown);
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity var(--df-transition-normal), transform var(--df-transition-normal);
+    
+    /* Glass effect */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.dropdown-menu.hidden {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+}
+
+.dropdown-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-3);
+    padding: var(--df-space-2) var(--df-space-3);
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: var(--df-text-sm);
+    color: var(--df-text-secondary);
+    text-align: left;
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.dropdown-item:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+}
+
+.dropdown-item:active {
+    background: var(--df-bg-active);
+}
+
+.dropdown-item svg {
+    width: 15px;
+    height: 15px;
+    color: var(--df-text-muted);
+    flex-shrink: 0;
+    transition: color var(--df-transition-fast);
+}
+
+.dropdown-item:hover svg {
+    color: var(--df-text-tertiary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--df-border-subtle);
+    margin: var(--df-space-1) 0;
+}
+
+/* ============================================================================
+   Main Content Area
+   ============================================================================ */
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--df-space-4);
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+.main-content::-webkit-scrollbar,
+.fields-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.main-content::-webkit-scrollbar-track,
+.fields-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.main-content::-webkit-scrollbar-thumb,
+.fields-list::-webkit-scrollbar-thumb {
+    background: var(--df-border-default);
+    border-radius: 3px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover,
+.fields-list::-webkit-scrollbar-thumb:hover {
+    background: var(--df-text-muted);
+}
+
+/* ============================================================================
+   Empty State - Inviting, Not Sad
+   ============================================================================ */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--df-space-8) var(--df-space-4);
+    min-height: 400px;
+}
+
+.empty-state-content {
+    max-width: 280px;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--df-space-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--df-primary-subtle);
+    border-radius: var(--df-radius-xl);
+    color: var(--df-primary);
+    
+    /* Subtle animation */
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+
+.empty-icon svg {
+    width: 36px;
+    height: 36px;
+}
+
+.empty-title {
+    font-size: var(--df-text-lg);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-primary);
+    margin-bottom: var(--df-space-2);
+    letter-spacing: -0.01em;
+}
+
+.empty-text {
+    font-size: var(--df-text-sm);
+    color: var(--df-text-tertiary);
+    line-height: var(--df-leading-relaxed);
+    margin-bottom: var(--df-space-6);
+}
+
+/* ============================================================================
+   Fields View
+   ============================================================================ */
+
+.fields-view {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    animation: fadeIn var(--df-transition-slow);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Status Badge - Refined */
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+    padding: var(--df-space-2) var(--df-space-3);
+    background: var(--df-bg-subtle);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-lg);
+    margin-bottom: var(--df-space-4);
+}
+
+.badge-count {
+    font-size: var(--df-text-lg);
+    font-weight: var(--df-weight-bold);
+    color: var(--df-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.badge-text {
+    font-size: var(--df-text-sm);
+    color: var(--df-text-tertiary);
+    flex: 1;
+}
+
+.btn-rescan {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--df-radius-md);
+    color: var(--df-text-muted);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.btn-rescan:hover {
+    background: var(--df-bg-base);
+    color: var(--df-primary);
+    transform: rotate(45deg);
+}
+
+.btn-rescan svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* ============================================================================
+   Fields List
+   ============================================================================ */
+
+.fields-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: var(--df-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-3);
+}
+
+/* Field Card - Premium Design */
+.field-item {
+    position: relative;
+    padding: var(--df-space-3);
+    background: var(--df-bg-elevated);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-lg);
+    transition: border-color var(--df-transition-normal),
+                box-shadow var(--df-transition-normal),
+                transform var(--df-transition-normal);
+}
+
+.field-item:hover {
+    border-color: var(--df-border-default);
+    box-shadow: var(--df-shadow-sm);
+    transform: translateY(-1px);
+}
+
+.field-item:focus-within {
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+/* Empty field indicator */
+.field-item.empty {
+    border-color: var(--df-warning);
+    background: var(--df-warning-subtle);
+}
+
+.field-item.empty::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--df-warning);
+    border-radius: var(--df-radius-lg) 0 0 var(--df-radius-lg);
+}
+
+/* Field highlighting animation */
+.field-item.field-highlighting {
+    border-color: var(--df-primary);
+    box-shadow: var(--df-shadow-glow);
+}
+
+/* Field filled animation */
+.field-item.field-filled {
+    animation: fieldFilled 0.6s ease;
+}
+
+@keyframes fieldFilled {
+    0% { background: var(--df-success-subtle); }
+    100% { background: var(--df-bg-elevated); }
+}
+
+.field-label {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+    font-size: var(--df-text-xs);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: var(--df-space-2);
+}
+
+.field-input {
+    width: 100%;
+    padding: var(--df-space-2) var(--df-space-3);
+    font-family: inherit;
+    font-size: var(--df-text-md);
+    color: var(--df-text-primary);
+    background: var(--df-bg-subtle);
+    border: 1px solid transparent;
+    border-radius: var(--df-radius-md);
+    transition: all var(--df-transition-fast);
+}
+
+.field-input:hover {
+    background: var(--df-bg-base);
+    border-color: var(--df-border-subtle);
+}
+
+.field-input:focus {
+    outline: none;
+    background: var(--df-bg-base);
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+.field-input::placeholder {
+    color: var(--df-text-muted);
+}
+
+/* ============================================================================
+   Primary Actions Bar - Fixed Bottom
+   ============================================================================ */
+
+.primary-actions {
+    display: flex;
+    gap: var(--df-space-2);
+    padding: var(--df-space-3) 0;
+    border-top: 1px solid var(--df-border-subtle);
+    background: var(--df-bg-base);
+}
+
+/* ============================================================================
+   Buttons - Premium Design System
+   ============================================================================ */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--df-space-2);
+    padding: var(--df-space-2) var(--df-space-4);
+    font-family: inherit;
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    line-height: 1;
+    color: var(--df-text-secondary);
+    background: var(--df-bg-elevated);
+    border: 1px solid var(--df-border-default);
+    border-radius: var(--df-radius-md);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--df-bg-hover);
+    border-color: var(--df-border-strong);
+    color: var(--df-text-primary);
+}
+
+.btn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
+
+/* Primary Button - The Hero */
+.btn-primary {
+    color: var(--df-text-inverse);
+    background: var(--df-primary);
+    border-color: var(--df-primary);
+    box-shadow: var(--df-shadow-sm);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--df-primary-hover);
+    border-color: var(--df-primary-hover);
+    box-shadow: var(--df-shadow-md);
+}
+
+/* Fill All Button - The Star */
+.btn-fill-all {
+    flex: 2;
+    min-height: 44px;
+    color: var(--df-text-inverse);
+    background: linear-gradient(135deg, var(--df-primary) 0%, var(--df-primary-hover) 100%);
+    border: none;
+    border-radius: var(--df-radius-lg);
+    font-size: var(--df-text-md);
+    font-weight: var(--df-weight-semibold);
+    box-shadow: var(--df-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-fill-all::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.5s ease;
+}
+
+.btn-fill-all:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--df-shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.btn-fill-all:hover:not(:disabled)::before {
+    transform: translateX(100%);
+}
+
+.btn-fill-all:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+}
+
+.btn-fill-all svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Secondary Button */
+.btn-secondary {
+    flex: 1;
+    color: var(--df-text-secondary);
+    background: var(--df-bg-subtle);
+    border-color: var(--df-border-subtle);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--df-bg-hover);
+    border-color: var(--df-border-default);
+}
+
+/* Undo Button - Contextual State */
+#undoBtn {
+    position: relative;
+}
+
+#undoBtn.undo-available {
+    color: var(--df-primary);
+    background: var(--df-primary-subtle);
+    border-color: var(--df-primary);
+}
+
+#undoBtn.undo-available:hover {
+    background: var(--df-primary-glow);
+}
+
+/* Compare Changes Button */
+.btn-preview {
+    flex: 0.8;
+    color: var(--df-primary);
+    background: var(--df-primary-subtle);
+    border-color: transparent;
+}
+
+.btn-preview:hover:not(:disabled) {
+    background: var(--df-primary-glow);
+    border-color: var(--df-primary);
+}
+
+.btn-preview .change-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--df-error);
+    color: var(--df-text-inverse);
+    font-size: 10px;
+    font-weight: var(--df-weight-bold);
+    border-radius: var(--df-radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Document Check Button */
+.btn-preflight {
+    flex: 0.8;
+    color: var(--df-success);
+    background: var(--df-success-subtle);
+    border-color: transparent;
+}
+
+.btn-preflight:hover:not(:disabled) {
+    background: rgba(5, 150, 105, 0.15);
+    border-color: var(--df-success);
+}
+
+/* Link Button */
+.btn-link {
+    padding: var(--df-space-2) 0;
+    color: var(--df-primary);
+    background: none;
+    border: none;
+}
+
+.btn-link:hover {
+    color: var(--df-primary-hover);
+    text-decoration: underline;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* ============================================================================
+   Success/Undo Bar
+   ============================================================================ */
+
+.undo-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-3) var(--df-space-4);
+    background: var(--df-success);
+    color: var(--df-text-inverse);
+    border-radius: var(--df-radius-lg);
+    margin-top: var(--df-space-3);
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    animation: slideUp var(--df-transition-spring);
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-undo {
+    padding: var(--df-space-1) var(--df-space-3);
+    font-family: inherit;
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-success);
+    background: var(--df-text-inverse);
+    border: none;
+    border-radius: var(--df-radius-sm);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.btn-undo:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* ============================================================================
+   Toast Notifications
+   ============================================================================ */
+
+.toast-container {
+    position: fixed;
+    bottom: var(--df-space-4);
+    left: var(--df-space-4);
+    right: var(--df-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-2);
+    z-index: var(--df-z-toast);
+    pointer-events: none;
+}
+
+.toast {
+    padding: var(--df-space-3) var(--df-space-4);
+    background: var(--df-text-primary);
+    color: var(--df-text-inverse);
+    border-radius: var(--df-radius-lg);
+    box-shadow: var(--df-shadow-lg);
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    pointer-events: auto;
+    animation: toastIn var(--df-transition-spring);
+    
+    /* Glass effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.toast-success {
+    background: var(--df-success);
+}
+
+.toast-error {
+    background: var(--df-error);
+}
+
+.toast-warning {
+    background: var(--df-warning);
+    color: var(--df-text-primary);
+}
+
+.toast-info {
+    background: var(--df-primary);
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ============================================================================
+   Fill Progress Overlay
+   ============================================================================ */
+
+.fill-progress {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--df-bg-overlay);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: var(--df-z-modal);
+    padding: var(--df-space-6);
+    animation: fadeIn var(--df-transition-normal);
+}
+
+.fill-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 240px;
+    margin-bottom: var(--df-space-3);
+}
+
+.fill-progress-title {
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-secondary);
+}
+
+.fill-progress-count {
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.fill-progress-bar {
+    width: 100%;
+    max-width: 240px;
+    height: 4px;
+    background: var(--df-border-default);
+    border-radius: var(--df-radius-full);
+    overflow: hidden;
+}
+
+.fill-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--df-primary) 0%, var(--df-primary-light) 100%);
+    border-radius: var(--df-radius-full);
+    transition: width var(--df-transition-fast);
+}
+
+/* Fill Complete State */
+.fill-complete {
+    text-align: center;
+}
+
+.fill-complete-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto var(--df-space-4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--df-success-subtle);
+    border-radius: var(--df-radius-full);
+    color: var(--df-success);
+    animation: scaleIn var(--df-transition-spring);
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+}
+
+.fill-complete-title {
+    font-size: var(--df-text-xl);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-primary);
+    margin-bottom: var(--df-space-2);
+}
+
+.fill-complete-text {
+    font-size: var(--df-text-sm);
+    color: var(--df-text-tertiary);
+}
+
+/* ============================================================================
+   Loading Overlay
+   ============================================================================ */
+
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--df-space-4);
+    background: var(--df-bg-overlay);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: var(--df-z-modal);
+}
+
+.loading-overlay.visible {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+    border: 2px solid var(--df-border-default);
+    border-top-color: var(--df-primary);
+    border-radius: var(--df-radius-full);
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: var(--df-text-sm);
+    color: var(--df-text-tertiary);
+}
+
+/* ============================================================================
+   Modals - Premium Design
+   ============================================================================ */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: var(--df-z-modal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--df-space-4);
+    animation: fadeIn var(--df-transition-normal);
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    max-height: calc(100vh - 64px);
+    background: var(--df-bg-elevated);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-xl);
+    box-shadow: var(--df-shadow-xl);
+    overflow: hidden;
+    animation: modalIn var(--df-transition-spring);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-4);
+    border-bottom: 1px solid var(--df-border-subtle);
+}
+
+.modal-title {
+    font-size: var(--df-text-lg);
+    font-weight: var(--df-weight-semibold);
+    color: var(--df-text-primary);
+    letter-spacing: -0.01em;
+}
+
+.modal-close {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--df-radius-md);
+    font-size: 18px;
+    color: var(--df-text-muted);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+}
+
+.modal-body {
+    padding: var(--df-space-4);
+    overflow-y: auto;
+    max-height: 400px;
+}
+
+.modal-description {
+    margin: 0 0 var(--df-space-4);
+    color: var(--df-text-tertiary);
+    font-size: var(--df-text-sm);
+    line-height: var(--df-leading-relaxed);
+}
+
+/* ============================================================================
+   Form Elements
+   ============================================================================ */
+
+.form-group {
+    margin-bottom: var(--df-space-4);
+}
+
+.form-group label {
+    display: block;
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-secondary);
+    margin-bottom: var(--df-space-2);
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: var(--df-space-2) var(--df-space-3);
+    font-family: inherit;
+    font-size: var(--df-text-md);
+    color: var(--df-text-primary);
+    background: var(--df-bg-subtle);
+    border: 1px solid var(--df-border-subtle);
+    border-radius: var(--df-radius-md);
+    transition: all var(--df-transition-fast);
+}
+
+.form-input:hover,
+.form-select:hover {
+    border-color: var(--df-border-default);
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    background: var(--df-bg-base);
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+.form-select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+}
+
+/* Checkbox styling */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-2);
+    padding: var(--df-space-2) 0;
+    cursor: pointer;
+    font-size: var(--df-text-sm);
+    color: var(--df-text-secondary);
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--df-primary);
+    cursor: pointer;
+}
+
+/* ============================================================================
+   Numbering Options
+   ============================================================================ */
+
+.numbering-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-2);
+}
+
+.numbering-option {
+    display: flex;
+    align-items: center;
+    gap: var(--df-space-3);
+    padding: var(--df-space-3);
+    background: var(--df-bg-subtle);
+    border: 2px solid transparent;
+    border-radius: var(--df-radius-lg);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    text-align: left;
+    font-family: inherit;
+}
+
+.numbering-option:hover {
+    background: var(--df-bg-hover);
+    border-color: var(--df-border-default);
+}
+
+.numbering-option:focus {
+    outline: none;
+    border-color: var(--df-primary);
+}
+
+.numbering-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 10px;
+    color: var(--df-text-muted);
+    line-height: 1.4;
+    min-width: 80px;
+}
+
+.numbering-preview span:first-child {
+    font-weight: bold;
+    color: var(--df-text-tertiary);
+}
+
+.numbering-label {
+    flex: 1;
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-primary);
+}
+
+/* ============================================================================
+   Client Profile List
+   ============================================================================ */
+
+.dataset-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--df-space-1);
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.dataset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-3);
+    background: var(--df-bg-subtle);
+    border: none;
+    border-radius: var(--df-radius-md);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    text-align: left;
+    font-family: inherit;
+    width: 100%;
+}
+
+.dataset-item:hover {
+    background: var(--df-bg-hover);
+}
+
+.dataset-item-manage {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--df-space-3);
+    background: var(--df-bg-subtle);
+    border-radius: var(--df-radius-md);
+}
+
+.dataset-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.dataset-name {
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dataset-meta {
+    font-size: var(--df-text-xs);
+    color: var(--df-text-muted);
+    margin-top: 2px;
+}
+
+.btn-delete-dataset {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--df-radius-md);
+    color: var(--df-text-muted);
+    cursor: pointer;
+    transition: all var(--df-transition-fast);
+    flex-shrink: 0;
+    margin-left: var(--df-space-2);
+}
+
+.btn-delete-dataset:hover {
+    background: var(--df-error-subtle);
+    color: var(--df-error);
+}
+
+/* ============================================================================
+   Settings
+   ============================================================================ */
+
+.settings-group {
+    margin-bottom: var(--df-space-4);
+}
+
+.settings-group > label:not(.checkbox-label) {
+    display: block;
+    font-size: var(--df-text-sm);
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-secondary);
+    margin-bottom: var(--df-space-2);
+}
+
+/* ============================================================================
+   Utility Classes
+   ============================================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ============================================================================
+   Micro-interactions & Accessibility
+   ============================================================================ */
+
+/* Subtle hover scale for interactive elements */
+.btn:hover:not(:disabled),
+.dropdown-item:hover,
+.dataset-item:hover,
+.numbering-option:hover {
+    transition: all var(--df-transition-fast);
+}
+
+/* ============================================================================
+   Focus States - Visible for keyboard navigation (WCAG 2.4.7)
+   ============================================================================ */
+
+/* Global focus visible */
+:focus-visible {
+    outline: 2px solid var(--df-primary);
+    outline-offset: 2px;
+}
+
+/* Button focus states */
+.btn:focus-visible,
+.btn-icon:focus-visible,
+.btn-rescan:focus-visible,
+.btn-link:focus-visible {
+    outline: 2px solid var(--df-primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--df-primary-glow);
+}
+
+/* Input focus states */
+.field-input:focus-visible,
+.form-input:focus-visible,
+.form-select:focus-visible {
+    outline: none;
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+/* Dropdown item focus */
+.dropdown-item:focus-visible {
+    outline: none;
+    background: var(--df-primary-subtle);
+    color: var(--df-primary);
+}
+
+/* Modal close button focus */
+.modal-close:focus-visible {
+    outline: 2px solid var(--df-primary);
+    outline-offset: 2px;
+    background: var(--df-bg-hover);
+}
+
+/* Dataset and numbering option focus */
+.dataset-item:focus-visible,
+.numbering-option:focus-visible {
+    outline: none;
+    border-color: var(--df-primary);
+    box-shadow: 0 0 0 3px var(--df-primary-glow);
+}
+
+/* Checkbox focus */
+.checkbox-label input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--df-primary);
+    outline-offset: 2px;
+}
+
+/* ============================================================================
+   Enhanced Hover States - All interactive elements
+   ============================================================================ */
+
+/* Icon buttons hover enhancement */
+.btn-icon:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+    transform: scale(1.02);
+}
+
+.btn-icon:active {
+    transform: scale(0.95);
+}
+
+/* Rescan button hover */
+.btn-rescan:hover {
+    background: var(--df-primary-subtle);
+    color: var(--df-primary);
+    transform: rotate(90deg);
+}
+
+/* Modal close hover */
+.modal-close:hover {
+    background: var(--df-bg-hover);
+    color: var(--df-text-primary);
+    transform: scale(1.05);
+}
+
+/* Field item hover enhancement */
+.field-item:hover {
+    border-color: var(--df-border-default);
+    box-shadow: var(--df-shadow-sm);
+    transform: translateY(-1px);
+}
+
+/* Delete button hover */
+.btn-delete-dataset:hover {
+    background: var(--df-error-subtle);
+    color: var(--df-error);
+    transform: scale(1.05);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================================================
+   Keyboard Shortcut Hints
+   ============================================================================ */
+
+.btn[data-shortcut]::after {
+    content: attr(data-shortcut);
+    margin-left: var(--df-space-2);
+    padding: 2px 4px;
+    font-size: 10px;
+    font-weight: var(--df-weight-medium);
+    color: var(--df-text-muted);
+    background: var(--df-bg-subtle);
+    border-radius: 3px;
+    opacity: 0.7;
+}
+
+/* ============================================================================
+   Print Styles (hidden when printing)
+   ============================================================================ */
+
+@media print {
+    .taskpane {
+        display: none !important;
+    }
+}

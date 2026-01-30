@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocForge</title>
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="taskpane.css">
+    <link rel="stylesheet" href="loading.css">
+    <link rel="stylesheet" href="onboarding.css">
+    <link rel="stylesheet" href="feature-discovery.css">
+    <link rel="stylesheet" href="../features/diff/diff-preview.css">
+</head>
+<body>
+    <div id="app" class="taskpane">
+        <!-- ================================================================
+             Header - Minimal, Premium
+             ================================================================ -->
+        <header class="taskpane-header">
+            <div class="header-brand">
+                <!-- DocForge Logo - Document with plus -->
+                <svg class="brand-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="9" y1="14" x2="15" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span class="brand-name">DocForge</span>
+            </div>
+            
+            <div class="header-actions">
+                <!-- More Options -->
+                <button class="btn-icon" id="moreBtn" type="button" aria-label="More options" aria-haspopup="true" aria-expanded="false">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="1"/>
+                        <circle cx="12" cy="5" r="1"/>
+                        <circle cx="12" cy="19" r="1"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Dropdown Menu -->
+            <nav id="moreMenu" class="dropdown-menu hidden" role="menu" aria-label="More options">
+                <!-- Document Actions -->
+                <button class="dropdown-item" id="menuLetterhead" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <path d="M3 9h18"/>
+                        <path d="M9 21V9"/>
+                    </svg>
+                    Insert Letterhead
+                </button>
+                
+                <button class="dropdown-item" id="menuTOC" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <line x1="3" y1="6" x2="3.01" y2="6"/>
+                        <line x1="3" y1="12" x2="3.01" y2="12"/>
+                        <line x1="3" y1="18" x2="3.01" y2="18"/>
+                    </svg>
+                    Table of Contents
+                </button>
+                
+                <button class="dropdown-item" id="menuCrossRef" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                    Cross-References
+                </button>
+                
+                <div class="dropdown-divider" role="separator"></div>
+                
+                <!-- Data Management -->
+                <button class="dropdown-item" id="menuSaveDataset" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                        <polyline points="17 21 17 13 7 13 7 21"/>
+                        <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    Save Client Profile
+                </button>
+                
+                <button class="dropdown-item" id="menuLoadDataset" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        <polyline points="12 10 12 16"/>
+                        <polyline points="9 13 12 10 15 13"/>
+                    </svg>
+                    Load Client Profile
+                </button>
+                
+                <button class="dropdown-item" id="menuManageDatasets" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                    </svg>
+                    Manage Profiles
+                </button>
+                
+                <div class="dropdown-divider" role="separator"></div>
+                
+                <!-- Settings & Help -->
+                <button class="dropdown-item" id="menuSettings" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Settings
+                </button>
+                
+                <button class="dropdown-item" id="menuHelp" role="menuitem">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Help
+                </button>
+            </nav>
+        </header>
+
+        <!-- ================================================================
+             Main Content - One Screen Philosophy
+             ================================================================ -->
+        <main class="main-content" id="main-content">
+            
+            <!-- Empty State - Inviting, Not Sad -->
+            <div id="emptyState" class="empty-state">
+                <div class="empty-state-content" id="emptyStateContent">
+                    <div class="empty-icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="12" y1="11" x2="12" y2="17"/>
+                            <line x1="9" y1="14" x2="15" y2="14"/>
+                        </svg>
+                    </div>
+                    <h2 class="empty-title">Ready when you are</h2>
+                    <p class="empty-text">
+                        Open a document with template fields, or try our sample to see the magic.
+                    </p>
+                    <button class="btn btn-primary btn-block" id="trySampleBtn" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                        Try Sample NDA
+                    </button>
+                    <button class="btn btn-link" id="scanDocBtn" type="button">
+                        Scan This Document
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fields View - The Main Event -->
+            <div id="fieldsView" class="fields-view hidden">
+                
+                <!-- Status Badge -->
+                <div class="status-badge" id="statusBadge">
+                    <span class="badge-count" id="fieldCount">0</span>
+                    <span class="badge-text">fields found</span>
+                    <button class="btn-rescan" id="rescanBtn" type="button" aria-label="Rescan document" title="Rescan">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Fields List - Scrollable -->
+                <div class="fields-list" id="fieldsList" role="list" aria-label="Template fields">
+                    <!-- Fields rendered dynamically by taskpane.js -->
+                </div>
+
+                <!-- Primary Actions - Fixed Bottom -->
+                <div class="primary-actions">
+                    <!-- Undo -->
+                    <button class="btn btn-secondary" id="undoBtn" type="button" title="Nothing to undo yet" data-shortcut="Ctrl+Z">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M3 7v6h6"/>
+                            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6.39 2.64L3 13"/>
+                        </svg>
+                        <span class="sr-only">Undo</span>
+                    </button>
+                    
+                    <!-- Diff Preview -->
+                    <button class="btn btn-preview" id="previewDiffBtn" type="button" title="Preview changes" data-shortcut="Ctrl+D">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <path d="M12 3v18"/>
+                            <path d="M3 12h18"/>
+                        </svg>
+                        Compare
+                    </button>
+                    
+                    <!-- Document Check -->
+                    <button class="btn btn-preflight" id="preflightBtn" type="button" title="Document check">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Check
+                    </button>
+                    
+                    <!-- Fill All - The Star -->
+                    <button class="btn btn-fill-all" id="fillAllBtn" type="button" data-shortcut="Ctrl+Shift+F">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path d="M12 2l9 4.5v11L12 22l-9-4.5v-11L12 2z"/>
+                            <path d="M12 22V12"/>
+                            <path d="M12 12L3 7.5"/>
+                            <path d="M21 7.5L12 12"/>
+                        </svg>
+                        Fill All
+                    </button>
+                </div>
+
+                <!-- Success Message -->
+                <div id="successBar" class="undo-bar hidden" role="status" aria-live="polite">
+                    <span id="successMessage">Fields filled</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loadingText">
+            <div class="loading-spinner" aria-hidden="true"></div>
+            <span class="loading-text" id="loadingText">Loading...</span>
+        </div>
+
+        <!-- Dataset Modal -->
+        <div id="datasetModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="datasetModalTitle">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="datasetModalTitle" class="modal-title">Save Client Profile</h2>
+                    <button class="modal-close" id="closeDatasetModal" type="button" aria-label="Close">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body" id="datasetModalBody">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Numbering Modal -->
+        <div id="numberingModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="numberingModalTitle">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="numberingModalTitle" class="modal-title">Fix Numbering</h2>
+                    <button class="modal-close" id="closeNumberingModal" type="button" aria-label="Close">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-description">Choose a numbering style for your document:</p>
+                    <div class="numbering-options">
+                        <button class="numbering-option" data-preset="standard">
+                            <div class="numbering-preview">
+                                <span>ARTICLE I</span>
+                                <span>1.1 Section</span>
+                                <span>(a) Paragraph</span>
+                            </div>
+                            <span class="numbering-label">Standard Outline</span>
+                        </button>
+                        <button class="numbering-option" data-preset="federal">
+                            <div class="numbering-preview">
+                                <span>I. Main Point</span>
+                                <span>A. Sub-point</span>
+                                <span>1. Detail</span>
+                            </div>
+                            <span class="numbering-label">Federal Court</span>
+                        </button>
+                        <button class="numbering-option" data-preset="contract">
+                            <div class="numbering-preview">
+                                <span>ARTICLE I</span>
+                                <span>Section 1.1</span>
+                                <span>1.1.1 Sub</span>
+                            </div>
+                            <span class="numbering-label">Contract Style</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <script src="../common/utils.js"></script>
+    <script src="../common/storage.js"></script>
+    <script src="../common/loading.js"></script>
+    <script src="../features/templates/fill-engine.js"></script>
+    <script src="../features/diff/diff-engine.js"></script>
+    <script src="../features/diff/diff-preview.js"></script>
+    <script src="../features/diff/diff-integration.js"></script>
+    <script src="../preflight/preflight-checker.js"></script>
+    <script src="../preflight/preflight-ui.js"></script>
+    <script src="onboarding.js"></script>
+    <script src="feature-discovery.js"></script>
+    <script src="taskpane.js"></script>
+</body>
+</html>

@@ -119,5 +119,3 @@ if (typeof window !== 'undefined') {
     window.DocForgeAPI = DocForgeAPI;
 }
 
-export default DocForgeAPI;
-export { DocForgeAPI };

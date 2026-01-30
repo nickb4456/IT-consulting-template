@@ -369,5 +369,3 @@ if (typeof window !== 'undefined') {
     window.DocForgeState = DocForgeState;
 }
 
-export default DocForgeState;
-export { DocForgeState, actions, selectors };

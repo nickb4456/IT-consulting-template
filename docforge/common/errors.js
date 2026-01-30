@@ -7,7 +7,6 @@
  */
 
 // Error context types for targeted messaging
-export const ErrorContext = {
     TEMPLATE_IMPORT: 'template_import',
     TEMPLATE_SAVE: 'template_save',
     FIELD_INSERT: 'field_insert',
@@ -153,7 +152,6 @@ const errorPatterns = [
  * @param {string} context - Context from ErrorContext enum
  * @returns {{ message: string, hint: string, technical?: string }}
  */
-export function getUserFriendlyMessage(error, context = ErrorContext.GENERIC) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     
     // Check for specific error patterns first
@@ -187,7 +185,6 @@ export function getUserFriendlyMessage(error, context = ErrorContext.GENERIC) {
  * @param {string} context - Context from ErrorContext enum
  * @returns {string} - Formatted message like "Couldn't save — try again"
  */
-export function formatError(error, context = ErrorContext.GENERIC) {
     const { message, hint } = getUserFriendlyMessage(error, context);
     return `${message} — ${hint.toLowerCase().replace(/\.$/, '')}`;
 }
@@ -199,7 +196,6 @@ export function formatError(error, context = ErrorContext.GENERIC) {
  * @param {string} context - Context from ErrorContext enum
  * @returns {string} - Just the friendly message
  */
-export function formatErrorShort(error, context = ErrorContext.GENERIC) {
     const { message } = getUserFriendlyMessage(error, context);
     return message;
 }
@@ -212,7 +208,6 @@ export function formatErrorShort(error, context = ErrorContext.GENERIC) {
  * @param {string} context - What was happening
  * @param {object} extra - Additional debug info
  */
-export function logError(error, context = 'unknown', extra = {}) {
     const timestamp = new Date().toISOString();
     const errorMessage = error instanceof Error ? error.message : String(error);
     const stack = error instanceof Error ? error.stack : undefined;
@@ -232,7 +227,6 @@ export function logError(error, context = 'unknown', extra = {}) {
  * @param {Function} onError - Callback when error occurs (receives friendly error)
  * @returns {Function} - Wrapped function
  */
-export function withErrorHandling(fn, context, onError) {
     return async (...args) => {
         try {
             return await fn(...args);
@@ -255,7 +249,6 @@ export function withErrorHandling(fn, context, onError) {
  * @param {string} context - Error context for logging
  * @returns {Function} - Safe function that returns null on error
  */
-export function safeCall(fn, context = 'unknown') {
     return async (...args) => {
         try {
             return await fn(...args);
@@ -266,7 +259,6 @@ export function safeCall(fn, context = 'unknown') {
     };
 }
 
-export default {
     ErrorContext,
     getUserFriendlyMessage,
     formatError,

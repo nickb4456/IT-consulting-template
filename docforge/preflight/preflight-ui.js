@@ -609,4 +609,3 @@ if (typeof window !== 'undefined') {
     window.jumpToPreflightItem = jumpToPreflightItem;
 }
 
-export default PreflightUI;

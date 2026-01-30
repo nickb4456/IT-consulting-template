@@ -575,8 +575,6 @@ const DocForgeStorage = {
 };
 
 // ES modules
-export default DocForgeStorage;
-export { DocForgeStorage, STORAGE_KEYS };
 
 // CommonJS
 if (typeof module !== 'undefined' && module.exports) {

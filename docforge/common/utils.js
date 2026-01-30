@@ -567,8 +567,6 @@ const DocForgeUtils = {
 };
 
 // ES modules
-export default DocForgeUtils;
-export {
     generateUUID,
     generateShortId,
     formatDate,

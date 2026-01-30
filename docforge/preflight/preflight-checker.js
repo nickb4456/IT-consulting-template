@@ -654,8 +654,6 @@ const DocForgePreflight = {
 };
 
 // ES modules
-export default DocForgePreflight;
-export { PreflightChecker, DEFAULT_CHECKS, PLACEHOLDER_PATTERNS };
 
 // Global
 if (typeof window !== 'undefined') {

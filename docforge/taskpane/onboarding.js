@@ -1166,7 +1166,6 @@ const DocForgeOnboarding = {
 };
 
 // ES modules
-export default DocForgeOnboarding;
 
 // Global
 if (typeof window !== 'undefined') {

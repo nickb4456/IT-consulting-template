@@ -213,5 +213,3 @@ if (typeof window !== 'undefined') {
     window.DocForgeSync = DocForgeSync;
 }
 
-export default DocForgeSync;
-export { DocForgeSync };

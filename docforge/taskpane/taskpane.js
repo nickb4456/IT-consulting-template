@@ -1,4 +1,4 @@
-/* DocForge - Two-Level Navigation */
+/* DraftBridge - Document Generation */
 /* global Office, Word */
 
 const TEMPLATES = {
@@ -160,101 +160,49 @@ async function insertTemplate(id) {
 }
 
 async function insertLetterTemplate(ctx, body) {
-    // Date
-    const dateP = body.insertParagraph('', Word.InsertLocation.end);
-    const dateCC = dateP.insertContentControl();
-    dateCC.tag = 'df_date'; dateCC.title = 'Date';
-    dateCC.placeholderText = '[Date]';
-    dateCC.appearance = Word.ContentControlAppearance.boundingBox;
+    const fields = [
+        { id: 'date', label: 'Date', prefix: '' },
+        { id: 'delivery', label: 'Delivery Phrases', prefix: '' },
+        { id: 'recipients', label: 'Recipients', prefix: '' },
+        { id: 'reline', label: 'Re Line', prefix: 'Re:\t', prefixBold: true },
+        { id: 'salutation', label: 'Salutation', prefix: '' },
+        { id: 'body', label: 'Body', isBody: true },
+        { id: 'closing', label: 'Closing Phrase', prefix: '' },
+        { id: 'author', label: 'Author Name', prefix: '', extraSpace: true },
+        { id: 'initials', label: 'Initials', prefix: '' },
+        { id: 'enclosures', label: 'Enclosures', prefix: 'Enclosures:\t' },
+        { id: 'cc', label: 'cc', prefix: 'cc:\t' }
+    ];
     
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Delivery Phrases
-    const delP = body.insertParagraph('', Word.InsertLocation.end);
-    const delCC = delP.insertContentControl();
-    delCC.tag = 'df_delivery'; delCC.title = 'Delivery Phrases';
-    delCC.placeholderText = '[Delivery Phrases]';
-    delCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Recipients (address block)
-    const recipP = body.insertParagraph('', Word.InsertLocation.end);
-    const recipCC = recipP.insertContentControl();
-    recipCC.tag = 'df_recipients'; recipCC.title = 'Recipients';
-    recipCC.placeholderText = '[Recipients]';
-    recipCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Re: line
-    const reP = body.insertParagraph('', Word.InsertLocation.end);
-    reP.insertText('Re:\t', Word.InsertLocation.end).font.bold = true;
-    const reCC = reP.insertContentControl();
-    reCC.tag = 'df_reline'; reCC.title = 'Re Line';
-    reCC.placeholderText = '[Re Line]';
-    reCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Salutation
-    const salP = body.insertParagraph('', Word.InsertLocation.end);
-    const salCC = salP.insertContentControl();
-    salCC.tag = 'df_salutation'; salCC.title = 'Salutation';
-    salCC.placeholderText = '[Salutation]';
-    salCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Body placeholder
-    const bodyP = body.insertParagraph('[Begin typing here]', Word.InsertLocation.end);
-    bodyP.font.italic = true;
-    bodyP.font.color = '#666666';
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Closing phrase
-    const closeP = body.insertParagraph('', Word.InsertLocation.end);
-    const closeCC = closeP.insertContentControl();
-    closeCC.tag = 'df_closing'; closeCC.title = 'Closing Phrase';
-    closeCC.placeholderText = '[Closing Phrase]';
-    closeCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Author Name
-    const authP = body.insertParagraph('', Word.InsertLocation.end);
-    const authCC = authP.insertContentControl();
-    authCC.tag = 'df_author'; authCC.title = 'Author Name';
-    authCC.placeholderText = '[Author Name]';
-    authCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    body.insertParagraph('', Word.InsertLocation.end);
-    
-    // Initials
-    const initP = body.insertParagraph('', Word.InsertLocation.end);
-    const initCC = initP.insertContentControl();
-    initCC.tag = 'df_initials'; initCC.title = 'Initials';
-    initCC.placeholderText = '[Initials]';
-    initCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    // Enclosures
-    const encP = body.insertParagraph('', Word.InsertLocation.end);
-    encP.insertText('Enclosures:\t', Word.InsertLocation.end);
-    const encCC = encP.insertContentControl();
-    encCC.tag = 'df_enclosures'; encCC.title = 'Enclosures';
-    encCC.placeholderText = '[Enclosures]';
-    encCC.appearance = Word.ContentControlAppearance.boundingBox;
-    
-    // cc
-    const ccP = body.insertParagraph('', Word.InsertLocation.end);
-    ccP.insertText('cc:\t', Word.InsertLocation.end);
-    const ccCC = ccP.insertContentControl();
-    ccCC.tag = 'df_cc'; ccCC.title = 'cc';
-    ccCC.placeholderText = '[cc]';
-    ccCC.appearance = Word.ContentControlAppearance.boundingBox;
+    for (const f of fields) {
+        if (f.isBody) {
+            const bodyP = body.insertParagraph('[Begin typing here]', Word.InsertLocation.end);
+            bodyP.font.italic = true;
+            bodyP.font.color = '#666666';
+            body.insertParagraph('', Word.InsertLocation.end);
+            continue;
+        }
+        
+        const p = body.insertParagraph('', Word.InsertLocation.end);
+        if (f.prefix) {
+            const prefixRange = p.insertText(f.prefix, Word.InsertLocation.end);
+            if (f.prefixBold) prefixRange.font.bold = true;
+        }
+        const cc = p.insertContentControl();
+        cc.tag = 'df_' + f.id;
+        cc.title = f.label;
+        cc.placeholderText = '[' + f.label + ']';
+        cc.appearance = Word.ContentControlAppearance.boundingBox;
+        
+        if (f.extraSpace) {
+            body.insertParagraph('', Word.InsertLocation.end);
+        }
+        
+        // Add spacing after certain fields
+        if (['date', 'delivery', 'recipients', 'reline', 'salutation', 'closing'].includes(f.id)) {
+            body.insertParagraph('', Word.InsertLocation.end);
+        }
+    }
 }
 
 async function scan() {

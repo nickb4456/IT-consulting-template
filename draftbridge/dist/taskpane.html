@@ -2,692 +2,182 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DraftBridge</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="taskpane.css?v=20260130-ux-polished">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 16px;
+            font-size: 14px;
+        }
+        .header {
+            font-size: 20px;
+            font-weight: 700;
+            color: #8B7355;
+            margin-bottom: 16px;
+        }
+        .header span { color: #5C4A32; }
+        .status {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .clause {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .clause-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+        .clause-content {
+            color: #555;
+            font-size: 12px;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 8px;
+            background: #fafafa;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        .insert-btn {
+            background: #8B7355;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            font-size: 14px;
+        }
+        .insert-btn:hover { background: #6d5a43; }
+        .insert-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .insert-btn.success {
+            background: #2e7d32;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <div class="app" role="application" aria-label="DraftBridge Document Assistant">
-        <header class="header">
-            <span class="logo" aria-label="DraftBridge">Draft<span>Bridge</span></span>
-            <div class="connection-status" id="connectionStatus" role="status" aria-live="polite">
-                <span class="status-dot"></span>
-                <span class="status-text">Ready</span>
-            </div>
-        </header>
+    <div class="header">Draft<span>Bridge</span></div>
+    <div id="status" class="status">Loading clauses...</div>
+    <div id="clauses"></div>
 
-        <nav class="tabs" role="tablist" aria-label="Main navigation">
-            <button class="tab active" data-tab="generate" role="tab" aria-selected="true" aria-controls="generatePanel" id="tab-generate">
-                <span>+</span>
-            </button>
-            <button class="tab" data-tab="edit" role="tab" aria-selected="false" aria-controls="editPanel" id="tab-edit">
-                <span>Edit</span>
-            </button>
-            <button class="tab" data-tab="data" role="tab" aria-selected="false" aria-controls="dataPanel" id="tab-data">
-                <span>Data</span>
-            </button>
-            <button class="tab" data-tab="library" role="tab" aria-selected="false" aria-controls="libraryPanel" id="tab-library">
-                <span>Lib</span>
-            </button>
-            <button class="tab" data-tab="share" role="tab" aria-selected="false" aria-controls="sharePanel" id="tab-share">
-                <span>Share</span>
-            </button>
-            <button class="tab" data-tab="admin" role="tab" aria-selected="false" aria-controls="adminPanel" id="tab-admin">
-                <span>Cfg</span>
-            </button>
-        </nav>
-
-        <main class="content">
-            <section class="panel" id="generatePanel" role="tabpanel" aria-labelledby="tab-generate">
-                <div class="panel-title">Generate Documents</div>
-                <p class="panel-subtitle">Choose a template to create a new document</p>
-                <div class="options" role="group" aria-label="Document templates">
-                    <button class="opt" data-template="letter" aria-describedby="letter-desc">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">✉️</span>
-                            <span>Letter</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <span id="letter-desc" class="sr-only">Create a formal business letter</span>
-                    
-                    <button class="opt" data-template="memo" aria-describedby="memo-desc">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📝</span>
-                            <span>Memo</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <span id="memo-desc" class="sr-only">Create an internal memorandum</span>
-                    
-                    <button class="opt" data-template="fax" aria-describedby="fax-desc">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📠</span>
-                            <span>Fax Cover</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <span id="fax-desc" class="sr-only">Create a fax cover sheet</span>
-                </div>
-                
-                <div class="divider">
-                    <span>Convert & Tools</span>
-                </div>
-                
-                <div class="options" role="group" aria-label="Conversion tools">
-                    <button class="opt" id="recreateBtn" aria-describedby="recreate-desc">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">🔄</span>
-                            <span>Recreate As...</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <span id="recreate-desc" class="sr-only">Convert this document to a different format</span>
-                    
-                    <button class="opt opt-secondary" data-action="anonymize">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">🕶️</span>
-                            <span>Anonymize</span>
-                        </div>
-                    </button>
-                </div>
-                
-                <div class="divider">
-                    <span>Document Variables</span>
-                </div>
-                
-                <button class="opt opt-highlight" id="detectBookmarksBtn" aria-describedby="bookmarks-desc">
-                    <div class="opt-content">
-                        <span class="opt-icon" aria-hidden="true">🔖</span>
-                        <div class="opt-text-group">
-                            <span>Detect Bookmarks</span>
-                            <span class="opt-subtitle">Auto-build form from Word bookmarks</span>
-                        </div>
-                    </div>
-                    <span class="opt-arrow" aria-hidden="true">→</span>
-                </button>
-                <span id="bookmarks-desc" class="sr-only">Scan document for bookmarks and create a fill-in form</span>
-                
-                <button class="opt opt-highlight" id="clientsBtn" aria-describedby="clients-desc">
-                    <div class="opt-content">
-                        <span class="opt-icon" aria-hidden="true">👥</span>
-                        <div class="opt-text-group">
-                            <span>Clients</span>
-                            <span class="opt-subtitle">Drag & drop client info into document</span>
-                        </div>
-                    </div>
-                    <span class="opt-arrow" aria-hidden="true">→</span>
-                </button>
-                <span id="clients-desc" class="sr-only">Select a client to auto-fill their information</span>
-                
-                <button class="opt" id="globalVarsBtn" aria-describedby="globalvars-desc">
-                    <div class="opt-content">
-                        <span class="opt-icon" aria-hidden="true">🌐</span>
-                        <div class="opt-text-group">
-                            <span>Global Variables</span>
-                            <span class="opt-subtitle">{{Placeholders}} that update everywhere</span>
-                        </div>
-                    </div>
-                    <span class="opt-arrow" aria-hidden="true">→</span>
-                </button>
-                <span id="globalvars-desc" class="sr-only">Manage global variables like client name, firm info, dates</span>
-                
-                <button class="scan-btn" id="scanBtn" aria-describedby="scan-desc">
-                    <span class="scan-icon" aria-hidden="true">🔍</span>
-                    <span class="scan-text">Scan Document</span>
-                    <span class="scan-loading" aria-hidden="true">⏳ Scanning...</span>
-                </button>
-                <span id="scan-desc" class="sr-only">Analyze current document content</span>
-            </section>
-
-            <section class="panel hidden" id="editPanel" role="tabpanel" aria-labelledby="tab-edit">
-                <div class="panel-title">Edit Tools</div>
-                <p class="panel-subtitle">Format and structure your document</p>
-                <div class="options" role="group" aria-label="Editing tools">
-                    <button class="opt" data-action="numbering">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Numbering</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="toc">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Table of Contents</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="pleadings">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Pleading Format</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                </div>
-            </section>
-
-            <section class="panel hidden" id="dataPanel" role="tabpanel" aria-labelledby="tab-data">
-                <div class="panel-title">Data Management</div>
-                <p class="panel-subtitle">Save and reuse document content</p>
-                <div class="options" role="group" aria-label="Data options">
-                    <button class="opt" data-action="save-content">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Save Content</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="insert-content">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Insert Content</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="datasets">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Datasets</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                </div>
-            </section>
-
-            <section class="panel hidden" id="libraryPanel" role="tabpanel" aria-labelledby="tab-library">
-                <div class="library-search">
-                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                    <input type="text" 
-                           class="search-input" 
-                           id="librarySearch" 
-                           placeholder="Search clauses..."
-                           aria-label="Search clause library"
-                           autocomplete="off">
-                    <button class="search-clear hidden" id="searchClear" aria-label="Clear search">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18"/>
-                            <line x1="6" y1="6" x2="18" y2="18"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="filter-row">
-                    <div class="filter-chips" role="group" aria-label="Filter by category">
-                        <button class="chip active" data-filter="all" aria-pressed="true">All</button>
-                        <button class="chip" data-filter="contracts" aria-pressed="false">Contracts</button>
-                        <button class="chip" data-filter="litigation" aria-pressed="false">Litigation</button>
-                        <button class="chip" data-filter="corporate" aria-pressed="false">Corporate</button>
-                    </div>
-                    <select class="client-filter" id="clientFilter" aria-label="Filter by client">
-                        <option value="all">All Clients</option>
-                    </select>
-                </div>
-
-                <!-- Recently Used Section -->
-                <div class="usage-section hidden" id="recentlyUsedSection">
-                    <div class="usage-header">
-                        <svg class="usage-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                        <span>Recently Used</span>
-                        <button class="usage-toggle" id="toggleRecent" aria-label="Toggle recently used">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="usage-cards" id="recentlyUsedCards" role="list"></div>
-                </div>
-
-                <!-- Most Used Section -->
-                <div class="usage-section hidden" id="mostUsedSection">
-                    <div class="usage-header">
-                        <svg class="usage-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                        </svg>
-                        <span>Most Used</span>
-                        <button class="usage-toggle" id="toggleMostUsed" aria-label="Toggle most used">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="6 9 12 15 18 9"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="usage-cards" id="mostUsedCards" role="list"></div>
-                </div>
-
-                <div class="results-count" id="resultsCount" aria-live="polite" aria-atomic="true">
-                    <span class="count-text">Loading clauses...</span>
-                    <span class="cache-indicator hidden" id="cacheIndicator" title="Loaded from cache">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
-                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-                        </svg>
-                        Cached
-                    </span>
-                </div>
-
-                <div class="clause-feed" id="clauseFeed" role="list" aria-label="Clause library">
-                    <!-- Skeleton loading state -->
-                    <div class="clause-card skeleton" aria-hidden="true">
-                        <div class="clause-header">
-                            <div class="skeleton-line skeleton-title"></div>
-                            <div class="skeleton-pill"></div>
-                        </div>
-                        <div class="skeleton-line skeleton-text"></div>
-                        <div class="skeleton-line skeleton-text short"></div>
-                        <div class="skeleton-btn"></div>
-                    </div>
-                    <div class="clause-card skeleton" aria-hidden="true">
-                        <div class="clause-header">
-                            <div class="skeleton-line skeleton-title"></div>
-                            <div class="skeleton-pill"></div>
-                        </div>
-                        <div class="skeleton-line skeleton-text"></div>
-                        <div class="skeleton-line skeleton-text short"></div>
-                        <div class="skeleton-btn"></div>
-                    </div>
-                    <div class="clause-card skeleton" aria-hidden="true">
-                        <div class="clause-header">
-                            <div class="skeleton-line skeleton-title"></div>
-                            <div class="skeleton-pill"></div>
-                        </div>
-                        <div class="skeleton-line skeleton-text"></div>
-                        <div class="skeleton-line skeleton-text short"></div>
-                        <div class="skeleton-btn"></div>
-                    </div>
-                </div>
-                
-                <!-- Empty State -->
-                <div class="empty-state hidden" id="emptyState">
-                    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-                        <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-                    </svg>
-                    <div class="empty-state-title">No clauses found</div>
-                    <div class="empty-state-text">Try adjusting your search or filters</div>
-                </div>
-            </section>
-
-            <section class="panel hidden" id="sharePanel" role="tabpanel" aria-labelledby="tab-share">
-                <div class="panel-title">Share Document</div>
-                <p class="panel-subtitle">Collaborate with your team</p>
-                <div class="options" role="group" aria-label="Sharing options">
-                    <button class="opt" data-action="share-users">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Share with Users</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="share-groups">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Share with Groups</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="export">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Export</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                </div>
-            </section>
-
-            <section class="panel hidden" id="adminPanel" role="tabpanel" aria-labelledby="tab-admin">
-                <div class="panel-title">Administration</div>
-                <p class="panel-subtitle">Configure settings and styles</p>
-                <div class="options" role="group" aria-label="Admin options">
-                    <button class="opt" data-action="doc-id">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Document ID</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="settings">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Settings</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                    <button class="opt" data-action="firm-styles">
-                        <div class="opt-content">
-                            <span class="opt-icon" aria-hidden="true">📋</span>
-                            <span>Firm Styles</span>
-                        </div>
-                        <span class="opt-arrow" aria-hidden="true">→</span>
-                    </button>
-                </div>
-            </section>
-
-            <section class="panel hidden" id="fieldsPanel" role="tabpanel" aria-label="Document fields">
-                <div class="panel-header">
-                    <button class="back-btn" id="backBtn" aria-label="Go back to Generate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="15,18 9,12 15,6"/>
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    <span class="panel-title" id="templateTitle">Document</span>
-                </div>
-                <div class="fields" id="fieldsList" role="form" aria-label="Document fields"></div>
-                <div class="actions">
-                    <button class="btn secondary" id="undoBtn" disabled aria-label="Undo last fill">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="1,4 1,10 7,10"/>
-                            <path d="M3.51 15a9 9 0 102.13-9.36L1 10"/>
-                        </svg>
-                        <span>Undo</span>
-                    </button>
-                    <button class="btn primary" id="fillBtn">
-                        <span class="btn-text">Fill Document</span>
-                        <span class="btn-loading" aria-hidden="true">
-                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                            Generating...
-                        </span>
-                    </button>
-                </div>
-            </section>
-            
-            <!-- Clients Panel (Drag & Drop) -->
-            <section class="panel hidden" id="clientsPanel" role="tabpanel" aria-label="Client management">
-                <div class="panel-header">
-                    <button class="back-btn" id="clientsBackBtn" aria-label="Go back to Generate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="15,18 9,12 15,6"/>
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    <div class="panel-header-text">
-                        <span class="panel-title">Clients</span>
-                        <span class="panel-subtitle">Drag onto document or click to apply</span>
-                    </div>
-                </div>
-                
-                <div class="clients-info">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                    <span><strong>Drag</strong> a client card onto your document, or <strong>click</strong> to replace all client placeholders.</span>
-                </div>
-                
-                <div class="clients-search">
-                    <input type="text" id="clientSearch" placeholder="Search clients..." aria-label="Search clients">
-                </div>
-                
-                <div class="clients-list" id="clientsList" role="list">
-                    <!-- Dynamically populated -->
-                </div>
-                
-                <div class="clients-actions">
-                    <button class="btn-small" id="addClientBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                            <circle cx="8.5" cy="7" r="4"/>
-                            <line x1="20" y1="8" x2="20" y2="14"/>
-                            <line x1="23" y1="11" x2="17" y2="11"/>
-                        </svg>
-                        Add Client
-                    </button>
-                </div>
-            </section>
-            
-            <!-- Global Variables Panel -->
-            <section class="panel hidden" id="globalvarsPanel" role="tabpanel" aria-label="Global variables">
-                <div class="panel-header">
-                    <button class="back-btn" id="globalVarsBackBtn" aria-label="Go back to Generate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="15,18 9,12 15,6"/>
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    <div class="panel-header-text">
-                        <span class="panel-title">Global Variables</span>
-                        <span class="panel-subtitle">Change once, update everywhere</span>
-                    </div>
-                </div>
-                
-                <div class="globalvars-info">
-                    <p>Use <code>{{Variable_Name}}</code> syntax in your documents. These values replace all matching placeholders.</p>
-                    <p class="info-highlight">✨ <strong>Punctuation Guard:</strong> Blank variables won't leave orphan commas or periods.</p>
-                </div>
-                
-                <div class="globalvars-actions-top">
-                    <button class="btn-small" id="scanPlaceholdersBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="11" cy="11" r="8"/>
-                            <path d="M21 21l-4.35-4.35"/>
-                        </svg>
-                        Scan Document
-                    </button>
-                </div>
-                
-                <div class="fields globalvars-list" id="globalVarsList" role="form" aria-label="Global variables">
-                    <!-- Dynamically populated -->
-                </div>
-                
-                <div class="actions">
-                    <button class="btn primary" id="applyGlobalVarsBtn">
-                        <span class="btn-text">Apply to Document</span>
-                        <span class="btn-loading" aria-hidden="true">
-                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                            Applying...
-                        </span>
-                    </button>
-                </div>
-            </section>
-            
-            <!-- Recreate Panel (convert document type) -->
-            <section class="panel hidden" id="recreatePanel" role="tabpanel" aria-label="Recreate document">
-                <div class="panel-header">
-                    <button class="back-btn" id="recreateBackBtn" aria-label="Go back to Generate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="15,18 9,12 15,6"/>
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    <div class="panel-header-text">
-                        <span class="panel-title">Recreate As...</span>
-                        <span class="panel-subtitle">Convert your document to a new format</span>
-                    </div>
-                </div>
-                
-                <div class="recreate-mode-toggle" role="tablist">
-                    <button class="mode-tab active" data-mode="convert" role="tab" aria-selected="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="17 1 21 5 17 9"/>
-                            <path d="M3 11V9a4 4 0 014-4h14"/>
-                            <polyline points="7 23 3 19 7 15"/>
-                            <path d="M21 13v2a4 4 0 01-4 4H3"/>
-                        </svg>
-                        <span>Convert Format</span>
-                    </button>
-                    <button class="mode-tab" data-mode="swap" role="tab" aria-selected="false">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-                            <circle cx="8.5" cy="7" r="4"/>
-                            <polyline points="17 11 19 13 23 9"/>
-                        </svg>
-                        <span>Swap Client</span>
-                    </button>
-                </div>
-                
-                <div class="recreate-preview" id="recreatePreview">
-                    <div class="preview-label">Current document preview:</div>
-                    <div class="preview-content" id="previewContent">
-                        <span class="preview-loading">Analyzing document...</span>
-                    </div>
-                </div>
-                
-                <!-- Convert Mode Options -->
-                <div class="recreate-options" id="convertOptions">
-                    <div class="recreate-label">Convert to:</div>
-                    <div class="recreate-grid" role="radiogroup" aria-label="Target document type">
-                        <button class="recreate-option" data-target="letter" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                <polyline points="22,6 12,13 2,6"/>
-                            </svg>
-                            <span>Letter</span>
-                        </button>
-                        <button class="recreate-option" data-target="memo" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                            </svg>
-                            <span>Memo</span>
-                        </button>
-                        <button class="recreate-option" data-target="email" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                                <polyline points="22,6 12,13 2,6"/>
-                            </svg>
-                            <span>Email</span>
-                        </button>
-                        <button class="recreate-option" data-target="brief" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                            </svg>
-                            <span>Brief</span>
-                        </button>
-                        <button class="recreate-option" data-target="pleading" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                <line x1="3" y1="9" x2="21" y2="9"/>
-                                <line x1="9" y1="21" x2="9" y2="9"/>
-                            </svg>
-                            <span>Pleading</span>
-                        </button>
-                        <button class="recreate-option" data-target="contract" role="radio" aria-checked="false">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                                <polyline points="14,2 14,8 20,8"/>
-                                <line x1="16" y1="13" x2="8" y2="13"/>
-                                <line x1="16" y1="17" x2="8" y2="17"/>
-                                <line x1="10" y1="9" x2="8" y2="9"/>
-                            </svg>
-                            <span>Contract</span>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="recreate-settings" id="convertSettings">
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="keepFormatting" checked>
-                        <span class="checkbox-text">Preserve key information (names, dates, addresses)</span>
-                    </label>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="appendOriginal">
-                        <span class="checkbox-text">Append original below new version</span>
-                    </label>
-                </div>
-                </div>
-                
-                <!-- Swap Client Mode Options -->
-                <div class="swap-client-options hidden" id="swapOptions">
-                    <div class="recreate-label">Replace client information:</div>
-                    <div class="swap-detected" id="swapDetected">
-                        <span class="swap-loading">Detecting names and info...</span>
-                    </div>
-                    <div class="swap-fields" id="swapFields">
-                        <!-- Dynamically populated -->
-                    </div>
-                </div>
-                
-                <div class="actions">
-                    <button class="btn primary" id="doRecreateBtn" disabled>
-                        <span class="btn-text">Recreate Document</span>
-                        <span class="btn-loading" aria-hidden="true">
-                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                            Converting...
-                        </span>
-                    </button>
-                </div>
-            </section>
-            
-            <!-- Variables Panel (auto-built from bookmarks) -->
-            <section class="panel hidden" id="variablesPanel" role="tabpanel" aria-label="Document variables">
-                <div class="panel-header">
-                    <button class="back-btn" id="variablesBackBtn" aria-label="Go back to Generate">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="15,18 9,12 15,6"/>
-                        </svg>
-                        <span>Back</span>
-                    </button>
-                    <div class="panel-header-text">
-                        <span class="panel-title">Document Variables</span>
-                        <span class="panel-subtitle" id="variablesCount">0 bookmarks detected</span>
-                    </div>
-                </div>
-                
-                <div class="variables-info">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="12" y1="16" x2="12" y2="12"/>
-                        <line x1="12" y1="8" x2="12.01" y2="8"/>
-                    </svg>
-                    <span>Fill in the values below, then click "Fill Document" to update all bookmarks at once.</span>
-                </div>
-                
-                <div class="fields variables-list" id="variablesList" role="form" aria-label="Bookmark variables">
-                    <!-- Dynamically populated -->
-                </div>
-                
-                <div class="actions variables-actions">
-                    <button class="btn secondary" id="rescanBookmarksBtn" aria-label="Rescan for bookmarks">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <polyline points="23,4 23,10 17,10"/>
-                            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
-                        </svg>
-                        <span>Rescan</span>
-                    </button>
-                    <button class="btn primary" id="fillVariablesBtn" disabled>
-                        <span class="btn-text">Fill Document</span>
-                        <span class="btn-loading" aria-hidden="true">
-                            <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                            Filling...
-                        </span>
-                    </button>
-                </div>
-            </section>
-        </main>
-
-        <!-- Save to Library FAB -->
-        <button class="save-library-fab hidden" id="saveLibraryFab" aria-label="Save selection to library">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-                <polyline points="17,21 17,13 7,13 7,21"/>
-                <polyline points="7,3 7,8 15,8"/>
-            </svg>
-            <span class="fab-text">Save to Library</span>
-            <span class="fab-loading" aria-hidden="true">
-                <svg class="spinner" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                Saving...
-            </span>
-        </button>
-
-        <!-- Toast Container -->
-        <div id="toastContainer" class="toast-container" role="region" aria-live="polite" aria-label="Notifications"></div>
-    </div>
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-    <script src="cache.js?v=20260130-phase2"></script>
-    <script src="taskpane.js?v=20260130-phase2"></script>
+    <script>
+        const API = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
+        const FIRM = 'morrison';
+
+        Office.onReady(async (info) => {
+            if (info.host === Office.HostType.Word) {
+                loadClauses();
+            } else {
+                // For testing outside Word
+                loadClauses();
+            }
+        });
+
+        async function loadClauses() {
+            const statusEl = document.getElementById('status');
+            const clausesEl = document.getElementById('clauses');
+
+            try {
+                statusEl.textContent = 'Fetching clauses...';
+                
+                const response = await fetch(`${API}/firms/${FIRM}/clauses`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const allClauses = await response.json();
+                
+                // Take first 5 clauses
+                const clauses = allClauses.slice(0, 5);
+                
+                statusEl.textContent = `✓ Loaded ${clauses.length} clauses. Click to insert.`;
+                statusEl.classList.remove('error');
+
+                clausesEl.innerHTML = clauses.map((clause, i) => `
+                    <div class="clause">
+                        <div class="clause-title">${escapeHtml(clause.title)}</div>
+                        <div class="clause-content">${escapeHtml(clause.content)}</div>
+                        <button class="insert-btn" onclick="insertClause(${i})">
+                            Insert into Document
+                        </button>
+                    </div>
+                `).join('');
+
+                // Store clauses globally for insert function
+                window.clauseData = clauses;
+
+            } catch (err) {
+                console.error('Load failed:', err);
+                statusEl.textContent = '✗ Failed to load clauses: ' + err.message;
+                statusEl.classList.add('error');
+            }
+        }
+
+        async function insertClause(index) {
+            const clause = window.clauseData[index];
+            const btn = document.querySelectorAll('.insert-btn')[index];
+            
+            btn.disabled = true;
+            btn.textContent = 'Inserting...';
+
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.insertText(clause.content, Word.InsertLocation.replace);
+                    await context.sync();
+                });
+
+                btn.textContent = '✓ Inserted!';
+                btn.classList.add('success');
+                
+                setTimeout(() => {
+                    btn.textContent = 'Insert into Document';
+                    btn.classList.remove('success');
+                    btn.disabled = false;
+                }, 2000);
+
+            } catch (err) {
+                console.error('Insert failed:', err);
+                btn.textContent = '✗ Failed - ' + err.message;
+                
+                setTimeout(() => {
+                    btn.textContent = 'Insert into Document';
+                    btn.disabled = false;
+                }, 3000);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>

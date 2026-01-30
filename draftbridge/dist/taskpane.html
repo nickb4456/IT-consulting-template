@@ -360,6 +360,39 @@
             font-size: 16px;
         }
         
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            pointer-events: none;
+        }
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .toast.success { background: #2e7d32; }
+        .toast.error { background: #c62828; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
         /* Empty State */
         .empty {
             text-align: center;
@@ -429,6 +462,7 @@
     </style>
 </head>
 <body>
+    <div id="toast-container" class="toast-container"></div>
     <div class="header">Draft<span>Bridge</span></div>
     
     <div class="tabs-container">
@@ -1007,6 +1041,19 @@ COMMENTS:
         }
 
         // ═══════════════════════════════════════════════════════════════
+        // TOAST NOTIFICATIONS
+        // ═══════════════════════════════════════════════════════════════
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'} ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
         // DATA TAB - SAVE CLAUSE FEATURE
         // ═══════════════════════════════════════════════════════════════
 
@@ -1024,12 +1071,12 @@ COMMENTS:
                 });
 
                 if (!selectedText) {
-                    alert('Please highlight text in your document first');
+                    showToast('Please highlight text in your document first', 'error');
                     return;
                 }
 
                 if (selectedText.length < 20) {
-                    alert('Please select more text (at least 20 characters)');
+                    showToast('Please select more text (at least 20 characters)', 'error');
                     return;
                 }
 
@@ -1055,7 +1102,7 @@ COMMENTS:
                 
             } catch (err) {
                 console.error('Error getting selection:', err);
-                alert('Could not read document selection');
+                showToast('Could not read document selection', 'error');
             }
         }
 
@@ -1084,13 +1131,13 @@ COMMENTS:
             const title = document.getElementById('save-title').value.trim();
             
             if (!title) {
-                alert('Please enter a title');
+                showToast('Please enter a title', 'error');
                 document.getElementById('save-title').focus();
                 return;
             }
             
             if (!pendingSaveText) {
-                alert('No text to save');
+                showToast('No text to save', 'error');
                 cancelSaveClause();
                 return;
             }
@@ -1118,12 +1165,15 @@ COMMENTS:
                 allClauses.unshift(newClause);
                 renderClauses();
                 
-                alert('Saved: ' + title);
+                // Return to main data view first
                 cancelSaveClause();
+                
+                // Then show success toast
+                showToast(`Saved to library: ${title}`, 'success');
                 
             } catch (err) {
                 console.error('Save failed:', err);
-                alert('Could not save clause');
+                showToast('Could not save clause - check console', 'error');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.textContent = 'Save Clause';

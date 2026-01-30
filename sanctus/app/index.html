@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sanctus - Catholic Couples</title>
+    <style>
+        :root {
+            --gold: #C9A227;
+            --gold-light: #E8D5A3;
+            --cream: #FDF8F0;
+            --cream-dark: #F5EDE0;
+            --burgundy: #722F37;
+            --text: #2C1810;
+            --text-light: #6B5B4F;
+            --white: #FFFFFF;
+            --shadow: rgba(44, 24, 16, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+            min-height: 100vh;
+            color: var(--text);
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--white);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            letter-spacing: 0.1em;
+        }
+
+        .header .cross {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            border: 1px solid var(--gold-light);
+        }
+
+        .card h2 {
+            color: var(--gold);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--cream-dark);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(201, 162, 39, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gold-light);
+        }
+
+        .btn-danger {
+            background: var(--burgundy);
+            color: var(--white);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            width: auto;
+        }
+
+        .btn-google {
+            background: white;
+            color: #444;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-google:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--text-light);
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--gold-light);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+
+        /* Auth Toggle */
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--text-light);
+        }
+
+        .auth-toggle a {
+            color: var(--gold);
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: var(--cream);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .user-email {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Partner Status */
+        .partner-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--cream);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-dot.linked {
+            background: #4CAF50;
+        }
+
+        .invite-code {
+            font-family: monospace;
+            font-size: 1.5rem;
+            letter-spacing: 0.2em;
+            background: var(--gold-light);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            color: var(--text);
+            margin: 1rem 0;
+        }
+
+        /* Drawing Canvas Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: var(--text);
+            color: var(--white);
+        }
+
+        .modal-header h3 {
+            font-size: 1rem;
+        }
+
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        #drawingCanvas {
+            background: var(--white);
+            border-radius: 8px;
+            touch-action: none;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .canvas-tools {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--text);
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.active {
+            border-color: var(--white);
+        }
+
+        .color-black { background: #000000; }
+        .color-red { background: #C41E3A; }
+        .color-blue { background: #1E4D8C; }
+        .color-gold { background: #C9A227; }
+        .color-pink { background: #E8A4B8; }
+
+        /* Inbox Gallery */
+        .inbox-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .drawing-item {
+            position: relative;
+            background: var(--white);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .drawing-item:hover {
+            transform: scale(1.02);
+        }
+
+        .drawing-item img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+        }
+
+        .drawing-item .timestamp {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .drawing-item .new-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--burgundy);
+            color: var(--white);
+            font-size: 0.625rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        /* Daily Content */
+        .daily-content {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .daily-content .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .daily-content .quote {
+            font-style: italic;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .daily-content .source {
+            color: var(--gold);
+            font-size: 0.9rem;
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            background: var(--cream);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            color: var(--text-light);
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            background: var(--gold);
+            color: var(--white);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--cream-dark);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            z-index: 2000;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translate(-50%, 20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* Full Drawing View */
+        .drawing-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 1500;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .drawing-modal.active {
+            display: flex;
+        }
+
+        .drawing-modal img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+
+        .drawing-modal .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 2rem;
+            cursor: pointer;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .invite-code {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+        /* Paywall Overlay */
+        .paywall {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--cream) 0%, var(--cream-dark) 100%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .paywall.hidden { display: none; }
+        
+        .paywall-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .paywall h1 {
+            font-family: 'Georgia', serif;
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+        
+        .paywall-subtitle {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .paywall-features {
+            text-align: left;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+        
+        .paywall-features li {
+            padding: 0.5rem 0;
+            color: var(--text);
+            list-style: none;
+        }
+        
+        .paywall-features li::before {
+            content: "✓ ";
+            color: var(--gold);
+            font-weight: bold;
+        }
+        
+        .paywall-price {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .paywall-price span {
+            font-size: 1rem;
+            color: var(--text-light);
+            font-weight: normal;
+        }
+        
+        .paywall-btn {
+            background: var(--gold);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .paywall-btn:hover {
+            background: #b8911f;
+            transform: scale(1.05);
+        }
+        
+        .paywall-note {
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Paywall -->
+    <div id="paywall" class="paywall">
+        <div class="paywall-icon">☧</div>
+        <h1>Sanctus</h1>
+        <p class="paywall-subtitle">Daily connection for Catholic couples</p>
+        
+        <ul class="paywall-features">
+            <li>365 daily faith questions</li>
+            <li>52 weekly couple prayers</li>
+            <li>Draw & send love notes</li>
+            <li>Partner sync across devices</li>
+            <li>Streak tracking & progress</li>
+            <li>Works offline</li>
+        </ul>
+        
+        <div class="paywall-price">$0.99 <span>/ year</span></div>
+        
+        <button class="paywall-btn" onclick="startPayment()">🔓 Unlock Sanctus</button>
+        
+        <p class="paywall-note">Secure payment via Stripe. Instant access.</p>
+    </div>
+
+    <header class="header">
+        <div class="cross">✝</div>
+        <h1>SANCTUS</h1>
+    </header>
+
+    <main class="container">
+        <!-- Auth Section (shown when logged out) -->
+        <div id="authSection">
+            <div class="card" id="signInCard">
+                <h2>🕊️ Welcome Back</h2>
+                <form id="signInForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signInEmail" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signInPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+                <div class="divider"><span>or</span></div>
+                <button onclick="signInWithGoogle()" class="btn btn-google">
+                    <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right: 8px;">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <div class="auth-toggle">
+                    New to Sanctus? <a onclick="showSignUp()">Create Account</a>
+                </div>
+            </div>
+
+            <div class="card hidden" id="signUpCard">
+                <h2>🕊️ Join Sanctus</h2>
+                <form id="signUpForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="signUpEmail" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="signUpPassword" required placeholder="At least 6 characters" minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm Password</label>
+                        <input type="password" id="signUpConfirm" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </form>
+                <div class="divider"><span>or</span></div>
+                <button onclick="signInWithGoogle()" class="btn btn-google">
+                    <svg width="18" height="18" viewBox="0 0 18 18" style="margin-right: 8px;">
+                        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+                        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/>
+                        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                <div class="auth-toggle">
+                    Already have an account? <a onclick="showSignIn()">Sign In</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- App Section (shown when logged in) -->
+        <div id="appSection" class="hidden">
+            <!-- User Info -->
+            <div class="user-info">
+                <span class="user-email" id="userEmail">Loading...</span>
+                <button class="btn btn-secondary btn-small" onclick="signOut()">Sign Out</button>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="home" onclick="switchTab('home')">🏠 Home</button>
+                <button class="nav-tab" data-tab="draw" onclick="switchTab('draw')">🎨 Draw</button>
+                <button class="nav-tab" data-tab="inbox" onclick="switchTab('inbox')">💌 Inbox <span id="inboxBadge"></span></button>
+            </div>
+
+            <!-- Home Tab -->
+            <div class="tab-content active" id="homeTab">
+                <!-- Partner Status Card -->
+                <div class="card">
+                    <h2>💍 Partner Connection</h2>
+                    <div class="partner-status">
+                        <div class="status-dot" id="partnerDot"></div>
+                        <span id="partnerStatusText">Loading...</span>
+                    </div>
+                    
+                    <div id="inviteCodeSection">
+                        <p style="text-align: center; color: var(--text-light); margin-bottom: 0.5rem;">Your invite code:</p>
+                        <div class="invite-code" id="myInviteCode">------</div>
+                        <p style="text-align: center; color: var(--text-light); font-size: 0.85rem;">Share this code with your spouse</p>
+                    </div>
+
+                    <div id="linkPartnerSection" style="margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Enter partner's invite code</label>
+                            <input type="text" id="partnerCodeInput" placeholder="ABC123" maxlength="6" style="text-transform: uppercase; text-align: center; font-family: monospace; letter-spacing: 0.2em;">
+                        </div>
+                        <button class="btn btn-secondary" onclick="linkPartner()">Link Partner</button>
+                    </div>
+                </div>
+
+                <!-- Daily Question -->
+                <div class="card">
+                    <h2>💬 Daily Question</h2>
+                    <div class="daily-content">
+                        <p id="dailyQuestion" class="quote">"What is one way I can better support you this week?"</p>
+                    </div>
+                </div>
+
+                <!-- Daily Prayer -->
+                <div class="card">
+                    <h2>🙏 Daily Prayer</h2>
+                    <div class="daily-content">
+                        <p class="quote" id="dailyPrayer">"Lord, bless our marriage. Help us to love each other as You love us, to forgive as You forgive, and to grow together in faith. May our home be a place of peace, joy, and Your presence. Amen."</p>
+                    </div>
+                </div>
+
+                <!-- Daily Quote -->
+                <div class="card">
+                    <h2>📖 Daily Reflection</h2>
+                    <div class="daily-content">
+                        <p class="quote" id="dailyQuote">"Love is patient, love is kind. It does not envy, it does not boast, it is not proud."</p>
+                        <p class="source" id="quoteSource">— 1 Corinthians 13:4</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Draw Tab -->
+            <div class="tab-content" id="drawTab">
+                <div class="card">
+                    <h2>🎨 Send a Drawing</h2>
+                    <p style="color: var(--text-light); margin-bottom: 1rem;">Express your love through art! Draw something special for your spouse.</p>
+                    <button class="btn btn-primary" onclick="openCanvas()" id="openCanvasBtn">
+                        ✏️ Open Canvas
+                    </button>
+                    <p id="partnerRequiredMsg" class="hidden" style="color: var(--burgundy); text-align: center; margin-top: 1rem;">
+                        Link your partner first to send drawings
+                    </p>
+                </div>
+            </div>
+
+            <!-- Inbox Tab -->
+            <div class="tab-content" id="inboxTab">
+                <div class="card">
+                    <h2>💌 Received Drawings</h2>
+                    <div id="inboxGallery" class="inbox-gallery">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading drawings...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Drawing Canvas Modal -->
+    <div class="modal" id="canvasModal">
+        <div class="modal-header">
+            <h3>✏️ Draw for your spouse</h3>
+            <button class="btn btn-small btn-secondary" onclick="closeCanvas()">✕ Close</button>
+        </div>
+        <div class="canvas-container">
+            <canvas id="drawingCanvas" width="400" height="400"></canvas>
+        </div>
+        <div class="canvas-tools">
+            <button class="color-btn color-black active" data-color="#000000" onclick="selectColor(this)"></button>
+            <button class="color-btn color-red" data-color="#C41E3A" onclick="selectColor(this)"></button>
+            <button class="color-btn color-blue" data-color="#1E4D8C" onclick="selectColor(this)"></button>
+            <button class="color-btn color-gold" data-color="#C9A227" onclick="selectColor(this)"></button>
+            <button class="color-btn color-pink" data-color="#E8A4B8" onclick="selectColor(this)"></button>
+            <button class="btn btn-secondary btn-small" onclick="clearCanvas()" style="margin-left: 1rem;">🗑️ Clear</button>
+            <button class="btn btn-primary btn-small" onclick="sendDrawing()" style="margin-left: 0.5rem;">💌 Send</button>
+        </div>
+    </div>
+
+    <!-- Full Drawing View Modal -->
+    <div class="drawing-modal" id="drawingViewModal">
+        <button class="close-btn" onclick="closeDrawingView()">✕</button>
+        <img id="drawingViewImage" src="" alt="Drawing">
+        <p style="color: var(--white); margin-top: 1rem;" id="drawingViewTimestamp"></p>
+    </div>
+
+    <!-- Firebase SDK (v9 compat for easier usage) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ============================================
+        // 🔥 FIREBASE CONFIGURATION
+        // ============================================
+        // TODO: Replace with your own Firebase config
+        // Get this from: Firebase Console > Project Settings > Your Apps > Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDGF4ckAnEqDwJgElnec2E7SFQg05X9eJ0",
+            authDomain: "sanctus-app.firebaseapp.com",
+            projectId: "sanctus-app",
+            storageBucket: "sanctus-app.firebasestorage.app",
+            messagingSenderId: "245244300917",
+            appId: "1:245244300917:web:ff71499e44cd985f80323c"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ============================================
+        // 🌐 GLOBAL STATE
+        // ============================================
+        let currentUser = null;
+        let userData = null;
+        let partnerData = null;
+        let drawingsUnsubscribe = null;
+        let userDataUnsubscribe = null;
+
+        // Canvas state
+        let canvas, ctx;
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let lastX = 0;
+        let lastY = 0;
+
+        // Daily content
+        const dailyQuestions = [
+            "What is one way I can better support you this week?",
+            "What's a happy memory from our relationship that you cherish?",
+            "How can we pray together more intentionally?",
+            "What dream do you have that I can help you pursue?",
+            "When do you feel most loved by me?",
+            "What's something you've been wanting to tell me?",
+            "How can we grow closer to God together this month?"
+        ];
+
+        const dailyPrayers = [
+            "Lord, bless our marriage. Help us to love each other as You love us, to forgive as You forgive, and to grow together in faith. May our home be a place of peace, joy, and Your presence. Amen.",
+            "Heavenly Father, strengthen the bond between us. Give us patience in difficulties, joy in our journey, and gratitude for each other. May our love reflect Your love. Amen.",
+            "Dear Lord, guide our marriage today. Help us speak with kindness, listen with understanding, and act with love. Unite our hearts in Your sacred purpose. Amen.",
+            "Gracious God, thank You for the gift of marriage. Help us to honor each other, to serve one another, and to keep You at the center of our union. Amen.",
+            "Holy Spirit, fill our home with Your peace. Remove any discord and replace it with harmony. May our marriage be a testament to Your grace. Amen."
+        ];
+
+        const dailyQuotes = [
+            { text: "Love is patient, love is kind. It does not envy, it does not boast, it is not proud.", source: "1 Corinthians 13:4" },
+            { text: "Two are better than one, because they have a good return for their labor.", source: "Ecclesiastes 4:9" },
+            { text: "Above all, love each other deeply, because love covers over a multitude of sins.", source: "1 Peter 4:8" },
+            { text: "Let all that you do be done in love.", source: "1 Corinthians 16:14" },
+            { text: "And now these three remain: faith, hope and love. But the greatest of these is love.", source: "1 Corinthians 13:13" },
+            { text: "Be completely humble and gentle; be patient, bearing with one another in love.", source: "Ephesians 4:2" },
+            { text: "Husbands, love your wives, just as Christ loved the church.", source: "Ephesians 5:25" }
+        ];
+
+        // ============================================
+        // 🔐 AUTHENTICATION
+        // ============================================
+        function showSignIn() {
+            document.getElementById('signInCard').classList.remove('hidden');
+            document.getElementById('signUpCard').classList.add('hidden');
+        }
+
+        function showSignUp() {
+            document.getElementById('signInCard').classList.add('hidden');
+            document.getElementById('signUpCard').classList.remove('hidden');
+        }
+
+        document.getElementById('signInForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signInEmail').value;
+            const password = document.getElementById('signInPassword').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                showToast('Welcome back! 🙏');
+            } catch (error) {
+                showToast('Error: ' + error.message);
+            }
+        });
+
+        document.getElementById('signUpForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('signUpEmail').value;
+            const password = document.getElementById('signUpPassword').value;
+            const confirm = document.getElementById('signUpConfirm').value;
+
+            if (password !== confirm) {
+                showToast('Passwords do not match');
+                return;
+            }
+
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                // Create user document with invite code
+                const inviteCode = generateInviteCode();
+                await db.collection('users').doc(cred.user.uid).set({
+                    email: email,
+                    inviteCode: inviteCode,
+                    partnerId: null,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                // Create invite code lookup
+                await db.collection('inviteCodes').doc(inviteCode).set({
+                    userId: cred.user.uid
+                });
+                showToast('Account created! Welcome to Sanctus ✝️');
+            } catch (error) {
+                showToast('Error: ' + error.message);
+            }
+        });
+
+        // Google Sign-In
+        async function signInWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Check if user doc exists, create if not
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists) {
+                    // New user - create profile with invite code
+                    await db.collection('users').doc(user.uid).set({
+                        email: user.email,
+                        displayName: user.displayName || user.email.split('@')[0],
+                        inviteCode: generateInviteCode(),
+                        partnerId: null,
+                        coupleId: null,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    showToast('Welcome to Sanctus! 🕊️');
+                } else {
+                    showToast('Welcome back! 🕊️');
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message);
+            }
+        }
+
+        function signOut() {
+            auth.signOut();
+            showToast('Signed out. Peace be with you 🕊️');
+        }
+
+        function generateInviteCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            currentUser = user;
+            if (user) {
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('appSection').classList.remove('hidden');
+                document.getElementById('userEmail').textContent = user.email;
+                await loadUserData();
+                setupRealtimeListeners();
+                loadDailyContent();
+            } else {
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('appSection').classList.add('hidden');
+                // Cleanup listeners
+                if (drawingsUnsubscribe) drawingsUnsubscribe();
+                if (userDataUnsubscribe) userDataUnsubscribe();
+            }
+        });
+
+        // ============================================
+        // 👥 PARTNER LINKING
+        // ============================================
+        async function loadUserData() {
+            const doc = await db.collection('users').doc(currentUser.uid).get();
+            if (doc.exists) {
+                userData = doc.data();
+                document.getElementById('myInviteCode').textContent = userData.inviteCode || '------';
+                updatePartnerStatus();
+            }
+        }
+
+        async function updatePartnerStatus() {
+            const dot = document.getElementById('partnerDot');
+            const text = document.getElementById('partnerStatusText');
+            const linkSection = document.getElementById('linkPartnerSection');
+            const openCanvasBtn = document.getElementById('openCanvasBtn');
+            const partnerMsg = document.getElementById('partnerRequiredMsg');
+
+            if (userData && userData.partnerId) {
+                dot.classList.add('linked');
+                // Get partner email
+                const partnerDoc = await db.collection('users').doc(userData.partnerId).get();
+                if (partnerDoc.exists) {
+                    partnerData = partnerDoc.data();
+                    text.textContent = `Linked with ${partnerData.email}`;
+                } else {
+                    text.textContent = 'Partner linked';
+                }
+                linkSection.classList.add('hidden');
+                openCanvasBtn.disabled = false;
+                partnerMsg.classList.add('hidden');
+            } else {
+                dot.classList.remove('linked');
+                text.textContent = 'Not linked yet';
+                linkSection.classList.remove('hidden');
+                openCanvasBtn.disabled = true;
+                partnerMsg.classList.remove('hidden');
+            }
+        }
+
+        async function linkPartner() {
+            const code = document.getElementById('partnerCodeInput').value.toUpperCase().trim();
+            if (code.length !== 6) {
+                showToast('Please enter a 6-character code');
+                return;
+            }
+
+            if (code === userData.inviteCode) {
+                showToast("You can't link with yourself!");
+                return;
+            }
+
+            try {
+                // Look up the invite code
+                const codeDoc = await db.collection('inviteCodes').doc(code).get();
+                if (!codeDoc.exists) {
+                    showToast('Invalid invite code');
+                    return;
+                }
+
+                const partnerId = codeDoc.data().userId;
+
+                // Check if partner is already linked
+                const partnerDoc = await db.collection('users').doc(partnerId).get();
+                if (partnerDoc.exists && partnerDoc.data().partnerId && partnerDoc.data().partnerId !== currentUser.uid) {
+                    showToast('This person is already linked to someone else');
+                    return;
+                }
+
+                // Link both users
+                const batch = db.batch();
+                batch.update(db.collection('users').doc(currentUser.uid), { partnerId: partnerId });
+                batch.update(db.collection('users').doc(partnerId), { partnerId: currentUser.uid });
+                await batch.commit();
+
+                userData.partnerId = partnerId;
+                updatePartnerStatus();
+                showToast('Partner linked! 💍 You are now connected.');
+            } catch (error) {
+                showToast('Error linking partner: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // 🎨 DRAWING CANVAS
+        // ============================================
+        function initCanvas() {
+            canvas = document.getElementById('drawingCanvas');
+            ctx = canvas.getContext('2d');
+
+            // Set canvas size based on screen
+            const size = Math.min(window.innerWidth - 40, window.innerHeight - 200, 500);
+            canvas.width = size;
+            canvas.height = size;
+
+            // White background
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Drawing settings
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Mouse events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+
+            // Touch events
+            canvas.addEventListener('touchstart', handleTouchStart);
+            canvas.addEventListener('touchmove', handleTouchMove);
+            canvas.addEventListener('touchend', stopDrawing);
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            [lastX, lastY] = [e.offsetX, e.offsetY];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            isDrawing = true;
+            lastX = touch.clientX - rect.left;
+            lastY = touch.clientY - rect.top;
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            lastX = x;
+            lastY = y;
+        }
+
+        function selectColor(btn) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentColor = btn.dataset.color;
+            ctx.strokeStyle = currentColor;
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function openCanvas() {
+            if (!userData || !userData.partnerId) {
+                showToast('Link your partner first to send drawings');
+                return;
+            }
+            document.getElementById('canvasModal').classList.add('active');
+            initCanvas();
+        }
+
+        function closeCanvas() {
+            document.getElementById('canvasModal').classList.remove('active');
+        }
+
+        async function sendDrawing() {
+            if (!userData || !userData.partnerId) {
+                showToast('Link your partner first');
+                return;
+            }
+
+            // Check if canvas is blank
+            const imageData = canvas.toDataURL('image/png');
+            
+            try {
+                await db.collection('drawings').add({
+                    fromUserId: currentUser.uid,
+                    toUserId: userData.partnerId,
+                    imageData: imageData,
+                    seen: false,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                showToast('Drawing sent with love! 💌');
+                closeCanvas();
+            } catch (error) {
+                showToast('Error sending drawing: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // 💌 INBOX
+        // ============================================
+        function setupRealtimeListeners() {
+            // Listen for user data changes
+            userDataUnsubscribe = db.collection('users').doc(currentUser.uid)
+                .onSnapshot((doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        updatePartnerStatus();
+                    }
+                });
+
+            // Listen for incoming drawings
+            drawingsUnsubscribe = db.collection('drawings')
+                .where('toUserId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    renderInbox(snapshot.docs);
+                    updateInboxBadge(snapshot.docs);
+                });
+        }
+
+        function renderInbox(docs) {
+            const gallery = document.getElementById('inboxGallery');
+            
+            if (docs.length === 0) {
+                gallery.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">💌</div>
+                        <p>No drawings yet</p>
+                        <p style="font-size: 0.85rem; margin-top: 0.5rem;">
+                            When your partner sends you a drawing, it will appear here!
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            gallery.innerHTML = docs.map(doc => {
+                const data = doc.data();
+                const date = data.createdAt ? data.createdAt.toDate() : new Date();
+                const timeStr = formatDate(date);
+                
+                return `
+                    <div class="drawing-item" onclick="viewDrawing('${doc.id}', '${data.imageData.replace(/'/g, "\\'")}', '${timeStr}', ${!data.seen})">
+                        ${!data.seen ? '<span class="new-badge">NEW</span>' : ''}
+                        <img src="${data.imageData}" alt="Drawing">
+                        <div class="timestamp">${timeStr}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateInboxBadge(docs) {
+            const unseenCount = docs.filter(d => !d.data().seen).length;
+            const badge = document.getElementById('inboxBadge');
+            badge.textContent = unseenCount > 0 ? `(${unseenCount})` : '';
+        }
+
+        async function viewDrawing(docId, imageData, timestamp, isNew) {
+            // Mark as seen
+            if (isNew) {
+                await db.collection('drawings').doc(docId).update({ seen: true });
+            }
+
+            // Show full view
+            document.getElementById('drawingViewImage').src = imageData;
+            document.getElementById('drawingViewTimestamp').textContent = timestamp;
+            document.getElementById('drawingViewModal').classList.add('active');
+        }
+
+        function closeDrawingView() {
+            document.getElementById('drawingViewModal').classList.remove('active');
+        }
+
+        // ============================================
+        // 📅 DAILY CONTENT
+        // ============================================
+        function loadDailyContent() {
+            const dayOfYear = getDayOfYear();
+            
+            // Rotate content based on day
+            const questionIndex = dayOfYear % dailyQuestions.length;
+            const prayerIndex = dayOfYear % dailyPrayers.length;
+            const quoteIndex = dayOfYear % dailyQuotes.length;
+
+            document.getElementById('dailyQuestion').textContent = `"${dailyQuestions[questionIndex]}"`;
+            document.getElementById('dailyPrayer').textContent = dailyPrayers[prayerIndex];
+            document.getElementById('dailyQuote').textContent = `"${dailyQuotes[quoteIndex].text}"`;
+            document.getElementById('quoteSource').textContent = `— ${dailyQuotes[quoteIndex].source}`;
+        }
+
+        function getDayOfYear() {
+            const now = new Date();
+            const start = new Date(now.getFullYear(), 0, 0);
+            const diff = now - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        // ============================================
+        // 🧭 NAVIGATION
+        // ============================================
+        function switchTab(tabName) {
+            // Update nav buttons
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+        }
+
+        // ============================================
+        // 🛠️ UTILITIES
+        // ============================================
+        function formatDate(date) {
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            
+            return date.toLocaleDateString();
+        }
+
+        function showToast(message) {
+            // Remove existing toast
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Close modals on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeCanvas();
+                closeDrawingView();
+            }
+        });
+
+        // Close drawing view on background click
+        document.getElementById('drawingViewModal').addEventListener('click', (e) => {
+            if (e.target.id === 'drawingViewModal') {
+                closeDrawingView();
+            }
+        });
+
+        // ============================================
+        // PAYWALL
+        // ============================================
+        const STRIPE_LINK = 'https://buy.stripe.com/7sY7sL3OnaRNbFg7yKfUQ00'; // Replace with real Stripe link
+        
+        function checkPaywall() {
+            // Check URL for success param (from Stripe redirect)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('success') === 'true' || params.get('session_id')) {
+                localStorage.setItem('sanctus_paid', 'true');
+                localStorage.setItem('sanctus_paid_date', new Date().toISOString());
+                // Clean URL
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+            
+            // Check if paid
+            const isPaid = localStorage.getItem('sanctus_paid') === 'true';
+            
+            if (isPaid) {
+                document.getElementById('paywall').classList.add('hidden');
+            }
+        }
+        
+        function startPayment() {
+            // Redirect to Stripe
+            const successUrl = encodeURIComponent(window.location.href.split('?')[0] + '?success=true');
+            window.location.href = STRIPE_LINK + '?success_url=' + successUrl;
+        }
+        
+        // Block PWA install if not paid
+        window.addEventListener('beforeinstallprompt', (e) => {
+            const isPaid = localStorage.getItem('sanctus_paid') === 'true';
+            if (!isPaid) {
+                e.preventDefault();
+                alert('Please subscribe to Sanctus to install the app!');
+                return false;
+            }
+        });
+        
+        // Check paywall on load
+        checkPaywall();
+    </script>
+</body>
+</html>

@@ -37,6 +37,15 @@
             text-align: center;
             padding: 0.75rem 1rem;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .support-banner.hidden {
+            display: none;
         }
 
         .support-banner a {
@@ -56,6 +65,23 @@
         .support-banner a:hover {
             background: var(--gold);
             color: var(--text);
+        }
+
+        .support-banner .dismiss-btn {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: rgba(255,255,255,0.6);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .support-banner .dismiss-btn:hover {
+            color: var(--white);
         }
 
         /* Header */
@@ -575,9 +601,27 @@
     </style>
 </head>
 <body>
-    <div class="support-banner">
-        ☕ Enjoying Sanctus? <a href="https://buy.stripe.com/7sY7sL3OnaRNbFg7yKfUQ00" target="_blank">Buy us a coffee — $0.99</a>
+    <div class="support-banner" id="supportBanner">
+        <span>☕ Enjoying Sanctus? <a href="https://buy.stripe.com/7sY7sL3OnaRNbFg7yKfUQ00" target="_blank">Buy us a coffee — $0.99</a></span>
+        <button class="dismiss-btn" onclick="dismissBanner()" aria-label="Dismiss">&times;</button>
     </div>
+    <script>
+        (function() {
+            const banner = document.getElementById('supportBanner');
+            const dismissedAt = localStorage.getItem('sanctus_banner_dismissed');
+            if (dismissedAt) {
+                const daysSince = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
+                if (daysSince < 15) {
+                    banner.classList.add('hidden');
+                }
+            }
+        })();
+        function dismissBanner() {
+            const banner = document.getElementById('supportBanner');
+            banner.classList.add('hidden');
+            localStorage.setItem('sanctus_banner_dismissed', Date.now().toString());
+        }
+    </script>
     <header class="header">
         <div class="cross">✝</div>
         <h1>SANCTUS</h1>

@@ -119,6 +119,23 @@ function formatDate(dateStr) {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// Helper to create content control with placeholder text (works in Word Online)
+function createFieldParagraph(body, label, tag, prefix = '', prefixBold = false) {
+    const p = body.insertParagraph('', Word.InsertLocation.end);
+    if (prefix) {
+        const prefixRange = p.insertText(prefix, Word.InsertLocation.end);
+        if (prefixBold) prefixRange.font.bold = true;
+    }
+    // Insert placeholder text first - required for Word Online
+    const placeholder = '[' + label + ']';
+    const range = p.insertText(placeholder, Word.InsertLocation.end);
+    const cc = range.insertContentControl();
+    cc.tag = tag;
+    cc.title = label;
+    cc.appearance = Word.ContentControlAppearance.boundingBox;
+    return p;
+}
+
 async function insertTemplate(id) {
     const t = TEMPLATES[id];
     if (!t) return;
@@ -127,7 +144,6 @@ async function insertTemplate(id) {
             const body = ctx.document.body;
             
             if (id === 'letter') {
-                // Professional letter format (WilmerHale style)
                 await insertLetterTemplate(ctx, body);
             } else {
                 // Standard format for memo/fax
@@ -139,18 +155,9 @@ async function insertTemplate(id) {
                     if (f.type === 'textarea') {
                         const labelP = body.insertParagraph(f.label + ':', Word.InsertLocation.end);
                         labelP.font.bold = true;
-                        const ccP = body.insertParagraph('', Word.InsertLocation.end);
-                        const cc = ccP.insertContentControl();
-                        cc.tag = 'df_' + f.id; cc.title = f.label;
-                        cc.placeholderText = '[' + f.label + ']';
-                        cc.appearance = Word.ContentControlAppearance.boundingBox;
+                        createFieldParagraph(body, f.label, 'df_' + f.id);
                     } else {
-                        const p = body.insertParagraph('', Word.InsertLocation.end);
-                        p.insertText(f.label + ': ', Word.InsertLocation.end).font.bold = true;
-                        const cc = p.insertContentControl();
-                        cc.tag = 'df_' + f.id; cc.title = f.label;
-                        cc.placeholderText = '[' + f.label + ']';
-                        cc.appearance = Word.ContentControlAppearance.boundingBox;
+                        createFieldParagraph(body, f.label, 'df_' + f.id, f.label + ': ', true);
                     }
                 }
             }
@@ -160,49 +167,50 @@ async function insertTemplate(id) {
 }
 
 async function insertLetterTemplate(ctx, body) {
-    const fields = [
-        { id: 'date', label: 'Date', prefix: '' },
-        { id: 'delivery', label: 'Delivery Phrases', prefix: '' },
-        { id: 'recipients', label: 'Recipients', prefix: '' },
-        { id: 'reline', label: 'Re Line', prefix: 'Re:\t', prefixBold: true },
-        { id: 'salutation', label: 'Salutation', prefix: '' },
-        { id: 'body', label: 'Body', isBody: true },
-        { id: 'closing', label: 'Closing Phrase', prefix: '' },
-        { id: 'author', label: 'Author Name', prefix: '', extraSpace: true },
-        { id: 'initials', label: 'Initials', prefix: '' },
-        { id: 'enclosures', label: 'Enclosures', prefix: 'Enclosures:\t' },
-        { id: 'cc', label: 'cc', prefix: 'cc:\t' }
-    ];
+    // Date
+    createFieldParagraph(body, 'Date', 'df_date');
+    body.insertParagraph('', Word.InsertLocation.end);
     
-    for (const f of fields) {
-        if (f.isBody) {
-            const bodyP = body.insertParagraph('[Begin typing here]', Word.InsertLocation.end);
-            bodyP.font.italic = true;
-            bodyP.font.color = '#666666';
-            body.insertParagraph('', Word.InsertLocation.end);
-            continue;
-        }
-        
-        const p = body.insertParagraph('', Word.InsertLocation.end);
-        if (f.prefix) {
-            const prefixRange = p.insertText(f.prefix, Word.InsertLocation.end);
-            if (f.prefixBold) prefixRange.font.bold = true;
-        }
-        const cc = p.insertContentControl();
-        cc.tag = 'df_' + f.id;
-        cc.title = f.label;
-        cc.placeholderText = '[' + f.label + ']';
-        cc.appearance = Word.ContentControlAppearance.boundingBox;
-        
-        if (f.extraSpace) {
-            body.insertParagraph('', Word.InsertLocation.end);
-        }
-        
-        // Add spacing after certain fields
-        if (['date', 'delivery', 'recipients', 'reline', 'salutation', 'closing'].includes(f.id)) {
-            body.insertParagraph('', Word.InsertLocation.end);
-        }
-    }
+    // Delivery
+    createFieldParagraph(body, 'Delivery Phrases', 'df_delivery');
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Recipients
+    createFieldParagraph(body, 'Recipients', 'df_recipients');
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Re: line
+    createFieldParagraph(body, 'Re Line', 'df_reline', 'Re:\t', true);
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Salutation
+    createFieldParagraph(body, 'Salutation', 'df_salutation');
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Body placeholder
+    const bodyP = body.insertParagraph('[Begin typing here]', Word.InsertLocation.end);
+    bodyP.font.italic = true;
+    bodyP.font.color = '#6B7280';
+    body.insertParagraph('', Word.InsertLocation.end);
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Closing
+    createFieldParagraph(body, 'Closing Phrase', 'df_closing');
+    body.insertParagraph('', Word.InsertLocation.end);
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Author
+    createFieldParagraph(body, 'Author Name', 'df_author');
+    body.insertParagraph('', Word.InsertLocation.end);
+    
+    // Initials
+    createFieldParagraph(body, 'Initials', 'df_initials');
+    
+    // Enclosures
+    createFieldParagraph(body, 'Enclosures', 'df_enclosures', 'Enclosures:\t');
+    
+    // cc
+    createFieldParagraph(body, 'cc', 'df_cc', 'cc:\t');
 }
 
 async function scan() {
@@ -217,7 +225,7 @@ async function scan() {
                 id: c.tag.replace('df_', ''),
                 label: c.title || c.tag.replace('df_', ''),
                 value: c.text || '',
-                type: c.tag === 'df_address' ? 'textarea' : (c.tag === 'df_date' ? 'date' : 'text')
+                type: c.tag === 'df_recipients' ? 'textarea' : (c.tag === 'df_date' ? 'date' : 'text')
             }));
         });
         if (!fields.length) { toast('No fields found', 'error'); return; }
@@ -267,10 +275,7 @@ async function fill() {
                     const fieldId = c.tag.replace('df_', '');
                     let val = values[fieldId];
                     if (val) {
-                        // Format dates nicely
-                        if (fieldId === 'date') {
-                            val = formatDate(val);
-                        }
+                        if (fieldId === 'date') val = formatDate(val);
                         c.insertText(val, Word.InsertLocation.replace);
                         filled++;
                     }

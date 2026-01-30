@@ -14,16 +14,55 @@
             display: flex;
             flex-direction: column;
         }
+        
+        /* Header */
         .header {
             font-size: 20px;
             font-weight: 700;
             color: #8B7355;
-            padding: 16px;
+            padding: 12px 16px;
             background: white;
             border-bottom: 1px solid #e0e0e0;
         }
         .header span { color: #5C4A32; }
         
+        /* Main Tabs */
+        .main-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 8px;
+            flex-wrap: wrap;
+        }
+        .main-tab {
+            padding: 10px 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .main-tab:hover { color: #8B7355; }
+        .main-tab.active {
+            color: #8B7355;
+            border-bottom-color: #8B7355;
+        }
+        
+        /* Panels */
+        .panel {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .panel.active {
+            display: flex;
+        }
+        
+        /* Search Box */
         .search-box {
             padding: 12px 16px;
             background: white;
@@ -41,14 +80,15 @@
             border-color: #8B7355;
         }
         
-        .tabs {
+        /* Filter Tabs */
+        .filter-tabs {
             display: flex;
             background: white;
             border-bottom: 1px solid #e0e0e0;
             padding: 0 12px;
         }
-        .tab {
-            padding: 12px 16px;
+        .filter-tab {
+            padding: 10px 14px;
             border: none;
             background: none;
             cursor: pointer;
@@ -56,30 +96,34 @@
             font-weight: 500;
             color: #666;
             border-bottom: 2px solid transparent;
-            transition: all 0.2s;
         }
-        .tab:hover { color: #8B7355; }
-        .tab.active {
+        .filter-tab:hover { color: #8B7355; }
+        .filter-tab.active {
             color: #8B7355;
             border-bottom-color: #8B7355;
         }
         
+        /* Status Bar */
         .status {
-            background: #e8f5e9;
+            background: #f8f8f8;
             color: #2e7d32;
             padding: 8px 16px;
             font-size: 13px;
+            border-bottom: 1px solid #e0e0e0;
         }
         .status.error {
             background: #ffebee;
             color: #c62828;
         }
         
-        .clauses {
+        /* Scrollable Content */
+        .content {
             flex: 1;
             overflow-y: auto;
             padding: 12px 16px;
         }
+        
+        /* Clause Cards */
         .clause {
             background: white;
             border-radius: 8px;
@@ -93,6 +137,7 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 8px;
+            gap: 10px;
         }
         .clause-title {
             font-weight: 600;
@@ -101,11 +146,12 @@
             flex: 1;
         }
         .clause-category {
-            font-size: 11px;
+            font-size: 10px;
             padding: 3px 8px;
             border-radius: 4px;
-            font-weight: 500;
+            font-weight: 600;
             text-transform: uppercase;
+            white-space: nowrap;
         }
         .clause-category.contracts { background: #e3f2fd; color: #1565c0; }
         .clause-category.litigation { background: #ffebee; color: #c62828; }
@@ -119,11 +165,14 @@
             margin-bottom: 10px;
             max-height: 80px;
             overflow-y: auto;
-            padding: 8px;
+            padding: 10px;
             background: #fafafa;
             border-radius: 4px;
+            border: 1px solid #eee;
         }
-        .insert-btn {
+        
+        /* Buttons */
+        .btn {
             background: #8B7355;
             color: white;
             border: none;
@@ -134,13 +183,107 @@
             font-size: 13px;
             transition: all 0.2s;
         }
-        .insert-btn:hover { background: #6d5a43; }
-        .insert-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
+        .btn:hover { background: #6d5a43; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .btn.success { background: #2e7d32; }
+        .btn.secondary {
+            background: white;
+            color: #8B7355;
+            border: 1px solid #8B7355;
         }
-        .insert-btn.success { background: #2e7d32; }
+        .btn.secondary:hover { background: #f5f5f5; }
         
+        /* Generate Panel Options */
+        .option-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border: 1px solid #e8e8e8;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+        .option-card:hover {
+            border-color: #8B7355;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .option-icon {
+            font-size: 24px;
+        }
+        .option-text {
+            flex: 1;
+        }
+        .option-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+        .option-desc {
+            font-size: 12px;
+            color: #666;
+        }
+        .option-arrow {
+            color: #999;
+            font-size: 18px;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .section-desc {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 20px 0 16px;
+            padding-top: 16px;
+        }
+        .divider-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Form Fields */
+        .field {
+            margin-bottom: 14px;
+        }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 4px;
+        }
+        .field input, .field textarea, .field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .field input:focus, .field textarea:focus, .field select:focus {
+            outline: none;
+            border-color: #8B7355;
+        }
+        .field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        /* Empty State */
         .empty {
             text-align: center;
             padding: 40px;
@@ -150,24 +293,331 @@
             font-size: 40px;
             margin-bottom: 10px;
         }
+        
+        /* Coming Soon */
+        .coming-soon {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .coming-soon-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+        .coming-soon-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .coming-soon-sub {
+            font-size: 13px;
+            color: #999;
+        }
+        
+        /* Sub-panel (for forms) */
+        .sub-panel {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+        .sub-panel.active {
+            display: flex;
+        }
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #8B7355;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .back-btn:hover { background: #f8f8f8; }
+        
+        /* Actions Footer */
+        .actions {
+            padding: 12px 16px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        .actions .btn {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
     <div class="header">Draft<span>Bridge</span></div>
     
-    <div class="search-box">
-        <input type="text" class="search-input" id="search" placeholder="Search clauses..." oninput="filterClauses()">
+    <div class="main-tabs">
+        <button class="main-tab active" onclick="switchPanel('generate')">Generate</button>
+        <button class="main-tab" onclick="switchPanel('edit')">Edit</button>
+        <button class="main-tab" onclick="switchPanel('library')">Library</button>
+        <button class="main-tab" onclick="switchPanel('data')">Data</button>
+        <button class="main-tab" onclick="switchPanel('admin')">Settings</button>
     </div>
     
-    <div class="tabs">
-        <button class="tab active" data-filter="all" onclick="setCategory('all')">All</button>
-        <button class="tab" data-filter="contracts" onclick="setCategory('contracts')">Contracts</button>
-        <button class="tab" data-filter="litigation" onclick="setCategory('litigation')">Litigation</button>
-        <button class="tab" data-filter="corporate" onclick="setCategory('corporate')">Corporate</button>
+    <!-- GENERATE PANEL -->
+    <div class="panel active" id="panel-generate">
+        <div class="sub-panel active" id="generate-main">
+            <div class="content">
+                <div class="section-header">Create Document</div>
+                <div class="section-desc">Choose a template to start</div>
+                
+                <div class="option-card" onclick="showTemplate('letter')">
+                    <span class="option-icon">✉️</span>
+                    <div class="option-text">
+                        <div class="option-title">Letter</div>
+                        <div class="option-desc">Formal business letter</div>
+                    </div>
+                    <span class="option-arrow">→</span>
+                </div>
+                
+                <div class="option-card" onclick="showTemplate('memo')">
+                    <span class="option-icon">📝</span>
+                    <div class="option-text">
+                        <div class="option-title">Memorandum</div>
+                        <div class="option-desc">Internal memo</div>
+                    </div>
+                    <span class="option-arrow">→</span>
+                </div>
+                
+                <div class="option-card" onclick="showTemplate('fax')">
+                    <span class="option-icon">📠</span>
+                    <div class="option-text">
+                        <div class="option-title">Fax Cover</div>
+                        <div class="option-desc">Fax cover sheet</div>
+                    </div>
+                    <span class="option-arrow">→</span>
+                </div>
+                
+                <div class="divider">
+                    <span class="divider-label">Tools</span>
+                </div>
+                
+                <div class="option-card" onclick="alert('Coming soon!')">
+                    <span class="option-icon">🔖</span>
+                    <div class="option-text">
+                        <div class="option-title">Detect Bookmarks</div>
+                        <div class="option-desc">Auto-fill Word bookmarks</div>
+                    </div>
+                    <span class="option-arrow">→</span>
+                </div>
+                
+                <div class="option-card" onclick="alert('Coming soon!')">
+                    <span class="option-icon">🌐</span>
+                    <div class="option-text">
+                        <div class="option-title">Global Variables</div>
+                        <div class="option-desc">{{Placeholders}} everywhere</div>
+                    </div>
+                    <span class="option-arrow">→</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Letter Form -->
+        <div class="sub-panel" id="generate-letter">
+            <button class="back-btn" onclick="hideTemplate()">← Back</button>
+            <div class="content">
+                <div class="section-header">Letter</div>
+                <div class="section-desc">Fill in the details</div>
+                
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="letter-date">
+                </div>
+                <div class="field">
+                    <label>Recipient Name</label>
+                    <input type="text" id="letter-recipient" placeholder="John Smith">
+                </div>
+                <div class="field">
+                    <label>Recipient Address</label>
+                    <textarea id="letter-address" placeholder="123 Main St&#10;City, State 12345"></textarea>
+                </div>
+                <div class="field">
+                    <label>RE: Subject</label>
+                    <input type="text" id="letter-subject" placeholder="Subject matter">
+                </div>
+                <div class="field">
+                    <label>Closing</label>
+                    <input type="text" id="letter-closing" placeholder="Sincerely" value="Sincerely">
+                </div>
+                <div class="field">
+                    <label>Your Name</label>
+                    <input type="text" id="letter-signer" placeholder="Your name">
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" onclick="generateLetter()">Generate Letter</button>
+            </div>
+        </div>
+        
+        <!-- Memo Form -->
+        <div class="sub-panel" id="generate-memo">
+            <button class="back-btn" onclick="hideTemplate()">← Back</button>
+            <div class="content">
+                <div class="section-header">Memorandum</div>
+                <div class="section-desc">Fill in the details</div>
+                
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="memo-date">
+                </div>
+                <div class="field">
+                    <label>To</label>
+                    <input type="text" id="memo-to" placeholder="Recipient name(s)">
+                </div>
+                <div class="field">
+                    <label>From</label>
+                    <input type="text" id="memo-from" placeholder="Your name">
+                </div>
+                <div class="field">
+                    <label>Subject</label>
+                    <input type="text" id="memo-subject" placeholder="Brief description">
+                </div>
+                <div class="field">
+                    <label>CC (optional)</label>
+                    <input type="text" id="memo-cc" placeholder="Copy recipients">
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" onclick="generateMemo()">Generate Memo</button>
+            </div>
+        </div>
+        
+        <!-- Fax Form -->
+        <div class="sub-panel" id="generate-fax">
+            <button class="back-btn" onclick="hideTemplate()">← Back</button>
+            <div class="content">
+                <div class="section-header">Fax Cover Sheet</div>
+                <div class="section-desc">Fill in the details</div>
+                
+                <div class="field">
+                    <label>Date</label>
+                    <input type="date" id="fax-date">
+                </div>
+                <div class="field">
+                    <label>To</label>
+                    <input type="text" id="fax-to" placeholder="Recipient name">
+                </div>
+                <div class="field">
+                    <label>Fax Number</label>
+                    <input type="text" id="fax-number" placeholder="(555) 123-4567">
+                </div>
+                <div class="field">
+                    <label>From</label>
+                    <input type="text" id="fax-from" placeholder="Your name">
+                </div>
+                <div class="field">
+                    <label>Phone</label>
+                    <input type="text" id="fax-phone" placeholder="(555) 987-6543">
+                </div>
+                <div class="field">
+                    <label>Pages</label>
+                    <input type="number" id="fax-pages" placeholder="1" value="1">
+                </div>
+                <div class="field">
+                    <label>RE: Subject</label>
+                    <input type="text" id="fax-subject" placeholder="Subject matter">
+                </div>
+            </div>
+            <div class="actions">
+                <button class="btn" onclick="generateFax()">Generate Fax Cover</button>
+            </div>
+        </div>
     </div>
     
-    <div id="status" class="status">Loading clauses...</div>
-    <div id="clauses" class="clauses"></div>
+    <!-- EDIT PANEL -->
+    <div class="panel" id="panel-edit">
+        <div class="content">
+            <div class="section-header">Edit Tools</div>
+            <div class="section-desc">Format and structure your document</div>
+            
+            <div class="option-card" onclick="alert('Coming soon!')">
+                <span class="option-icon">🔢</span>
+                <div class="option-text">
+                    <div class="option-title">Numbering</div>
+                    <div class="option-desc">Fix paragraph numbering</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+            
+            <div class="option-card" onclick="alert('Coming soon!')">
+                <span class="option-icon">📑</span>
+                <div class="option-text">
+                    <div class="option-title">Table of Contents</div>
+                    <div class="option-desc">Generate TOC</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+            
+            <div class="option-card" onclick="alert('Coming soon!')">
+                <span class="option-icon">📄</span>
+                <div class="option-text">
+                    <div class="option-title">Pleading Format</div>
+                    <div class="option-desc">Court document formatting</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LIBRARY PANEL -->
+    <div class="panel" id="panel-library">
+        <div class="search-box">
+            <input type="text" class="search-input" id="search" placeholder="Search clauses..." oninput="filterClauses()">
+        </div>
+        
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all" onclick="setCategory('all')">All</button>
+            <button class="filter-tab" data-filter="contracts" onclick="setCategory('contracts')">Contracts</button>
+            <button class="filter-tab" data-filter="litigation" onclick="setCategory('litigation')">Litigation</button>
+            <button class="filter-tab" data-filter="corporate" onclick="setCategory('corporate')">Corporate</button>
+        </div>
+        
+        <div id="library-status" class="status">Loading clauses...</div>
+        <div id="clauses" class="content"></div>
+    </div>
+    
+    <!-- DATA PANEL -->
+    <div class="panel" id="panel-data">
+        <div class="coming-soon">
+            <div class="coming-soon-icon">🗄️</div>
+            <div class="coming-soon-text">Data Management</div>
+            <div class="coming-soon-sub">Coming soon</div>
+        </div>
+    </div>
+    
+    <!-- ADMIN PANEL -->
+    <div class="panel" id="panel-admin">
+        <div class="content">
+            <div class="section-header">Settings</div>
+            <div class="section-desc">Configure your preferences</div>
+            
+            <div class="option-card" onclick="alert('Coming soon!')">
+                <span class="option-icon">🏢</span>
+                <div class="option-text">
+                    <div class="option-title">Firm Settings</div>
+                    <div class="option-desc">Firm name, address, branding</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+            
+            <div class="option-card" onclick="alert('Coming soon!')">
+                <span class="option-icon">🎨</span>
+                <div class="option-text">
+                    <div class="option-title">Styles</div>
+                    <div class="option-desc">Document styles & formatting</div>
+                </div>
+                <span class="option-arrow">→</span>
+            </div>
+        </div>
+    </div>
 
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script>
@@ -178,11 +628,140 @@
         let currentCategory = 'all';
 
         Office.onReady(async (info) => {
+            // Set today's date on date inputs
+            const today = new Date().toISOString().split('T')[0];
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.value = today;
+            });
+            
+            // Load clauses
             loadClauses();
         });
 
+        // Panel Navigation
+        function switchPanel(panelId) {
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.textContent.toLowerCase().includes(panelId));
+            });
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === 'panel-' + panelId);
+            });
+        }
+
+        // Template Forms
+        function showTemplate(type) {
+            document.getElementById('generate-main').classList.remove('active');
+            document.getElementById('generate-' + type).classList.add('active');
+        }
+        
+        function hideTemplate() {
+            document.querySelectorAll('#panel-generate .sub-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('generate-main').classList.add('active');
+        }
+
+        // Generate Documents
+        async function generateLetter() {
+            const date = document.getElementById('letter-date').value;
+            const recipient = document.getElementById('letter-recipient').value;
+            const address = document.getElementById('letter-address').value;
+            const subject = document.getElementById('letter-subject').value;
+            const closing = document.getElementById('letter-closing').value;
+            const signer = document.getElementById('letter-signer').value;
+            
+            const text = `${formatDate(date)}
+
+${recipient}
+${address}
+
+RE: ${subject}
+
+Dear ${recipient.split(' ')[0]}:
+
+[Letter body here]
+
+${closing},
+
+
+${signer}`;
+            
+            await insertText(text);
+            hideTemplate();
+        }
+        
+        async function generateMemo() {
+            const date = document.getElementById('memo-date').value;
+            const to = document.getElementById('memo-to').value;
+            const from = document.getElementById('memo-from').value;
+            const subject = document.getElementById('memo-subject').value;
+            const cc = document.getElementById('memo-cc').value;
+            
+            let text = `MEMORANDUM
+
+DATE:    ${formatDate(date)}
+TO:      ${to}
+FROM:    ${from}
+RE:      ${subject}`;
+            
+            if (cc) text += `\nCC:      ${cc}`;
+            
+            text += `\n\n${'─'.repeat(50)}\n\n[Memo body here]`;
+            
+            await insertText(text);
+            hideTemplate();
+        }
+        
+        async function generateFax() {
+            const date = document.getElementById('fax-date').value;
+            const to = document.getElementById('fax-to').value;
+            const faxNum = document.getElementById('fax-number').value;
+            const from = document.getElementById('fax-from').value;
+            const phone = document.getElementById('fax-phone').value;
+            const pages = document.getElementById('fax-pages').value;
+            const subject = document.getElementById('fax-subject').value;
+            
+            const text = `FAX COVER SHEET
+
+DATE:     ${formatDate(date)}
+TO:       ${to}
+FAX:      ${faxNum}
+FROM:     ${from}
+PHONE:    ${phone}
+PAGES:    ${pages} (including cover)
+RE:       ${subject}
+
+${'─'.repeat(50)}
+
+COMMENTS:
+
+[Comments here]`;
+            
+            await insertText(text);
+            hideTemplate();
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+        
+        async function insertText(text) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.insertText(text, Word.InsertLocation.replace);
+                    await context.sync();
+                });
+                alert('✓ Inserted!');
+            } catch (err) {
+                console.error('Insert failed:', err);
+                alert('Failed to insert: ' + err.message);
+            }
+        }
+
+        // Library Functions
         async function loadClauses() {
-            const statusEl = document.getElementById('status');
+            const statusEl = document.getElementById('library-status');
 
             try {
                 statusEl.textContent = 'Fetching clauses...';
@@ -206,12 +785,9 @@
 
         function setCategory(category) {
             currentCategory = category;
-            
-            // Update tab styles
-            document.querySelectorAll('.tab').forEach(tab => {
+            document.querySelectorAll('.filter-tab').forEach(tab => {
                 tab.classList.toggle('active', tab.dataset.filter === category);
             });
-            
             filterClauses();
         }
 
@@ -229,8 +805,7 @@
             
             renderClauses(filtered);
             
-            // Update status
-            const statusEl = document.getElementById('status');
+            const statusEl = document.getElementById('library-status');
             if (searchTerm || currentCategory !== 'all') {
                 statusEl.textContent = `${filtered.length} of ${allClauses.length} clauses`;
             } else {
@@ -251,27 +826,23 @@
                 return;
             }
 
-            clausesEl.innerHTML = clauses.map((clause, i) => `
-                <div class="clause" data-index="${i}">
+            clausesEl.innerHTML = clauses.map((clause) => `
+                <div class="clause">
                     <div class="clause-header">
                         <div class="clause-title">${escapeHtml(clause.title)}</div>
                         <span class="clause-category ${clause.category || 'contracts'}">${clause.category || 'contracts'}</span>
                     </div>
                     <div class="clause-content">${escapeHtml(clause.content)}</div>
-                    <button class="insert-btn" onclick="insertClause('${clause.clauseId}')">
-                        Insert
-                    </button>
+                    <button class="btn" onclick="insertClause('${clause.clauseId}', this)">Insert</button>
                 </div>
             `).join('');
         }
 
-        async function insertClause(clauseId) {
+        async function insertClause(clauseId, btn) {
             const clause = allClauses.find(c => c.clauseId === clauseId);
             if (!clause) return;
             
-            const btn = event.target;
             const originalText = btn.textContent;
-            
             btn.disabled = true;
             btn.textContent = 'Inserting...';
 
@@ -294,7 +865,6 @@
             } catch (err) {
                 console.error('Insert failed:', err);
                 btn.textContent = '✗ Error';
-                
                 setTimeout(() => {
                     btn.textContent = originalText;
                     btn.disabled = false;

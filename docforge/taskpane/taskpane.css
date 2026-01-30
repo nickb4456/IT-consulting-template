@@ -1,111 +1,40 @@
 /**
- * DocForge - Professional Legal Document Automation
- * 
- * Design principle: If it doesn't help a lawyer draft faster, remove it.
- * Clean, professional aesthetic suitable for law firm environments.
- * 
- * @version 4.2.0 - UX Improvements
+ * DocForge - Clean, Compact Taskpane
+ * Simple 2x3 template grid that fits in the panel
  */
 
-/* ============================================================================
-   Design Tokens
-   ============================================================================ */
-
 :root {
-    /* Brand - Professional Blue */
     --blue: #2563eb;
     --blue-hover: #1d4ed8;
-    --blue-subtle: rgba(37, 99, 235, 0.08);
-    --blue-glow: rgba(37, 99, 235, 0.15);
-    
-    /* Text - High Contrast for Readability */
-    --text: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --text-inverse: #ffffff;
-    
-    /* Surfaces */
+    --text: #1e293b;
+    --text-secondary: #64748b;
     --bg: #ffffff;
     --bg-subtle: #f8fafc;
-    --bg-elevated: #ffffff;
-    
-    /* Borders */
     --border: #e2e8f0;
-    --border-strong: #cbd5e1;
-    
-    /* Status */
-    --success: #059669;
-    --warning: #f59e0b;
-    --error: #dc2626;
-    
-    /* Shadows - Subtle Depth */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-    
-    /* Radii */
     --radius: 8px;
-    --radius-lg: 10px;
-    
-    /* Typography */
-    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-    
-    /* Transitions */
-    --transition-fast: 100ms ease;
-    --transition-normal: 150ms ease;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --text: #f9fafb;
-        --text-secondary: #9ca3af;
-        --text-muted: #6b7280;
-        --bg: #111827;
-        --bg-subtle: #1f2937;
-        --bg-elevated: #1f2937;
-        --border: #374151;
-        --border-strong: #4b5563;
-        --blue-subtle: rgba(59, 130, 246, 0.15);
-    }
-}
-
-/* ============================================================================
-   Reset
-   ============================================================================ */
-
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     font-family: var(--font);
     font-size: 14px;
-    line-height: 1.5;
     color: var(--text);
     background: var(--bg);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
-
-/* ============================================================================
-   Layout
-   ============================================================================ */
 
 .taskpane {
     display: flex;
     flex-direction: column;
     height: 100vh;
     max-width: 400px;
-    overflow: hidden;
 }
 
+/* Header */
 .header {
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
-    background: var(--bg);
-    flex-shrink: 0;
 }
 
 .brand {
@@ -114,195 +43,100 @@ body {
     gap: 8px;
 }
 
-.brand-icon {
-    color: var(--blue);
-}
+.brand-icon { color: var(--blue); }
+.brand-name { font-weight: 600; font-size: 15px; }
 
-.brand-name {
-    font-weight: 600;
-    font-size: 15px;
-}
-
+/* Main */
 .main {
     flex: 1;
     overflow-y: auto;
-    padding: 20px 16px;
+    padding: 16px;
 }
 
-/* Custom scrollbar */
-.main::-webkit-scrollbar {
-    width: 6px;
-}
+.view.hidden { display: none; }
 
-.main::-webkit-scrollbar-track {
-    background: transparent;
-}
+.home-header { margin-bottom: 16px; }
+.page-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.page-subtitle { font-size: 13px; color: var(--text-secondary); }
 
-.main::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-}
-
-.main::-webkit-scrollbar-thumb:hover {
-    background: var(--text-muted);
-}
-
-/* ============================================================================
-   Views
-   ============================================================================ */
-
-.view.hidden {
-    display: none;
-}
-
-.home-header {
-    margin-bottom: 20px;
-}
-
-.page-title {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    margin-bottom: 4px;
-}
-
-.page-subtitle {
-    font-size: 13px;
-    color: var(--text-muted);
-}
-
-/* ============================================================================
-   Template Grid - Prominent List Layout
-   Professional, scannable, easy to navigate
-   ============================================================================ */
+/* ============================================
+   TEMPLATE GRID - 2 columns, compact cards
+   ============================================ */
 
 .template-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
-    margin-bottom: 8px;
+    margin-bottom: 20px;
 }
 
 .template-card {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    background: var(--bg-elevated);
+    padding: 16px 12px;
+    background: var(--bg);
     border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius);
     cursor: pointer;
-    transition: border-color var(--transition-normal), 
-                box-shadow var(--transition-normal),
-                background-color var(--transition-normal);
+    transition: all 0.15s ease;
+    text-align: center;
     font-family: inherit;
-    text-align: left;
 }
 
 .template-card:hover {
-    border-color: var(--border-strong);
-    background: var(--bg-subtle);
-    box-shadow: var(--shadow-md);
-}
-
-.template-card:active {
-    background: var(--bg);
-}
-
-.template-card:focus-visible {
-    outline: none;
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-subtle);
+    background: var(--bg-subtle);
 }
 
-/* Template Icon - Neutral until hover */
 .template-icon {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-subtle);
-    border-radius: var(--radius);
+    margin-bottom: 8px;
     color: var(--text-secondary);
-    flex-shrink: 0;
-    transition: background-color var(--transition-normal), 
-                color var(--transition-normal);
 }
 
 .template-icon svg {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
 }
 
 .template-card:hover .template-icon {
-    background: var(--blue-subtle);
     color: var(--blue);
 }
 
-/* Template Text Content */
 .template-info {
-    flex: 1;
-    min-width: 0;
+    width: 100%;
 }
 
 .template-name {
     display: block;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
     color: var(--text);
     line-height: 1.3;
-    margin-bottom: 2px;
 }
 
 .template-desc {
-    display: block;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.4;
+    display: none; /* Hide descriptions in grid view */
 }
 
-/* Arrow Indicator */
 .template-arrow {
-    color: var(--text-muted);
-    opacity: 0.4;
-    flex-shrink: 0;
-    transition: opacity var(--transition-fast);
+    display: none; /* Hide arrows in grid view */
 }
 
-.template-arrow svg {
-    width: 16px;
-    height: 16px;
-}
-
-.template-card:hover .template-arrow {
-    opacity: 1;
-}
-
-/* Loading state */
-.template-card.loading {
-    pointer-events: none;
-    opacity: 0.6;
-}
-
-.template-card.loading .template-icon {
-    opacity: 0.5;
-}
-
-/* ============================================================================
-   Scan Section - Secondary Entry Point
-   ============================================================================ */
-
+/* Scan Section */
 .scan-divider {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin: 20px 0 16px 0;
-    color: var(--text-muted);
+    gap: 10px;
+    margin: 16px 0 12px;
+    color: var(--text-secondary);
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .scan-divider::before,
@@ -314,47 +148,44 @@ body {
 }
 
 .btn-scan {
-    margin-bottom: 8px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
 }
 
-.btn-scan svg {
-    color: var(--text-muted);
-    transition: color var(--transition-fast);
-}
-
-.btn-scan:hover svg {
+.btn-scan:hover {
+    border-color: var(--blue);
     color: var(--blue);
 }
 
 .scan-hint {
-    font-size: 12px;
-    color: var(--text-muted);
+    font-size: 11px;
+    color: var(--text-secondary);
     text-align: center;
+    margin-top: 8px;
 }
 
-/* ============================================================================
-   Fields View
-   ============================================================================ */
-
+/* Fields View */
 .fields-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.fields-title-group {
-    flex: 1;
-}
-
-.fields-title-group .page-title {
-    margin-bottom: 0;
-}
-
-.field-count {
-    font-size: 12px;
-    color: var(--text-muted);
-}
+.fields-title-group { flex: 1; }
+.fields-title-group .page-title { margin-bottom: 0; }
+.field-count { font-size: 12px; color: var(--text-secondary); }
 
 .back-btn {
     width: 32px;
@@ -367,8 +198,6 @@ body {
     border-radius: var(--radius);
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
-    flex-shrink: 0;
 }
 
 .back-btn:hover {
@@ -376,26 +205,21 @@ body {
     color: var(--text);
 }
 
-.back-btn:focus-visible {
-    outline: 2px solid var(--blue);
-    outline-offset: 2px;
-}
-
 .fields-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 .field-group {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .field-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -411,49 +235,23 @@ body {
     background: var(--bg-subtle);
     border: 1px solid transparent;
     border-radius: var(--radius);
-    transition: all var(--transition-fast);
-}
-
-.field-input:hover {
-    background: var(--bg);
-    border-color: var(--border);
 }
 
 .field-input:focus {
     outline: none;
-    background: var(--bg);
     border-color: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-glow);
+    background: var(--bg);
 }
 
-.field-input::placeholder {
-    color: var(--text-muted);
-}
-
-/* Empty field indicator */
 .field-group.empty .field-input {
-    border-color: var(--warning);
-    background: rgba(245, 158, 11, 0.05);
+    border-color: #f59e0b;
 }
 
-/* Filled animation */
-.field-group.filled .field-input {
-    animation: fieldFilled 0.5s ease;
-}
-
-@keyframes fieldFilled {
-    0% { background: rgba(5, 150, 105, 0.1); border-color: var(--success); }
-    100% { background: var(--bg-subtle); border-color: transparent; }
-}
-
-/* ============================================================================
-   Buttons
-   ============================================================================ */
-
+/* Actions */
 .actions {
     display: flex;
     gap: 8px;
-    padding-top: 16px;
+    padding-top: 12px;
     border-top: 1px solid var(--border);
 }
 
@@ -462,35 +260,23 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     border: none;
     border-radius: var(--radius);
     cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--blue);
-    outline-offset: 2px;
 }
 
 .btn-primary {
     flex: 2;
-    color: var(--text-inverse);
+    color: white;
     background: var(--blue);
 }
 
-.btn-primary:hover:not(:disabled) {
-    background: var(--blue-hover);
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+.btn-primary:hover { background: var(--blue-hover); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-secondary {
     flex: 1;
@@ -499,26 +285,14 @@ body {
     border: 1px solid var(--border);
 }
 
-.btn-secondary:hover:not(:disabled) {
-    background: var(--bg);
-    border-color: var(--border-strong);
+.btn-secondary:hover {
+    border-color: var(--text-secondary);
     color: var(--text);
 }
 
-.btn-secondary:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
+.btn-secondary:disabled { opacity: 0.4; }
 
-.btn-secondary svg {
-    width: 16px;
-    height: 16px;
-}
-
-/* ============================================================================
-   Toast
-   ============================================================================ */
-
+/* Toast */
 .toast {
     position: fixed;
     bottom: 16px;
@@ -526,56 +300,86 @@ body {
     right: 16px;
     padding: 12px 16px;
     background: var(--text);
-    color: var(--bg);
+    color: white;
     border-radius: var(--radius);
     font-size: 13px;
-    font-weight: 500;
     text-align: center;
     z-index: 1000;
-    animation: slideUp 0.2s ease;
 }
 
-.toast.hidden {
-    display: none;
+.toast.hidden { display: none; }
+.toast.success { background: #059669; }
+.toast.error { background: #dc2626; }
+
+/* Accessibility */
+.skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    padding: 8px 16px;
+    background: var(--blue);
+    color: white;
+    border-radius: var(--radius);
+    text-decoration: none;
+    z-index: 1000;
 }
 
-.toast.success {
-    background: var(--success);
-    color: var(--text-inverse);
+.skip-link:focus { top: 8px; }
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
-.toast.error {
-    background: var(--error);
-    color: var(--text-inverse);
+/* Loading */
+.template-card.loading { opacity: 0.6; pointer-events: none; }
+.btn.loading { color: transparent; position: relative; }
+.btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
 }
 
-.toast.warning {
-    background: var(--warning);
-    color: var(--text);
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Fill progress overlay */
+.fill-progress-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.95);
+    z-index: 100;
 }
 
-@keyframes slideUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+.fill-progress-content { text-align: center; }
+.fill-progress-text { font-size: 14px; margin-bottom: 12px; }
+.fill-progress-bar { width: 180px; height: 4px; background: var(--border); border-radius: 2px; }
+.fill-progress-fill { height: 100%; background: var(--blue); border-radius: 2px; transition: width 0.1s; }
+
+.fill-complete { text-align: center; }
+.fill-complete-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 150, 105, 0.1);
+    color: #059669;
+    border-radius: 50%;
 }
-
-/* ============================================================================
-   Reduced Motion
-   ============================================================================ */
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ============================================================================
-   Print (hide taskpane when printing document)
-   ============================================================================ */
-
-@media print {
-    .taskpane {
-        display: none !important;
-    }
-}
+.fill-complete-title { font-size: 16px; font-weight: 600; }
+.fill-complete-subtitle { font-size: 13px; color: var(--text-secondary); }

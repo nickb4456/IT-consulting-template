@@ -1,16 +1,20 @@
-/* DraftBridge - Document Generation - v20260130 */
+/* DraftBridge - Document Generation - v20260130-wired */
 /* global Office, Word */
 
+const API_BASE = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
+const FIRM_ID = 'morrison'; // TODO: Make configurable per firm
+
 const TEMPLATES = {
-    letter: { name: 'Letter', fields: [
+    letter: { name: 'Letter', hasAuthor: true, fields: [
+        { id: 'author', label: 'Author', type: 'select' },
         { id: 'date', label: 'Date', type: 'date' },
         { id: 'delivery', label: 'Delivery Phrases', placeholder: 'Via Email' },
         { id: 'recipients', label: 'Recipients', type: 'textarea', placeholder: 'Name\nAddress Line 1\nCity, State ZIP' },
         { id: 'reline', label: 'Re Line' },
         { id: 'salutation', label: 'Salutation', placeholder: 'Dear Mr./Ms.' },
         { id: 'closing', label: 'Closing Phrase', placeholder: 'Sincerely,' },
-        { id: 'author', label: 'Author Name' },
-        { id: 'initials', label: 'Initials', placeholder: 'ABC/def' },
+        { id: 'authorName', label: 'Author Name', readonly: true },
+        { id: 'initials', label: 'Initials', readonly: true },
         { id: 'enclosures', label: 'Enclosures' },
         { id: 'cc', label: 'cc' }
     ]},
@@ -31,10 +35,20 @@ const TEMPLATES = {
 };
 
 let current = null, values = {}, undo = [], activeTab = 'generate';
+let authors = []; // Cached authors from API
 
 Office.onReady(info => { if (info.host === Office.HostType.Word) init(); });
 
-function init() {
+async function init() {
+    // Pre-fetch authors
+    try {
+        const res = await fetch(`${API_BASE}/firms/${FIRM_ID}/authors`);
+        authors = await res.json();
+        console.log('Loaded authors:', authors);
+    } catch (e) {
+        console.error('Failed to load authors:', e);
+    }
+
     document.querySelectorAll('.tab').forEach(t => 
         t.addEventListener('click', () => switchTab(t.dataset.tab)));
     document.querySelectorAll('.opt[data-template]').forEach(b => 
@@ -76,7 +90,7 @@ async function selectTemplate(id, btn) {
         document.getElementById(activeTab + 'Panel').classList.add('hidden');
         document.getElementById('fieldsPanel').classList.remove('hidden');
         setTimeout(() => {
-            const first = document.querySelector('.field input, .field textarea');
+            const first = document.querySelector('.field select, .field input, .field textarea');
             if (first) first.focus();
         }, 50);
         updateUndo();
@@ -92,13 +106,24 @@ function renderFields(t) {
     list.innerHTML = t.fields.map(f => {
         let input;
         const ph = f.placeholder ? ` placeholder="${esc(f.placeholder)}"` : '';
-        if (f.type === 'date') {
-            input = `<input type="date" id="f-${f.id}" data-field="${f.id}">`;
+        const ro = f.readonly ? ' readonly' : '';
+        
+        if (f.type === 'select' && f.id === 'author') {
+            // Author dropdown populated from API
+            const opts = authors.map(a => 
+                `<option value="${a.id}">${a.name} — ${a.title}</option>`
+            ).join('');
+            input = `<select id="f-${f.id}" data-field="${f.id}">
+                <option value="">Select author...</option>
+                ${opts}
+            </select>`;
+        } else if (f.type === 'date') {
+            input = `<input type="date" id="f-${f.id}" data-field="${f.id}"${ro}>`;
         } else if (f.type === 'textarea') {
             const taPh = f.placeholder || 'Line 1\nLine 2\nLine 3';
-            input = `<textarea id="f-${f.id}" data-field="${f.id}" rows="3" placeholder="${esc(taPh)}"></textarea>`;
+            input = `<textarea id="f-${f.id}" data-field="${f.id}" rows="3" placeholder="${esc(taPh)}"${ro}></textarea>`;
         } else {
-            input = `<input type="text" id="f-${f.id}" data-field="${f.id}" autocomplete="off"${ph}>`;
+            input = `<input type="text" id="f-${f.id}" data-field="${f.id}" autocomplete="off"${ph}${ro}>`;
         }
         return `<div class="field" data-id="${f.id}">
             <label for="f-${f.id}">${esc(f.label)}</label>
@@ -106,10 +131,36 @@ function renderFields(t) {
         </div>`;
     }).join('');
     
-    list.querySelectorAll('input, textarea').forEach(i => i.addEventListener('input', () => {
+    // Bind author dropdown change
+    const authorSelect = document.getElementById('f-author');
+    if (authorSelect) {
+        authorSelect.addEventListener('change', () => {
+            const author = authors.find(a => a.id === authorSelect.value);
+            if (author) {
+                // Auto-fill author fields
+                setField('authorName', author.name);
+                setField('initials', author.initials);
+                setField('closing', 'Sincerely,');
+                values.authorName = author.name;
+                values.initials = author.initials;
+                values.closing = 'Sincerely,';
+                values._authorData = author; // Store for later use
+            }
+        });
+    }
+    
+    list.querySelectorAll('input, textarea, select').forEach(i => i.addEventListener('input', () => {
         values[i.dataset.field] = i.value;
         i.closest('.field').classList.toggle('empty', !i.value.trim());
     }));
+}
+
+function setField(id, value) {
+    const el = document.getElementById('f-' + id);
+    if (el) {
+        el.value = value;
+        el.closest('.field')?.classList.remove('empty');
+    }
 }
 
 function backToPanel() {
@@ -141,7 +192,7 @@ async function insertTemplate(id) {
                 { id: 'salutation', label: 'Salutation', prefix: '' },
                 { id: 'body', isBody: true },
                 { id: 'closing', label: 'Closing Phrase', prefix: '' },
-                { id: 'author', label: 'Author Name', prefix: '', extraSpace: true },
+                { id: 'authorName', label: 'Author Name', prefix: '', extraSpace: true },
                 { id: 'initials', label: 'Initials', prefix: '' },
                 { id: 'enclosures', label: 'Enclosures', prefix: 'Enclosures:\t' },
                 { id: 'cc', label: 'cc', prefix: 'cc:\t' }
@@ -157,9 +208,6 @@ async function insertTemplate(id) {
                 }
                 
                 const p = body.insertParagraph(f.prefix + '[' + f.label + ']', Word.InsertLocation.end);
-                if (f.prefix) {
-                    // Bold the prefix portion
-                }
                 
                 await ctx.sync();
                 
@@ -235,10 +283,16 @@ async function scan() {
 async function fill() {
     const t = TEMPLATES[current];
     if (!t) return;
-    document.querySelectorAll('.field input, .field textarea').forEach(i => { 
-        if (i.value.trim()) values[i.dataset.field] = i.value.trim(); 
+    document.querySelectorAll('.field input, .field textarea, .field select').forEach(i => { 
+        if (i.value && i.value.trim()) values[i.dataset.field] = i.value.trim(); 
     });
-    if (!Object.keys(values).length) { 
+    
+    // Don't require author dropdown to be counted
+    const fillableValues = { ...values };
+    delete fillableValues.author;
+    delete fillableValues._authorData;
+    
+    if (!Object.keys(fillableValues).length) { 
         toast('Enter values first', 'error'); 
         const first = document.querySelector('.field input, .field textarea');
         if (first) first.focus();

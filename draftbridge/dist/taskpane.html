@@ -9,101 +9,180 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f5f5;
-            padding: 16px;
             font-size: 14px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         .header {
             font-size: 20px;
             font-weight: 700;
             color: #8B7355;
-            margin-bottom: 16px;
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
         }
         .header span { color: #5C4A32; }
+        
+        .search-box {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #8B7355;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 0 12px;
+        }
+        .tab {
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover { color: #8B7355; }
+        .tab.active {
+            color: #8B7355;
+            border-bottom-color: #8B7355;
+        }
+        
         .status {
             background: #e8f5e9;
             color: #2e7d32;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 16px;
+            padding: 8px 16px;
             font-size: 13px;
         }
         .status.error {
             background: #ffebee;
             color: #c62828;
         }
+        
+        .clauses {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
         .clause {
             background: white;
             border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e8e8e8;
+        }
+        .clause-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
         .clause-title {
             font-weight: 600;
             color: #333;
-            margin-bottom: 8px;
-            font-size: 15px;
+            font-size: 14px;
+            flex: 1;
         }
+        .clause-category {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        .clause-category.contracts { background: #e3f2fd; color: #1565c0; }
+        .clause-category.litigation { background: #ffebee; color: #c62828; }
+        .clause-category.corporate { background: #e8f5e9; color: #2e7d32; }
+        .clause-category.ip { background: #f3e5f5; color: #7b1fa2; }
+        
         .clause-content {
             color: #555;
             font-size: 12px;
             line-height: 1.5;
-            margin-bottom: 12px;
-            max-height: 120px;
+            margin-bottom: 10px;
+            max-height: 80px;
             overflow-y: auto;
             padding: 8px;
             background: #fafafa;
             border-radius: 4px;
-            border: 1px solid #eee;
         }
         .insert-btn {
             background: #8B7355;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
+            padding: 8px 16px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: 500;
-            width: 100%;
-            font-size: 14px;
+            font-size: 13px;
+            transition: all 0.2s;
         }
         .insert-btn:hover { background: #6d5a43; }
         .insert-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
         }
-        .insert-btn.success {
-            background: #2e7d32;
-        }
-        .loading {
+        .insert-btn.success { background: #2e7d32; }
+        
+        .empty {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: #999;
+        }
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="header">Draft<span>Bridge</span></div>
+    
+    <div class="search-box">
+        <input type="text" class="search-input" id="search" placeholder="Search clauses..." oninput="filterClauses()">
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" data-filter="all" onclick="setCategory('all')">All</button>
+        <button class="tab" data-filter="contracts" onclick="setCategory('contracts')">Contracts</button>
+        <button class="tab" data-filter="litigation" onclick="setCategory('litigation')">Litigation</button>
+        <button class="tab" data-filter="corporate" onclick="setCategory('corporate')">Corporate</button>
+    </div>
+    
     <div id="status" class="status">Loading clauses...</div>
-    <div id="clauses"></div>
+    <div id="clauses" class="clauses"></div>
 
     <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <script>
         const API = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
         const FIRM = 'morrison';
+        
+        let allClauses = [];
+        let currentCategory = 'all';
 
         Office.onReady(async (info) => {
-            if (info.host === Office.HostType.Word) {
-                loadClauses();
-            } else {
-                // For testing outside Word
-                loadClauses();
-            }
+            loadClauses();
         });
 
         async function loadClauses() {
             const statusEl = document.getElementById('status');
-            const clausesEl = document.getElementById('clauses');
 
             try {
                 statusEl.textContent = 'Fetching clauses...';
@@ -111,37 +190,87 @@
                 const response = await fetch(`${API}/firms/${FIRM}/clauses`);
                 if (!response.ok) throw new Error('Failed to fetch');
                 
-                const allClauses = await response.json();
+                allClauses = await response.json();
                 
-                // Take first 5 clauses
-                const clauses = allClauses.slice(0, 5);
-                
-                statusEl.textContent = `✓ Loaded ${clauses.length} clauses. Click to insert.`;
+                statusEl.textContent = `✓ ${allClauses.length} clauses loaded`;
                 statusEl.classList.remove('error');
 
-                clausesEl.innerHTML = clauses.map((clause, i) => `
-                    <div class="clause">
-                        <div class="clause-title">${escapeHtml(clause.title)}</div>
-                        <div class="clause-content">${escapeHtml(clause.content)}</div>
-                        <button class="insert-btn" onclick="insertClause(${i})">
-                            Insert into Document
-                        </button>
-                    </div>
-                `).join('');
-
-                // Store clauses globally for insert function
-                window.clauseData = clauses;
+                renderClauses();
 
             } catch (err) {
                 console.error('Load failed:', err);
-                statusEl.textContent = '✗ Failed to load clauses: ' + err.message;
+                statusEl.textContent = '✗ Failed to load: ' + err.message;
                 statusEl.classList.add('error');
             }
         }
 
-        async function insertClause(index) {
-            const clause = window.clauseData[index];
-            const btn = document.querySelectorAll('.insert-btn')[index];
+        function setCategory(category) {
+            currentCategory = category;
+            
+            // Update tab styles
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === category);
+            });
+            
+            filterClauses();
+        }
+
+        function filterClauses() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            
+            const filtered = allClauses.filter(clause => {
+                const matchesCategory = currentCategory === 'all' || clause.category === currentCategory;
+                const matchesSearch = !searchTerm || 
+                    clause.title.toLowerCase().includes(searchTerm) ||
+                    clause.content.toLowerCase().includes(searchTerm) ||
+                    (clause.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
+                return matchesCategory && matchesSearch;
+            });
+            
+            renderClauses(filtered);
+            
+            // Update status
+            const statusEl = document.getElementById('status');
+            if (searchTerm || currentCategory !== 'all') {
+                statusEl.textContent = `${filtered.length} of ${allClauses.length} clauses`;
+            } else {
+                statusEl.textContent = `✓ ${allClauses.length} clauses loaded`;
+            }
+        }
+
+        function renderClauses(clauses = allClauses) {
+            const clausesEl = document.getElementById('clauses');
+            
+            if (clauses.length === 0) {
+                clausesEl.innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">📭</div>
+                        <div>No clauses found</div>
+                    </div>
+                `;
+                return;
+            }
+
+            clausesEl.innerHTML = clauses.map((clause, i) => `
+                <div class="clause" data-index="${i}">
+                    <div class="clause-header">
+                        <div class="clause-title">${escapeHtml(clause.title)}</div>
+                        <span class="clause-category ${clause.category || 'contracts'}">${clause.category || 'contracts'}</span>
+                    </div>
+                    <div class="clause-content">${escapeHtml(clause.content)}</div>
+                    <button class="insert-btn" onclick="insertClause('${clause.clauseId}')">
+                        Insert
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function insertClause(clauseId) {
+            const clause = allClauses.find(c => c.clauseId === clauseId);
+            if (!clause) return;
+            
+            const btn = event.target;
+            const originalText = btn.textContent;
             
             btn.disabled = true;
             btn.textContent = 'Inserting...';
@@ -153,23 +282,23 @@
                     await context.sync();
                 });
 
-                btn.textContent = '✓ Inserted!';
+                btn.textContent = '✓ Done!';
                 btn.classList.add('success');
                 
                 setTimeout(() => {
-                    btn.textContent = 'Insert into Document';
+                    btn.textContent = originalText;
                     btn.classList.remove('success');
                     btn.disabled = false;
-                }, 2000);
+                }, 1500);
 
             } catch (err) {
                 console.error('Insert failed:', err);
-                btn.textContent = '✗ Failed - ' + err.message;
+                btn.textContent = '✗ Error';
                 
                 setTimeout(() => {
-                    btn.textContent = 'Insert into Document';
+                    btn.textContent = originalText;
                     btn.disabled = false;
-                }, 3000);
+                }, 2000);
             }
         }
 

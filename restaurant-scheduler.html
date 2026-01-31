@@ -1739,10 +1739,338 @@
             transform: scale(1.02);
             transition: all 0.15s ease;
         }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-logo .icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin: 0 auto 16px;
+        }
+
+        .login-logo h1 {
+            font-size: 24px;
+            color: #1f2937;
+            margin: 0;
+        }
+
+        .login-logo p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-form input {
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .login-form input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .login-form .btn-login {
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .login-form .btn-login:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .login-form .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-divider {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            margin: 8px 0;
+        }
+
+        .login-toggle {
+            text-align: center;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .login-toggle a {
+            color: #2563eb;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .login-toggle a:hover {
+            text-decoration: underline;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .role-option {
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .role-option:hover {
+            border-color: #2563eb;
+        }
+
+        .role-option.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .role-option .icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .role-option .title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .role-option .desc {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .login-error {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .user-badge .avatar {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            min-width: 200px;
+            display: none;
+            z-index: 100;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .user-dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-dropdown-item:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .user-dropdown-item.danger {
+            color: var(--danger);
+        }
+
+        .sync-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: var(--text-muted);
+            padding: 6px 10px;
+            background: var(--bg-tertiary);
+            border-radius: 20px;
+        }
+
+        .sync-indicator .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .sync-indicator.syncing .dot {
+            background: var(--warning);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Login Screen -->
+    <div class="login-screen" id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="icon">S</div>
+                <h1>StaffSync</h1>
+                <p>Restaurant Staff Scheduling</p>
+            </div>
+
+            <div class="login-error" id="login-error"></div>
+
+            <!-- Login Form -->
+            <form class="login-form" id="login-form">
+                <input type="email" id="login-email" placeholder="Email address" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="submit" class="btn-login" id="login-btn">Sign In</button>
+            </form>
+
+            <!-- Signup Form (hidden by default) -->
+            <form class="login-form" id="signup-form" style="display: none;">
+                <input type="text" id="signup-name" placeholder="Full name" required>
+                <input type="email" id="signup-email" placeholder="Email address" required>
+                <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required minlength="6">
+
+                <div class="login-divider">Select your role</div>
+
+                <div class="role-selector">
+                    <div class="role-option selected" data-role="manager" onclick="selectRole(this)">
+                        <div class="icon">👔</div>
+                        <div class="title">Manager</div>
+                        <div class="desc">Create organization</div>
+                    </div>
+                    <div class="role-option" data-role="employee" onclick="selectRole(this)">
+                        <div class="icon">👤</div>
+                        <div class="title">Employee</div>
+                        <div class="desc">Join with code</div>
+                    </div>
+                </div>
+
+                <!-- Organization code input for employees -->
+                <div id="org-code-field" style="display: none;">
+                    <input type="text" id="signup-org-code" placeholder="Organization code from your manager" style="text-transform: uppercase;">
+                </div>
+
+                <button type="submit" class="btn-login" id="signup-btn">Create Account</button>
+            </form>
+
+            <div class="login-toggle" id="login-toggle">
+                Don't have an account? <a onclick="toggleAuthMode()">Sign up</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container" id="app-container" style="display: none;">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="logo">
@@ -1824,6 +2152,9 @@
                     <span id="theme-text">Dark Mode</span>
                 </button>
             </div>
+
+            <!-- User Area -->
+            <div id="user-area" style="padding: 16px; border-top: 1px solid var(--border-color); margin-top: auto;"></div>
         </aside>
 
         <!-- Main Content -->
@@ -3220,19 +3551,43 @@
                 });
                 
                 return `
-                    <div class="shift-section">
+                    <div class="shift-section"
+                         data-shift="${shift.id}"
+                         ondragover="handleDayViewDragOver(event)"
+                         ondrop="handleDayViewDrop(event, '${shift.id}')"
+                         ondragleave="handleDragLeave(event)">
                         <div class="shift-section-header">
                             <div class="shift-section-title">${escapeHtml(shift.name)}</div>
                             <div class="shift-section-time">${escapeHtml(shift.startTime)} - ${escapeHtml(shift.endTime)}</div>
                         </div>
                         <div class="shift-staff-grid">
-                            ${staffSlots.length > 0 ? staffSlots.map(slot => `
-                                <div class="staff-slot ${slot.filled ? 'filled' : slot.warning ? 'warning' : 'empty'}">
-                                    <div class="staff-slot-name">${slot.filled ? slot.name : slot.warning ? 'NEEDED' : 'Empty'}</div>
-                                    <div class="staff-slot-role">${ROLE_LABELS[slot.role]}</div>
-                                </div>
-                            `).join('') : '<div style="color: var(--text-muted); padding: 20px; font-size: 12px;">No staff requirements set</div>'}
+                            ${staffSlots.length > 0 ? staffSlots.map((slot, idx) => {
+                                if (slot.filled) {
+                                    const staffMember = state.staff.find(s => s.name === slot.name);
+                                    return `
+                                        <div class="staff-slot filled"
+                                             draggable="true"
+                                             ondragstart="handleDayViewDragStart(event, '${shift.id}', '${staffMember?.id}')"
+                                             ondragend="handleDragEnd(event)"
+                                             onclick="removeDayViewAssignment('${shift.id}', '${staffMember?.id}')"
+                                             style="cursor: grab;">
+                                            <div class="staff-slot-name">${slot.name}</div>
+                                            <div class="staff-slot-role">${ROLE_LABELS[slot.role]}</div>
+                                            <span class="slot-remove">×</span>
+                                        </div>
+                                    `;
+                                } else {
+                                    return `
+                                        <div class="staff-slot ${slot.warning ? 'warning' : 'empty'}"
+                                             onclick="openDayViewAssignModal('${shift.id}', '${slot.role}')">
+                                            <div class="staff-slot-name">${slot.warning ? '+ Add Staff' : 'Empty'}</div>
+                                            <div class="staff-slot-role">${ROLE_LABELS[slot.role]}</div>
+                                        </div>
+                                    `;
+                                }
+                            }).join('') : '<div style="color: var(--text-muted); padding: 20px; font-size: 12px;">No staff requirements set</div>'}
                         </div>
+                        <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="openDayViewAssignModal('${shift.id}')">+ Add Staff</button>
                     </div>
                 `;
             }).join('');
@@ -4962,7 +5317,7 @@
             
             // Initialize day picker
             document.getElementById('day-picker').value = state.selectedDay;
-            
+
             // Initial render
             renderDashboard();
             renderSchedule();
@@ -4976,7 +5331,450 @@
             updateMarketBadge();
         }
 
-        init();
+        // ============================================
+        // FIREBASE INTEGRATION
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrBQKmHV9zzS6XUc3cleuIck2Xli30jQo",
+            authDomain: "scheduler-d2be6.firebaseapp.com",
+            projectId: "scheduler-d2be6",
+            storageBucket: "scheduler-d2be6.firebasestorage.app",
+            messagingSenderId: "752240565816",
+            appId: "1:752240565816:web:a04845e817d864a95510cd",
+            measurementId: "G-LZV3BQELLB"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let userRole = 'employee';
+        let organizationId = null;
+
+        // Auth state listener
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await loadUserData(user.uid);
+                showApp();
+            } else {
+                currentUser = null;
+                showLogin();
+            }
+        });
+
+        async function loadUserData(uid) {
+            try {
+                const userDoc = await db.collection('users').doc(uid).get();
+                if (userDoc.exists) {
+                    const data = userDoc.data();
+                    userRole = data.role || 'employee';
+                    organizationId = data.organizationId;
+
+                    // Load organization data
+                    if (organizationId) {
+                        await loadOrganizationData();
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading user data:', error);
+            }
+        }
+
+        async function loadOrganizationData() {
+            try {
+                const scheduleDoc = await db.collection('schedules').doc(organizationId).get();
+                if (scheduleDoc.exists) {
+                    const data = scheduleDoc.data();
+                    if (data.staff) state.staff = data.staff;
+                    if (data.shiftTemplates) state.shiftTemplates = data.shiftTemplates;
+                    if (data.schedule) state.schedule = data.schedule;
+                    if (data.holidays) state.holidays = data.holidays;
+                    if (data.swapRequests) state.swapRequests = data.swapRequests;
+                    if (data.timeOffRequests) state.timeOffRequests = data.timeOffRequests;
+                }
+            } catch (error) {
+                console.error('Error loading organization data:', error);
+            }
+        }
+
+        async function saveToFirestore() {
+            if (!organizationId || userRole !== 'manager') return;
+
+            try {
+                await db.collection('schedules').doc(organizationId).set({
+                    staff: state.staff,
+                    shiftTemplates: state.shiftTemplates,
+                    schedule: state.schedule,
+                    holidays: state.holidays,
+                    swapRequests: state.swapRequests || [],
+                    timeOffRequests: state.timeOffRequests || [],
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedBy: currentUser.uid
+                }, { merge: true });
+
+                showSyncStatus('synced');
+            } catch (error) {
+                console.error('Error saving to Firestore:', error);
+                showSyncStatus('error');
+            }
+        }
+
+        function showSyncStatus(status) {
+            const indicator = document.getElementById('sync-indicator');
+            if (!indicator) return;
+
+            if (status === 'syncing') {
+                indicator.classList.add('syncing');
+                indicator.querySelector('span').textContent = 'Syncing...';
+            } else if (status === 'synced') {
+                indicator.classList.remove('syncing');
+                indicator.querySelector('span').textContent = 'Synced';
+            } else {
+                indicator.classList.remove('syncing');
+                indicator.querySelector('span').textContent = 'Sync error';
+            }
+        }
+
+        // Override saveState to also save to Firestore
+        const originalSaveState = saveState;
+        saveState = function() {
+            originalSaveState();
+            if (currentUser && userRole === 'manager') {
+                showSyncStatus('syncing');
+                saveToFirestore();
+            }
+        };
+
+        function showApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-container').style.display = 'flex';
+
+            // Update user display
+            updateUserDisplay();
+
+            // Initialize app
+            init();
+        }
+
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('app-container').style.display = 'none';
+        }
+
+        let organizationCode = null;
+
+        async function updateUserDisplay() {
+            const userArea = document.getElementById('user-area');
+            if (userArea && currentUser) {
+                // Get org code for managers
+                if (userRole === 'manager' && organizationId) {
+                    const orgDoc = await db.collection('organizations').doc(organizationId).get();
+                    if (orgDoc.exists) {
+                        organizationCode = orgDoc.data().code;
+                    }
+                }
+
+                const initial = currentUser.displayName ? currentUser.displayName.charAt(0).toUpperCase() : currentUser.email.charAt(0).toUpperCase();
+                userArea.innerHTML = `
+                    <div class="sync-indicator" id="sync-indicator">
+                        <div class="dot"></div>
+                        <span>Synced</span>
+                    </div>
+                    ${userRole === 'manager' && organizationCode ? `
+                        <div style="margin: 12px 0; padding: 10px; background: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+                            <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Share this code with employees</div>
+                            <div style="font-size: 18px; font-weight: 700; letter-spacing: 2px; color: var(--accent);" onclick="copyOrgCode()" title="Click to copy">${organizationCode}</div>
+                        </div>
+                    ` : ''}
+                    <div class="user-menu">
+                        <div class="user-badge" onclick="toggleUserDropdown()">
+                            <div class="avatar">${initial}</div>
+                            <span>${currentUser.displayName || currentUser.email.split('@')[0]}</span>
+                            <span style="font-size: 10px; color: var(--text-muted);">${userRole}</span>
+                        </div>
+                        <div class="user-dropdown" id="user-dropdown">
+                            <div class="user-dropdown-item" onclick="showProfile()">
+                                <span>👤</span> My Profile
+                            </div>
+                            ${userRole === 'manager' ? `
+                                <div class="user-dropdown-item" onclick="showOrgSettings()">
+                                    <span>⚙️</span> Organization Settings
+                                </div>
+                                <div class="user-dropdown-item" onclick="showInviteModal()">
+                                    <span>📧</span> Invite Employees
+                                </div>
+                            ` : ''}
+                            <div class="user-dropdown-item danger" onclick="signOut()">
+                                <span>🚪</span> Sign Out
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function copyOrgCode() {
+            if (organizationCode) {
+                navigator.clipboard.writeText(organizationCode);
+                showToast('Organization code copied!', 'success');
+            }
+        }
+
+        function showInviteModal() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.id = 'invite-modal';
+            modal.innerHTML = `
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 class="modal-title">Invite Employees</h2>
+                        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">×</button>
+                    </div>
+                    <div style="padding: 16px;">
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">
+                            Share your organization code with employees so they can join your schedule.
+                        </p>
+
+                        <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px;">
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Organization Code</div>
+                            <div style="font-size: 32px; font-weight: 800; letter-spacing: 4px; color: var(--accent);">${organizationCode}</div>
+                            <button class="btn btn-secondary" style="margin-top: 12px;" onclick="copyOrgCode()">📋 Copy Code</button>
+                        </div>
+
+                        <div class="login-divider">Or invite by email</div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <input type="email" id="invite-email" placeholder="employee@email.com" style="flex: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-tertiary); color: var(--text-primary);">
+                            <button class="btn btn-primary" onclick="sendInvite()">Send</button>
+                        </div>
+
+                        <p style="font-size: 11px; color: var(--text-muted); margin-top: 12px;">
+                            The employee will receive an email with instructions to join your organization.
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        async function sendInvite() {
+            const email = document.getElementById('invite-email')?.value?.trim();
+            if (!email) {
+                showToast('Please enter an email address', 'error');
+                return;
+            }
+
+            try {
+                // Save invite to Firestore
+                await db.collection('invites').add({
+                    email: email.toLowerCase(),
+                    organizationId: organizationId,
+                    organizationCode: organizationCode,
+                    invitedBy: currentUser.uid,
+                    invitedByName: currentUser.displayName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending'
+                });
+
+                showToast(`Invite sent to ${email}`, 'success');
+                document.getElementById('invite-email').value = '';
+                document.getElementById('invite-modal')?.remove();
+            } catch (error) {
+                console.error('Error sending invite:', error);
+                showToast('Failed to send invite', 'error');
+            }
+        }
+
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown').classList.toggle('show');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.user-menu')) {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) dropdown.classList.remove('show');
+            }
+        });
+
+        async function signOut() {
+            try {
+                await auth.signOut();
+                showToast('Signed out successfully');
+            } catch (error) {
+                showToast('Error signing out', 'error');
+            }
+        }
+
+        // Login form handler
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const btn = document.getElementById('login-btn');
+            const errorEl = document.getElementById('login-error');
+
+            btn.disabled = true;
+            btn.textContent = 'Signing in...';
+            errorEl.classList.remove('show');
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+            } catch (error) {
+                errorEl.textContent = getAuthErrorMessage(error.code);
+                errorEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Sign In';
+            }
+        });
+
+        // Signup form handler
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const role = document.querySelector('.role-option.selected')?.dataset.role || 'employee';
+            const orgCode = document.getElementById('signup-org-code')?.value?.toUpperCase().trim();
+            const btn = document.getElementById('signup-btn');
+            const errorEl = document.getElementById('login-error');
+
+            btn.disabled = true;
+            btn.textContent = 'Creating account...';
+            errorEl.classList.remove('show');
+
+            try {
+                let orgId = null;
+
+                // For employees, verify organization code first
+                if (role === 'employee') {
+                    if (!orgCode) {
+                        throw { code: 'custom/no-org-code' };
+                    }
+
+                    // Look up organization by code
+                    const orgQuery = await db.collection('organizations')
+                        .where('code', '==', orgCode)
+                        .limit(1)
+                        .get();
+
+                    if (orgQuery.empty) {
+                        throw { code: 'custom/invalid-org-code' };
+                    }
+
+                    orgId = orgQuery.docs[0].id;
+                }
+
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+
+                // Update display name
+                await userCredential.user.updateProfile({ displayName: name });
+
+                // Create organization for managers
+                if (role === 'manager') {
+                    // Generate a unique 6-character code
+                    const orgCodeGen = generateOrgCode();
+
+                    const orgRef = await db.collection('organizations').add({
+                        name: `${name}'s Restaurant`,
+                        code: orgCodeGen,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        ownerId: userCredential.user.uid
+                    });
+                    orgId = orgRef.id;
+
+                    // Create empty schedule doc
+                    await db.collection('schedules').doc(orgId).set({
+                        staff: [],
+                        shiftTemplates: [],
+                        schedule: {},
+                        holidays: [],
+                        swapRequests: [],
+                        timeOffRequests: [],
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+
+                // Save user data
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    role: role,
+                    organizationId: orgId,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+            } catch (error) {
+                errorEl.textContent = getAuthErrorMessage(error.code);
+                errorEl.classList.add('show');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        });
+
+        function generateOrgCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        function selectRole(element) {
+            document.querySelectorAll('.role-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            // Show/hide org code field for employees
+            const orgCodeField = document.getElementById('org-code-field');
+            if (element.dataset.role === 'employee') {
+                orgCodeField.style.display = 'block';
+            } else {
+                orgCodeField.style.display = 'none';
+            }
+        }
+
+        let isSignupMode = false;
+        function toggleAuthMode() {
+            isSignupMode = !isSignupMode;
+            document.getElementById('login-form').style.display = isSignupMode ? 'none' : 'flex';
+            document.getElementById('signup-form').style.display = isSignupMode ? 'flex' : 'none';
+            document.getElementById('login-toggle').innerHTML = isSignupMode
+                ? 'Already have an account? <a onclick="toggleAuthMode()">Sign in</a>'
+                : 'Don\'t have an account? <a onclick="toggleAuthMode()">Sign up</a>';
+            document.getElementById('login-error').classList.remove('show');
+        }
+
+        function getAuthErrorMessage(code) {
+            const messages = {
+                'auth/invalid-email': 'Invalid email address',
+                'auth/user-disabled': 'This account has been disabled',
+                'auth/user-not-found': 'No account found with this email',
+                'auth/wrong-password': 'Incorrect password',
+                'auth/email-already-in-use': 'An account with this email already exists',
+                'auth/weak-password': 'Password must be at least 6 characters',
+                'auth/network-request-failed': 'Network error. Please check your connection.',
+                'custom/no-org-code': 'Please enter your organization code from your manager',
+                'custom/invalid-org-code': 'Invalid organization code. Please check with your manager.'
+            };
+            return messages[code] || 'An error occurred. Please try again.';
+        }
+
+        function showProfile() {
+            showToast('Profile settings coming soon');
+        }
+
+        function showOrgSettings() {
+            showToast('Organization settings coming soon');
+        }
+
+        // Don't auto-init, wait for auth
+        // init();
     </script>
 </body>
 </html>

@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirmFlow | AI Tools Built for Law Firms That Actually Work</title>
+    <meta name="description" content="Stop losing cases to missed calls. Stop stressing about trust accounts. Stop missing deadlines. AI-powered tools built by lawyers, for lawyers.">
+    
+    <!-- Open Graph / Social Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://firmflow.io/">
+    <meta property="og:title" content="FirmFlow | AI Tools Built for Law Firms">
+    <meta property="og:description" content="Never lose a case to a missed call. Never worry about trust account compliance. Never miss a deadline. Tools that actually work.">
+    <meta property="og:image" content="https://firmflow.io/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <meta name="theme-color" content="#0f172a">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #10b981;
+            --accent-light: #34d399;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-lighter: #334155;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-cta {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .nav-cta:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 30% 20%, rgba(59, 130, 246, 0.15), transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(16, 185, 129, 0.1), transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 .highlight {
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .hero-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card);
+            border-color: var(--primary);
+        }
+
+        .hero-trust {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .hero-trust svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+        }
+
+        /* Hero Visual */
+        .hero-visual {
+            position: relative;
+        }
+
+        .hero-dashboard {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dashboard-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-green { background: #22c55e; }
+
+        .dashboard-title {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .dashboard-metric {
+            background: var(--bg-lighter);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .dashboard-metric-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .dashboard-metric-badge {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .dashboard-metric-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .dashboard-metric-sub {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .dashboard-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .dashboard-small {
+            background: var(--bg-lighter);
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .dashboard-small-label {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dashboard-small-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .value-green { color: var(--accent); }
+        .value-blue { color: var(--primary); }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(180deg, var(--bg-dark), var(--bg-card));
+        }
+
+        .section-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-badge {
+            display: inline-block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--danger);
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .problem-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .problem-card:hover {
+            border-color: var(--danger);
+            transform: translateY(-5px);
+        }
+
+        .problem-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin: 0 auto 1.5rem;
+        }
+
+        .problem-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .problem-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .problem-stat {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        /* Products Section */
+        .products-section {
+            padding: 6rem 2rem;
+            background: var(--bg-card);
+        }
+
+        .products-section .section-badge {
+            color: var(--accent);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .product-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.4s;
+        }
+
+        .product-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .product-card.featured {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, var(--bg-dark), rgba(59, 130, 246, 0.1));
+        }
+
+        .product-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: var(--warning);
+            color: var(--bg-dark);
+            padding: 0.35rem 1rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .product-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-tagline {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .product-features {
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .product-features li::before {
+            content: '✓';
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .product-price {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .product-price-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .product-price-period {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .product-roi {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--accent-light);
+        }
+
+        .product-cta {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Bundle Section */
+        .bundle-section {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.05));
+        }
+
+        .bundle-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .bundle-badge {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .bundle-card h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .bundle-tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .bundle-includes {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .bundle-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        .bundle-item-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-lighter);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bundle-pricing {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .bundle-original {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            font-size: 1.5rem;
+        }
+
+        .bundle-price {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .bundle-price span {
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+
+        .bundle-savings {
+            background: var(--accent);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        /* Social Proof Section */
+        .social-proof {
+            padding: 6rem 2rem;
+            background: var(--bg-dark);
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .testimonial-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            left: 1.5rem;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.3;
+            line-height: 1;
+        }
+
+        .testimonial-text {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .testimonial-info h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .testimonial-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .testimonial-product {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Trust Signals */
+        .trust-signals {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .trust-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .trust-item strong {
+            display: block;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .trust-item span {
+            font-size: 0.85rem;
+        }
+
+        /* Objections Section */
+        .objections-section {
+            padding: 6rem 2rem;
+            background: var(--bg-card);
+        }
+
+        .objections-section .section-badge {
+            color: var(--warning);
+        }
+
+        .objections-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .objection-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+
+        .objection-question {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .objection-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+
+        .objection-question h4 {
+            font-size: 1.1rem;
+            color: var(--warning);
+        }
+
+        .objection-answer {
+            color: var(--text-muted);
+            line-height: 1.7;
+            padding-left: 3.5rem;
+        }
+
+        .objection-answer strong {
+            color: var(--text);
+        }
+
+        /* Final CTA */
+        .final-cta {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, var(--bg-dark), var(--bg-card));
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .final-cta p {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .final-cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .guarantee {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            color: var(--accent-light);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            padding: 4rem 2rem 2rem;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-brand h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-brand h3 span {
+            color: var(--primary);
+        }
+
+        .footer-brand p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-col h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-col a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .footer-col a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-bottom p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-legal a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+
+        .footer-legal a:hover {
+            color: var(--text);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-visual {
+                order: -1;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-trust {
+                justify-content: center;
+            }
+
+            .hero-stats {
+                justify-content: center;
+            }
+
+            .problems-grid,
+            .products-grid,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .objections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .bundle-pricing {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .bundle-price {
+                font-size: 3rem;
+            }
+
+            .trust-signals {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Scroll animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">Firm<span>Flow</span></a>
+            <ul class="nav-links">
+                <li><a href="#products">Products</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contact" class="nav-cta">Start Free Trial</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="pulse"></span>
+                    Built by lawyers, for lawyers
+                </div>
+                
+                <h1>Stop Losing Cases to <span class="highlight">Missed Calls</span> and <span class="highlight">Missed Deadlines</span></h1>
+                
+                <p class="hero-subtitle">48% of law firms let calls go to voicemail. Those clients call your competitor next. Our AI tools recover lost leads, protect your license, and give you time back.</p>
+                
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">$15K</div>
+                        <div class="hero-stat-label">Avg. revenue recovered<br>per month</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">3 sec</div>
+                        <div class="hero-stat-label">Response time to<br>missed calls</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number">0</div>
+                        <div class="hero-stat-label">Missed deadlines<br>guaranteed</div>
+                    </div>
+                </div>
+                
+                <div class="hero-buttons">
+                    <a href="#pricing" class="btn btn-primary">
+                        Start 14-Day Free Trial
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                    <a href="#demo" class="btn btn-secondary">Watch Demo</a>
+                </div>
+                
+                <div class="hero-trust">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span>No credit card required • Cancel anytime • SOC 2 compliant</span>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="hero-dashboard">
+                    <div class="dashboard-header">
+                        <span class="dashboard-dot dot-red"></span>
+                        <span class="dashboard-dot dot-yellow"></span>
+                        <span class="dashboard-dot dot-green"></span>
+                        <span class="dashboard-title">FirmFlow Dashboard</span>
+                    </div>
+                    
+                    <div class="dashboard-metric">
+                        <div class="dashboard-metric-header">
+                            <span class="dashboard-metric-label">Cases Recovered This Month</span>
+                            <span class="dashboard-metric-badge">+23%</span>
+                        </div>
+                        <div class="dashboard-metric-value">12 Cases</div>
+                        <div class="dashboard-metric-sub">$47,500 in potential fees recovered</div>
+                    </div>
+                    
+                    <div class="dashboard-row">
+                        <div class="dashboard-small">
+                            <div class="dashboard-small-label">Trust Account Status</div>
+                            <div class="dashboard-small-value value-green">✓ Balanced</div>
+                        </div>
+                        <div class="dashboard-small">
+                            <div class="dashboard-small-label">Upcoming Deadlines</div>
+                            <div class="dashboard-small-value value-blue">7 tracked</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem-section" id="problems">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">The Reality</span>
+                <h2 class="section-title">Three Ways You're Losing Money Right Now</h2>
+                <p class="section-subtitle">These aren't hypotheticals. They're happening in your practice every single week.</p>
+            </div>
+            
+            <div class="problems-grid">
+                <div class="problem-card fade-in">
+                    <div class="problem-icon">📵</div>
+                    <h3>Missed Calls = Lost Cases</h3>
+                    <p>Every unanswered call is a potential client who hangs up and calls your competitor. They don't leave voicemails—they move on.</p>
+                    <div class="problem-stat">48% of firms miss calls daily</div>
+                </div>
+                
+                <div class="problem-card fade-in">
+                    <div class="problem-icon">⚠️</div>
+                    <h3>Trust Account Anxiety</h3>
+                    <p>Trust account violations are the #1 cause of bar complaints. One mistake could cost you your license—and your livelihood.</p>
+                    <div class="problem-stat">#1 cause of bar complaints</div>
+                </div>
+                
+                <div class="problem-card fade-in">
+                    <div class="problem-icon">⏰</div>
+                    <h3>Deadline Disasters</h3>
+                    <p>Miss a filing deadline and face malpractice claims, angry clients, and sleepless nights. Manual calendar tracking is playing with fire.</p>
+                    <div class="problem-stat">$2.8M avg. malpractice claim</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products-section" id="products">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">The Solutions</span>
+                <h2 class="section-title">Tools That Actually Solve Your Problems</h2>
+                <p class="section-subtitle">Not more features you'll never use. Just the tools that make the biggest difference.</p>
+            </div>
+            
+            <div class="products-grid">
+                <!-- CALLBACK -->
+                <div class="product-card featured fade-in">
+                    <span class="product-badge">Most Popular</span>
+                    <div class="product-icon">📞</div>
+                    <h3>CALLBACK</h3>
+                    <p class="product-tagline">"Never lose a case to a missed call again."</p>
+                    <p>Instant text response to every missed call in under 3 seconds. Works 24/7, even when you're in court or with clients.</p>
+                    
+                    <ul class="product-features">
+                        <li>Customizable auto-reply messages</li>
+                        <li>Business hours vs. after-hours modes</li>
+                        <li>Conversion tracking dashboard</li>
+                        <li>Works with any phone system</li>
+                    </ul>
+                    
+                    <div class="product-price">
+                        <span class="product-price-amount">$29</span>
+                        <span class="product-price-period">/month</span>
+                    </div>
+                    
+                    <div class="product-roi">
+                        💰 One recovered case pays for 50+ years of subscription
+                    </div>
+                    
+                    <a href="#" class="btn btn-primary product-cta">Start Free Trial</a>
+                </div>
+                
+                <!-- TRUSTLOCK -->
+                <div class="product-card fade-in">
+                    <div class="product-icon">🔒</div>
+                    <h3>TRUSTLOCK</h3>
+                    <p class="product-tagline">"Sleep at night knowing your trust account is perfect."</p>
+                    <p>Three-way reconciliation that keeps your trust account audit-ready. One glance tells you everything is balanced.</p>
+                    
+                    <ul class="product-features">
+                        <li>Real-time balance dashboard</li>
+                        <li>Per-client ledger tracking</li>
+                        <li>Bank statement CSV import</li>
+                        <li>One-click compliance reports</li>
+                    </ul>
+                    
+                    <div class="product-price">
+                        <span class="product-price-amount">$49</span>
+                        <span class="product-price-period">/month</span>
+                    </div>
+                    
+                    <div class="product-roi">
+                        ⚖️ vs. $300+/mo for Clio's trust features
+                    </div>
+                    
+                    <a href="#" class="btn btn-primary product-cta">Start Free Trial</a>
+                </div>
+                
+                <!-- DEADLINE -->
+                <div class="product-card fade-in">
+                    <div class="product-icon">📅</div>
+                    <h3>DEADLINE</h3>
+                    <p class="product-tagline">"You will never miss a deadline."</p>
+                    <p>Multi-jurisdiction deadline calculator with automatic holiday and weekend adjustments. Syncs directly to your calendar.</p>
+                    
+                    <ul class="product-features">
+                        <li>Federal + 50 state rules</li>
+                        <li>Auto holiday/weekend adjustment</li>
+                        <li>Export to ICS calendar</li>
+                        <li>Common deadline templates</li>
+                    </ul>
+                    
+                    <div class="product-price">
+                        <span class="product-price-amount">$25</span>
+                        <span class="product-price-period">/month</span>
+                    </div>
+                    
+                    <div class="product-roi">
+                        🛡️ Malpractice insurance costs $2,000/yr. We're 1% of that.
+                    </div>
+                    
+                    <a href="#" class="btn btn-primary product-cta">Start Free Trial</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Bundle Section -->
+    <section class="bundle-section" id="pricing">
+        <div class="section-container">
+            <div class="bundle-card fade-in">
+                <span class="bundle-badge">⭐ BEST VALUE</span>
+                <h2>FirmFlow Essentials Bundle</h2>
+                <p class="bundle-tagline">Everything a solo attorney needs. Nothing they don't.</p>
+                
+                <div class="bundle-includes">
+                    <div class="bundle-item">
+                        <span class="bundle-item-icon">📞</span>
+                        <span>CALLBACK</span>
+                    </div>
+                    <div class="bundle-item">
+                        <span class="bundle-item-icon">🔒</span>
+                        <span>TRUSTLOCK</span>
+                    </div>
+                    <div class="bundle-item">
+                        <span class="bundle-item-icon">📅</span>
+                        <span>DEADLINE</span>
+                    </div>
+                </div>
+                
+                <div class="bundle-pricing">
+                    <span class="bundle-original">$103/mo separately</span>
+                    <span class="bundle-price">$79<span>/month</span></span>
+                    <span class="bundle-savings">Save $24/mo</span>
+                </div>
+                
+                <a href="#" class="btn btn-primary">Get the Bundle — 14 Days Free</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Social Proof Section -->
+    <section class="social-proof" id="testimonials">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge" style="color: var(--primary);">Trusted by Solo Practitioners</span>
+                <h2 class="section-title">What Lawyers Are Saying</h2>
+            </div>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card fade-in">
+                    <p class="testimonial-text">"I recovered 3 cases in my first week. That's $15,000 in fees from a $29 investment. The ROI is insane."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">MR</div>
+                        <div class="testimonial-info">
+                            <h4>Maria Rodriguez</h4>
+                            <p>Solo PI Attorney, Miami</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-product">Using CALLBACK</div>
+                </div>
+                
+                <div class="testimonial-card fade-in">
+                    <p class="testimonial-text">"I used to lie awake worrying about my trust account. Now I check TRUSTLOCK every morning and actually feel calm."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">JC</div>
+                        <div class="testimonial-info">
+                            <h4>James Chen</h4>
+                            <p>Estate Planning Attorney, Dallas</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-product">Using TRUSTLOCK</div>
+                </div>
+                
+                <div class="testimonial-card fade-in">
+                    <p class="testimonial-text">"My malpractice carrier should pay for this. It's the best deadline protection tool I've ever used. Period."</p>
+                    <div class="testimonial-author">
+                        <div class="testimonial-avatar">SK</div>
+                        <div class="testimonial-info">
+                            <h4>Sarah Kim</h4>
+                            <p>Litigation Partner, Phoenix</p>
+                        </div>
+                    </div>
+                    <div class="testimonial-product">Using DEADLINE</div>
+                </div>
+            </div>
+            
+            <div class="trust-signals">
+                <div class="trust-item">
+                    <div class="trust-icon">🔐</div>
+                    <div>
+                        <strong>SOC 2 Compliant</strong>
+                        <span>Bank-level security</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">⚖️</div>
+                    <div>
+                        <strong>Bar Association Friendly</strong>
+                        <span>Designed for compliance</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">🇺🇸</div>
+                    <div>
+                        <strong>US-Based Support</strong>
+                        <span>Real humans, not bots</span>
+                    </div>
+                </div>
+                <div class="trust-item">
+                    <div class="trust-icon">💳</div>
+                    <div>
+                        <strong>No Contracts</strong>
+                        <span>Cancel anytime</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Objections Section -->
+    <section class="objections-section" id="faq">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-badge">Straight Talk</span>
+                <h2 class="section-title">Addressing Your Concerns Head-On</h2>
+                <p class="section-subtitle">We know lawyers are skeptical. Here's everything you're probably thinking.</p>
+            </div>
+            
+            <div class="objections-grid">
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">🤔</div>
+                        <h4>"I already have practice management software."</h4>
+                    </div>
+                    <p class="objection-answer">Good. Keep it. Our tools integrate with what you already use—Clio, PracticePanther, MyCase, or even spreadsheets. <strong>We're not replacing your system</strong>, we're plugging the gaps it doesn't cover.</p>
+                </div>
+                
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">💰</div>
+                        <h4>"Another monthly subscription I don't need."</h4>
+                    </div>
+                    <p class="objection-answer">Let's do the math: <strong>One recovered case = $3,000-$15,000</strong> in fees. Our entire bundle costs $79/month. That's less than one billable hour. One recovered case pays for a decade of service.</p>
+                </div>
+                
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">🔒</div>
+                        <h4>"What about client confidentiality?"</h4>
+                    </div>
+                    <p class="objection-answer"><strong>SOC 2 Type II compliant. Bank-level encryption.</strong> Your data never leaves secure US servers. We don't sell data, period. We're building tools for lawyers—we understand privilege.</p>
+                </div>
+                
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">⏱️</div>
+                        <h4>"I don't have time to learn new software."</h4>
+                    </div>
+                    <p class="objection-answer">These tools are simple by design. <strong>CALLBACK takes 5 minutes to set up.</strong> TRUSTLOCK imports your existing data automatically. If you can use email, you can use FirmFlow.</p>
+                </div>
+                
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">🧪</div>
+                        <h4>"Sounds too good to be true."</h4>
+                    </div>
+                    <p class="objection-answer">Try it free for 14 days. <strong>No credit card required.</strong> If you don't see value in the first week, walk away. We only win if you do.</p>
+                </div>
+                
+                <div class="objection-card fade-in">
+                    <div class="objection-question">
+                        <div class="objection-icon">🏢</div>
+                        <h4>"Will this work for my practice area?"</h4>
+                    </div>
+                    <p class="objection-answer">CALLBACK works for any practice that gets phone calls (all of them). TRUSTLOCK works for any practice handling client funds. DEADLINE covers <strong>every jurisdiction, every case type.</strong></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="final-cta" id="contact">
+        <div class="section-container">
+            <h2>Ready to Stop Leaving Money on the Table?</h2>
+            <p>Join hundreds of solo practitioners who've already recovered thousands in lost revenue.</p>
+            
+            <div class="final-cta-buttons">
+                <a href="#" class="btn btn-primary">
+                    Start Your Free 14-Day Trial
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </a>
+                <a href="#" class="btn btn-secondary">Schedule a Demo</a>
+            </div>
+            
+            <div class="guarantee">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                30-Day Money-Back Guarantee • No Questions Asked
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Firm<span>Flow</span></h3>
+                    <p>AI-powered tools built specifically for solo and small law firms. We help you recover lost revenue, stay compliant, and never miss a deadline.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Products</h4>
+                    <ul>
+                        <li><a href="#">CALLBACK</a></li>
+                        <li><a href="#">TRUSTLOCK</a></li>
+                        <li><a href="#">DEADLINE</a></li>
+                        <li><a href="#">Essentials Bundle</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">API Docs</a></li>
+                        <li><a href="#">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About</a></li>
+                        <li><a href="#">Contact</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Press</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>© 2025 FirmFlow. All rights reserved.</p>
+                <div class="footer-legal">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Security</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scroll Animation Script -->
+    <script>
+        // Intersection Observer for fade-in animations
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navigation background on scroll
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(15, 23, 42, 0.98)';
+            } else {
+                nav.style.background = 'rgba(15, 23, 42, 0.95)';
+            }
+        });
+    </script>
+</body>
+</html>

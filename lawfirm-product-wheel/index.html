@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Legal Suite | Law Firm Products</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy-deep: #0a1628;
+            --navy-mid: #1a2744;
+            --navy-light: #2a3a5c;
+            --gold-primary: #d4af37;
+            --gold-light: #f4d03f;
+            --gold-dark: #b8960c;
+            --glass-bg: rgba(26, 39, 68, 0.6);
+            --glass-border: rgba(212, 175, 55, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--navy-deep);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text-primary);
+        }
+
+        /* Animated background */
+        .bg-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-gradient {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(26, 39, 68, 0.8) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(42, 58, 92, 0.4) 0%, transparent 70%),
+                linear-gradient(180deg, var(--navy-deep) 0%, #0d1d35 100%);
+        }
+
+        .bg-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(212, 175, 55, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 175, 55, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: orbFloat 8s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, transparent 70%);
+            top: -100px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(42, 58, 92, 0.4) 0%, transparent 70%);
+            bottom: -50px;
+            left: -50px;
+            animation-delay: -4s;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            animation-delay: -2s;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            backdrop-filter: blur(20px);
+            margin-bottom: 24px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--navy-deep);
+        }
+
+        .logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease-out 0.1s both;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            animation: fadeInDown 0.8s ease-out 0.2s both;
+        }
+
+        .subtitle span {
+            color: var(--gold-primary);
+            font-weight: 500;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Carousel Container */
+        .carousel-section {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            perspective: 1500px;
+            perspective-origin: 50% 50%;
+            margin: 20px 0 60px;
+        }
+
+        .carousel-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel {
+            position: relative;
+            width: 320px;
+            height: 480px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Cards */
+        .card {
+            position: absolute;
+            width: 320px;
+            height: 480px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.5), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.1) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        .card.active::before,
+        .card.active::after {
+            opacity: 1;
+        }
+
+        .card.active {
+            border-color: rgba(212, 175, 55, 0.4);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 60px -15px rgba(212, 175, 55, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Card Icon */
+        .card-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        .card-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            opacity: 0.15;
+        }
+
+        .card-icon::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+        }
+
+        .card.active .card-icon {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px -10px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Card Content */
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .card-tagline {
+            font-size: 0.9rem;
+            color: var(--gold-primary);
+            font-weight: 500;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .card-features {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--gold-primary);
+            margin-top: 1px;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .price {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .price-amount {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1;
+        }
+
+        .price-period {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .cta-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+            border: none;
+            border-radius: 12px;
+            color: var(--navy-deep);
+            font-weight: 600;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-primary));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cta-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(212, 175, 55, 0.5);
+        }
+
+        .cta-btn:hover::before {
+            opacity: 1;
+        }
+
+        /* Floating animation for active card */
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .card.active {
+            animation: cardFloat 3s ease-in-out infinite;
+        }
+
+        /* Navigation */
+        .nav-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.4);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .dots {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .dot:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .dot.active {
+            background: var(--gold-primary);
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Side navigation arrows */
+        .side-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        .side-nav.prev {
+            left: max(20px, calc(50% - 400px));
+        }
+
+        .side-nav.next {
+            right: max(20px, calc(50% - 400px));
+        }
+
+        .side-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.7;
+        }
+
+        .side-btn:hover {
+            opacity: 1;
+            background: rgba(212, 175, 55, 0.2);
+            border-color: rgba(212, 175, 55, 0.4);
+            transform: scale(1.15);
+            box-shadow: 0 10px 40px -10px rgba(212, 175, 55, 0.4);
+        }
+
+        /* Keyboard hint */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            opacity: 0.5;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .key {
+            padding: 6px 10px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 6px;
+            font-family: monospace;
+        }
+
+        /* Progress bar */
+        .progress-wrapper {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 2px;
+        }
+
+        .paused .progress-bar {
+            animation-play-state: paused;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            header {
+                padding: 40px 20px 30px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .carousel-section {
+                height: 520px;
+            }
+
+            .carousel {
+                width: 280px;
+                height: 420px;
+            }
+
+            .card {
+                width: 280px;
+                height: 420px;
+                padding: 24px;
+            }
+
+            .card-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+
+            .card-title {
+                font-size: 1.25rem;
+            }
+
+            .side-nav {
+                display: none;
+            }
+
+            .keyboard-hint {
+                display: none;
+            }
+
+            .nav-btn {
+                width: 48px;
+                height: 48px;
+                font-size: 18px;
+            }
+        }
+
+        /* Touch feedback */
+        @media (hover: none) {
+            .card:active {
+                transform: scale(0.98);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-wrapper">
+        <div class="bg-gradient"></div>
+        <div class="bg-grid"></div>
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
+
+    <header>
+        <div class="logo-badge">
+            <div class="logo-icon">AI</div>
+            <span class="logo-text">Legal Suite</span>
+        </div>
+        <h1>AI-Powered Legal Tools</h1>
+        <p class="subtitle">Streamline your practice with <span>intelligent automation</span> designed exclusively for modern law firms</p>
+    </header>
+
+    <section class="carousel-section" id="carouselSection">
+        <div class="side-nav prev">
+            <button class="side-btn" onclick="prevSlide()" aria-label="Previous">
+                ←
+            </button>
+        </div>
+        
+        <div class="carousel-container">
+            <div class="carousel" id="carousel"></div>
+        </div>
+        
+        <div class="side-nav next">
+            <button class="side-btn" onclick="nextSlide()" aria-label="Next">
+                →
+            </button>
+        </div>
+
+        <div class="progress-wrapper" id="progressWrapper">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="prevSlide()" aria-label="Previous">←</button>
+            <div class="dots" id="dots"></div>
+            <button class="nav-btn" onclick="nextSlide()" aria-label="Next">→</button>
+        </div>
+    </section>
+
+    <div class="keyboard-hint">
+        <span class="key">←</span>
+        <span class="key">→</span>
+        <span>to navigate</span>
+    </div>
+
+    <script>
+        const products = [
+            {
+                id: 'trustlock',
+                name: 'TRUSTLOCK',
+                tagline: 'Trust Account Reconciliation',
+                icon: '🔐',
+                features: [
+                    'Automated three-way reconciliation',
+                    'Real-time compliance alerts',
+                    'Audit-ready reports in seconds'
+                ],
+                price: 49
+            },
+            {
+                id: 'deadline',
+                name: 'DEADLINE',
+                tagline: 'Court Deadline Calculator',
+                icon: '⏱️',
+                features: [
+                    'All federal & state court rules',
+                    'Smart calendar integration',
+                    'Team-wide deadline sharing'
+                ],
+                price: 25
+            },
+            {
+                id: 'callback',
+                name: 'CALLBACK',
+                tagline: 'Missed Call Recovery',
+                icon: '📞',
+                features: [
+                    'Instant AI text follow-up',
+                    'Lead capture & qualification',
+                    '24/7 client engagement'
+                ],
+                price: 29
+            },
+            {
+                id: 'billablebar',
+                name: 'BillableBar',
+                tagline: 'Menubar Time Tracking',
+                icon: '⏰',
+                features: [
+                    'One-click time capture',
+                    'Intelligent matter detection',
+                    'Seamless billing integration'
+                ],
+                price: 19
+            },
+            {
+                id: 'caseflow',
+                name: 'CaseFlow Board',
+                tagline: 'Litigation Kanban',
+                icon: '📋',
+                features: [
+                    'Visual case pipeline',
+                    'Automated stage workflows',
+                    'Team collaboration built-in'
+                ],
+                price: 49
+            },
+            {
+                id: 'conflictshield',
+                name: 'ConflictShield AI',
+                tagline: 'Conflict Checking',
+                icon: '🛡️',
+                features: [
+                    'AI-powered entity matching',
+                    'Cross-matter analysis',
+                    'Instant conflict reports'
+                ],
+                price: 39
+            },
+            {
+                id: 'deposync',
+                name: 'DepoSync',
+                tagline: 'Deposition Scheduling',
+                icon: '📅',
+                features: [
+                    'Multi-party coordination',
+                    'Court reporter matching',
+                    'Automated confirmations'
+                ],
+                price: 35
+            },
+            {
+                id: 'legaltoolbar',
+                name: 'Legal Toolbar',
+                tagline: 'Word Add-in for Contracts',
+                icon: '📝',
+                features: [
+                    'Smart clause library',
+                    'Risk scoring & highlights',
+                    'Version comparison tools'
+                ],
+                price: 29
+            }
+        ];
+
+        const carousel = document.getElementById('carousel');
+        const dotsContainer = document.getElementById('dots');
+        const progressBar = document.getElementById('progressBar');
+        const progressWrapper = document.getElementById('progressWrapper');
+        
+        let currentIndex = 0;
+        let isAnimating = false;
+        let autoplayInterval;
+        let progressInterval;
+        let isPaused = false;
+        const autoplayDelay = 4000;
+        const totalCards = products.length;
+        const angleStep = 360 / totalCards;
+        const radius = 450;
+
+        // Create cards
+        products.forEach((product, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.index = index;
+            card.innerHTML = `
+                <div class="card-icon">${product.icon}</div>
+                <h3 class="card-title">${product.name}</h3>
+                <p class="card-tagline">${product.tagline}</p>
+                <div class="card-features">
+                    ${product.features.map(f => `
+                        <div class="feature">
+                            <span class="feature-icon">✓</span>
+                            <span>${f}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="card-footer">
+                    <div class="price">
+                        <span class="price-amount">$${product.price}</span>
+                        <span class="price-period">per month</span>
+                    </div>
+                    <button class="cta-btn"><span>Learn More</span></button>
+                </div>
+            `;
+            card.addEventListener('click', () => goToSlide(index));
+            carousel.appendChild(card);
+        });
+
+        // Create dots
+        products.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'dot';
+            dot.dataset.index = index;
+            dot.addEventListener('click', () => goToSlide(index));
+            dotsContainer.appendChild(dot);
+        });
+
+        function updateCarousel() {
+            const cards = document.querySelectorAll('.card');
+            const dots = document.querySelectorAll('.dot');
+            
+            cards.forEach((card, index) => {
+                const offset = index - currentIndex;
+                let angle = offset * angleStep;
+                
+                // Normalize angle
+                while (angle < -180) angle += 360;
+                while (angle > 180) angle -= 360;
+                
+                const radian = (angle * Math.PI) / 180;
+                const x = Math.sin(radian) * radius;
+                const z = Math.cos(radian) * radius - radius;
+                const rotateY = -angle;
+                
+                // Calculate opacity and scale based on z position
+                const normalizedZ = (z + radius) / (2 * radius);
+                const scale = 0.6 + normalizedZ * 0.4;
+                const opacity = 0.3 + normalizedZ * 0.7;
+                
+                card.style.transform = `
+                    translateX(${x}px)
+                    translateZ(${z}px)
+                    rotateY(${rotateY}deg)
+                    scale(${scale})
+                `;
+                card.style.opacity = opacity;
+                card.style.zIndex = Math.round(normalizedZ * 100);
+                
+                // Active state
+                if (index === currentIndex) {
+                    card.classList.add('active');
+                    card.style.opacity = 1;
+                    card.style.zIndex = 100;
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+            
+            // Update dots
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+
+        function goToSlide(index) {
+            if (isAnimating || index === currentIndex) return;
+            isAnimating = true;
+            currentIndex = index;
+            updateCarousel();
+            resetProgress();
+            setTimeout(() => isAnimating = false, 600);
+        }
+
+        function nextSlide() {
+            goToSlide((currentIndex + 1) % totalCards);
+        }
+
+        function prevSlide() {
+            goToSlide((currentIndex - 1 + totalCards) % totalCards);
+        }
+
+        function resetProgress() {
+            progressBar.style.transition = 'none';
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.transition = 'width 0.1s linear';
+            }, 50);
+        }
+
+        function startAutoplay() {
+            if (autoplayInterval) clearInterval(autoplayInterval);
+            if (progressInterval) clearInterval(progressInterval);
+            
+            let progress = 0;
+            const step = 100 / (autoplayDelay / 100);
+            
+            progressInterval = setInterval(() => {
+                if (!isPaused) {
+                    progress += step;
+                    progressBar.style.width = `${Math.min(progress, 100)}%`;
+                }
+            }, 100);
+            
+            autoplayInterval = setInterval(() => {
+                if (!isPaused) {
+                    nextSlide();
+                    progress = 0;
+                }
+            }, autoplayDelay);
+        }
+
+        function pauseAutoplay() {
+            isPaused = true;
+            progressWrapper.classList.add('paused');
+        }
+
+        function resumeAutoplay() {
+            isPaused = false;
+            progressWrapper.classList.remove('paused');
+        }
+
+        // Event listeners
+        const carouselSection = document.getElementById('carouselSection');
+        carouselSection.addEventListener('mouseenter', pauseAutoplay);
+        carouselSection.addEventListener('mouseleave', resumeAutoplay);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') prevSlide();
+            if (e.key === 'ArrowRight') nextSlide();
+        });
+
+        // Touch/swipe support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        carousel.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            pauseAutoplay();
+        }, { passive: true });
+
+        carousel.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+            resumeAutoplay();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // Initialize
+        updateCarousel();
+        startAutoplay();
+
+        // Pause on tab visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                pauseAutoplay();
+            } else {
+                resumeAutoplay();
+            }
+        });
+    </script>
+</body>
+</html>

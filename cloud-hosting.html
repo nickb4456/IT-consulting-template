@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Hosting & Server Management | AIBridges - Rhode Island</title>
+    <meta name="description" content="Managed cloud hosting on AWS for Rhode Island businesses. Ubuntu, Windows Server, databases, websites. Local support, enterprise infrastructure.">
+    <link rel="canonical" href="https://aibridges.org/cloud-hosting">
+    
+    <meta property="og:title" content="Cloud Hosting & Server Management | AIBridges">
+    <meta property="og:description" content="Enterprise AWS infrastructure with local Rhode Island support. Ubuntu, Windows, databases, websites.">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #0a0a0f;
+            --bg-card: #14141e;
+            --bg-card-alt: #1a1a2e;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --aws-orange: #ff9900;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+        
+        /* Nav */
+        nav {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,15,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        
+        nav .container { display: flex; justify-content: space-between; align-items: center; }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links a {
+            color: var(--muted);
+            text-decoration: none;
+            margin-left: 2rem;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--text); }
+        
+        /* Hero */
+        .hero {
+            padding: 5rem 0 4rem;
+            text-align: center;
+            background: radial-gradient(ellipse at top, rgba(99,102,241,0.1) 0%, transparent 50%);
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,153,0,0.1);
+            border: 1px solid rgba(255,153,0,0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            color: var(--aws-orange);
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 span { color: var(--accent); }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--muted);
+            max-width: 650px;
+            margin: 0 auto 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+        .btn-outline:hover { border-color: var(--primary); }
+        
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        
+        /* Services Grid */
+        .services-section {
+            padding: 5rem 0;
+        }
+        
+        .services-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .services-section > .container > p {
+            text-align: center;
+            color: var(--muted);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .service-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        
+        .service-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+        
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--bg-card-alt);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .service-card p {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .service-card .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .service-card .price span {
+            font-size: 0.9rem;
+            font-weight: 400;
+            color: var(--muted);
+        }
+        
+        .service-card ul {
+            list-style: none;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .service-card li {
+            padding: 0.4rem 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .service-card li::before {
+            content: "✓";
+            color: var(--success);
+        }
+        
+        /* Pricing Table */
+        .pricing-section {
+            padding: 5rem 0;
+            background: var(--bg-card);
+        }
+        
+        .pricing-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .pricing-table {
+            width: 100%;
+            border-collapse: collapse;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .pricing-table th,
+        .pricing-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pricing-table th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .pricing-table td:first-child {
+            font-weight: 500;
+        }
+        
+        .pricing-table .price-cell {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        
+        .pricing-table .specs {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        
+        /* Add-ons */
+        .addons-section {
+            padding: 5rem 0;
+        }
+        
+        .addons-section h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .addons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .addon-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .addon-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .addon-card p {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        
+        .addon-card .price {
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+        
+        /* What's Included */
+        .included-section {
+            padding: 5rem 0;
+            background: var(--bg-card);
+        }
+        
+        .included-section h2 {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .included-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .included-item {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .included-item .icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .included-item h4 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .included-item p {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        /* CTA */
+        .cta-section {
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section p {
+            color: var(--muted);
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .cta-section .phone {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-top: 1.5rem;
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        footer a { color: var(--primary); }
+        
+        @media (max-width: 768px) {
+            .services-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+            .pricing-table { font-size: 0.9rem; }
+            .pricing-table th, .pricing-table td { padding: 0.75rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">AIBridges</a>
+            <div class="nav-links">
+                <a href="/#services">Services</a>
+                <a href="/managed-it.html">Managed IT</a>
+                <a href="/#products">Products</a>
+                <a href="/#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span>☁️</span> Powered by AWS
+            </div>
+            <h1>Cloud Hosting &<br><span>Server Management</span></h1>
+            <p>Enterprise-grade AWS infrastructure with local Rhode Island support. We set it up, manage it, and keep it running — you focus on your business.</p>
+            <div class="hero-buttons">
+                <a href="#services" class="btn btn-primary">View Services</a>
+                <a href="tel:+14013272971" class="btn btn-outline">📞 (401) 327-2971</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="services-section" id="services">
+        <div class="container">
+            <h2>What We Host</h2>
+            <p>From simple websites to complex Windows environments — all managed, monitored, and backed up.</p>
+            
+            <div class="services-grid">
+                <!-- Linux/Ubuntu Server -->
+                <div class="service-card">
+                    <div class="service-icon">🐧</div>
+                    <h3>Linux / Ubuntu Server</h3>
+                    <p>Perfect for web apps, APIs, Docker containers, and development environments. The workhorse of the cloud.</p>
+                    <div class="price">$49<span>/mo starting</span></div>
+                    <ul>
+                        <li>Ubuntu 22.04 LTS or 24.04</li>
+                        <li>SSH access provided</li>
+                        <li>Auto security updates</li>
+                        <li>Docker pre-installed (optional)</li>
+                        <li>Firewall configured</li>
+                    </ul>
+                </div>
+                
+                <!-- Windows Desktop -->
+                <div class="service-card">
+                    <div class="service-icon">🪟</div>
+                    <h3>Windows Desktop (RDP)</h3>
+                    <p>Full Windows 10/11 desktop in the cloud. Access from anywhere. Run your Windows apps 24/7.</p>
+                    <div class="price">$79<span>/mo starting</span></div>
+                    <ul>
+                        <li>Windows 10 or 11 Pro</li>
+                        <li>Remote Desktop access</li>
+                        <li>Install any software</li>
+                        <li>Persistent storage</li>
+                        <li>Daily snapshots</li>
+                    </ul>
+                </div>
+                
+                <!-- Windows Server -->
+                <div class="service-card">
+                    <div class="service-icon">🏢</div>
+                    <h3>Windows Server</h3>
+                    <p>For Active Directory, file shares, SQL Server, or legacy Windows applications that need a proper server OS.</p>
+                    <div class="price">$149<span>/mo starting</span></div>
+                    <ul>
+                        <li>Windows Server 2019/2022</li>
+                        <li>Active Directory ready</li>
+                        <li>SQL Server available</li>
+                        <li>RDP + admin access</li>
+                        <li>Licensing included</li>
+                    </ul>
+                </div>
+                
+                <!-- Website Hosting -->
+                <div class="service-card">
+                    <div class="service-icon">🌐</div>
+                    <h3>Website Hosting</h3>
+                    <p>WordPress, static sites, or custom web apps. SSL included, CDN optional, blazing fast.</p>
+                    <div class="price">$29<span>/mo starting</span></div>
+                    <ul>
+                        <li>WordPress or static sites</li>
+                        <li>Free SSL certificate</li>
+                        <li>Daily backups</li>
+                        <li>99.9% uptime SLA</li>
+                        <li>Email hosting add-on available</li>
+                    </ul>
+                </div>
+                
+                <!-- Database Hosting -->
+                <div class="service-card">
+                    <div class="service-icon">🗄️</div>
+                    <h3>Database Hosting</h3>
+                    <p>Managed MySQL, PostgreSQL, or SQL Server. We handle backups, updates, and optimization.</p>
+                    <div class="price">$59<span>/mo starting</span></div>
+                    <ul>
+                        <li>MySQL, PostgreSQL, or MSSQL</li>
+                        <li>Automated daily backups</li>
+                        <li>Point-in-time recovery</li>
+                        <li>Performance monitoring</li>
+                        <li>Secure remote access</li>
+                    </ul>
+                </div>
+                
+                <!-- Email Server -->
+                <div class="service-card">
+                    <div class="service-icon">📧</div>
+                    <h3>Email Server</h3>
+                    <p>Professional email on your domain. Microsoft 365 setup or self-hosted — your choice.</p>
+                    <div class="price">$10<span>/user/mo</span></div>
+                    <ul>
+                        <li>your@yourdomain.com</li>
+                        <li>50GB mailbox</li>
+                        <li>Spam filtering</li>
+                        <li>Mobile sync</li>
+                        <li>Microsoft 365 or self-hosted</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section">
+        <div class="container">
+            <h2>Server Sizing & Pricing</h2>
+            
+            <table class="pricing-table">
+                <thead>
+                    <tr>
+                        <th>Size</th>
+                        <th>Specs</th>
+                        <th>Best For</th>
+                        <th>Linux</th>
+                        <th>Windows</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Micro</strong></td>
+                        <td class="specs">1 vCPU, 1GB RAM, 20GB SSD</td>
+                        <td>Dev/test, small sites</td>
+                        <td class="price-cell">$29/mo</td>
+                        <td class="price-cell">$49/mo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Small</strong></td>
+                        <td class="specs">2 vCPU, 2GB RAM, 40GB SSD</td>
+                        <td>WordPress, small apps</td>
+                        <td class="price-cell">$49/mo</td>
+                        <td class="price-cell">$79/mo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Medium</strong></td>
+                        <td class="specs">2 vCPU, 4GB RAM, 80GB SSD</td>
+                        <td>Business apps, databases</td>
+                        <td class="price-cell">$79/mo</td>
+                        <td class="price-cell">$129/mo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Large</strong></td>
+                        <td class="specs">4 vCPU, 8GB RAM, 160GB SSD</td>
+                        <td>High traffic, SQL Server</td>
+                        <td class="price-cell">$149/mo</td>
+                        <td class="price-cell">$229/mo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XL</strong></td>
+                        <td class="specs">8 vCPU, 16GB RAM, 320GB SSD</td>
+                        <td>Enterprise workloads</td>
+                        <td class="price-cell">$299/mo</td>
+                        <td class="price-cell">$449/mo</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Custom</strong></td>
+                        <td class="specs">Your requirements</td>
+                        <td>Anything else</td>
+                        <td class="price-cell" colspan="2">Let's talk</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p style="text-align: center; color: var(--muted); margin-top: 2rem; font-size: 0.9rem;">
+                * Windows pricing includes licensing. All plans include management, monitoring, and support.
+            </p>
+        </div>
+    </section>
+
+    <section class="addons-section">
+        <div class="container">
+            <h2>Add-Ons & Extras</h2>
+            
+            <div class="addons-grid">
+                <div class="addon-card">
+                    <div>
+                        <h4>Additional Storage</h4>
+                        <p>SSD block storage</p>
+                    </div>
+                    <div class="price">$0.10/GB/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Daily Backups</h4>
+                        <p>30-day retention</p>
+                    </div>
+                    <div class="price">Included</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Hourly Backups</h4>
+                        <p>For critical systems</p>
+                    </div>
+                    <div class="price">+$29/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>SSL Certificate</h4>
+                        <p>Let's Encrypt auto-renewal</p>
+                    </div>
+                    <div class="price">Included</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>CDN (CloudFront)</h4>
+                        <p>Global content delivery</p>
+                    </div>
+                    <div class="price">+$19/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>DDoS Protection</h4>
+                        <p>AWS Shield Standard</p>
+                    </div>
+                    <div class="price">Included</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>VPN Access</h4>
+                        <p>Secure site-to-site or client</p>
+                    </div>
+                    <div class="price">+$49/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Load Balancer</h4>
+                        <p>High availability setup</p>
+                    </div>
+                    <div class="price">+$39/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Static IP</h4>
+                        <p>Dedicated IP address</p>
+                    </div>
+                    <div class="price">+$5/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Domain Registration</h4>
+                        <p>.com, .org, .io, etc.</p>
+                    </div>
+                    <div class="price">$15/yr</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>Email Hosting</h4>
+                        <p>Per mailbox</p>
+                    </div>
+                    <div class="price">$10/user/mo</div>
+                </div>
+                
+                <div class="addon-card">
+                    <div>
+                        <h4>24/7 Monitoring</h4>
+                        <p>Uptime + alerts</p>
+                    </div>
+                    <div class="price">Included</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="included-section">
+        <div class="container">
+            <h2>Every Server Includes</h2>
+            
+            <div class="included-grid">
+                <div class="included-item">
+                    <div class="icon">🔒</div>
+                    <div>
+                        <h4>Security Hardening</h4>
+                        <p>Firewall rules, fail2ban, automatic security patches. We lock it down so you don't have to worry.</p>
+                    </div>
+                </div>
+                
+                <div class="included-item">
+                    <div class="icon">📊</div>
+                    <div>
+                        <h4>24/7 Monitoring</h4>
+                        <p>We watch CPU, memory, disk, and uptime. If something's wrong, we know before you do.</p>
+                    </div>
+                </div>
+                
+                <div class="included-item">
+                    <div class="icon">💾</div>
+                    <div>
+                        <h4>Daily Backups</h4>
+                        <p>Automatic daily snapshots with 30-day retention. Restore in minutes if anything goes wrong.</p>
+                    </div>
+                </div>
+                
+                <div class="included-item">
+                    <div class="icon">🔧</div>
+                    <div>
+                        <h4>Managed Updates</h4>
+                        <p>OS patches, security updates, and maintenance windows handled by us. You stay focused on work.</p>
+                    </div>
+                </div>
+                
+                <div class="included-item">
+                    <div class="icon">📞</div>
+                    <div>
+                        <h4>Rhode Island Support</h4>
+                        <p>Real humans in Cranston, RI. Call or email — we respond same day, usually within hours.</p>
+                    </div>
+                </div>
+                
+                <div class="included-item">
+                    <div class="icon">📈</div>
+                    <div>
+                        <h4>Easy Scaling</h4>
+                        <p>Need more power? We upgrade your server with minimal downtime. Pay only for what you use.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Move to the Cloud?</h2>
+            <p>Tell us what you're running now. We'll design the right setup and give you a fixed monthly price.</p>
+            <a href="tel:+14013272971" class="btn btn-primary">📞 Call (401) 327-2971</a>
+            <span class="phone">or email nick@aibridges.org</span>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 AIBridges · Cranston, RI · <a href="/">aibridges.org</a></p>
+        </div>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": "Cloud Hosting & Server Management",
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": "AIBridges",
+            "telephone": "+1-401-327-2971",
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Cranston",
+                "addressRegion": "RI",
+                "addressCountry": "US"
+            }
+        },
+        "description": "Managed cloud hosting on AWS for Rhode Island businesses. Ubuntu, Windows Server, databases, websites.",
+        "areaServed": "Rhode Island",
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Cloud Hosting Services",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Linux Server Hosting"
+                    },
+                    "price": "49.00",
+                    "priceCurrency": "USD"
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Windows Desktop Hosting"
+                    },
+                    "price": "79.00",
+                    "priceCurrency": "USD"
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Windows Server Hosting"
+                    },
+                    "price": "149.00",
+                    "priceCurrency": "USD"
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Database Hosting"
+                    },
+                    "price": "59.00",
+                    "priceCurrency": "USD"
+                }
+            ]
+        }
+    }
+    </script>
+</body>
+</html>

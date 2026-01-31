@@ -1722,11 +1722,22 @@
         /* Drag and drop styles */
         .dragging {
             opacity: 0.5;
+            cursor: grabbing !important;
+        }
+
+        .shift-chip[draggable="true"] {
+            cursor: grab;
+        }
+
+        .shift-chip[draggable="true"]:active {
+            cursor: grabbing;
         }
 
         .drag-over {
             background: var(--accent-light) !important;
-            border: 1px dashed var(--accent) !important;
+            border: 2px dashed var(--accent) !important;
+            transform: scale(1.02);
+            transition: all 0.15s ease;
         }
     </style>
 </head>
@@ -3051,7 +3062,9 @@
                                         <div class="shift-chip ${escapeHtml(staff.role)}"
                                              draggable="true"
                                              ondragstart="handleDragStart(event, '${dateKey}', '${shift.id}', '${a.staffId}')"
-                                             onclick="showShiftOptions('${dateKey}', '${shift.id}', '${a.staffId}')">
+                                             ondragend="handleDragEnd(event)"
+                                             onclick="showShiftOptions('${dateKey}', '${shift.id}', '${a.staffId}')"
+                                             style="cursor: grab;">
                                             ${escapeHtml(staff.name)}
                                             <span class="remove-shift" onclick="event.stopPropagation(); removeAssignment('${dateKey}', '${shift.id}', '${a.staffId}')">×</span>
                                         </div>
@@ -3345,11 +3358,27 @@
 
         function handleDragStart(e, date, shiftId, staffId) {
             dragData = { date, shiftId, staffId };
+            e.dataTransfer.setData('text/plain', JSON.stringify(dragData));
+            e.dataTransfer.effectAllowed = 'move';
             e.target.classList.add('dragging');
+
+            // Set drag image
+            const dragImage = e.target.cloneNode(true);
+            dragImage.style.position = 'absolute';
+            dragImage.style.top = '-1000px';
+            document.body.appendChild(dragImage);
+            e.dataTransfer.setDragImage(dragImage, 0, 0);
+            setTimeout(() => dragImage.remove(), 0);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
         }
 
         function handleDragOver(e) {
             e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
             e.currentTarget.classList.add('drag-over');
         }
 
@@ -3360,18 +3389,25 @@
         function handleDrop(e) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
-            
+
             if (!dragData) return;
-            
+
             const newDate = e.currentTarget.dataset.date;
             const newShiftId = e.currentTarget.dataset.shift;
-            
+
+            // Don't do anything if dropped in same spot
+            if (newDate === dragData.date && newShiftId === dragData.shiftId) {
+                dragData = null;
+                return;
+            }
+
             // Remove from old position
             removeAssignment(dragData.date, dragData.shiftId, dragData.staffId);
-            
+
             // Add to new position
             assignStaff(newDate, newShiftId, dragData.staffId);
-            
+
+            showToast('Shift moved successfully', 'success');
             dragData = null;
         }
 

@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DocForge</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 12px;
+            background: #f8f9fa;
+            color: #1f2937;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: #1e3a5f;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 14px; font-weight: 600; }
+        .header-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .header-btn:hover { background: rgba(255,255,255,0.25); }
+        
+        /* TEMPLATE LIST VIEW */
+        #template-list-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .search-box {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+        .search-box:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .category {
+            margin-bottom: 16px;
+        }
+        .category-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+        .template-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .template-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .template-item:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+        .template-icon {
+            width: 32px;
+            height: 32px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .template-info { flex: 1; }
+        .template-name { font-weight: 500; font-size: 13px; }
+        .template-desc { font-size: 11px; color: #6b7280; margin-top: 2px; }
+        
+        /* VARIABLE EDITOR VIEW */
+        #variable-editor-view {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+        }
+        #variable-editor-view.active {
+            display: flex;
+        }
+        #template-list-view.hidden {
+            display: none;
+        }
+        
+        .editor-header {
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            color: #6b7280;
+        }
+        .back-btn:hover { color: #1f2937; }
+        .editor-title { font-weight: 600; font-size: 14px; }
+        .editor-subtitle { font-size: 11px; color: #6b7280; }
+        
+        .toolbar {
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 6px;
+        }
+        .toolbar button {
+            padding: 6px 14px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .toolbar button:hover { background: #f3f4f6; }
+        .toolbar button.primary {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        .toolbar button.primary:hover { background: #1d4ed8; }
+        .toolbar select {
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: auto;
+        }
+        
+        .variables-form {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+        .field {
+            margin-bottom: 12px;
+        }
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #374151;
+        }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+        }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+        }
+        .field textarea { resize: vertical; min-height: 60px; }
+        .field-hint {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+        
+        .status-bar {
+            padding: 8px 12px;
+            background: #1e3a5f;
+            color: white;
+            font-size: 11px;
+            display: none;
+        }
+        .status-bar.success { background: #059669; display: block; }
+        .status-bar.error { background: #dc2626; display: block; }
+        .status-bar.info { background: #2563eb; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚖️ DocForge</h1>
+        <button class="header-btn" onclick="showSettings()">⚙️</button>
+    </div>
+    
+    <!-- TEMPLATE LIST VIEW -->
+    <div id="template-list-view">
+        <input type="text" class="search-box" placeholder="Search templates..." oninput="filterTemplates(this.value)">
+        
+        <div class="category" data-category="correspondence">
+            <div class="category-title">Correspondence</div>
+            <div class="template-list">
+                <div class="template-item" onclick="selectTemplate('letter')">
+                    <div class="template-icon">✉️</div>
+                    <div class="template-info">
+                        <div class="template-name">Business Letter</div>
+                        <div class="template-desc">Standard firm correspondence</div>
+                    </div>
+                </div>
+                <div class="template-item" onclick="selectTemplate('memo')">
+                    <div class="template-icon">📝</div>
+                    <div class="template-info">
+                        <div class="template-name">Legal Memo</div>
+                        <div class="template-desc">Internal memorandum</div>
+                    </div>
+                </div>
+                <div class="template-item" onclick="selectTemplate('opinion')">
+                    <div class="template-icon">⚖️</div>
+                    <div class="template-info">
+                        <div class="template-name">Opinion Letter</div>
+                        <div class="template-desc">Formal legal opinion</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="category" data-category="client">
+            <div class="category-title">Client Documents</div>
+            <div class="template-list">
+                <div class="template-item" onclick="selectTemplate('engagement')">
+                    <div class="template-icon">🤝</div>
+                    <div class="template-info">
+                        <div class="template-name">Engagement Letter</div>
+                        <div class="template-desc">New matter engagement</div>
+                    </div>
+                </div>
+                <div class="template-item" onclick="selectTemplate('nda')">
+                    <div class="template-icon">🔒</div>
+                    <div class="template-info">
+                        <div class="template-name">NDA</div>
+                        <div class="template-desc">Non-disclosure agreement</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- VARIABLE EDITOR VIEW -->
+    <div id="variable-editor-view">
+        <div class="editor-header">
+            <button class="back-btn" onclick="goBack()">←</button>
+            <div>
+                <div class="editor-title" id="editor-title">Business Letter</div>
+                <div class="editor-subtitle" id="editor-subtitle">Fill in the variables below</div>
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <button onclick="insertTemplate()" class="primary">Insert & Fill</button>
+            <button onclick="fillOnly()">Fill Only</button>
+            <select id="dataset-select" onchange="loadDataset()">
+                <option value="">Load saved...</option>
+            </select>
+        </div>
+        
+        <div class="variables-form" id="variables-form">
+            <!-- Variables rendered here -->
+        </div>
+    </div>
+    
+    <div class="status-bar" id="status-bar"></div>
+    
+    <script>
+        let currentTemplate = null;
+        
+        // Template definitions with their variables
+        const TEMPLATES = {
+            letter: {
+                name: 'Business Letter',
+                icon: '✉️',
+                variables: [
+                    { name: 'Date', type: 'date', default: 'today' },
+                    { name: 'RecipientName', label: 'Recipient Name', type: 'text' },
+                    { name: 'RecipientTitle', label: 'Recipient Title', type: 'text' },
+                    { name: 'RecipientCompany', label: 'Company', type: 'text' },
+                    { name: 'RecipientAddress', label: 'Address', type: 'textarea' },
+                    { name: 'Subject', label: 'Re: Subject', type: 'text' },
+                    { name: 'Salutation', label: 'Salutation', type: 'text', hint: 'e.g., Mr. Smith' },
+                    { name: 'BodyText', label: 'Body', type: 'textarea' },
+                    { name: 'ClosingPhrase', label: 'Closing', type: 'select', options: ['Sincerely,', 'Very truly yours,', 'Best regards,'] },
+                    { name: 'AuthorName', label: 'Author Name', type: 'text' },
+                    { name: 'AuthorTitle', label: 'Author Title', type: 'text' },
+                    { name: 'FirmName', label: 'Firm Name', type: 'text' },
+                    { name: 'CC', label: 'CC', type: 'text' },
+                    { name: 'Enclosures', label: 'Enclosures', type: 'text' }
+                ],
+                content: `{{Date}}
+
+{{RecipientName}}
+{{RecipientTitle}}
+{{RecipientCompany}}
+{{RecipientAddress}}
+
+Re: {{Subject}}
+
+Dear {{Salutation}}:
+
+{{BodyText}}
+
+{{ClosingPhrase}}
+
+
+{{AuthorName}}
+{{AuthorTitle}}
+{{FirmName}}
+
+cc: {{CC}}
+Enclosures: {{Enclosures}}`
+            },
+            memo: {
+                name: 'Legal Memo',
+                icon: '📝',
+                variables: [
+                    { name: 'To', label: 'To', type: 'text' },
+                    { name: 'From', label: 'From', type: 'text' },
+                    { name: 'Date', type: 'date', default: 'today' },
+                    { name: 'Subject', label: 'Re: Subject', type: 'text' },
+                    { name: 'QuestionPresented', label: 'Question Presented', type: 'textarea' },
+                    { name: 'BriefAnswer', label: 'Brief Answer', type: 'textarea' },
+                    { name: 'Facts', label: 'Facts', type: 'textarea' },
+                    { name: 'Discussion', label: 'Discussion', type: 'textarea' },
+                    { name: 'Conclusion', label: 'Conclusion', type: 'textarea' }
+                ],
+                content: `CONFIDENTIAL MEMORANDUM
+
+TO:        {{To}}
+FROM:      {{From}}
+DATE:      {{Date}}
+RE:        {{Subject}}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+QUESTION PRESENTED
+
+{{QuestionPresented}}
+
+BRIEF ANSWER
+
+{{BriefAnswer}}
+
+FACTS
+
+{{Facts}}
+
+DISCUSSION
+
+{{Discussion}}
+
+CONCLUSION
+
+{{Conclusion}}`
+            },
+            opinion: {
+                name: 'Opinion Letter',
+                icon: '⚖️',
+                variables: [
+                    { name: 'Date', type: 'date', default: 'today' },
+                    { name: 'RecipientName', label: 'Recipient', type: 'text' },
+                    { name: 'RecipientCompany', label: 'Company', type: 'text' },
+                    { name: 'RecipientAddress', label: 'Address', type: 'textarea' },
+                    { name: 'Subject', label: 'Subject', type: 'text' },
+                    { name: 'Salutation', label: 'Salutation', type: 'text' },
+                    { name: 'FactsAndAssumptions', label: 'Facts & Assumptions', type: 'textarea' },
+                    { name: 'Opinion', label: 'Opinion', type: 'textarea' },
+                    { name: 'Qualifications', label: 'Qualifications', type: 'textarea' },
+                    { name: 'AuthorName', label: 'Author', type: 'text' },
+                    { name: 'FirmName', label: 'Firm', type: 'text' }
+                ],
+                content: `[FIRM LETTERHEAD]
+
+{{Date}}
+
+PRIVILEGED AND CONFIDENTIAL
+ATTORNEY-CLIENT COMMUNICATION
+
+{{RecipientName}}
+{{RecipientCompany}}
+{{RecipientAddress}}
+
+Re: Opinion Letter – {{Subject}}
+
+Dear {{Salutation}}:
+
+You have requested our opinion regarding {{Subject}}.
+
+FACTS AND ASSUMPTIONS
+
+{{FactsAndAssumptions}}
+
+OPINION
+
+{{Opinion}}
+
+QUALIFICATIONS
+
+{{Qualifications}}
+
+Very truly yours,
+
+{{AuthorName}}
+{{FirmName}}`
+            },
+            engagement: {
+                name: 'Engagement Letter',
+                icon: '🤝',
+                variables: [
+                    { name: 'Date', type: 'date', default: 'today' },
+                    { name: 'ClientName', label: 'Client Name', type: 'text' },
+                    { name: 'ClientAddress', label: 'Client Address', type: 'textarea' },
+                    { name: 'Matter', label: 'Matter Description', type: 'text' },
+                    { name: 'Salutation', label: 'Salutation', type: 'text' },
+                    { name: 'Scope', label: 'Scope of Work', type: 'textarea' },
+                    { name: 'FeesAndBilling', label: 'Fees & Billing', type: 'textarea' },
+                    { name: 'Retainer', label: 'Retainer', type: 'text' },
+                    { name: 'AuthorName', label: 'Attorney Name', type: 'text' },
+                    { name: 'FirmName', label: 'Firm Name', type: 'text' }
+                ],
+                content: `{{FirmName}}
+
+{{Date}}
+
+{{ClientName}}
+{{ClientAddress}}
+
+Re: Engagement Letter – {{Matter}}
+
+Dear {{Salutation}}:
+
+Thank you for selecting {{FirmName}} to represent you in connection with {{Matter}}.
+
+SCOPE OF REPRESENTATION
+
+{{Scope}}
+
+FEES AND BILLING
+
+{{FeesAndBilling}}
+
+RETAINER
+
+{{Retainer}}
+
+Please sign below to indicate your agreement.
+
+Sincerely,
+
+{{AuthorName}}
+{{FirmName}}
+
+AGREED AND ACCEPTED:
+
+_____________________________
+{{ClientName}}
+Date: _______________`
+            },
+            nda: {
+                name: 'NDA',
+                icon: '🔒',
+                variables: [
+                    { name: 'Date', type: 'date', default: 'today' },
+                    { name: 'DisclosingParty', label: 'Disclosing Party', type: 'text' },
+                    { name: 'ReceivingParty', label: 'Receiving Party', type: 'text' },
+                    { name: 'Purpose', label: 'Purpose', type: 'textarea' },
+                    { name: 'Term', label: 'Term', type: 'text', hint: 'e.g., 2 years' },
+                    { name: 'Jurisdiction', label: 'Governing Law', type: 'text' }
+                ],
+                content: `NON-DISCLOSURE AGREEMENT
+
+This Agreement is entered into as of {{Date}} by and between:
+
+{{DisclosingParty}} ("Disclosing Party")
+and
+{{ReceivingParty}} ("Receiving Party")
+
+1. PURPOSE
+{{Purpose}}
+
+2. TERM
+This Agreement shall remain in effect for {{Term}}.
+
+3. GOVERNING LAW
+This Agreement shall be governed by the laws of {{Jurisdiction}}.
+
+IN WITNESS WHEREOF:
+
+{{DisclosingParty}}
+By: _____________________________
+
+{{ReceivingParty}}
+By: _____________________________`
+            }
+        };
+        
+        // Initialize
+        Office.onReady((info) => {
+            loadDatasetsFromStorage();
+        });
+        
+        // Template selection
+        function selectTemplate(id) {
+            currentTemplate = TEMPLATES[id];
+            document.getElementById('editor-title').textContent = currentTemplate.name;
+            renderVariableForm();
+            document.getElementById('template-list-view').classList.add('hidden');
+            document.getElementById('variable-editor-view').classList.add('active');
+        }
+        
+        function goBack() {
+            document.getElementById('template-list-view').classList.remove('hidden');
+            document.getElementById('variable-editor-view').classList.remove('active');
+            currentTemplate = null;
+        }
+        
+        function filterTemplates(query) {
+            const q = query.toLowerCase();
+            document.querySelectorAll('.template-item').forEach(item => {
+                const name = item.querySelector('.template-name').textContent.toLowerCase();
+                item.style.display = name.includes(q) ? 'flex' : 'none';
+            });
+        }
+        
+        // Render variable form
+        function renderVariableForm() {
+            const form = document.getElementById('variables-form');
+            form.innerHTML = currentTemplate.variables.map(v => {
+                const label = v.label || v.name;
+                const value = v.default === 'today' ? new Date().toLocaleDateString('en-US', {year:'numeric',month:'long',day:'numeric'}) : '';
+                
+                if (v.type === 'textarea') {
+                    return `<div class="field">
+                        <label>${label}</label>
+                        <textarea id="var-${v.name}" placeholder="Enter ${label.toLowerCase()}...">${value}</textarea>
+                        ${v.hint ? `<div class="field-hint">${v.hint}</div>` : ''}
+                    </div>`;
+                } else if (v.type === 'select') {
+                    return `<div class="field">
+                        <label>${label}</label>
+                        <select id="var-${v.name}">
+                            ${v.options.map(o => `<option value="${o}">${o}</option>`).join('')}
+                        </select>
+                    </div>`;
+                } else {
+                    return `<div class="field">
+                        <label>${label}</label>
+                        <input type="${v.type === 'date' ? 'text' : 'text'}" id="var-${v.name}" value="${value}" placeholder="Enter ${label.toLowerCase()}...">
+                        ${v.hint ? `<div class="field-hint">${v.hint}</div>` : ''}
+                    </div>`;
+                }
+            }).join('');
+        }
+        
+        // Get form values
+        function getFormValues() {
+            const values = {};
+            currentTemplate.variables.forEach(v => {
+                const el = document.getElementById('var-' + v.name);
+                if (el && el.value) values[v.name] = el.value;
+            });
+            return values;
+        }
+        
+        // Insert template and fill
+        async function insertTemplate() {
+            const values = getFormValues();
+            let content = currentTemplate.content;
+            
+            // Replace variables
+            Object.entries(values).forEach(([name, value]) => {
+                content = content.replace(new RegExp('\\{\\{' + name + '\\}\\}', 'g'), value);
+            });
+            
+            try {
+                await Word.run(async (context) => {
+                    const range = context.document.getSelection();
+                    range.insertText(content, Word.InsertLocation.replace);
+                    await context.sync();
+                    showStatus('success', 'Template inserted!');
+                });
+            } catch (error) {
+                showStatus('error', 'Error: ' + error.message);
+            }
+        }
+        
+        // Fill only (document already has template)
+        async function fillOnly() {
+            const values = getFormValues();
+            
+            try {
+                await Word.run(async (context) => {
+                    const body = context.document.body;
+                    let filled = 0;
+                    
+                    for (const [name, value] of Object.entries(values)) {
+                        const results = body.search('{{' + name + '}}', {matchCase: false});
+                        results.load('items');
+                        await context.sync();
+                        
+                        for (const item of results.items) {
+                            item.insertText(value, Word.InsertLocation.replace);
+                            filled++;
+                        }
+                    }
+                    
+                    await context.sync();
+                    showStatus('success', `Filled ${filled} variables`);
+                });
+            } catch (error) {
+                showStatus('error', 'Error: ' + error.message);
+            }
+        }
+        
+        // Datasets
+        function loadDatasetsFromStorage() {
+            const saved = JSON.parse(localStorage.getItem('docforge-datasets') || '{}');
+            const select = document.getElementById('dataset-select');
+            select.innerHTML = '<option value="">Load saved...</option>';
+            Object.keys(saved).forEach(name => {
+                select.innerHTML += `<option value="${name}">${name}</option>`;
+            });
+        }
+        
+        function loadDataset() {
+            const name = document.getElementById('dataset-select').value;
+            if (!name) return;
+            
+            const saved = JSON.parse(localStorage.getItem('docforge-datasets') || '{}');
+            if (saved[name]) {
+                Object.entries(saved[name]).forEach(([key, value]) => {
+                    const el = document.getElementById('var-' + key);
+                    if (el) el.value = value;
+                });
+                showStatus('success', 'Loaded: ' + name);
+            }
+        }
+        
+        function showSettings() {
+            const name = prompt('Save current values as:', 'Client - Matter');
+            if (!name) return;
+            
+            const values = getFormValues();
+            const saved = JSON.parse(localStorage.getItem('docforge-datasets') || '{}');
+            saved[name] = values;
+            localStorage.setItem('docforge-datasets', JSON.stringify(saved));
+            loadDatasetsFromStorage();
+            showStatus('success', 'Saved: ' + name);
+        }
+        
+        function showStatus(type, message) {
+            const bar = document.getElementById('status-bar');
+            bar.className = 'status-bar ' + type;
+            bar.textContent = message;
+            setTimeout(() => { bar.className = 'status-bar'; }, 3000);
+        }
+    </script>
+</body>
+</html>

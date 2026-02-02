@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI & IT Services Cranston RI | AIBridges</title>
-    <meta name="description" content="Elevate IT Rhode Island - Premium IT & AI Services for Local Businesses. Based in Cranston, RI with same-day support.">
+    <meta name="description" content="AIBridges IT Rhode Island - Premium IT & AI Services for Local Businesses. Based in Cranston, RI with same-day support.">
     
     <!-- Open Graph / Social Meta Tags -->
     <meta property="og:type" content="website">
@@ -984,40 +984,40 @@
             margin: 0 auto;
         }
 
-        /* Free Lesson Card */
-        .free-lesson {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.1));
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 3rem;
-            margin: 3rem auto;
+        /* Free Lesson Card with Plasma Border */
+        .plasma-border-small {
             max-width: 800px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
+            margin: 3rem auto;
+            padding: 15px;
             opacity: 0;
             animation: fadeSlideUp 0.8s ease forwards;
             animation-delay: 1.4s;
+        }
+
+        .plasma-border-small #plasmaCanvasLesson {
+            border-radius: 28px;
+        }
+
+        .free-lesson {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.1));
+            border: none;
+            border-radius: 24px;
+            padding: 3rem;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .free-lesson:hover {
             transform: translateY(-5px);
-            border-color: rgba(99, 102, 241, 0.3);
             box-shadow: 0 25px 50px rgba(99, 102, 241, 0.15);
         }
 
         .free-lesson::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
-            background-size: 200% 100%;
-            animation: gradientSlide 3s ease infinite;
+            display: none;
         }
 
         @keyframes gradientSlide {
@@ -2957,7 +2957,7 @@
                 Rhode Island's AI & IT Partner
             </div>
             <h1>
-                <span class="gradient">Elevate IT</span><br>
+                <span class="gradient">AIBridges IT</span><br>
                 Rhode Island
             </h1>
             <p class="hero-subtitle">
@@ -2976,12 +2976,15 @@
                 </a>
             </div>
 
-            <!-- Free Lesson Card -->
-            <div class="free-lesson" role="article">
-                <span class="free-tag">Free Lesson</span>
-                <h3>What Are AI Agents?</h3>
-                <p>Discover how AI agents can automate your business workflows. Interactive 3D visualization included.</p>
-                <a href="#" class="btn btn-secondary ripple" role="button">Start Learning <span aria-hidden="true">→</span></a>
+            <!-- Free Lesson Card with Plasma Border -->
+            <div class="plasma-border-wrapper plasma-border-small" id="freeLessonWrapper">
+                <canvas id="plasmaCanvasLesson"></canvas>
+                <div class="free-lesson" role="article">
+                    <span class="free-tag">Free Lesson</span>
+                    <h3>What Are AI Agents?</h3>
+                    <p>Discover how AI agents can automate your business workflows. Interactive 3D visualization included.</p>
+                    <a href="#" class="btn btn-secondary ripple" role="button">Start Learning <span aria-hidden="true">→</span></a>
+                </div>
             </div>
         </div>
     </section>
@@ -4549,7 +4552,7 @@
     import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
     import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-    // Elevate IT Brand Colors
+    // AIBridges Brand Colors
     const COLORS = {
         primary: 0x2563eb,      // Blue
         secondary: 0x06b6d4,    // Cyan
@@ -4659,7 +4662,7 @@
     mainLight.shadow.camera.bottom = -10;
     scene.add(mainLight);
 
-    // Accent lights with Elevate IT blue/cyan colors
+    // Accent lights with AIBridges blue/cyan colors
     const accentLight1 = new THREE.PointLight(COLORS.primary, 2, 10);
     accentLight1.position.set(-3, 2, 2);
     scene.add(accentLight1);
@@ -4824,7 +4827,7 @@
         // Terminal style content
         ctx.font = 'bold 14px monospace';
         ctx.fillStyle = '#06b6d4';
-        ctx.fillText('Elevate IT Rhode Island', 20, 30);
+        ctx.fillText('AIBridges IT Rhode Island', 20, 30);
         ctx.fillText('Cranston, RI', 20, 50);
 
         // Main message with typing effect
@@ -4974,7 +4977,7 @@
 
     // ========== DECORATIVE ELEMENTS ==========
 
-    // Floating hologram cube (Elevate IT branding)
+    // Floating hologram cube (AIBridges branding)
     const cubeGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
     const cubeEdges = new THREE.EdgesGeometry(cubeGeometry);
     const cubeLine = new THREE.LineSegments(
@@ -7107,29 +7110,10 @@
         }
     </script>
 
-    <!-- Plasma Border Effect for 3D Office Scene -->
+    <!-- Plasma Border Effect -->
     <script>
     (function() {
-        const plasmaCanvas = document.getElementById('plasmaCanvas');
-        if (!plasmaCanvas) return;
-
-        const ctx = plasmaCanvas.getContext('2d');
-        const wrapper = plasmaCanvas.parentElement;
-
-        function resizePlasmaCanvas() {
-            const rect = wrapper.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            plasmaCanvas.width = rect.width * dpr;
-            plasmaCanvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
-            plasmaCanvas.style.width = rect.width + 'px';
-            plasmaCanvas.style.height = rect.height + 'px';
-        }
-
-        resizePlasmaCanvas();
-        window.addEventListener('resize', resizePlasmaCanvas);
-
-        // Simplex noise implementation
+        // Simplex noise implementation (shared)
         class SimplexNoise {
             constructor() {
                 this.p = new Uint8Array(256);
@@ -7141,7 +7125,6 @@
                 this.perm = new Uint8Array(512);
                 for (let i = 0; i < 512; i++) this.perm[i] = this.p[i & 255];
             }
-
             noise2D(x, y) {
                 const F2 = 0.5 * (Math.sqrt(3) - 1);
                 const G2 = (3 - Math.sqrt(3)) / 6;
@@ -7149,71 +7132,50 @@
                 const i = Math.floor(x + s);
                 const j = Math.floor(y + s);
                 const t = (i + j) * G2;
-                const X0 = i - t;
-                const Y0 = j - t;
-                const x0 = x - X0;
-                const y0 = y - Y0;
-                const i1 = x0 > y0 ? 1 : 0;
-                const j1 = x0 > y0 ? 0 : 1;
-                const x1 = x0 - i1 + G2;
-                const y1 = y0 - j1 + G2;
-                const x2 = x0 - 1 + 2 * G2;
-                const y2 = y0 - 1 + 2 * G2;
-                const ii = i & 255;
-                const jj = j & 255;
+                const X0 = i - t, Y0 = j - t;
+                const x0 = x - X0, y0 = y - Y0;
+                const i1 = x0 > y0 ? 1 : 0, j1 = x0 > y0 ? 0 : 1;
+                const x1 = x0 - i1 + G2, y1 = y0 - j1 + G2;
+                const x2 = x0 - 1 + 2 * G2, y2 = y0 - 1 + 2 * G2;
+                const ii = i & 255, jj = j & 255;
                 const grad = (hash, x, y) => {
                     const h = hash & 7;
-                    const u = h < 4 ? x : y;
-                    const v = h < 4 ? y : x;
+                    const u = h < 4 ? x : y, v = h < 4 ? y : x;
                     return ((h & 1) ? -u : u) + ((h & 2) ? -2 * v : 2 * v);
                 };
                 let n0 = 0, n1 = 0, n2 = 0;
                 let t0 = 0.5 - x0 * x0 - y0 * y0;
-                if (t0 >= 0) {
-                    t0 *= t0;
-                    n0 = t0 * t0 * grad(this.perm[ii + this.perm[jj]], x0, y0);
-                }
+                if (t0 >= 0) { t0 *= t0; n0 = t0 * t0 * grad(this.perm[ii + this.perm[jj]], x0, y0); }
                 let t1 = 0.5 - x1 * x1 - y1 * y1;
-                if (t1 >= 0) {
-                    t1 *= t1;
-                    n1 = t1 * t1 * grad(this.perm[ii + i1 + this.perm[jj + j1]], x1, y1);
-                }
+                if (t1 >= 0) { t1 *= t1; n1 = t1 * t1 * grad(this.perm[ii + i1 + this.perm[jj + j1]], x1, y1); }
                 let t2 = 0.5 - x2 * x2 - y2 * y2;
-                if (t2 >= 0) {
-                    t2 *= t2;
-                    n2 = t2 * t2 * grad(this.perm[ii + 1 + this.perm[jj + 1]], x2, y2);
-                }
+                if (t2 >= 0) { t2 *= t2; n2 = t2 * t2 * grad(this.perm[ii + 1 + this.perm[jj + 1]], x2, y2); }
                 return 70 * (n0 + n1 + n2);
             }
         }
 
         const noise = new SimplexNoise();
         let plasmaTime = 0;
-        let borderPoints = [];
 
         function getBorderPath(width, height, padding, radius) {
             const points = [];
             const steps = 200;
             const w = width - padding * 2;
             const h = height - padding * 2;
-
             for (let i = 0; i < steps; i++) {
                 const t = i / steps;
                 let x, y;
                 const perimeter = 2 * (w + h - 4 * radius) + 2 * Math.PI * radius;
                 const pos = t * perimeter;
-
                 if (pos < w - 2 * radius) {
-                    x = padding + radius + pos;
-                    y = padding;
+                    x = padding + radius + pos; y = padding;
                 } else if (pos < w - 2 * radius + Math.PI * radius / 2) {
                     const angle = (pos - (w - 2 * radius)) / radius;
                     x = padding + w - radius + Math.sin(angle) * radius;
                     y = padding + radius - Math.cos(angle) * radius;
                 } else if (pos < w - 2 * radius + Math.PI * radius / 2 + h - 2 * radius) {
                     const edgePos = pos - (w - 2 * radius + Math.PI * radius / 2);
-                    x = padding + w;
-                    y = padding + radius + edgePos;
+                    x = padding + w; y = padding + radius + edgePos;
                 } else if (pos < w - 2 * radius + Math.PI * radius + h - 2 * radius) {
                     const cornerStart = w - 2 * radius + Math.PI * radius / 2 + h - 2 * radius;
                     const angle = Math.PI / 2 + (pos - cornerStart) / radius;
@@ -7221,9 +7183,7 @@
                     y = padding + h - radius - Math.cos(angle) * radius;
                 } else if (pos < 2 * (w - 2 * radius) + Math.PI * radius + h - 2 * radius) {
                     const edgeStart = w - 2 * radius + Math.PI * radius + h - 2 * radius;
-                    const edgePos = pos - edgeStart;
-                    x = padding + w - radius - edgePos;
-                    y = padding + h;
+                    x = padding + w - radius - (pos - edgeStart); y = padding + h;
                 } else if (pos < 2 * (w - 2 * radius) + 1.5 * Math.PI * radius + h - 2 * radius) {
                     const cornerStart = 2 * (w - 2 * radius) + Math.PI * radius + h - 2 * radius;
                     const angle = Math.PI + (pos - cornerStart) / radius;
@@ -7231,9 +7191,7 @@
                     y = padding + h - radius - Math.cos(angle) * radius;
                 } else if (pos < 2 * (w - 2 * radius) + 1.5 * Math.PI * radius + 2 * (h - 2 * radius)) {
                     const edgeStart = 2 * (w - 2 * radius) + 1.5 * Math.PI * radius + h - 2 * radius;
-                    const edgePos = pos - edgeStart;
-                    x = padding;
-                    y = padding + h - radius - edgePos;
+                    x = padding; y = padding + h - radius - (pos - edgeStart);
                 } else {
                     const cornerStart = 2 * (w - 2 * radius) + 1.5 * Math.PI * radius + 2 * (h - 2 * radius);
                     const angle = 1.5 * Math.PI + (pos - cornerStart) / radius;
@@ -7245,107 +7203,117 @@
             return points;
         }
 
-        function drawPlasma() {
-            const rect = wrapper.getBoundingClientRect();
-            const width = rect.width;
-            const height = rect.height;
+        // Create plasma border instances
+        function createPlasmaBorder(canvasId, options = {}) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return null;
 
-            // Regenerate border points if size changed
-            if (borderPoints.length === 0 || borderPoints._width !== width) {
-                borderPoints = getBorderPath(width, height, 20, 16);
-                borderPoints._width = width;
+            const ctx = canvas.getContext('2d');
+            const wrapper = canvas.parentElement;
+            const padding = options.padding || 15;
+            const radius = options.radius || 24;
+            const scale = options.scale || 1;
+            let borderPoints = [];
+            let lastWidth = 0;
+
+            function resize() {
+                const rect = wrapper.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(dpr, dpr);
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                lastWidth = 0; // Force recalc
             }
 
-            ctx.clearRect(0, 0, width, height);
+            resize();
+            window.addEventListener('resize', resize);
 
-            // Draw multiple plasma layers using the site's color scheme
-            for (let layer = 0; layer < 5; layer++) {
-                const layerOffset = layer * 0.2;
-                const alpha = 0.35 - layer * 0.05;
-                const blur = 15 + layer * 12;
+            return {
+                draw: function() {
+                    const rect = wrapper.getBoundingClientRect();
+                    const width = rect.width;
+                    const height = rect.height;
 
-                ctx.save();
-                ctx.filter = `blur(${blur}px)`;
-                ctx.beginPath();
-
-                borderPoints.forEach((point, i) => {
-                    const noiseVal = noise.noise2D(
-                        point.t * 2 + plasmaTime * 0.3 + layerOffset,
-                        layer * 10
-                    );
-                    const noiseVal2 = noise.noise2D(
-                        point.t * 3 + plasmaTime * 0.2 + layerOffset,
-                        layer * 10 + 100
-                    );
-
-                    const nextPoint = borderPoints[(i + 1) % borderPoints.length];
-                    const dx = nextPoint.x - point.x;
-                    const dy = nextPoint.y - point.y;
-                    const len = Math.sqrt(dx * dx + dy * dy);
-                    const nx = -dy / len;
-                    const ny = dx / len;
-
-                    const offset = (noiseVal * 25 + noiseVal2 * 15) * (1 + layer * 0.5);
-                    const x = point.x + nx * offset;
-                    const y = point.y + ny * offset;
-
-                    if (i === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
+                    if (lastWidth !== width) {
+                        borderPoints = getBorderPath(width, height, padding, radius);
+                        lastWidth = width;
                     }
-                });
 
-                ctx.closePath();
+                    ctx.clearRect(0, 0, width, height);
 
-                // Using AIBridges color scheme (primary: #6366f1, accent: #22d3ee)
-                const gradient = ctx.createLinearGradient(0, 0, width, height);
-                gradient.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
-                gradient.addColorStop(0.3, `rgba(34, 211, 238, ${alpha})`);
-                gradient.addColorStop(0.6, `rgba(99, 102, 241, ${alpha})`);
-                gradient.addColorStop(1, `rgba(34, 211, 238, ${alpha})`);
+                    // Draw plasma layers
+                    for (let layer = 0; layer < 5; layer++) {
+                        const layerOffset = layer * 0.2;
+                        const alpha = (0.35 - layer * 0.05) * scale;
+                        const blur = (10 + layer * 8) * scale;
 
-                ctx.strokeStyle = gradient;
-                ctx.lineWidth = 8 + layer * 4;
-                ctx.stroke();
-                ctx.restore();
-            }
+                        ctx.save();
+                        ctx.filter = `blur(${blur}px)`;
+                        ctx.beginPath();
 
-            // Bright core line
-            ctx.save();
-            ctx.filter = 'blur(2px)';
-            ctx.beginPath();
+                        borderPoints.forEach((point, i) => {
+                            const noiseVal = noise.noise2D(point.t * 2 + plasmaTime * 0.3 + layerOffset, layer * 10);
+                            const noiseVal2 = noise.noise2D(point.t * 3 + plasmaTime * 0.2 + layerOffset, layer * 10 + 100);
+                            const nextPoint = borderPoints[(i + 1) % borderPoints.length];
+                            const dx = nextPoint.x - point.x, dy = nextPoint.y - point.y;
+                            const len = Math.sqrt(dx * dx + dy * dy);
+                            const nx = -dy / len, ny = dx / len;
+                            const offset = (noiseVal * 20 + noiseVal2 * 12) * (1 + layer * 0.4) * scale;
+                            const x = point.x + nx * offset, y = point.y + ny * offset;
+                            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                        });
 
-            borderPoints.forEach((point, i) => {
-                const noiseVal = noise.noise2D(point.t * 2 + plasmaTime * 0.3, 0);
-                const nextPoint = borderPoints[(i + 1) % borderPoints.length];
-                const dx = nextPoint.x - point.x;
-                const dy = nextPoint.y - point.y;
-                const len = Math.sqrt(dx * dx + dy * dy);
-                const nx = -dy / len;
-                const ny = dx / len;
-                const offset = noiseVal * 15;
-                const x = point.x + nx * offset;
-                const y = point.y + ny * offset;
+                        ctx.closePath();
+                        const gradient = ctx.createLinearGradient(0, 0, width, height);
+                        gradient.addColorStop(0, `rgba(99, 102, 241, ${alpha})`);
+                        gradient.addColorStop(0.3, `rgba(34, 211, 238, ${alpha})`);
+                        gradient.addColorStop(0.6, `rgba(99, 102, 241, ${alpha})`);
+                        gradient.addColorStop(1, `rgba(34, 211, 238, ${alpha})`);
+                        ctx.strokeStyle = gradient;
+                        ctx.lineWidth = (6 + layer * 3) * scale;
+                        ctx.stroke();
+                        ctx.restore();
+                    }
 
-                if (i === 0) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
+                    // Core line
+                    ctx.save();
+                    ctx.filter = 'blur(2px)';
+                    ctx.beginPath();
+                    borderPoints.forEach((point, i) => {
+                        const noiseVal = noise.noise2D(point.t * 2 + plasmaTime * 0.3, 0);
+                        const nextPoint = borderPoints[(i + 1) % borderPoints.length];
+                        const dx = nextPoint.x - point.x, dy = nextPoint.y - point.y;
+                        const len = Math.sqrt(dx * dx + dy * dy);
+                        const nx = -dy / len, ny = dx / len;
+                        const offset = noiseVal * 12 * scale;
+                        const x = point.x + nx * offset, y = point.y + ny * offset;
+                        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                    });
+                    ctx.closePath();
+                    ctx.strokeStyle = 'rgba(200, 220, 255, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
                 }
-            });
-
-            ctx.closePath();
-            ctx.strokeStyle = 'rgba(200, 220, 255, 0.8)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            ctx.restore();
-
-            plasmaTime += 0.006;
-            requestAnimationFrame(drawPlasma);
+            };
         }
 
-        drawPlasma();
+        // Initialize plasma borders
+        const borders = [
+            createPlasmaBorder('plasmaCanvas', { padding: 20, radius: 16, scale: 1 }),
+            createPlasmaBorder('plasmaCanvasLesson', { padding: 15, radius: 24, scale: 0.8 })
+        ].filter(Boolean);
+
+        function animate() {
+            borders.forEach(b => b.draw());
+            plasmaTime += 0.006;
+            requestAnimationFrame(animate);
+        }
+
+        if (borders.length > 0) animate();
     })();
     </script>
 </body>

@@ -984,40 +984,58 @@
             margin: 0 auto;
         }
 
-        /* Free Lesson Card with Plasma Border */
-        .plasma-border-small {
+        /* Hero Plasma Border */
+        .plasma-border-hero {
+            max-width: 900px;
+            margin: 0 auto 2rem auto;
+            padding: 30px;
+        }
+
+        .plasma-border-hero #plasmaCanvasHero {
+            border-radius: 32px;
+        }
+
+        .hero-inner {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Free Lesson Card */
+        .free-lesson {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.1));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            margin: 2rem auto;
             max-width: 800px;
-            margin: 3rem auto;
-            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
             opacity: 0;
             animation: fadeSlideUp 0.8s ease forwards;
             animation-delay: 1.4s;
-        }
-
-        .plasma-border-small #plasmaCanvasLesson {
-            border-radius: 28px;
-        }
-
-        .free-lesson {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.1));
-            border: none;
-            border-radius: 24px;
-            padding: 3rem;
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            overflow: hidden;
-            backdrop-filter: blur(20px);
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         .free-lesson:hover {
             transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.3);
             box-shadow: 0 25px 50px rgba(99, 102, 241, 0.15);
         }
 
         .free-lesson::before {
-            display: none;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            animation: gradientSlide 3s ease infinite;
         }
 
         @keyframes gradientSlide {
@@ -2952,39 +2970,42 @@
             <div class="shape shape-3"></div>
         </div>
         <div class="hero-content">
-            <div class="hero-badge">
-                <span class="pulse"></span>
-                Rhode Island's AI & IT Partner
-            </div>
-            <h1>
-                <span class="gradient">AIBridges IT</span><br>
-                Rhode Island
-            </h1>
-            <p class="hero-subtitle">
-                <span class="typewriter" id="typewriter">
-                    <span class="typewriter-text"></span><span class="typewriter-cursor"></span>
-                </span>
-            </p>
-            <div class="hero-buttons">
-                <a href="#contact" class="btn btn-primary ripple" role="button">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                    Get Started
-                </a>
-                <a href="#demo" class="btn btn-secondary ripple" role="button">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-                    Watch AI Demo
-                </a>
+            <!-- Hero Title Section with Plasma Border -->
+            <div class="plasma-border-wrapper plasma-border-hero" id="heroPlasmaWrapper">
+                <canvas id="plasmaCanvasHero"></canvas>
+                <div class="hero-inner">
+                    <div class="hero-badge">
+                        <span class="pulse"></span>
+                        Rhode Island's AI & IT Partner
+                    </div>
+                    <h1>
+                        <span class="gradient">AIBridges IT</span><br>
+                        Rhode Island
+                    </h1>
+                    <p class="hero-subtitle">
+                        <span class="typewriter" id="typewriter">
+                            <span class="typewriter-text"></span><span class="typewriter-cursor"></span>
+                        </span>
+                    </p>
+                    <div class="hero-buttons">
+                        <a href="#contact" class="btn btn-primary ripple" role="button">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                            Get Started
+                        </a>
+                        <a href="#demo" class="btn btn-secondary ripple" role="button">
+                            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                            Watch AI Demo
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <!-- Free Lesson Card with Plasma Border -->
-            <div class="plasma-border-wrapper plasma-border-small" id="freeLessonWrapper">
-                <canvas id="plasmaCanvasLesson"></canvas>
-                <div class="free-lesson" role="article">
-                    <span class="free-tag">Free Lesson</span>
-                    <h3>What Are AI Agents?</h3>
-                    <p>Discover how AI agents can automate your business workflows. Interactive 3D visualization included.</p>
-                    <a href="#" class="btn btn-secondary ripple" role="button">Start Learning <span aria-hidden="true">→</span></a>
-                </div>
+            <!-- Free Lesson Card -->
+            <div class="free-lesson" role="article">
+                <span class="free-tag">Free Lesson</span>
+                <h3>What Are AI Agents?</h3>
+                <p>Discover how AI agents can automate your business workflows. Interactive 3D visualization included.</p>
+                <a href="#" class="btn btn-secondary ripple" role="button">Start Learning <span aria-hidden="true">→</span></a>
             </div>
         </div>
     </section>
@@ -7304,7 +7325,7 @@
         // Initialize plasma borders
         const borders = [
             createPlasmaBorder('plasmaCanvas', { padding: 20, radius: 16, scale: 1 }),
-            createPlasmaBorder('plasmaCanvasLesson', { padding: 15, radius: 24, scale: 0.8 })
+            createPlasmaBorder('plasmaCanvasHero', { padding: 25, radius: 32, scale: 1.2 })
         ].filter(Boolean);
 
         function animate() {

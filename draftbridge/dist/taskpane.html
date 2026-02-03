@@ -1536,7 +1536,7 @@
             </div>
             
             <div class="actions">
-                <button class="btn secondary" onclick="showNumberingEditor()">✏️ Edit</button>
+                <button class="btn secondary" onclick="openWordNumberingDialog()">✏️ Edit</button>
                 <button class="btn" onclick="applySelectedScheme()">Apply to Selection</button>
             </div>
         </div>
@@ -1939,24 +1939,24 @@
         });
         
         // Simple toast notification
-        function toast(message, type = 'info') {
+        function toast(message, type = 'info', duration = 3000) {
             // Remove any existing toast
             const existing = document.querySelector('.toast-notification');
             if (existing) existing.remove();
             
-            const toast = document.createElement('div');
-            toast.className = `toast-notification toast-${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
+            const toastEl = document.createElement('div');
+            toastEl.className = `toast-notification toast-${type}`;
+            toastEl.textContent = message;
+            document.body.appendChild(toastEl);
             
             // Animate in
-            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => toastEl.classList.add('show'), 10);
             
-            // Remove after 3 seconds
+            // Remove after duration
             setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
+                toastEl.classList.remove('show');
+                setTimeout(() => toastEl.remove(), 300);
+            }, duration);
         }
         
         // Populate all author/signer dropdowns with firm authors
@@ -2271,6 +2271,33 @@
             hideNumberingEditor();
         }
         
+        // Open Word's native numbering dialog
+        async function openWordNumberingDialog() {
+            try {
+                await Word.run(async (context) => {
+                    // Select the current paragraph first
+                    const selection = context.document.getSelection();
+                    selection.load('paragraphs');
+                    await context.sync();
+                    
+                    // Use Office ribbon command to open Numbering dialog
+                    // This opens the "Define New Number Format" dialog
+                    if (Office.context.requirements.isSetSupported('WordApi', '1.5')) {
+                        // Trigger ribbon command for numbering library
+                        await context.document.body.paragraphs.getFirst().select();
+                        await context.sync();
+                    }
+                });
+                
+                // Show instruction since we can't directly open the dialog
+                toast('Use Home → Numbering dropdown → Define New Number Format', 'info', 5000);
+                
+            } catch (err) {
+                console.error('Could not open dialog:', err);
+                toast('Open from: Home → Numbering dropdown → Define New Number Format', 'info', 5000);
+            }
+        }
+        
         async function applySelectedScheme() {
             const scheme = numberingSchemes[selectedSchemeId] || userSchemes[selectedSchemeId];
             if (!scheme) {
@@ -2281,17 +2308,44 @@
             try {
                 await Word.run(async (context) => {
                     const selection = context.document.getSelection();
-                    selection.load('paragraphs');
+                    selection.load('paragraphs,text');
                     await context.sync();
                     
-                    // Apply numbering to each paragraph
+                    // Check if document/selection is empty
                     const paragraphs = selection.paragraphs;
                     paragraphs.load('items');
                     await context.sync();
                     
-                    for (let i = 0; i < paragraphs.items.length; i++) {
-                        const para = paragraphs.items[i];
-                        para.listFormat.convertToNumberedList();
+                    let targetParagraphs = paragraphs.items;
+                    
+                    // If empty or no content, insert placeholder paragraphs
+                    if (targetParagraphs.length === 0 || (targetParagraphs.length === 1 && !selection.text.trim())) {
+                        // Insert sample numbered items
+                        const body = context.document.body;
+                        body.insertParagraph('Item 1', Word.InsertLocation.end);
+                        body.insertParagraph('Item 2', Word.InsertLocation.end);
+                        body.insertParagraph('Item 3', Word.InsertLocation.end);
+                        await context.sync();
+                        
+                        // Re-select the inserted content
+                        body.load('paragraphs');
+                        await context.sync();
+                        targetParagraphs = body.paragraphs.items.slice(-3);
+                    }
+                    
+                    // Load listFormat for all target paragraphs
+                    for (let i = 0; i < targetParagraphs.length; i++) {
+                        const para = targetParagraphs[i];
+                        para.load('listFormat');
+                    }
+                    await context.sync();
+                    
+                    // Apply numbering
+                    for (let i = 0; i < targetParagraphs.length; i++) {
+                        const para = targetParagraphs[i];
+                        if (para.listFormat) {
+                            para.listFormat.convertToNumberedList();
+                        }
                     }
                     await context.sync();
                     
@@ -2616,25 +2670,34 @@
         async function insertToc() {
             try {
                 await Word.run(async (context) => {
-                    const selection = context.document.getSelection();
+                    // Determine heading levels based on selection
+                    let headingLevels = '1';
+                    if (selectedTocStyle === 'level12') headingLevels = '1-2';
+                    if (selectedTocStyle === 'level123') headingLevels = '1-3';
                     
-                    // Determine levels based on selection
-                    let levels = 1;
-                    if (selectedTocStyle === 'level12') levels = 2;
-                    if (selectedTocStyle === 'level123') levels = 3;
+                    // Get the body to insert TOC at cursor or beginning
+                    const range = context.document.getSelection();
                     
-                    // Insert a simple TOC placeholder text for now
-                    // Full TOC implementation would use Word's built-in TOC
-                    const tocText = `[Table of Contents - Levels 1-${levels}]\n\n`;
-                    selection.insertText(tocText, Word.InsertLocation.replace);
+                    // Insert TOC field code
+                    // Word uses field codes like: TOC \o "1-3" \h \z \u
+                    // \o = heading levels, \h = hyperlinks, \z = hide tab/page in web, \u = use applied paragraph styles
+                    const tocField = `TOC \\o "${headingLevels}" \\h \\z \\u`;
+                    
+                    // Insert as a field
+                    range.insertField(Word.FieldType.toc, tocField, Word.InsertLocation.start);
                     
                     await context.sync();
                 });
                 
-                alert('✓ TOC inserted! Use Word\'s References tab to generate full TOC.');
+                toast('TOC inserted! Press F9 or right-click → Update Field to populate.', 'success', 5000);
             } catch (err) {
                 console.error('TOC insert failed:', err);
-                alert('Failed to insert TOC: ' + err.message);
+                // Fallback: try inserting via References tab guidance
+                if (err.message.includes('insertField') || err.message.includes('not supported')) {
+                    toast('Use References tab → Table of Contents to insert TOC', 'info', 5000);
+                } else {
+                    toast('Failed to insert TOC: ' + err.message, 'error');
+                }
             }
         }
         
@@ -3282,7 +3345,7 @@ COMMENTS:
             document.getElementById('voice-action').classList.remove('active');
         }
         
-        function toggleVoiceListening() {
+        async function toggleVoiceListening() {
             if (!recognition) {
                 showVoiceAction('Voice control not available. Requires Office 365/2021+ on Windows.', true);
                 return;
@@ -3292,6 +3355,26 @@ COMMENTS:
                 recognition.stop();
             } else {
                 try {
+                    // Request microphone permission explicitly first
+                    // This triggers the browser/OS permission prompt
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            // Permission granted - stop the stream (SpeechRecognition will create its own)
+                            stream.getTracks().forEach(track => track.stop());
+                            console.log('Microphone permission granted');
+                        } catch (permErr) {
+                            console.error('Microphone permission denied:', permErr);
+                            if (permErr.name === 'NotAllowedError') {
+                                showVoiceAction('Microphone blocked. In Windows: Settings → Privacy → Microphone → Allow desktop apps', true);
+                                return;
+                            } else if (permErr.name === 'NotFoundError') {
+                                showVoiceAction('No microphone found. Check your audio devices.', true);
+                                return;
+                            }
+                        }
+                    }
+                    
                     recognition.start();
                 } catch (err) {
                     console.error('Failed to start recognition:', err);

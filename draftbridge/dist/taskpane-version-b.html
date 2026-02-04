@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://appsforoffice.microsoft.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <title>DraftBridge</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #8B7355;
+            --primary-dark: #5C4A32;
+            --primary-light: #fdf8f3;
+            --gold: #C4A052;
+            --text: #333;
+            --text-muted: #666;
+            --text-light: #999;
+            --border: #e0e0e0;
+            --bg: #f5f5f5;
+            --bg-white: #fff;
+            --success: #2e7d32;
+            --warning: #f57c00;
+            --error: #c62828;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            font-size: 14px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* ========== HEADER ========== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .header h1 span {
+            color: var(--gold);
+        }
+        
+        .version-badge {
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            padding: 3px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+        
+        /* ========== STATUS SECTION ========== */
+        .status-section {
+            padding: 12px 20px;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .health-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--bg);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+        
+        .health-badge:hover {
+            background: #eee;
+            border-color: var(--primary);
+        }
+        
+        .health-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-light);
+        }
+        
+        .health-badge.healthy .health-dot { background: var(--success); }
+        .health-badge.issues .health-dot { background: var(--warning); }
+        .health-badge.broken .health-dot { background: var(--error); }
+        .health-badge.scanning .health-dot { 
+            background: var(--primary);
+            animation: pulse-dot 1s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        
+        .status-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            flex: 1;
+        }
+        
+        /* ========== MAIN CONTENT ========== */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        /* ========== SECTION TITLE ========== */
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+        
+        /* ========== QUICK ACTIONS ========== */
+        .quick-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateX(4px);
+        }
+        
+        .action-btn:active {
+            transform: translateX(2px);
+        }
+        
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0ebe4 100%);
+            border-color: var(--primary);
+        }
+        
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-dark);
+            flex-shrink: 0;
+        }
+        
+        .action-btn.primary .action-icon {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .action-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .action-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        
+        .action-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .action-arrow {
+            color: var(--text-light);
+            font-size: 18px;
+            font-weight: 300;
+        }
+        
+        /* ========== RECENT SECTION ========== */
+        .recent-section {
+            margin-bottom: 20px;
+        }
+        
+        .recent-list {
+            list-style: none;
+        }
+        
+        .recent-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .recent-item:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .recent-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+        
+        .recent-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .recent-title {
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .recent-meta {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 2px;
+        }
+        
+        .recent-action {
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 24px 16px;
+            color: var(--text-light);
+            background: var(--bg-white);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+        }
+        
+        .empty-state-text {
+            font-size: 13px;
+        }
+        
+        /* ========== TOAST NOTIFICATIONS ========== */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 3000;
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .toast-success { background: var(--success); }
+        .toast-error { background: var(--error); }
+        .toast-warning { background: var(--warning); }
+        .toast-info { background: #1565c0; }
+        
+        /* ========== FOOTER ========== */
+        .footer {
+            padding: 12px 20px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .footer-text {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <h1>Draft<span>Bridge</span></h1>
+        <span class="version-badge">VERSION B</span>
+    </header>
+    
+    <!-- Status Section -->
+    <section class="status-section">
+        <div class="health-badge" id="health-badge" onclick="showHealthDetails()" title="Document health - click for details">
+            <span class="health-dot"></span>
+            <span class="health-label">Checking...</span>
+        </div>
+        <span class="status-text" id="status-text">Ready</span>
+    </section>
+    
+    <!-- Main Content -->
+    <main class="content">
+        <!-- Quick Actions -->
+        <section class="actions-section">
+            <div class="section-title">Actions</div>
+            <div class="quick-actions">
+                <button class="action-btn primary" onclick="openDialog('generate')">
+                    <span class="action-icon">G</span>
+                    <div class="action-info">
+                        <div class="action-title">Generate Document</div>
+                        <div class="action-desc">Create letters, motions, memos</div>
+                    </div>
+                    <span class="action-arrow">&rarr;</span>
+                </button>
+                
+                <button class="action-btn" onclick="openDialog('numbering')">
+                    <span class="action-icon">#</span>
+                    <div class="action-info">
+                        <div class="action-title">Numbering</div>
+                        <div class="action-desc">Legal outline schemes, fix issues</div>
+                    </div>
+                    <span class="action-arrow">&rarr;</span>
+                </button>
+                
+                <button class="action-btn" onclick="openDialog('clauses')">
+                    <span class="action-icon">CL</span>
+                    <div class="action-info">
+                        <div class="action-title">Clause Library</div>
+                        <div class="action-desc">Standard clauses and boilerplate</div>
+                    </div>
+                    <span class="action-arrow">&rarr;</span>
+                </button>
+                
+                <button class="action-btn" onclick="openDialog('settings')">
+                    <span class="action-icon">S</span>
+                    <div class="action-info">
+                        <div class="action-title">Settings</div>
+                        <div class="action-desc">Preferences and configuration</div>
+                    </div>
+                    <span class="action-arrow">&rarr;</span>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Recent Items -->
+        <section class="recent-section">
+            <div class="section-title">Recent</div>
+            <ul class="recent-list" id="recent-list">
+                <!-- Populated dynamically -->
+            </ul>
+            <div class="empty-state" id="recent-empty">
+                <div class="empty-state-text">No recent items</div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <span class="footer-text">DraftBridge Gold - Dialog Edition</span>
+    </footer>
+    
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+    
+    <script>
+        const API = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
+        const DIALOG_URL = 'dialog-b.html';
+        
+        // ========== INITIALIZATION ==========
+        Office.onReady(async (info) => {
+            console.log('DraftBridge Version B loaded');
+            
+            // Initial health check
+            setTimeout(checkDocumentHealth, 500);
+            
+            // Load recent items
+            loadRecentItems();
+            
+            // Set up periodic health checks
+            setInterval(checkDocumentHealth, 30000);
+        });
+        
+        // ========== HEALTH CHECK ==========
+        let lastHealthStatus = 'unknown';
+        
+        async function checkDocumentHealth() {
+            const badge = document.getElementById('health-badge');
+            const label = badge.querySelector('.health-label');
+            const statusText = document.getElementById('status-text');
+            
+            badge.className = 'health-badge scanning';
+            label.textContent = 'Scanning...';
+            statusText.textContent = 'Checking document...';
+            
+            try {
+                await Word.run(async (context) => {
+                    const body = context.document.body;
+                    const paragraphs = body.paragraphs;
+                    paragraphs.load('items');
+                    await context.sync();
+                    
+                    let issueCount = 0;
+                    
+                    // Quick scan for numbering issues
+                    for (let i = 0; i < Math.min(paragraphs.items.length, 100); i++) {
+                        const para = paragraphs.items[i];
+                        para.load(['text', 'listItemOrNullObject']);
+                    }
+                    await context.sync();
+                    
+                    for (let i = 0; i < Math.min(paragraphs.items.length, 100); i++) {
+                        const para = paragraphs.items[i];
+                        const text = para.text.trim();
+                        
+                        // Check for manual numbering that should be automated
+                        const manualPattern = /^(\d+\.|[a-z]\.|[A-Z]\.|[ivxIVX]+\.|\(\d+\)|\([a-z]\))\s/;
+                        if (manualPattern.test(text) && (!para.listItemOrNullObject || para.listItemOrNullObject.isNullObject)) {
+                            issueCount++;
+                        }
+                    }
+                    
+                    updateHealthBadge(issueCount);
+                });
+            } catch (err) {
+                console.warn('Health check failed:', err);
+                badge.className = 'health-badge';
+                label.textContent = 'Unknown';
+                statusText.textContent = 'Could not scan document';
+            }
+        }
+        
+        function updateHealthBadge(issueCount) {
+            const badge = document.getElementById('health-badge');
+            const label = badge.querySelector('.health-label');
+            const statusText = document.getElementById('status-text');
+            
+            if (issueCount === 0) {
+                badge.className = 'health-badge healthy';
+                label.textContent = 'Healthy';
+                statusText.textContent = 'Document looks good';
+                lastHealthStatus = 'healthy';
+            } else if (issueCount <= 3) {
+                badge.className = 'health-badge issues';
+                label.textContent = `${issueCount} issue${issueCount > 1 ? 's' : ''}`;
+                statusText.textContent = 'Click badge to review';
+                lastHealthStatus = 'issues';
+            } else {
+                badge.className = 'health-badge broken';
+                label.textContent = `${issueCount} issues`;
+                statusText.textContent = 'Click badge to fix numbering';
+                lastHealthStatus = 'broken';
+            }
+        }
+        
+        function showHealthDetails() {
+            if (lastHealthStatus === 'healthy') {
+                toast('Document numbering looks healthy', 'success');
+            } else {
+                openDialog('numbering');
+            }
+        }
+        
+        // ========== DIALOG FUNCTIONS ==========
+        function openDialog(formType) {
+            const dialogUrl = `${window.location.origin}/${DIALOG_URL}?form=${formType}`;
+            
+            Office.context.ui.displayDialogAsync(
+                dialogUrl,
+                { height: 70, width: 60, displayInIframe: false },
+                function (asyncResult) {
+                    if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                        console.error('Dialog failed:', asyncResult.error.message);
+                        toast('Could not open dialog: ' + asyncResult.error.message, 'error');
+                        return;
+                    }
+                    
+                    const dialog = asyncResult.value;
+                    
+                    dialog.addEventHandler(Office.EventType.DialogMessageReceived, function(arg) {
+                        try {
+                            const message = JSON.parse(arg.message);
+                            handleDialogMessage(message);
+                        } catch (e) {
+                            console.error('Failed to parse dialog message:', e);
+                        }
+                        dialog.close();
+                    });
+                    
+                    dialog.addEventHandler(Office.EventType.DialogEventReceived, function(arg) {
+                        console.log('Dialog closed');
+                    });
+                }
+            );
+        }
+        
+        function handleDialogMessage(message) {
+            switch (message.action) {
+                case 'insert':
+                    insertDocument(message.formType, message.data);
+                    break;
+                case 'insert-numbering':
+                    insertNumberingScheme(message.data);
+                    break;
+                case 'insert-clause':
+                    insertClause(message.data);
+                    break;
+                case 'save-settings':
+                    saveSettings(message.data);
+                    break;
+                case 'cancel':
+                    // Dialog was cancelled, do nothing
+                    break;
+                default:
+                    console.log('Unknown action:', message.action);
+            }
+        }
+        
+        // ========== INSERT FUNCTIONS ==========
+        async function insertDocument(type, data) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    const content = buildDocumentContent(type, data);
+                    selection.insertText(content, Word.InsertLocation.replace);
+                    await context.sync();
+                    toast('Document inserted', 'success');
+                    addToRecent(type, data.title || type);
+                });
+            } catch (err) {
+                console.error('Insert failed:', err);
+                toast('Failed to insert document', 'error');
+            }
+        }
+        
+        function buildDocumentContent(type, data) {
+            switch (type) {
+                case 'demand-letter':
+                    return buildDemandLetter(data);
+                case 'motion':
+                    return buildMotion(data);
+                case 'memo':
+                    return buildMemo(data);
+                case 'letter':
+                    return buildLetter(data);
+                default:
+                    return data.content || '';
+            }
+        }
+        
+        function buildDemandLetter(d) {
+            return `${d.date || new Date().toLocaleDateString()}
+
+${d.delivery ? d.delivery + '\n\n' : ''}${d.recipient || '[Recipient Name]'}
+${d.recipientTitle ? d.recipientTitle + '\n' : ''}${d.company ? d.company + '\n' : ''}${d.address || '[Address]'}
+
+RE: ${d.subject || '[Subject Matter]'}
+
+Dear ${d.recipient ? d.recipient.split(' ')[0] : 'Sir/Madam'}:
+
+This letter constitutes a formal demand for payment in the amount of ${d.amount || '[Amount]'}.
+
+${d.basis || '[Basis for demand]'}
+
+Please remit payment in full on or before ${d.deadline || '[Deadline]'}. Failure to respond to this demand may result in legal action being taken against you without further notice.
+
+Please govern yourself accordingly.
+
+Very truly yours,
+
+
+${d.sender || '[Attorney Name]'}
+${d.senderTitle || ''}
+${d.firm || ''}
+`;
+        }
+        
+        function buildMotion(d) {
+            return `${d.court || '[COURT NAME]'}
+${d.district || '[DISTRICT/JURISDICTION]'}
+
+${d.plaintiff || '[PLAINTIFF]'},
+    Plaintiff,
+
+v.                                              Case No. ${d.caseNumber || '[Case Number]'}
+
+${d.defendant || '[DEFENDANT]'},
+    Defendant.
+
+DEFENDANT'S MOTION TO DISMISS
+PURSUANT TO FED. R. CIV. P. ${d.grounds ? d.grounds.join(', ') : '12(b)(6)'}
+
+Defendant ${d.defendant || '[Defendant]'}, by and through undersigned counsel, hereby moves this Honorable Court pursuant to Federal Rule of Civil Procedure ${d.grounds ? d.grounds.join(', ') : '12(b)(6)'} to dismiss the Complaint filed by Plaintiff ${d.plaintiff || '[Plaintiff]'}.
+
+INTRODUCTION
+
+${d.summary || '[Brief summary of arguments]'}
+
+WHEREFORE, Defendant respectfully requests that this Court grant Defendant's Motion to Dismiss and dismiss Plaintiff's Complaint with prejudice, together with such other relief as this Court deems just and proper.
+
+Respectfully submitted,
+
+
+_______________________________
+${d.attorney || '[Attorney Name]'}
+${d.bar ? 'Bar No. ' + d.bar : ''}
+${d.firm || '[Firm Name]'}
+${d.firmAddress || ''}
+${d.phone ? 'Tel: ' + d.phone : ''}
+${d.email ? 'Email: ' + d.email : ''}
+Counsel for Defendant
+`;
+        }
+        
+        function buildMemo(d) {
+            return `MEMORANDUM
+
+TO:      ${d.to || '[Recipient]'}
+FROM:    ${d.from || '[Sender]'}
+DATE:    ${d.date || new Date().toLocaleDateString()}
+RE:      ${d.subject || '[Subject]'}
+${d.cc ? 'CC:      ' + d.cc + '\n' : ''}
+${'─'.repeat(50)}
+
+${d.body || '[Memo body]'}
+`;
+        }
+        
+        function buildLetter(d) {
+            return `${d.date || new Date().toLocaleDateString()}
+
+${d.recipient || '[Recipient Name]'}
+${d.address || '[Address]'}
+
+RE: ${d.subject || '[Subject]'}
+
+Dear ${d.recipient ? d.recipient.split(' ')[0] : 'Sir/Madam'}:
+
+${d.body || '[Letter body]'}
+
+${d.closing || 'Sincerely'},
+
+
+${d.sender || '[Your Name]'}
+`;
+        }
+        
+        // ========== NUMBERING INSERT (WITH OOXML FIX) ==========
+        async function insertNumberingScheme(data) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    const ooxml = generateNumberingOoxml(data.scheme, data.levels || 3);
+                    selection.insertOoxml(ooxml, Word.InsertLocation.replace);
+                    await context.sync();
+                    toast('Numbering scheme applied', 'success');
+                    addToRecent('numbering', data.scheme);
+                });
+            } catch (err) {
+                console.error('Insert numbering failed:', err);
+                // Fallback to simple list API
+                try {
+                    await applyNumberingSimpleFallback(data.scheme);
+                } catch (e) {
+                    toast('Failed to apply numbering', 'error');
+                }
+            }
+        }
+        
+        function generateNumberingOoxml(scheme, levels) {
+            const schemes = {
+                'legal-outline': [
+                    { format: 'upperRoman', text: '%1.' },
+                    { format: 'upperLetter', text: '%2.' },
+                    { format: 'decimal', text: '%3.' },
+                    { format: 'lowerLetter', text: '%4.' },
+                    { format: 'lowerRoman', text: '(%5)' },
+                    { format: 'decimal', text: '(%6)' },
+                    { format: 'lowerLetter', text: '(%7)' },
+                    { format: 'lowerRoman', text: '(%8)' },
+                    { format: 'decimal', text: '(%9)' }
+                ],
+                'decimal': [
+                    { format: 'decimal', text: '%1.' },
+                    { format: 'decimal', text: '%1.%2.' },
+                    { format: 'decimal', text: '%1.%2.%3.' }
+                ],
+                'alpha-numeric': [
+                    { format: 'upperLetter', text: '%1.' },
+                    { format: 'decimal', text: '%2.' },
+                    { format: 'lowerLetter', text: '%3.' }
+                ],
+                'roman': [
+                    { format: 'upperRoman', text: '%1.' },
+                    { format: 'upperLetter', text: '%2.' },
+                    { format: 'decimal', text: '%3.' }
+                ]
+            };
+            
+            const schemeLevels = schemes[scheme] || schemes['legal-outline'];
+            
+            let abstractNumLevels = '';
+            for (let i = 0; i < Math.min(levels, schemeLevels.length); i++) {
+                const level = schemeLevels[i];
+                const numFmt = level.format === 'upperRoman' ? 'upperRoman' :
+                               level.format === 'lowerRoman' ? 'lowerRoman' :
+                               level.format === 'upperLetter' ? 'upperLetter' :
+                               level.format === 'lowerLetter' ? 'lowerLetter' : 'decimal';
+                
+                abstractNumLevels += `
+                    <w:lvl w:ilvl="${i}">
+                        <w:start w:val="1"/>
+                        <w:numFmt w:val="${numFmt}"/>
+                        <w:lvlText w:val="${level.text}"/>
+                        <w:lvlJc w:val="left"/>
+                        <w:pPr>
+                            <w:ind w:left="${720 * (i + 1)}" w:hanging="360"/>
+                        </w:pPr>
+                    </w:lvl>`;
+            }
+            
+            // OOXML with proper relationship parts (THE FIX)
+            return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<pkg:package xmlns:pkg="http://schemas.microsoft.com/office/2006/xmlPackage">
+    <pkg:part pkg:name="/_rels/.rels" pkg:contentType="application/vnd.openxmlformats-package.relationships+xml">
+        <pkg:xmlData>
+            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+            </Relationships>
+        </pkg:xmlData>
+    </pkg:part>
+    <pkg:part pkg:name="/word/_rels/document.xml.rels" pkg:contentType="application/vnd.openxmlformats-package.relationships+xml">
+        <pkg:xmlData>
+            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+            </Relationships>
+        </pkg:xmlData>
+    </pkg:part>
+    <pkg:part pkg:name="/word/numbering.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml">
+        <pkg:xmlData>
+            <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                <w:abstractNum w:abstractNumId="1">${abstractNumLevels}
+                </w:abstractNum>
+                <w:num w:numId="1">
+                    <w:abstractNumId w:val="1"/>
+                </w:num>
+            </w:numbering>
+        </pkg:xmlData>
+    </pkg:part>
+    <pkg:part pkg:name="/word/document.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml">
+        <pkg:xmlData>
+            <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                <w:body>
+                    <w:p>
+                        <w:pPr>
+                            <w:numPr>
+                                <w:ilvl w:val="0"/>
+                                <w:numId w:val="1"/>
+                            </w:numPr>
+                        </w:pPr>
+                        <w:r>
+                            <w:t>First item</w:t>
+                        </w:r>
+                    </w:p>
+                    <w:p>
+                        <w:pPr>
+                            <w:numPr>
+                                <w:ilvl w:val="1"/>
+                                <w:numId w:val="1"/>
+                            </w:numPr>
+                        </w:pPr>
+                        <w:r>
+                            <w:t>Sub-item</w:t>
+                        </w:r>
+                    </w:p>
+                    <w:p>
+                        <w:pPr>
+                            <w:numPr>
+                                <w:ilvl w:val="0"/>
+                                <w:numId w:val="1"/>
+                            </w:numPr>
+                        </w:pPr>
+                        <w:r>
+                            <w:t>Second item</w:t>
+                        </w:r>
+                    </w:p>
+                </w:body>
+            </w:document>
+        </pkg:xmlData>
+    </pkg:part>
+</pkg:package>`;
+        }
+        
+        async function applyNumberingSimpleFallback(scheme) {
+            await Word.run(async (context) => {
+                const selection = context.document.getSelection();
+                selection.load('text');
+                await context.sync();
+                
+                const para = selection.paragraphs.getFirst();
+                para.startNewList();
+                await context.sync();
+                
+                toast('Basic numbering applied', 'info');
+            });
+        }
+        
+        // ========== CLAUSE INSERT ==========
+        async function insertClause(data) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.insertText(data.content, Word.InsertLocation.replace);
+                    await context.sync();
+                    toast('Clause inserted', 'success');
+                    addToRecent('clause', data.title);
+                });
+            } catch (err) {
+                console.error('Insert clause failed:', err);
+                toast('Failed to insert clause', 'error');
+            }
+        }
+        
+        // ========== SETTINGS ==========
+        function saveSettings(data) {
+            localStorage.setItem('draftbridge_settings', JSON.stringify(data));
+            toast('Settings saved', 'success');
+        }
+        
+        function getSettings() {
+            return JSON.parse(localStorage.getItem('draftbridge_settings') || '{}');
+        }
+        
+        // ========== RECENT ITEMS ==========
+        const MAX_RECENT = 5;
+        
+        function loadRecentItems() {
+            const recent = JSON.parse(localStorage.getItem('draftbridge_recent') || '[]');
+            renderRecentItems(recent);
+        }
+        
+        function addToRecent(type, title) {
+            const recent = JSON.parse(localStorage.getItem('draftbridge_recent') || '[]');
+            const filtered = recent.filter(item => !(item.type === type && item.title === title));
+            filtered.unshift({ type, title, timestamp: Date.now() });
+            const trimmed = filtered.slice(0, MAX_RECENT);
+            localStorage.setItem('draftbridge_recent', JSON.stringify(trimmed));
+            renderRecentItems(trimmed);
+        }
+        
+        function renderRecentItems(items) {
+            const list = document.getElementById('recent-list');
+            const empty = document.getElementById('recent-empty');
+            
+            if (!items || items.length === 0) {
+                list.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            
+            list.innerHTML = items.map(item => `
+                <li class="recent-item" onclick="repeatRecent('${item.type}', '${item.title.replace(/'/g, "\\'")}')">
+                    <span class="recent-dot"></span>
+                    <div class="recent-info">
+                        <div class="recent-title">${item.title}</div>
+                        <div class="recent-meta">${formatTime(item.timestamp)}</div>
+                    </div>
+                    <span class="recent-action">&rarr;</span>
+                </li>
+            `).join('');
+        }
+        
+        function repeatRecent(type, title) {
+            if (type === 'numbering') {
+                openDialog('numbering');
+            } else if (type === 'clause') {
+                openDialog('clauses');
+            } else {
+                openDialog('generate');
+            }
+        }
+        
+        function formatTime(timestamp) {
+            const diff = Date.now() - timestamp;
+            const mins = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (mins < 1) return 'Just now';
+            if (mins < 60) return `${mins}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+        
+        // ========== TOAST NOTIFICATIONS ==========
+        function toast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = `toast-notification toast-${type}`;
+            t.textContent = message;
+            container.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => t.remove(), 300);
+            }, duration);
+        }
+    </script>
+</body>
+</html>

@@ -11,7 +11,7 @@ const DraftBridgeVersionedStorage = (function() {
     'use strict';
 
     const MAX_VERSIONS = 10; // Keep last 10 versions
-    const API_BASE = 'https://your-api.execute-api.us-east-1.amazonaws.com';
+    const API_BASE = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
 
     /**
      * Save item with versioning

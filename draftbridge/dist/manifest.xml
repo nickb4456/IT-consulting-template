@@ -16,7 +16,10 @@
   1. Replace ALL occurrences of "https://aibridges.org/draftbridges/dist" with your hosted domain
      Example: https://app.draftbridge.com
   2. Ensure all icon files exist at the specified paths
-  3. Upload taskpane.html, taskpane.js, taskpane.css, and icons to your server
+  3. Upload these files to your server:
+     - taskpane.html, taskpane.js, taskpane.css (main add-in)
+     - dialog.html, dialog.js, dialog.css (form dialog windows)
+     - icons/ folder
   4. All URLs MUST use HTTPS - Office Add-ins require secure connections
   
   ══════════════════════════════════════════════════════════════════════════════
@@ -85,19 +88,142 @@
             <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
           </GetStarted>
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <OfficeTab id="TabHome">
-              <Group id="DraftBridgeGroup">
-                <Label resid="GroupLabel"/>
+            <!-- Custom DraftBridge Tab -->
+            <CustomTab id="DraftBridgeTab">
+              
+              <!-- Generate Group -->
+              <Group id="GenerateGroup">
+                <Label resid="Generate.Group.Label"/>
                 <Icon>
                   <bt:Image size="16" resid="Icon.16x16"/>
                   <bt:Image size="32" resid="Icon.32x32"/>
                   <bt:Image size="80" resid="Icon.80x80"/>
                 </Icon>
-                <Control xsi:type="Button" id="TaskpaneButton">
-                  <Label resid="TaskpaneButton.Label"/>
+                <Control xsi:type="Button" id="GenerateBtn">
+                  <Label resid="Generate.Button.Label"/>
                   <Supertip>
-                    <Title resid="TaskpaneButton.Title"/>
-                    <Description resid="TaskpaneButton.Description"/>
+                    <Title resid="Generate.Button.Label"/>
+                    <Description resid="Generate.Button.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Menu" id="TemplatesMenu">
+                  <Label resid="Templates.Menu.Label"/>
+                  <Supertip>
+                    <Title resid="Templates.Menu.Label"/>
+                    <Description resid="Templates.Menu.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Items>
+                    <Item id="DemandLetter">
+                      <Label resid="DemandLetter.Label"/>
+                      <Supertip>
+                        <Title resid="DemandLetter.Label"/>
+                        <Description resid="DemandLetter.Description"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                        <SourceLocation resid="Taskpane.Url"/>
+                      </Action>
+                    </Item>
+                    <Item id="MotionToDismiss">
+                      <Label resid="MotionToDismiss.Label"/>
+                      <Supertip>
+                        <Title resid="MotionToDismiss.Label"/>
+                        <Description resid="MotionToDismiss.Description"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                        <SourceLocation resid="Taskpane.Url"/>
+                      </Action>
+                    </Item>
+                    <Item id="ContractTemplate">
+                      <Label resid="ContractTemplate.Label"/>
+                      <Supertip>
+                        <Title resid="ContractTemplate.Label"/>
+                        <Description resid="ContractTemplate.Description"/>
+                      </Supertip>
+                      <Icon>
+                        <bt:Image size="16" resid="Icon.16x16"/>
+                        <bt:Image size="32" resid="Icon.32x32"/>
+                        <bt:Image size="80" resid="Icon.80x80"/>
+                      </Icon>
+                      <Action xsi:type="ShowTaskpane">
+                        <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                        <SourceLocation resid="Taskpane.Url"/>
+                      </Action>
+                    </Item>
+                  </Items>
+                </Control>
+              </Group>
+              
+              <!-- Numbering Group -->
+              <Group id="NumberingGroup">
+                <Label resid="Numbering.Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <Control xsi:type="Button" id="NumberingBtn">
+                  <Label resid="Numbering.Button.Label"/>
+                  <Supertip>
+                    <Title resid="Numbering.Button.Label"/>
+                    <Description resid="Numbering.Button.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="TOCBtn">
+                  <Label resid="TOC.Button.Label"/>
+                  <Supertip>
+                    <Title resid="TOC.Button.Label"/>
+                    <Description resid="TOC.Button.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="FixBtn">
+                  <Label resid="Fix.Button.Label"/>
+                  <Supertip>
+                    <Title resid="Fix.Button.Label"/>
+                    <Description resid="Fix.Button.Description"/>
                   </Supertip>
                   <Icon>
                     <bt:Image size="16" resid="Icon.16x16"/>
@@ -110,7 +236,62 @@
                   </Action>
                 </Control>
               </Group>
-            </OfficeTab>
+              
+              <!-- Library Group -->
+              <Group id="LibraryGroup">
+                <Label resid="Library.Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <Control xsi:type="Button" id="ClausesBtn">
+                  <Label resid="Clauses.Button.Label"/>
+                  <Supertip>
+                    <Title resid="Clauses.Button.Label"/>
+                    <Description resid="Clauses.Button.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+              
+              <!-- Settings Group -->
+              <Group id="SettingsGroup">
+                <Label resid="Settings.Group.Label"/>
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16x16"/>
+                  <bt:Image size="32" resid="Icon.32x32"/>
+                  <bt:Image size="80" resid="Icon.80x80"/>
+                </Icon>
+                <Control xsi:type="Button" id="SettingsBtn">
+                  <Label resid="Settings.Button.Label"/>
+                  <Supertip>
+                    <Title resid="Settings.Button.Label"/>
+                    <Description resid="Settings.Button.Description"/>
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16x16"/>
+                    <bt:Image size="32" resid="Icon.32x32"/>
+                    <bt:Image size="80" resid="Icon.80x80"/>
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>DraftBridgeTaskpane</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url"/>
+                  </Action>
+                </Control>
+              </Group>
+              
+              <!-- Tab Label (MUST be last in CustomTab) -->
+              <Label resid="DraftBridge.Tab.Label"/>
+            </CustomTab>
           </ExtensionPoint>
         </DesktopFormFactor>
       </Host>
@@ -127,14 +308,54 @@
         <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://draftbridge.com/help"/>
       </bt:Urls>
       <bt:ShortStrings>
+        <!-- Get Started -->
         <bt:String id="GetStarted.Title" DefaultValue="Get started with DraftBridge"/>
-        <bt:String id="GroupLabel" DefaultValue="DraftBridge"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="DraftBridge"/>
-        <bt:String id="TaskpaneButton.Title" DefaultValue="Open DraftBridge"/>
+        
+        <!-- Tab Label -->
+        <bt:String id="DraftBridge.Tab.Label" DefaultValue="DraftBridge"/>
+        
+        <!-- Generate Group -->
+        <bt:String id="Generate.Group.Label" DefaultValue="Generate"/>
+        <bt:String id="Generate.Button.Label" DefaultValue="Generate"/>
+        <bt:String id="Templates.Menu.Label" DefaultValue="Templates"/>
+        <bt:String id="DemandLetter.Label" DefaultValue="Demand Letter"/>
+        <bt:String id="MotionToDismiss.Label" DefaultValue="Motion to Dismiss"/>
+        <bt:String id="ContractTemplate.Label" DefaultValue="Contract"/>
+        
+        <!-- Numbering Group -->
+        <bt:String id="Numbering.Group.Label" DefaultValue="Numbering"/>
+        <bt:String id="Numbering.Button.Label" DefaultValue="Insert Numbering"/>
+        <bt:String id="TOC.Button.Label" DefaultValue="TOC"/>
+        <bt:String id="Fix.Button.Label" DefaultValue="Fix"/>
+        
+        <!-- Library Group -->
+        <bt:String id="Library.Group.Label" DefaultValue="Library"/>
+        <bt:String id="Clauses.Button.Label" DefaultValue="Clauses"/>
+        
+        <!-- Settings Group -->
+        <bt:String id="Settings.Group.Label" DefaultValue="Settings"/>
+        <bt:String id="Settings.Button.Label" DefaultValue="Settings"/>
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Access your firm's clause library and generate documents with one tap."/>
-        <bt:String id="TaskpaneButton.Description" DefaultValue="Open the DraftBridge panel to access your clause library, templates, and document tools."/>
+        
+        <!-- Generate Group Descriptions -->
+        <bt:String id="Generate.Button.Description" DefaultValue="Open DraftBridge to generate legal documents with AI assistance."/>
+        <bt:String id="Templates.Menu.Description" DefaultValue="Quick access to document templates."/>
+        <bt:String id="DemandLetter.Description" DefaultValue="Generate a demand letter from template."/>
+        <bt:String id="MotionToDismiss.Description" DefaultValue="Generate a motion to dismiss from template."/>
+        <bt:String id="ContractTemplate.Description" DefaultValue="Generate a contract from template."/>
+        
+        <!-- Numbering Group Descriptions -->
+        <bt:String id="Numbering.Button.Description" DefaultValue="Insert legal numbering scheme into document."/>
+        <bt:String id="TOC.Button.Description" DefaultValue="Insert or update table of contents."/>
+        <bt:String id="Fix.Button.Description" DefaultValue="Fix numbering and formatting issues."/>
+        
+        <!-- Library Group Descriptions -->
+        <bt:String id="Clauses.Button.Description" DefaultValue="Browse and insert clauses from your firm's library."/>
+        
+        <!-- Settings Group Descriptions -->
+        <bt:String id="Settings.Button.Description" DefaultValue="Configure DraftBridge settings and preferences."/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

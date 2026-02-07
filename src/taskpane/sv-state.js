@@ -90,6 +90,19 @@ const SmartVariables = {
       clearTimeout(this._validateTimer);
       this._validateTimer = null;
     }
+    // Clean up keyboard event listeners from sv-profile.js and sv-form-renderer.js
+    if (this._profileEscapeHandler) {
+      document.removeEventListener('keydown', this._profileEscapeHandler);
+      this._profileEscapeHandler = null;
+    }
+    if (this._pickerEscapeHandler) {
+      document.removeEventListener('keydown', this._pickerEscapeHandler);
+      this._pickerEscapeHandler = null;
+    }
+    if (this._managerEscapeHandler) {
+      document.removeEventListener('keydown', this._managerEscapeHandler);
+      this._managerEscapeHandler = null;
+    }
     // Reset state
     this.state = {
       template: null,
@@ -178,6 +191,21 @@ const SmartVariables = {
       return '';
     }
     return id;
+  },
+
+  /**
+   * Escape HTML for safe display. Prevents XSS when inserting user content into innerHTML.
+   * @param {string} str - the string to escape
+   * @returns {string} HTML-safe string
+   */
+  escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   },
 
   /**

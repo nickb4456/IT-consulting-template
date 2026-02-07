@@ -1839,6 +1839,47 @@
             if (nextBtn) nextBtn.disabled = currentSubNavOffset >= maxScroll;
         }
         
+        // Generic modal helpers (used by Print Settings, PDF/A export, etc.)
+        function showModal(title, bodyHtml) {
+            // Remove any existing generic modal
+            const existing = document.getElementById('generic-modal');
+            if (existing) existing.remove();
+
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.id = 'generic-modal';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 500px; background: var(--db-surface); border-radius: var(--db-radius-lg); padding: 0; box-shadow: var(--db-shadow-modal);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--db-border);">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--db-text);">${title}</h3>
+                        <button onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--db-text-muted); padding: 4px 8px;" title="Close">&times;</button>
+                    </div>
+                    <div style="padding: 16px; max-height: 70vh; overflow-y: auto;">
+                        ${bodyHtml}
+                    </div>
+                </div>
+            `;
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) closeModal();
+            });
+            document.body.appendChild(modal);
+
+            modal._escHandler = function(e) {
+                if (e.key === 'Escape') closeModal();
+            };
+            document.addEventListener('keydown', modal._escHandler);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('generic-modal');
+            if (modal) {
+                if (modal._escHandler) {
+                    document.removeEventListener('keydown', modal._escHandler);
+                }
+                modal.remove();
+            }
+        }
+
         // Print Settings
         function showPrintSettings() {
             const html = `
@@ -8847,10 +8888,7 @@ COMMENTS:
             }
         };
     </script>
-    
-    <!-- Smart Variables CSS -->
-    <link rel="stylesheet" href="src/taskpane/smart-variables.css">
-    
+
     <!-- Smart Variables JS (modular) -->
     <script src="src/taskpane/sv-state.js"></script>
     <script src="src/taskpane/sv-courts.js"></script>
@@ -8860,6 +8898,5 @@ COMMENTS:
     <script src="src/taskpane/sv-form-renderer.js"></script>
     <script src="src/taskpane/sv-validation.js"></script>
     <script src="src/taskpane/sv-document-generator.js"></script>
-    <!-- <script src="src/taskpane/smart-variables.js"></script> -->
 </body>
 </html>

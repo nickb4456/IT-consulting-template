@@ -16,7 +16,7 @@ Object.assign(SmartVariables, {
   /** Load the courts database from courts.json, with empty-array fallback. */
   async loadCourtsDatabase() {
     try {
-      const response = await fetch('../data/courts.json');
+      const response = await fetch('src/data/courts.json');
       if (response.ok) {
         const data = await response.json();
         this.courts = data.courts || [];

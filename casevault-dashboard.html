@@ -413,18 +413,42 @@
     </footer>
 
     <script>
-        // Auth Check
-        function checkAuth() {
+        const VERIFY_API = 'https://YOUR_API_GATEWAY_URL/verify-access';
+
+        // Auth Check - Verify token with backend
+        async function checkAuth() {
             const accessToken = sessionStorage.getItem('casevault_access_token');
             const expiresAt = parseInt(sessionStorage.getItem('casevault_access_expires'));
 
+            // Quick client-side check first
             if (!accessToken || !expiresAt || Date.now() > expiresAt) {
-                // Access denied or expired
                 document.getElementById('lockedOverlay').style.display = 'flex';
                 return false;
             }
 
-            return true;
+            // Verify with backend
+            try {
+                const response = await fetch(`${VERIFY_API}?token=${encodeURIComponent(accessToken)}`);
+                const data = await response.json();
+
+                if (!data.valid) {
+                    // Token invalid or expired on backend
+                    sessionStorage.removeItem('casevault_access_token');
+                    sessionStorage.removeItem('casevault_access_expires');
+                    document.getElementById('lockedOverlay').style.display = 'flex';
+                    return false;
+                }
+
+                // Update expiration time from backend (in case of clock skew)
+                sessionStorage.setItem('casevault_access_expires', data.expiresAt);
+                return true;
+
+            } catch (error) {
+                console.error('Token verification failed:', error);
+                // On network error, fall back to client-side check
+                // This allows offline usage if token was previously valid
+                return Date.now() < expiresAt;
+            }
         }
 
         // Timer Countdown
@@ -479,9 +503,12 @@
         });
 
         // Initialize
-        if (checkAuth()) {
-            startTimer();
-        }
+        (async function() {
+            const isAuthenticated = await checkAuth();
+            if (isAuthenticated) {
+                startTimer();
+            }
+        })();
     </script>
 
     <!-- Font Awesome -->

@@ -390,30 +390,9 @@
             };
 
             try {
-                // TODO: Nick - Update this URL with your actual API Gateway endpoint
-                // After deploying Lambda, replace with: https://YOUR_API_ID.execute-api.us-east-1.amazonaws.com/prod/submit-case
+                // API Gateway endpoint - update with your actual endpoint after deploying Lambda
                 const API_ENDPOINT = 'https://YOUR_API_GATEWAY_URL/submit-case';
 
-                // TEMPORARY: Using mock tokens until Lambda is deployed
-                // Remove this section after API Gateway is configured
-                const mockToken = 'test_' + Math.random().toString(36).substring(7);
-                sessionStorage.setItem('casevault_access_token', mockToken);
-                sessionStorage.setItem('casevault_access_expires', Date.now() + (10 * 60 * 1000));
-
-                // Store submission in localStorage for tracking
-                const submissions = JSON.parse(localStorage.getItem('casevault_submissions') || '[]');
-                submissions.push({
-                    ...formData,
-                    token: mockToken
-                });
-                localStorage.setItem('casevault_submissions', JSON.stringify(submissions));
-
-                alert('✅ Submission successful! Redirecting to dashboard...');
-                window.location.href = '/casevault-dashboard.html';
-                return;
-
-                // Production code (enable after Lambda deployment):
-                /*
                 const response = await fetch(API_ENDPOINT, {
                     method: 'POST',
                     headers: {
@@ -434,16 +413,25 @@
                     sessionStorage.setItem('casevault_access_token', data.accessToken);
                     sessionStorage.setItem('casevault_access_expires', data.expiresAt);
 
+                    // Track submission locally for UX
+                    const submissions = JSON.parse(localStorage.getItem('casevault_submissions') || '[]');
+                    submissions.push({
+                        email: formData.email,
+                        state: formData.state,
+                        timestamp: formData.timestamp
+                    });
+                    localStorage.setItem('casevault_submissions', JSON.stringify(submissions));
+
                     // Redirect to dashboard
+                    alert('✅ Submission successful! Redirecting to dashboard...');
                     window.location.href = '/casevault-dashboard.html';
                 } else {
                     const error = await response.json().catch(() => ({ error: 'Unknown error' }));
                     alert(`Error: ${error.error || 'Failed to submit case. Please try again.'}`);
                 }
-                */
             } catch (error) {
                 console.error('Submission error:', error);
-                alert('Unable to connect to server. Using test mode for now.');
+                alert('Unable to connect to server. Please check your connection and try again.');
             }
         });
     </script>

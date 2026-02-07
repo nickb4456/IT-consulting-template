@@ -106,7 +106,7 @@ async function quickRestoreCommand(event: Office.AddinCommands.Event): Promise<v
       
       // Show confirmation dialog
       await Office.context.ui.displayDialogAsync(
-        'https://localhost:3000/survivor-confirm.html',
+        'https://aibridges.org/draftbridge/dist/survivor-confirm.html',
         { height: 30, width: 20 },
         (result) => {
           if (result.status === Office.AsyncResultStatus.Succeeded) {

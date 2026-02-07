@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://appsforoffice.microsoft.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <title>DraftBridge</title>
+    <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+    <style>
+        /* ========== RESET & BASE ========== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --primary: #8B7355;
+            --primary-dark: #6d5a43;
+            --primary-light: #fdf8f3;
+            --accent: #5C4A32;
+            --text: #333;
+            --text-muted: #666;
+            --text-light: #999;
+            --border: #e0e0e0;
+            --border-light: #f0f0f0;
+            --bg: #f5f5f5;
+            --bg-white: #fff;
+            --success: #2e7d32;
+            --success-light: #e8f5e9;
+            --warning: #f57c00;
+            --warning-light: #fff3e0;
+            --error: #c62828;
+            --error-light: #ffebee;
+            --info: #1565c0;
+            --info-light: #e3f2fd;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            font-size: 14px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--text);
+        }
+        
+        /* ========== HEADER ========== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: var(--bg-white);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+        
+        .header h1 span {
+            color: var(--accent);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .header-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-white);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .header-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        /* ========== MAIN TABS ========== */
+        .main-tabs {
+            display: flex;
+            background: var(--bg-white);
+            border-bottom: 1px solid var(--border);
+            padding: 0 8px;
+        }
+        
+        .main-tab {
+            flex: 1;
+            padding: 12px 8px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .main-tab:hover {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .main-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        /* Hide tabs when sub-panel is open (focus mode) */
+        body.focus-mode .main-tabs {
+            display: none;
+        }
+        
+        /* ========== PANELS ========== */
+        .panel {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .panel.active {
+            display: flex;
+        }
+        
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        /* ========== SUB-PANELS (Slide In) ========== */
+        .sub-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.25s ease-out;
+        }
+        
+        .sub-panel.active {
+            transform: translateX(0);
+        }
+        
+        .sub-panel-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--bg-white);
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .back-btn {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-white);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .back-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .sub-panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .sub-panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .sub-panel-footer {
+            padding: 12px 16px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+        }
+        
+        .sub-panel-footer .btn {
+            flex: 1;
+        }
+        
+        /* ========== SECTION HEADERS ========== */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+        
+        .section-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+        
+        /* ========== CARDS ========== */
+        .card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.15s;
+        }
+        
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .card-clickable {
+            cursor: pointer;
+        }
+        
+        .card-clickable:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        
+        .card-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        
+        .card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .card-icon.generate { background: var(--info-light); color: var(--info); border: 2px solid var(--info); }
+        .card-icon.numbering { background: var(--success-light); color: var(--success); border: 2px solid var(--success); }
+        .card-icon.clause { background: var(--warning-light); color: var(--warning); border: 2px solid var(--warning); }
+        .card-icon.settings { background: var(--bg); color: var(--text-muted); border: 2px solid var(--border); }
+        
+        /* ========== ACTION CARDS (Generate Panel) ========== */
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .action-card {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .action-card:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .action-card-label {
+            display: block;
+            width: 100%;
+            padding: 6px 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+        
+        .action-card-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        /* ========== BUTTONS ========== */
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .btn-primary:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #1b5e20;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        /* ========== FORM FIELDS ========== */
+        .field {
+            margin-bottom: 14px;
+        }
+        
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.15s;
+        }
+        
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(139, 115, 85, 0.1);
+        }
+        
+        .field textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .field-row {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .field-row .field {
+            flex: 1;
+        }
+        
+        /* ========== SEARCH BOX ========== */
+        .search-box {
+            margin-bottom: 14px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+        }
+        
+        /* ========== FILTER TABS ========== */
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-tab {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-white);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        
+        .filter-tab:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .filter-tab.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        
+        /* ========== CLAUSE CARDS ========== */
+        .clause-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 10px;
+            transition: all 0.15s;
+        }
+        
+        .clause-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .clause-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .clause-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+        
+        .clause-category {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        
+        .clause-category.contracts { background: var(--info-light); color: var(--info); border: 1px solid var(--info); }
+        .clause-category.litigation { background: var(--error-light); color: var(--error); border: 1px solid var(--error); }
+        .clause-category.corporate { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+        .clause-category.ip { background: #f3e5f5; color: #7b1fa2; border: 1px solid #7b1fa2; }
+        
+        .clause-content {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            max-height: 60px;
+            overflow: hidden;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+        }
+        
+        .clause-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* ========== NUMBERING SCHEMES ========== */
+        .scheme-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .scheme-card {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .scheme-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .scheme-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .scheme-card-name {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+        
+        .scheme-card-preview {
+            font-size: 10px;
+            color: var(--text-light);
+            font-family: monospace;
+        }
+        
+        /* ========== PREVIEW BOX ========== */
+        .preview-box {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .preview-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        
+        .preview-content {
+            font-family: 'Times New Roman', Georgia, serif;
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text);
+        }
+        
+        .preview-line {
+            display: flex;
+            align-items: baseline;
+        }
+        
+        .preview-line .num {
+            font-weight: 600;
+            min-width: 36px;
+            color: var(--primary);
+        }
+        
+        .preview-line.l1 { font-size: 14px; font-weight: 600; }
+        .preview-line.l2 { padding-left: 16px; }
+        .preview-line.l3 { padding-left: 32px; font-size: 12px; }
+        .preview-line.l4 { padding-left: 48px; font-size: 12px; }
+        .preview-line.l5 { padding-left: 64px; font-size: 11px; color: var(--text-muted); }
+        
+        /* ========== SETTINGS ITEMS ========== */
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+        }
+        
+        .settings-item-label {
+            font-weight: 500;
+            color: var(--text);
+        }
+        
+        .settings-item-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border);
+            border-radius: 24px;
+            transition: 0.3s;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+        
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+        
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+        
+        /* ========== STATUS BADGE ========== */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .status-badge.success { background: var(--success-light); color: var(--success); }
+        .status-badge.warning { background: var(--warning-light); color: var(--warning); }
+        .status-badge.error { background: var(--error-light); color: var(--error); }
+        .status-badge.info { background: var(--info-light); color: var(--info); }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+        
+        /* ========== TOAST NOTIFICATIONS ========== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success { background: var(--success); }
+        .toast.error { background: var(--error); }
+        .toast.warning { background: var(--warning); }
+        .toast.info { background: var(--info); }
+        
+        /* ========== EMPTY STATE ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+        
+        .empty-state-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .empty-state-desc {
+            font-size: 12px;
+        }
+        
+        /* ========== LIST CONTROLS ========== */
+        .list-controls {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .list-controls.active {
+            border-color: var(--primary);
+        }
+        
+        .list-controls-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .list-controls-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text);
+        }
+        
+        .list-controls-status {
+            margin-left: auto;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+        
+        .list-controls-status.in-list {
+            background: var(--success-light);
+            color: var(--success);
+        }
+        
+        .list-control-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            text-align: left;
+            margin-bottom: 8px;
+            transition: all 0.15s;
+        }
+        
+        .list-control-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .list-control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .list-control-btn-title {
+            font-weight: 500;
+            font-size: 13px;
+            color: var(--text);
+        }
+        
+        .list-control-btn-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        /* ========== DIVIDER ========== */
+        .divider {
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+        
+        /* ========== WRAPPER FOR ABSOLUTE PANELS ========== */
+        .panels-wrapper {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header class="header">
+        <h1>Draft<span>Bridge</span></h1>
+        <div class="header-actions">
+            <button class="header-btn" onclick="showHelp()">Help</button>
+        </div>
+    </header>
+    
+    <!-- MAIN TABS -->
+    <nav class="main-tabs" id="main-tabs">
+        <button class="main-tab active" data-panel="generate" onclick="switchPanel('generate')">Generate</button>
+        <button class="main-tab" data-panel="numbering" onclick="switchPanel('numbering')">Numbering</button>
+        <button class="main-tab" data-panel="library" onclick="switchPanel('library')">Clause Library</button>
+        <button class="main-tab" data-panel="settings" onclick="switchPanel('settings')">Settings</button>
+    </nav>
+    
+    <!-- PANELS WRAPPER -->
+    <div class="panels-wrapper">
+        
+        <!-- ========== GENERATE PANEL ========== -->
+        <div class="panel active" id="panel-generate">
+            <div class="panel-content">
+                <p class="section-label">Document Templates</p>
+                
+                <div class="action-grid">
+                    <div class="action-card" onclick="openForm('demand-letter')">
+                        <span class="action-card-label">DL</span>
+                        <span class="action-card-desc">Demand Letter</span>
+                    </div>
+                    <div class="action-card" onclick="openForm('motion')">
+                        <span class="action-card-label">MOT</span>
+                        <span class="action-card-desc">Motion</span>
+                    </div>
+                    <div class="action-card" onclick="openForm('letter')">
+                        <span class="action-card-label">LTR</span>
+                        <span class="action-card-desc">Letter</span>
+                    </div>
+                    <div class="action-card" onclick="openForm('memo')">
+                        <span class="action-card-label">MEM</span>
+                        <span class="action-card-desc">Memo</span>
+                    </div>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p class="section-label">Document Tools</p>
+                
+                <div class="card card-clickable" onclick="openForm('fill-variables')">
+                    <div class="card-title">Fill Variables</div>
+                    <div class="card-desc">Replace placeholders in your document</div>
+                </div>
+                
+                <div class="card card-clickable" onclick="insertToc()">
+                    <div class="card-title">Insert Table of Contents</div>
+                    <div class="card-desc">Add TOC at cursor position</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== NUMBERING PANEL ========== -->
+        <div class="panel" id="panel-numbering">
+            <div class="panel-content">
+                <p class="section-label">Select Numbering Scheme</p>
+                
+                <div class="scheme-grid" id="scheme-grid">
+                    <div class="scheme-card selected" data-scheme="legal-outline" onclick="selectScheme('legal-outline', this)">
+                        <div class="scheme-card-name">Legal Outline</div>
+                        <div class="scheme-card-preview">I. A. 1. (a) (i)</div>
+                    </div>
+                    <div class="scheme-card" data-scheme="contract-sections" onclick="selectScheme('contract-sections', this)">
+                        <div class="scheme-card-name">Contract</div>
+                        <div class="scheme-card-preview">Art I, Sec 1.</div>
+                    </div>
+                    <div class="scheme-card" data-scheme="heading-style" onclick="selectScheme('heading-style', this)">
+                        <div class="scheme-card-name">Heading</div>
+                        <div class="scheme-card-preview">1. 1.1 1.1.1</div>
+                    </div>
+                    <div class="scheme-card" data-scheme="pleading-format" onclick="selectScheme('pleading-format', this)">
+                        <div class="scheme-card-name">Pleading</div>
+                        <div class="scheme-card-preview">1. a. (1) (a)</div>
+                    </div>
+                </div>
+                
+                <div class="preview-box">
+                    <div class="preview-label">Preview</div>
+                    <div class="preview-content" id="numbering-preview">
+                        <div class="preview-line l1"><span class="num">I.</span> Article One</div>
+                        <div class="preview-line l2"><span class="num">A.</span> Section Title</div>
+                        <div class="preview-line l3"><span class="num">1.</span> Paragraph text</div>
+                        <div class="preview-line l4"><span class="num">(a)</span> Sub-paragraph</div>
+                        <div class="preview-line l5"><span class="num">(i)</span> Detail item</div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" style="width: 100%; margin-bottom: 16px;" onclick="applyNumbering()">
+                    Apply Numbering
+                </button>
+                
+                <div class="divider"></div>
+                
+                <p class="section-label">List Controls</p>
+                
+                <div class="list-controls" id="list-controls">
+                    <div class="list-controls-header">
+                        <span class="list-controls-title">Current List</span>
+                        <span class="list-controls-status" id="list-status">Not in list</span>
+                    </div>
+                    <button class="list-control-btn" onclick="continueList()">
+                        <div>
+                            <div class="list-control-btn-title">Continue Numbering</div>
+                            <div class="list-control-btn-desc">Connect to previous list</div>
+                        </div>
+                    </button>
+                    <button class="list-control-btn" onclick="restartList()">
+                        <div>
+                            <div class="list-control-btn-title">Restart at 1</div>
+                            <div class="list-control-btn-desc">Start new sequence</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <button class="btn btn-secondary" style="width: 100%;" onclick="openForm('numbering-editor')">
+                    Customize Scheme
+                </button>
+            </div>
+        </div>
+        
+        <!-- ========== CLAUSE LIBRARY PANEL ========== -->
+        <div class="panel" id="panel-library">
+            <div class="panel-content">
+                <div class="search-box">
+                    <input type="text" class="search-input" id="clause-search" placeholder="Search clauses..." oninput="filterClauses()">
+                </div>
+                
+                <div class="filter-tabs">
+                    <button class="filter-tab active" data-filter="all" onclick="setCategory('all')">All</button>
+                    <button class="filter-tab" data-filter="contracts" onclick="setCategory('contracts')">Contracts</button>
+                    <button class="filter-tab" data-filter="litigation" onclick="setCategory('litigation')">Litigation</button>
+                    <button class="filter-tab" data-filter="corporate" onclick="setCategory('corporate')">Corporate</button>
+                </div>
+                
+                <div class="status-badge info" id="library-status" style="margin-bottom: 14px;">
+                    <span class="status-dot"></span>
+                    <span>Loading clauses...</span>
+                </div>
+                
+                <div id="clause-list">
+                    <!-- Clauses rendered here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- ========== SETTINGS PANEL ========== -->
+        <div class="panel" id="panel-settings">
+            <div class="panel-content">
+                <p class="section-label">Preferences</p>
+                
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-label">Auto-save schemes</div>
+                        <div class="settings-item-desc">Remember your numbering preferences</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-autosave" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="settings-item">
+                    <div>
+                        <div class="settings-item-label">Show preview</div>
+                        <div class="settings-item-desc">Preview numbering before applying</div>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="setting-preview" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p class="section-label">Firm Settings</p>
+                
+                <div class="field">
+                    <label>Firm Name</label>
+                    <input type="text" id="firm-name" placeholder="Enter firm name">
+                </div>
+                
+                <div class="field">
+                    <label>Default Signer</label>
+                    <input type="text" id="default-signer" placeholder="Attorney name">
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p class="section-label">About</p>
+                
+                <div class="card">
+                    <div class="card-title">DraftBridge v1.0</div>
+                    <div class="card-desc">Professional document automation for legal teams</div>
+                </div>
+                
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="saveSettings()">
+                    Save Settings
+                </button>
+            </div>
+        </div>
+        
+        <!-- ========== SUB-PANELS (Slide In Forms) ========== -->
+        
+        <!-- DEMAND LETTER FORM -->
+        <div class="sub-panel" id="form-demand-letter">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Demand Letter</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="field">
+                    <label>Recipient Name</label>
+                    <input type="text" id="dl-recipient" placeholder="Opposing party or counsel">
+                </div>
+                <div class="field">
+                    <label>Address</label>
+                    <textarea id="dl-address" placeholder="Street address, city, state, zip"></textarea>
+                </div>
+                <div class="field">
+                    <label>Subject / RE:</label>
+                    <input type="text" id="dl-subject" placeholder="Brief description of matter">
+                </div>
+                <div class="field">
+                    <label>Client Name</label>
+                    <input type="text" id="dl-client" placeholder="Your client's name">
+                </div>
+                <div class="field">
+                    <label>Demand Amount (if applicable)</label>
+                    <input type="text" id="dl-amount" placeholder="$0.00">
+                </div>
+                <div class="field">
+                    <label>Response Deadline</label>
+                    <input type="text" id="dl-deadline" placeholder="e.g., 10 days">
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertDemandLetter()">Insert</button>
+            </div>
+        </div>
+        
+        <!-- MOTION FORM -->
+        <div class="sub-panel" id="form-motion">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Motion</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="field">
+                    <label>Motion Type</label>
+                    <select id="mot-type">
+                        <option value="dismiss">Motion to Dismiss</option>
+                        <option value="summary-judgment">Motion for Summary Judgment</option>
+                        <option value="compel">Motion to Compel</option>
+                        <option value="extend">Motion to Extend Time</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Case Number</label>
+                    <input type="text" id="mot-case" placeholder="Case number">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>Plaintiff</label>
+                        <input type="text" id="mot-plaintiff" placeholder="Plaintiff name">
+                    </div>
+                    <div class="field">
+                        <label>Defendant</label>
+                        <input type="text" id="mot-defendant" placeholder="Defendant name">
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Movant</label>
+                    <input type="text" id="mot-movant" placeholder="Who is filing this motion">
+                </div>
+                <div class="field">
+                    <label>Relief Requested</label>
+                    <textarea id="mot-relief" placeholder="What you're asking the court to do"></textarea>
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertMotion()">Insert</button>
+            </div>
+        </div>
+        
+        <!-- LETTER FORM -->
+        <div class="sub-panel" id="form-letter">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Letter</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="field">
+                    <label>Recipient</label>
+                    <input type="text" id="ltr-recipient" placeholder="Recipient name">
+                </div>
+                <div class="field">
+                    <label>Address</label>
+                    <textarea id="ltr-address" placeholder="Full address"></textarea>
+                </div>
+                <div class="field">
+                    <label>Subject / RE:</label>
+                    <input type="text" id="ltr-subject" placeholder="Subject line">
+                </div>
+                <div class="field">
+                    <label>Delivery Method (optional)</label>
+                    <select id="ltr-delivery">
+                        <option value="">None</option>
+                        <option value="VIA EMAIL">Via Email</option>
+                        <option value="VIA CERTIFIED MAIL">Via Certified Mail</option>
+                        <option value="VIA FACSIMILE">Via Facsimile</option>
+                        <option value="VIA HAND DELIVERY">Via Hand Delivery</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Closing</label>
+                    <select id="ltr-closing">
+                        <option value="Sincerely">Sincerely</option>
+                        <option value="Very truly yours">Very truly yours</option>
+                        <option value="Respectfully">Respectfully</option>
+                        <option value="Best regards">Best regards</option>
+                    </select>
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertLetter()">Insert</button>
+            </div>
+        </div>
+        
+        <!-- MEMO FORM -->
+        <div class="sub-panel" id="form-memo">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Memorandum</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="field">
+                    <label>To</label>
+                    <input type="text" id="memo-to" placeholder="Recipient">
+                </div>
+                <div class="field">
+                    <label>From</label>
+                    <input type="text" id="memo-from" placeholder="Sender">
+                </div>
+                <div class="field">
+                    <label>Subject / RE:</label>
+                    <input type="text" id="memo-subject" placeholder="Subject line">
+                </div>
+                <div class="field">
+                    <label>CC (optional)</label>
+                    <input type="text" id="memo-cc" placeholder="Carbon copy recipients">
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="insertMemo()">Insert</button>
+            </div>
+        </div>
+        
+        <!-- NUMBERING EDITOR -->
+        <div class="sub-panel" id="form-numbering-editor">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Customize Numbering</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="field">
+                    <label>Scheme Name</label>
+                    <input type="text" id="scheme-name" placeholder="My Custom Scheme">
+                </div>
+                
+                <div class="divider"></div>
+                
+                <p class="section-label">Level Formats</p>
+                
+                <div class="card" id="level-1-editor">
+                    <div class="card-title">Level 1</div>
+                    <div class="field-row" style="margin-top: 10px;">
+                        <div class="field">
+                            <label>Before</label>
+                            <input type="text" id="level-1-before" value="" placeholder="e.g., ARTICLE">
+                        </div>
+                        <div class="field">
+                            <label>Style</label>
+                            <select id="level-1-style">
+                                <option value="I">I, II, III</option>
+                                <option value="1">1, 2, 3</option>
+                                <option value="A">A, B, C</option>
+                                <option value="a">a, b, c</option>
+                                <option value="i">i, ii, iii</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>After</label>
+                            <input type="text" id="level-1-after" value="." placeholder=". or )">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" id="level-2-editor">
+                    <div class="card-title">Level 2</div>
+                    <div class="field-row" style="margin-top: 10px;">
+                        <div class="field">
+                            <label>Before</label>
+                            <input type="text" id="level-2-before" value="">
+                        </div>
+                        <div class="field">
+                            <label>Style</label>
+                            <select id="level-2-style">
+                                <option value="A">A, B, C</option>
+                                <option value="1">1, 2, 3</option>
+                                <option value="a">a, b, c</option>
+                                <option value="I">I, II, III</option>
+                                <option value="i">i, ii, iii</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>After</label>
+                            <input type="text" id="level-2-after" value=".">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card" id="level-3-editor">
+                    <div class="card-title">Level 3</div>
+                    <div class="field-row" style="margin-top: 10px;">
+                        <div class="field">
+                            <label>Before</label>
+                            <input type="text" id="level-3-before" value="">
+                        </div>
+                        <div class="field">
+                            <label>Style</label>
+                            <select id="level-3-style">
+                                <option value="1">1, 2, 3</option>
+                                <option value="a">a, b, c</option>
+                                <option value="A">A, B, C</option>
+                                <option value="i">i, ii, iii</option>
+                                <option value="I">I, II, III</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>After</label>
+                            <input type="text" id="level-3-after" value=".">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveCustomScheme()">Save Scheme</button>
+            </div>
+        </div>
+        
+        <!-- FILL VARIABLES -->
+        <div class="sub-panel" id="form-fill-variables">
+            <div class="sub-panel-header">
+                <button class="back-btn" onclick="closeForm()">Back</button>
+                <span class="sub-panel-title">Fill Variables</span>
+            </div>
+            <div class="sub-panel-content">
+                <div class="status-badge info" id="vars-status" style="margin-bottom: 14px;">
+                    <span class="status-dot"></span>
+                    <span>Scanning document...</span>
+                </div>
+                <div id="variables-list">
+                    <!-- Variables rendered here -->
+                </div>
+            </div>
+            <div class="sub-panel-footer">
+                <button class="btn btn-secondary" onclick="closeForm()">Cancel</button>
+                <button class="btn btn-primary" id="apply-vars-btn" onclick="applyVariables()" disabled>Apply</button>
+            </div>
+        </div>
+        
+    </div><!-- /panels-wrapper -->
+    
+    <!-- TOAST CONTAINER -->
+    <div id="toast-container"></div>
+    
+    <script>
+        // ========== CONFIG ==========
+        const API = 'https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com/prod';
+        const FIRM = 'morrison';
+        
+        // ========== BUILT-IN CLAUSES ==========
+        const BUILT_IN_CLAUSES = [
+            {
+                clauseId: 'builtin-mtd-1',
+                title: 'Motion to Dismiss - 12(b)(6)',
+                category: 'litigation',
+                content: 'COMES NOW Defendant, {{defendant.name}}, by and through undersigned counsel, and pursuant to Federal Rule of Civil Procedure 12(b)(6), moves this Honorable Court to dismiss Plaintiff\'s Complaint for failure to state a claim upon which relief can be granted. In support of this Motion, Defendant states as follows:\n\nI. INTRODUCTION\n\nPlaintiff\'s Complaint fails to state a plausible claim for relief and should be dismissed with prejudice.\n\nII. LEGAL STANDARD\n\nTo survive a motion to dismiss under Rule 12(b)(6), a complaint must contain "enough facts to state a claim to relief that is plausible on its face." Bell Atl. Corp. v. Twombly, 550 U.S. 544, 570 (2007).',
+                tags: ['motion', 'dismiss', 'federal', '12b6']
+            },
+            {
+                clauseId: 'builtin-demand-1',
+                title: 'Demand Letter - General',
+                category: 'litigation',
+                content: 'RE: Demand for Payment\n\nDear {{opposing.party}}:\n\nThis firm represents {{client.name}} regarding the above-referenced matter. Please be advised that our client demands immediate payment of ${{amount}} representing {{description}}.\n\nYour failure to satisfy this demand within {{deadline.days}} days of the date of this letter will result in our client pursuing all available legal remedies, including but not limited to commencing litigation, seeking all costs and attorney\'s fees permitted by law.\n\nPlease govern yourself accordingly.',
+                tags: ['demand', 'letter', 'payment', 'collection']
+            },
+            {
+                clauseId: 'builtin-indem-1',
+                title: 'Indemnification Clause',
+                category: 'contracts',
+                content: 'INDEMNIFICATION. {{indemnitor}} (the "Indemnitor") shall indemnify, defend, and hold harmless {{indemnitee}} (the "Indemnitee"), its officers, directors, employees, agents, and affiliates, from and against any and all claims, damages, losses, costs, and expenses (including reasonable attorneys\' fees) arising out of or relating to:\n\n(a) any breach of this Agreement by Indemnitor;\n(b) any negligent or wrongful act or omission of Indemnitor;\n(c) any violation of applicable law by Indemnitor.\n\nThis indemnification shall survive the termination or expiration of this Agreement.',
+                tags: ['indemnification', 'hold harmless', 'liability']
+            },
+            {
+                clauseId: 'builtin-conf-1',
+                title: 'Confidentiality Clause',
+                category: 'contracts',
+                content: 'CONFIDENTIALITY. Each party agrees to hold in strict confidence all Confidential Information disclosed by the other party. "Confidential Information" means any non-public information, technical data, trade secrets, or know-how, including but not limited to research, product plans, products, services, customers, markets, software, developments, inventions, processes, formulas, technology, designs, drawings, engineering, and business information.\n\nThe receiving party shall:\n(a) Use the same degree of care to protect Confidential Information as it uses to protect its own confidential information, but no less than reasonable care;\n(b) Not disclose Confidential Information to any third party without prior written consent;\n(c) Limit disclosure to employees and agents who have a need to know.',
+                tags: ['confidentiality', 'nda', 'trade secrets']
+            },
+            {
+                clauseId: 'builtin-force-1',
+                title: 'Force Majeure',
+                category: 'contracts',
+                content: 'FORCE MAJEURE. Neither party shall be liable for any failure or delay in performing their obligations under this Agreement if such failure or delay results from circumstances beyond the reasonable control of that party, including but not limited to: acts of God, natural disasters, war, terrorism, riots, embargoes, acts of civil or military authorities, fire, floods, accidents, strikes, or shortages of transportation, facilities, fuel, energy, labor, or materials.\n\nThe affected party shall give prompt written notice to the other party and shall use commercially reasonable efforts to mitigate the effects of such event.',
+                tags: ['force majeure', 'acts of god', 'excuse']
+            },
+            {
+                clauseId: 'builtin-arb-1',
+                title: 'Arbitration Clause',
+                category: 'contracts',
+                content: 'DISPUTE RESOLUTION. Any dispute, controversy, or claim arising out of or relating to this Agreement, or the breach, termination, or invalidity thereof, shall be settled by binding arbitration administered by the American Arbitration Association in accordance with its Commercial Arbitration Rules.\n\nThe arbitration shall be conducted by a single arbitrator mutually agreed upon by the parties, or if no agreement can be reached within {{days}} days, appointed by the AAA. The place of arbitration shall be {{city}}, {{state}}. The arbitrator\'s decision shall be final and binding, and judgment upon the award may be entered in any court having jurisdiction thereof.',
+                tags: ['arbitration', 'dispute', 'aaa']
+            },
+            {
+                clauseId: 'builtin-gov-1',
+                title: 'Governing Law',
+                category: 'contracts',
+                content: 'GOVERNING LAW AND JURISDICTION. This Agreement shall be governed by and construed in accordance with the laws of the State of {{state}}, without giving effect to any choice or conflict of law provision or rule. Any legal action or proceeding arising out of or relating to this Agreement shall be brought exclusively in the federal or state courts located in {{county}} County, {{state}}, and each party irrevocably consents to the jurisdiction of such courts.',
+                tags: ['governing law', 'jurisdiction', 'choice of law']
+            },
+            {
+                clauseId: 'builtin-entire-1',
+                title: 'Entire Agreement / Integration',
+                category: 'contracts',
+                content: 'ENTIRE AGREEMENT. This Agreement, together with all exhibits and schedules attached hereto, constitutes the entire agreement between the parties with respect to the subject matter hereof and supersedes all prior and contemporaneous agreements, representations, warranties, and understandings, whether written or oral, relating to such subject matter. No modification, amendment, or waiver of any provision of this Agreement shall be effective unless in writing and signed by both parties.',
+                tags: ['entire agreement', 'integration', 'merger']
+            },
+            {
+                clauseId: 'builtin-noc-1',
+                title: 'Notice Provision',
+                category: 'corporate',
+                content: 'NOTICES. All notices, requests, demands, and other communications under this Agreement shall be in writing and shall be deemed to have been duly given:\n\n(a) on the date of delivery if delivered personally;\n(b) on the date of transmission if sent via facsimile or email with confirmation of receipt;\n(c) on the business day after dispatch if sent by nationally recognized overnight courier;\n(d) on the fifth business day after mailing if sent by registered or certified mail, return receipt requested, postage prepaid.\n\nNotices shall be sent to the addresses set forth in the signature block, or to such other address as either party may designate in writing.',
+                tags: ['notice', 'communications', 'service']
+            },
+            {
+                clauseId: 'builtin-assign-1',
+                title: 'Assignment Clause',
+                category: 'corporate',
+                content: 'ASSIGNMENT. Neither party may assign, transfer, or delegate any of its rights or obligations under this Agreement without the prior written consent of the other party, which consent shall not be unreasonably withheld, conditioned, or delayed. Notwithstanding the foregoing, either party may assign this Agreement without consent to (a) an affiliate, or (b) a successor in interest in connection with a merger, acquisition, or sale of all or substantially all of its assets. Any purported assignment in violation of this section shall be null and void.',
+                tags: ['assignment', 'transfer', 'delegation']
+            }
+        ];
+        
+        // ========== NUMBERING SCHEMES ==========
+        const numberingSchemes = {
+            'legal-outline': {
+                name: 'Legal Outline',
+                levels: [
+                    { before: '', style: 'I', after: '.', follow: 'tab' },
+                    { before: '', style: 'A', after: '.', follow: 'tab' },
+                    { before: '', style: '1', after: '.', follow: 'tab' },
+                    { before: '(', style: 'a', after: ')', follow: 'tab' },
+                    { before: '(', style: 'i', after: ')', follow: 'tab' }
+                ]
+            },
+            'contract-sections': {
+                name: 'Contract Sections',
+                levels: [
+                    { before: 'ARTICLE ', style: 'I', after: '', follow: 'tab' },
+                    { before: 'Section ', style: '1', after: '.', follow: 'tab' },
+                    { before: '', style: 'a', after: '.', follow: 'tab' },
+                    { before: '(', style: 'i', after: ')', follow: 'tab' },
+                    { before: '(', style: 'A', after: ')', follow: 'tab' }
+                ]
+            },
+            'heading-style': {
+                name: 'Heading Style',
+                levels: [
+                    { before: '', style: '1', after: '.', follow: 'tab' },
+                    { before: '', style: '1', after: '.', follow: 'tab', legal: true },
+                    { before: '', style: '1', after: '.', follow: 'tab', legal: true },
+                    { before: '', style: '1', after: '.', follow: 'tab', legal: true },
+                    { before: '', style: '1', after: '.', follow: 'tab', legal: true }
+                ]
+            },
+            'pleading-format': {
+                name: 'Pleading Format',
+                levels: [
+                    { before: '', style: '1', after: '.', follow: 'tab' },
+                    { before: '', style: 'a', after: '.', follow: 'tab' },
+                    { before: '(', style: '1', after: ')', follow: 'tab' },
+                    { before: '(', style: 'a', after: ')', follow: 'tab' },
+                    { before: '(', style: 'i', after: ')', follow: 'tab' }
+                ]
+            }
+        };
+        
+        // ========== STATE ==========
+        let selectedSchemeId = 'legal-outline';
+        let allClauses = [...BUILT_IN_CLAUSES];
+        let currentCategory = 'all';
+        let foundVariables = [];
+        
+        // ========== INITIALIZATION ==========
+        Office.onReady(async (info) => {
+            console.log('DraftBridge Version A loaded');
+            
+            // Load clauses
+            loadClauses();
+            
+            // Load saved settings
+            loadSettings();
+            
+            // Check for ribbon command parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const panel = urlParams.get('panel');
+            if (panel) {
+                switchPanel(panel);
+            }
+        });
+        
+        // ========== PANEL SWITCHING ==========
+        function switchPanel(panelId) {
+            // Update tabs
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.panel === panelId);
+            });
+            
+            // Update panels
+            document.querySelectorAll('.panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            document.getElementById('panel-' + panelId).classList.add('active');
+        }
+        
+        // ========== SUB-PANEL (FORM) MANAGEMENT ==========
+        function openForm(formType) {
+            const formPanel = document.getElementById('form-' + formType);
+            if (formPanel) {
+                document.body.classList.add('focus-mode');
+                formPanel.classList.add('active');
+                
+                // Special handling for fill-variables
+                if (formType === 'fill-variables') {
+                    scanForVariables();
+                }
+            }
+        }
+        
+        function closeForm() {
+            document.body.classList.remove('focus-mode');
+            document.querySelectorAll('.sub-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+        }
+        
+        // ========== TOAST NOTIFICATIONS ==========
+        function toast(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast ' + type;
+            t.textContent = message;
+            container.appendChild(t);
+            
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => {
+                t.classList.remove('show');
+                setTimeout(() => t.remove(), 300);
+            }, duration);
+        }
+        
+        // ========== CLAUSE LIBRARY ==========
+        async function loadClauses() {
+            const statusEl = document.getElementById('library-status');
+            
+            try {
+                statusEl.innerHTML = '<span class="status-dot"></span><span>Fetching clauses...</span>';
+                
+                const response = await fetch(`${API}/firms/${FIRM}/clauses`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                
+                const data = await response.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    allClauses = data;
+                } else {
+                    allClauses = [...BUILT_IN_CLAUSES];
+                }
+                
+                statusEl.className = 'status-badge success';
+                statusEl.innerHTML = `<span class="status-dot"></span><span>${allClauses.length} clauses loaded</span>`;
+                renderClauses();
+                
+            } catch (err) {
+                console.log('Using built-in clauses:', err);
+                allClauses = [...BUILT_IN_CLAUSES];
+                statusEl.className = 'status-badge info';
+                statusEl.innerHTML = `<span class="status-dot"></span><span>${allClauses.length} sample clauses</span>`;
+                renderClauses();
+            }
+        }
+        
+        function setCategory(category) {
+            currentCategory = category;
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.filter === category);
+            });
+            filterClauses();
+        }
+        
+        function filterClauses() {
+            const searchTerm = document.getElementById('clause-search').value.toLowerCase();
+            
+            const filtered = allClauses.filter(clause => {
+                const matchesCategory = currentCategory === 'all' || clause.category === currentCategory;
+                const matchesSearch = !searchTerm || 
+                    clause.title.toLowerCase().includes(searchTerm) ||
+                    clause.content.toLowerCase().includes(searchTerm) ||
+                    (clause.tags || []).some(tag => tag.toLowerCase().includes(searchTerm));
+                return matchesCategory && matchesSearch;
+            });
+            
+            renderClauses(filtered);
+            
+            const statusEl = document.getElementById('library-status');
+            if (searchTerm || currentCategory !== 'all') {
+                statusEl.innerHTML = `<span class="status-dot"></span><span>${filtered.length} of ${allClauses.length} clauses</span>`;
+            } else {
+                statusEl.innerHTML = `<span class="status-dot"></span><span>${allClauses.length} clauses loaded</span>`;
+            }
+        }
+        
+        function renderClauses(clauses = allClauses) {
+            const container = document.getElementById('clause-list');
+            
+            if (clauses.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-title">No clauses found</div>
+                        <div class="empty-state-desc">Try adjusting your search or filters</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = clauses.map(clause => `
+                <div class="clause-card">
+                    <div class="clause-header">
+                        <span class="clause-title">${escapeHtml(clause.title)}</span>
+                        <span class="clause-category ${clause.category}">${clause.category}</span>
+                    </div>
+                    <div class="clause-content">${escapeHtml(clause.content.substring(0, 200))}...</div>
+                    <div class="clause-actions">
+                        <button class="btn btn-primary btn-small" onclick="insertClause('${clause.clauseId}')">Insert</button>
+                        <button class="btn btn-secondary btn-small" onclick="previewClause('${clause.clauseId}')">Preview</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        async function insertClause(clauseId) {
+            const clause = allClauses.find(c => c.clauseId === clauseId);
+            if (!clause) return;
+            
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.insertText(clause.content, Word.InsertLocation.replace);
+                    await context.sync();
+                });
+                toast('Clause inserted!', 'success');
+            } catch (err) {
+                console.error('Insert failed:', err);
+                toast('Failed to insert clause', 'error');
+            }
+        }
+        
+        function previewClause(clauseId) {
+            const clause = allClauses.find(c => c.clauseId === clauseId);
+            if (!clause) return;
+            
+            // Simple alert for now - could enhance with modal
+            alert(clause.content);
+        }
+        
+        // ========== NUMBERING ==========
+        function selectScheme(schemeId, element) {
+            selectedSchemeId = schemeId;
+            
+            document.querySelectorAll('.scheme-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            updateNumberingPreview();
+        }
+        
+        function updateNumberingPreview() {
+            const scheme = numberingSchemes[selectedSchemeId];
+            if (!scheme) return;
+            
+            const preview = document.getElementById('numbering-preview');
+            const samples = ['Article One', 'Section Title', 'Paragraph text', 'Sub-paragraph', 'Detail item'];
+            
+            let html = '';
+            for (let i = 0; i < 5; i++) {
+                const level = scheme.levels[i];
+                const num = level.before + formatNumber(i + 1, level.style) + level.after;
+                html += `<div class="preview-line l${i+1}"><span class="num">${num}</span> ${samples[i]}</div>`;
+            }
+            preview.innerHTML = html;
+        }
+        
+        function formatNumber(n, style) {
+            switch(style) {
+                case 'I': return toRoman(n).toUpperCase();
+                case 'i': return toRoman(n).toLowerCase();
+                case 'A': return toAlpha(n).toUpperCase();
+                case 'a': return toAlpha(n).toLowerCase();
+                case '1': return n.toString();
+                default: return n.toString();
+            }
+        }
+        
+        function toAlpha(n) {
+            let result = '';
+            while (n > 0) {
+                n--;
+                result = String.fromCharCode(65 + (n % 26)) + result;
+                n = Math.floor(n / 26);
+            }
+            return result || 'A';
+        }
+        
+        function toRoman(num) {
+            const romanNumerals = [
+                ['M', 1000], ['CM', 900], ['D', 500], ['CD', 400],
+                ['C', 100], ['XC', 90], ['L', 50], ['XL', 40],
+                ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1]
+            ];
+            let result = '';
+            for (const [letter, value] of romanNumerals) {
+                while (num >= value) {
+                    result += letter;
+                    num -= value;
+                }
+            }
+            return result;
+        }
+        
+        // OOXML Number format mapping
+        const ooxmlNumFormats = {
+            'I': 'upperRoman',
+            'i': 'lowerRoman', 
+            'A': 'upperLetter',
+            'a': 'lowerLetter',
+            '1': 'decimal'
+        };
+        
+        // Generate OOXML with proper relationships (FIXED VERSION)
+        function generateNumberingOoxml(scheme, sampleText) {
+            const numId = 1;
+            const abstractNumId = 1;
+            
+            let levelDefs = '';
+            for (let i = 0; i < scheme.levels.length; i++) {
+                const level = scheme.levels[i];
+                const numFmt = ooxmlNumFormats[level.style] || 'decimal';
+                const lvlText = escapeXml(level.before) + '%' + (i + 1) + escapeXml(level.after);
+                const indent = 720 + (i * 720);
+                const hanging = 360;
+                
+                levelDefs += `
+                    <w:lvl w:ilvl="${i}">
+                        <w:start w:val="1"/>
+                        <w:numFmt w:val="${numFmt}"/>
+                        <w:lvlText w:val="${lvlText}"/>
+                        <w:lvlJc w:val="left"/>
+                        <w:pPr>
+                            <w:ind w:left="${indent}" w:hanging="${hanging}"/>
+                        </w:pPr>
+                    </w:lvl>`;
+            }
+            
+            let paragraphs = '';
+            sampleText.forEach((text, idx) => {
+                const level = Math.min(idx, scheme.levels.length - 1);
+                paragraphs += `
+                    <w:p>
+                        <w:pPr>
+                            <w:numPr>
+                                <w:ilvl w:val="${level}"/>
+                                <w:numId w:val="${numId}"/>
+                            </w:numPr>
+                        </w:pPr>
+                        <w:r>
+                            <w:t>${escapeXml(text)}</w:t>
+                        </w:r>
+                    </w:p>`;
+            });
+            
+            return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+                <pkg:package xmlns:pkg="http://schemas.microsoft.com/office/2006/xmlPackage">
+                    <pkg:part pkg:name="/_rels/.rels" pkg:contentType="application/vnd.openxmlformats-package.relationships+xml">
+                        <pkg:xmlData>
+                            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+                            </Relationships>
+                        </pkg:xmlData>
+                    </pkg:part>
+                    <pkg:part pkg:name="/word/_rels/document.xml.rels" pkg:contentType="application/vnd.openxmlformats-package.relationships+xml">
+                        <pkg:xmlData>
+                            <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+                            </Relationships>
+                        </pkg:xmlData>
+                    </pkg:part>
+                    <pkg:part pkg:name="/word/numbering.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml">
+                        <pkg:xmlData>
+                            <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                                <w:abstractNum w:abstractNumId="${abstractNumId}">
+                                    ${levelDefs}
+                                </w:abstractNum>
+                                <w:num w:numId="${numId}">
+                                    <w:abstractNumId w:val="${abstractNumId}"/>
+                                </w:num>
+                            </w:numbering>
+                        </pkg:xmlData>
+                    </pkg:part>
+                    <pkg:part pkg:name="/word/document.xml" pkg:contentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml">
+                        <pkg:xmlData>
+                            <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+                                <w:body>
+                                    ${paragraphs}
+                                </w:body>
+                            </w:document>
+                        </pkg:xmlData>
+                    </pkg:part>
+                </pkg:package>`;
+        }
+        
+        async function applyNumbering() {
+            const scheme = numberingSchemes[selectedSchemeId];
+            if (!scheme) {
+                toast('Please select a numbering scheme', 'warning');
+                return;
+            }
+            
+            try {
+                toast('Applying numbering...', 'info');
+                
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.load('text');
+                    await context.sync();
+                    
+                    let sampleText;
+                    const selectedText = selection.text.trim();
+                    
+                    if (selectedText && selectedText.length > 0) {
+                        sampleText = selectedText.split('\r').filter(line => line.trim());
+                        if (sampleText.length === 0) {
+                            sampleText = ['First item', 'Second item', 'Third item'];
+                        }
+                    } else {
+                        sampleText = [
+                            'Article One',
+                            'Section A', 
+                            'Paragraph 1',
+                            'Sub-paragraph (a)',
+                            'Detail item (i)'
+                        ];
+                    }
+                    
+                    const ooxml = generateNumberingOoxml(scheme, sampleText);
+                    const insertLocation = selectedText ? Word.InsertLocation.replace : Word.InsertLocation.end;
+                    
+                    selection.insertOoxml(ooxml, insertLocation);
+                    await context.sync();
+                });
+                
+                toast(scheme.name + ' numbering applied!', 'success');
+            } catch (err) {
+                console.error('Apply failed:', err);
+                toast('Failed to apply numbering. Try selecting text first.', 'error');
+            }
+        }
+        
+        async function continueList() {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    const para = selection.paragraphs.getFirst();
+                    para.load('listItemOrNullObject');
+                    await context.sync();
+                    
+                    if (para.listItemOrNullObject && !para.listItemOrNullObject.isNullObject) {
+                        // Already in list - continue from previous
+                        toast('List continued', 'success');
+                    } else {
+                        toast('Place cursor in a numbered paragraph first', 'warning');
+                    }
+                });
+            } catch (err) {
+                console.error('Continue list failed:', err);
+                toast('Could not continue list', 'error');
+            }
+        }
+        
+        async function restartList() {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    const para = selection.paragraphs.getFirst();
+                    para.startNewList();
+                    await context.sync();
+                    toast('List restarted at 1', 'success');
+                });
+            } catch (err) {
+                console.error('Restart list failed:', err);
+                toast('Could not restart list', 'error');
+            }
+        }
+        
+        function saveCustomScheme() {
+            const name = document.getElementById('scheme-name').value.trim();
+            if (!name) {
+                toast('Please enter a scheme name', 'warning');
+                return;
+            }
+            
+            // Build custom scheme from form
+            const levels = [];
+            for (let i = 1; i <= 3; i++) {
+                levels.push({
+                    before: document.getElementById(`level-${i}-before`).value || '',
+                    style: document.getElementById(`level-${i}-style`).value || '1',
+                    after: document.getElementById(`level-${i}-after`).value || '.',
+                    follow: 'tab'
+                });
+            }
+            // Add two more default levels
+            levels.push({ before: '(', style: 'a', after: ')', follow: 'tab' });
+            levels.push({ before: '(', style: 'i', after: ')', follow: 'tab' });
+            
+            // Save to localStorage
+            const customSchemes = JSON.parse(localStorage.getItem('draftbridge_custom_schemes') || '{}');
+            const schemeId = 'custom_' + Date.now();
+            customSchemes[schemeId] = { name, levels };
+            localStorage.setItem('draftbridge_custom_schemes', JSON.stringify(customSchemes));
+            
+            toast('Scheme saved: ' + name, 'success');
+            closeForm();
+        }
+        
+        // ========== DOCUMENT TEMPLATES ==========
+        async function insertDemandLetter() {
+            const data = {
+                recipient: document.getElementById('dl-recipient').value || '[Opposing Party]',
+                address: document.getElementById('dl-address').value || '[Address]',
+                subject: document.getElementById('dl-subject').value || '[Subject]',
+                client: document.getElementById('dl-client').value || '[Client Name]',
+                amount: document.getElementById('dl-amount').value || '[Amount]',
+                deadline: document.getElementById('dl-deadline').value || '10 days'
+            };
+            
+            const content = `${new Date().toLocaleDateString()}
+
+VIA CERTIFIED MAIL
+
+${data.recipient}
+${data.address}
+
+RE: ${data.subject}
+    Our Client: ${data.client}
+    
+Dear Counsel:
+
+We represent ${data.client} in connection with the above-referenced matter.
+
+Please be advised that our client demands immediate payment of ${data.amount}.
+
+Your failure to satisfy this demand within ${data.deadline} of receipt of this letter will result in our client pursuing all available legal remedies.
+
+Please govern yourself accordingly.
+
+Very truly yours,
+
+
+[Attorney Name]
+[Firm Name]`;
+            
+            await insertContent(content);
+            closeForm();
+        }
+        
+        async function insertMotion() {
+            const data = {
+                type: document.getElementById('mot-type').value,
+                caseNumber: document.getElementById('mot-case').value || '[Case Number]',
+                plaintiff: document.getElementById('mot-plaintiff').value || '[Plaintiff]',
+                defendant: document.getElementById('mot-defendant').value || '[Defendant]',
+                movant: document.getElementById('mot-movant').value || 'Defendant',
+                relief: document.getElementById('mot-relief').value || '[requested relief]'
+            };
+            
+            const motionType = data.type.replace(/-/g, ' ').toUpperCase();
+            
+            const content = `[COURT NAME]
+
+${data.plaintiff},
+    Plaintiff,
+
+v.                                              Case No. ${data.caseNumber}
+
+${data.defendant},
+    Defendant.
+
+MOTION TO ${motionType}
+
+${data.movant}, by and through undersigned counsel, respectfully moves this Court for an order ${data.relief}, and in support thereof states as follows:
+
+I. INTRODUCTION
+
+[Introduction]
+
+II. STATEMENT OF FACTS
+
+[Statement of facts]
+
+III. ARGUMENT
+
+[Legal argument]
+
+IV. CONCLUSION
+
+WHEREFORE, ${data.movant} respectfully requests that this Court ${data.relief}.
+
+Respectfully submitted,
+
+
+[Attorney Name]
+[Firm Name]`;
+            
+            await insertContent(content);
+            closeForm();
+        }
+        
+        async function insertLetter() {
+            const data = {
+                recipient: document.getElementById('ltr-recipient').value || '[Recipient]',
+                address: document.getElementById('ltr-address').value || '[Address]',
+                subject: document.getElementById('ltr-subject').value || '[Subject]',
+                delivery: document.getElementById('ltr-delivery').value,
+                closing: document.getElementById('ltr-closing').value
+            };
+            
+            const content = `${new Date().toLocaleDateString()}
+
+${data.delivery ? data.delivery + '\n\n' : ''}${data.recipient}
+${data.address}
+
+RE: ${data.subject}
+
+Dear ${data.recipient.split(' ')[0]}:
+
+[Letter body]
+
+${data.closing},
+
+
+[Your Name]`;
+            
+            await insertContent(content);
+            closeForm();
+        }
+        
+        async function insertMemo() {
+            const data = {
+                to: document.getElementById('memo-to').value || '[Recipient]',
+                from: document.getElementById('memo-from').value || '[Sender]',
+                subject: document.getElementById('memo-subject').value || '[Subject]',
+                cc: document.getElementById('memo-cc').value
+            };
+            
+            const content = `MEMORANDUM
+
+TO:      ${data.to}
+FROM:    ${data.from}
+DATE:    ${new Date().toLocaleDateString()}
+RE:      ${data.subject}
+${data.cc ? 'CC:      ' + data.cc + '\n' : ''}
+${'─'.repeat(50)}
+
+[Memo body]`;
+            
+            await insertContent(content);
+            closeForm();
+        }
+        
+        async function insertToc() {
+            const content = `TABLE OF CONTENTS
+
+[TOC will be generated - press F9 to update]
+
+`;
+            await insertContent(content);
+            toast('TOC placeholder inserted. Press F9 to generate.', 'success');
+        }
+        
+        async function insertContent(content) {
+            try {
+                await Word.run(async (context) => {
+                    const selection = context.document.getSelection();
+                    selection.insertText(content, Word.InsertLocation.replace);
+                    await context.sync();
+                });
+                toast('Content inserted!', 'success');
+            } catch (err) {
+                console.error('Insert failed:', err);
+                toast('Failed to insert content', 'error');
+            }
+        }
+        
+        // ========== FILL VARIABLES ==========
+        async function scanForVariables() {
+            const statusEl = document.getElementById('vars-status');
+            const listEl = document.getElementById('variables-list');
+            const applyBtn = document.getElementById('apply-vars-btn');
+            
+            statusEl.className = 'status-badge info';
+            statusEl.innerHTML = '<span class="status-dot"></span><span>Scanning document...</span>';
+            listEl.innerHTML = '';
+            applyBtn.disabled = true;
+            
+            try {
+                await Word.run(async (context) => {
+                    const body = context.document.body;
+                    body.load('text');
+                    await context.sync();
+                    
+                    const varPattern = /\{\{([^}]+)\}\}/g;
+                    const matches = [...body.text.matchAll(varPattern)];
+                    
+                    if (matches.length === 0) {
+                        statusEl.className = 'status-badge warning';
+                        statusEl.innerHTML = '<span class="status-dot"></span><span>No variables found</span>';
+                        listEl.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-state-title">No variables found</div>
+                                <div class="empty-state-desc">Add placeholders like {{client.name}} to your document</div>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    // Get unique variables
+                    const uniqueVars = [...new Set(matches.map(m => m[1]))];
+                    foundVariables = uniqueVars;
+                    
+                    statusEl.className = 'status-badge success';
+                    statusEl.innerHTML = `<span class="status-dot"></span><span>${uniqueVars.length} variable${uniqueVars.length !== 1 ? 's' : ''} found</span>`;
+                    
+                    listEl.innerHTML = uniqueVars.map(varName => `
+                        <div class="field">
+                            <label>${escapeHtml(varName)}</label>
+                            <input type="text" data-var="${escapeHtml(varName)}" placeholder="Enter value">
+                        </div>
+                    `).join('');
+                    
+                    applyBtn.disabled = false;
+                });
+            } catch (err) {
+                console.error('Scan failed:', err);
+                statusEl.className = 'status-badge error';
+                statusEl.innerHTML = '<span class="status-dot"></span><span>Scan failed</span>';
+            }
+        }
+        
+        async function applyVariables() {
+            try {
+                await Word.run(async (context) => {
+                    const body = context.document.body;
+                    let filled = 0;
+                    
+                    for (const varName of foundVariables) {
+                        const input = document.querySelector(`input[data-var="${varName}"]`);
+                        const value = input ? input.value.trim() : '';
+                        
+                        if (value) {
+                            const searchResults = body.search('{{' + varName + '}}', { 
+                                matchCase: false, 
+                                matchWholeWord: false 
+                            });
+                            searchResults.load('items');
+                            await context.sync();
+                            
+                            for (const result of searchResults.items) {
+                                result.insertText(value, Word.InsertLocation.replace);
+                            }
+                            await context.sync();
+                            filled++;
+                        }
+                    }
+                    
+                    if (filled > 0) {
+                        toast(`Filled ${filled} variable${filled !== 1 ? 's' : ''}!`, 'success');
+                    } else {
+                        toast('No values entered', 'warning');
+                    }
+                });
+                
+                closeForm();
+            } catch (err) {
+                console.error('Apply failed:', err);
+                toast('Failed to apply variables', 'error');
+            }
+        }
+        
+        // ========== SETTINGS ==========
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem('draftbridge_settings') || '{}');
+            
+            if (settings.firmName) {
+                document.getElementById('firm-name').value = settings.firmName;
+            }
+            if (settings.defaultSigner) {
+                document.getElementById('default-signer').value = settings.defaultSigner;
+            }
+            if (settings.autoSave !== undefined) {
+                document.getElementById('setting-autosave').checked = settings.autoSave;
+            }
+            if (settings.showPreview !== undefined) {
+                document.getElementById('setting-preview').checked = settings.showPreview;
+            }
+        }
+        
+        function saveSettings() {
+            const settings = {
+                firmName: document.getElementById('firm-name').value,
+                defaultSigner: document.getElementById('default-signer').value,
+                autoSave: document.getElementById('setting-autosave').checked,
+                showPreview: document.getElementById('setting-preview').checked
+            };
+            
+            localStorage.setItem('draftbridge_settings', JSON.stringify(settings));
+            toast('Settings saved!', 'success');
+        }
+        
+        // ========== HELP ==========
+        function showHelp() {
+            alert('DraftBridge Help\n\n' +
+                'Generate: Create legal documents from templates\n' +
+                'Numbering: Apply legal outline numbering\n' +
+                'Clause Library: Insert standard legal clauses\n' +
+                'Settings: Configure preferences\n\n' +
+                'For support, contact your IT administrator.');
+        }
+        
+        // ========== UTILITIES ==========
+        function escapeHtml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        
+        function escapeXml(text) {
+            if (!text) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+    </script>
+</body>
+</html>

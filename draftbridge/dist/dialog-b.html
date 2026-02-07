@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://appsforoffice.microsoft.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <title>DraftBridge - Dialog</title>
+    <link rel="stylesheet" href="dialog-b.css">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+    <div class="dialog-container">
+        <!-- Header -->
+        <header class="dialog-header">
+            <div class="dialog-logo">
+                <span class="logo-mark">DB</span>
+                <span class="logo-text">Draft<span>Bridge</span></span>
+            </div>
+            <h1 class="dialog-title" id="formTitle">Loading...</h1>
+            <button class="dialog-close" onclick="closeDialog()" title="Close">X</button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="dialog-main">
+            <!-- Left: Form Section -->
+            <section class="form-section">
+                <div class="form-scroll">
+                    
+                    <!-- ════════════════════════════════════════════════════
+                         GENERATE DOCUMENT FORM
+                         ════════════════════════════════════════════════════ -->
+                    <div id="form-generate" class="form-content hidden">
+                        <!-- Document Type Tabs -->
+                        <div class="form-tabs">
+                            <button class="form-tab active" onclick="switchDocType('demand-letter')">Demand Letter</button>
+                            <button class="form-tab" onclick="switchDocType('motion')">Motion</button>
+                            <button class="form-tab" onclick="switchDocType('memo')">Memo</button>
+                        </div>
+                        
+                        <!-- Demand Letter Form -->
+                        <div id="form-demand-letter" class="doc-type-form">
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <input type="date" id="demand-date" class="form-input">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Recipient Name <span class="required">*</span></label>
+                                    <input type="text" id="demand-recipient" class="form-input" placeholder="John Smith">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" id="demand-recipient-title" class="form-input" placeholder="CEO, Manager, etc.">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Company</label>
+                                <input type="text" id="demand-company" class="form-input" placeholder="ABC Corporation">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Address <span class="required">*</span></label>
+                                <textarea id="demand-address" class="form-textarea" placeholder="123 Main Street&#10;City, State 12345" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="form-divider"><span>Demand Details</span></div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">RE: Subject <span class="required">*</span></label>
+                                <input type="text" id="demand-subject" class="form-input" placeholder="Breach of Contract - Invoice #12345">
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Amount <span class="required">*</span></label>
+                                    <input type="text" id="demand-amount" class="form-input" placeholder="$50,000.00">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Deadline</label>
+                                    <input type="date" id="demand-deadline" class="form-input">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Basis for Demand</label>
+                                <textarea id="demand-basis" class="form-textarea" placeholder="Describe the factual and legal basis..." rows="4"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tone</label>
+                                <select id="demand-tone" class="form-select">
+                                    <option value="firm">Firm but Professional</option>
+                                    <option value="formal">Formal</option>
+                                    <option value="aggressive">Aggressive</option>
+                                    <option value="conciliatory">Conciliatory</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-divider"><span>Sender</span></div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Your Name <span class="required">*</span></label>
+                                    <input type="text" id="demand-sender" class="form-input" placeholder="Attorney Name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" id="demand-sender-title" class="form-input" placeholder="Partner">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Firm Name</label>
+                                <input type="text" id="demand-firm" class="form-input" placeholder="Smith & Associates LLP">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Delivery Method</label>
+                                <select id="demand-delivery" class="form-select">
+                                    <option value="">None specified</option>
+                                    <option value="Via Certified Mail, Return Receipt Requested">Certified Mail, RRR</option>
+                                    <option value="Via Email">Via Email</option>
+                                    <option value="Via Federal Express">Via FedEx</option>
+                                    <option value="Via Hand Delivery">Hand Delivery</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- Motion Form -->
+                        <div id="form-motion" class="doc-type-form hidden">
+                            <div class="form-group">
+                                <label class="form-label">Court <span class="required">*</span></label>
+                                <select id="motion-court" class="form-select">
+                                    <option value="">Select Court...</option>
+                                    <option value="UNITED STATES DISTRICT COURT">U.S. District Court</option>
+                                    <option value="UNITED STATES BANKRUPTCY COURT">U.S. Bankruptcy Court</option>
+                                    <option value="STATE COURT">State Court</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">District/Jurisdiction <span class="required">*</span></label>
+                                <input type="text" id="motion-district" class="form-input" placeholder="Southern District of New York">
+                            </div>
+                            
+                            <div class="form-divider"><span>Case Information</span></div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Case Number <span class="required">*</span></label>
+                                    <input type="text" id="motion-case-number" class="form-input" placeholder="1:24-cv-12345">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Judge</label>
+                                    <input type="text" id="motion-judge" class="form-input" placeholder="Hon. Jane Smith">
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Plaintiff <span class="required">*</span></label>
+                                    <input type="text" id="motion-plaintiff" class="form-input" placeholder="JOHN DOE">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Defendant <span class="required">*</span></label>
+                                    <input type="text" id="motion-defendant" class="form-input" placeholder="ABC CORPORATION">
+                                </div>
+                            </div>
+                            
+                            <div class="form-divider"><span>Grounds</span></div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Rule 12(b) Grounds <span class="required">*</span></label>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="12(b)(1)">
+                                        <span>12(b)(1) - Lack of subject matter jurisdiction</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="12(b)(2)">
+                                        <span>12(b)(2) - Lack of personal jurisdiction</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="12(b)(3)">
+                                        <span>12(b)(3) - Improper venue</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="12(b)(6)" checked>
+                                        <span>12(b)(6) - Failure to state a claim</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" value="12(b)(7)">
+                                        <span>12(b)(7) - Failure to join required party</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Summary of Argument</label>
+                                <textarea id="motion-summary" class="form-textarea" placeholder="Brief summary of your arguments..." rows="4"></textarea>
+                            </div>
+                            
+                            <div class="form-divider"><span>Attorney</span></div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Attorney Name <span class="required">*</span></label>
+                                    <input type="text" id="motion-attorney" class="form-input" placeholder="Attorney Name">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Bar Number</label>
+                                    <input type="text" id="motion-bar" class="form-input" placeholder="123456">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Firm</label>
+                                <input type="text" id="motion-firm" class="form-input" placeholder="Law Firm LLP">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Firm Address</label>
+                                <textarea id="motion-firm-address" class="form-textarea" placeholder="123 Legal Way&#10;City, State 12345" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" id="motion-phone" class="form-input" placeholder="(555) 123-4567">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" id="motion-email" class="form-input" placeholder="attorney@firm.com">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Memo Form -->
+                        <div id="form-memo" class="doc-type-form hidden">
+                            <div class="form-group">
+                                <label class="form-label">To <span class="required">*</span></label>
+                                <input type="text" id="memo-to" class="form-input" placeholder="Recipient Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">From</label>
+                                <input type="text" id="memo-from" class="form-input" placeholder="Your Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Date</label>
+                                <input type="date" id="memo-date" class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Subject <span class="required">*</span></label>
+                                <input type="text" id="memo-subject" class="form-input" placeholder="Subject Line">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">CC</label>
+                                <input type="text" id="memo-cc" class="form-input" placeholder="Additional recipients">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Body</label>
+                                <textarea id="memo-body" class="form-textarea" placeholder="Memo content..." rows="8"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- ════════════════════════════════════════════════════
+                         NUMBERING FORM
+                         ════════════════════════════════════════════════════ -->
+                    <div id="form-numbering" class="form-content hidden">
+                        <div class="form-group">
+                            <label class="form-label">Select Numbering Scheme</label>
+                            <div id="scheme-list" class="scheme-list">
+                                <!-- Rendered by JS -->
+                            </div>
+                        </div>
+                        
+                        <div class="form-divider"><span>Options</span></div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Number of Levels</label>
+                            <select id="num-levels" class="form-select">
+                                <option value="2">2 Levels</option>
+                                <option value="3" selected>3 Levels</option>
+                                <option value="4">4 Levels</option>
+                                <option value="5">5 Levels</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Starting Number</label>
+                            <input type="number" id="num-start" class="form-input" value="1" min="1">
+                        </div>
+                    </div>
+                    
+                    <!-- ════════════════════════════════════════════════════
+                         CLAUSE LIBRARY FORM
+                         ════════════════════════════════════════════════════ -->
+                    <div id="form-clauses" class="form-content hidden">
+                        <div class="search-box">
+                            <span class="search-icon">?</span>
+                            <input type="text" id="clause-search" class="form-input" placeholder="Search clauses..." oninput="searchClauses()">
+                        </div>
+                        
+                        <div class="category-filter">
+                            <button class="category-btn active" data-category="all" onclick="filterClauses('all')">All</button>
+                            <button class="category-btn" data-category="confidentiality" onclick="filterClauses('confidentiality')">Confidentiality</button>
+                            <button class="category-btn" data-category="indemnification" onclick="filterClauses('indemnification')">Indemnification</button>
+                            <button class="category-btn" data-category="liability" onclick="filterClauses('liability')">Liability</button>
+                            <button class="category-btn" data-category="termination" onclick="filterClauses('termination')">Termination</button>
+                            <button class="category-btn" data-category="general" onclick="filterClauses('general')">General</button>
+                        </div>
+                        
+                        <div id="clause-list" class="clause-list">
+                            <!-- Rendered by JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- ════════════════════════════════════════════════════
+                         SETTINGS FORM
+                         ════════════════════════════════════════════════════ -->
+                    <div id="form-settings" class="form-content hidden">
+                        <div class="settings-group">
+                            <div class="settings-group-title">Defaults</div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Firm Name</label>
+                                <input type="text" id="setting-firm-name" class="form-input" placeholder="Your Firm Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Attorney Name</label>
+                                <input type="text" id="setting-attorney-name" class="form-input" placeholder="Your Name">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Default Numbering Scheme</label>
+                                <select id="setting-default-scheme" class="form-select">
+                                    <option value="legal-outline">Legal Outline (I, A, 1, a)</option>
+                                    <option value="decimal">Decimal (1.1.1)</option>
+                                    <option value="alpha-numeric">Alpha-Numeric (A, 1, a)</option>
+                                    <option value="roman">Roman (I, A, 1)</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-group">
+                            <div class="settings-group-title">Preferences</div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Auto Preview</div>
+                                    <div class="setting-desc">Update preview as you type</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="setting-auto-preview" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="setting-row">
+                                <div class="setting-info">
+                                    <div class="setting-label">Dark Mode</div>
+                                    <div class="setting-desc">Use dark color theme</div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="setting-dark-mode">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </section>
+
+            <!-- Right: Preview Section -->
+            <section class="preview-section">
+                <div class="preview-header">
+                    <h2>Preview</h2>
+                    <div class="preview-actions">
+                        <button class="preview-btn" onclick="refreshPreview()" title="Refresh">R</button>
+                    </div>
+                </div>
+                <div class="preview-content" id="previewContent">
+                    <div class="preview-placeholder">
+                        <div class="preview-placeholder-icon">?</div>
+                        <p>Fill in the form to see preview</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dialog-footer">
+            <button class="btn btn-secondary" onclick="closeDialog()">Cancel</button>
+            
+            <!-- Generate form footer -->
+            <button class="btn btn-primary" id="btn-insert-doc" onclick="insertDocument()">
+                Insert Document
+            </button>
+            
+            <!-- Numbering form footer -->
+            <button class="btn btn-primary hidden" id="btn-insert-numbering" onclick="insertNumbering()">
+                Apply Numbering
+            </button>
+            
+            <!-- Clause form footer -->
+            <button class="btn btn-primary hidden" id="btn-insert-clause" onclick="insertClause()">
+                Insert Clause
+            </button>
+            
+            <!-- Settings form footer -->
+            <button class="btn btn-primary hidden" id="btn-save-settings" onclick="saveSettings()">
+                Save Settings
+            </button>
+        </footer>
+    </div>
+
+    <script src="dialog-b.js"></script>
+    <script>
+        // Show appropriate footer button based on form
+        function updateFooterButton() {
+            const buttons = ['btn-insert-doc', 'btn-insert-numbering', 'btn-insert-clause', 'btn-save-settings'];
+            buttons.forEach(id => document.getElementById(id).classList.add('hidden'));
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const form = urlParams.get('form') || 'generate';
+            
+            switch (form) {
+                case 'generate':
+                    document.getElementById('btn-insert-doc').classList.remove('hidden');
+                    break;
+                case 'numbering':
+                    document.getElementById('btn-insert-numbering').classList.remove('hidden');
+                    break;
+                case 'clauses':
+                    document.getElementById('btn-insert-clause').classList.remove('hidden');
+                    break;
+                case 'settings':
+                    document.getElementById('btn-save-settings').classList.remove('hidden');
+                    break;
+            }
+        }
+        
+        // Run on load
+        document.addEventListener('DOMContentLoaded', updateFooterButton);
+    </script>
+</body>
+</html>

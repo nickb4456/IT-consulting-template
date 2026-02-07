@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Screenshot Pro - Feature Comparison Chart</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-card: #18181b;
+            --bg-input: #27272a;
+            --border: #3f3f46;
+            --text: #fafafa;
+            --text-muted: #a1a1aa;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #22d3ee;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+
+        .comparison-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 20px;
+            color: var(--accent);
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Comparison Table */
+        .comparison-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 32px;
+            border-radius: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .comparison-table thead th {
+            background: rgba(99, 102, 241, 0.05);
+            padding: 24px 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.9375rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table thead th:first-child {
+            border-top-left-radius: 16px;
+            color: var(--text-muted);
+        }
+
+        .comparison-table thead th.highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.1));
+            border-left: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+            text-align: center;
+            position: relative;
+        }
+
+        .comparison-table thead th.highlight::before {
+            content: '★ RECOMMENDED';
+            display: block;
+            font-size: 0.6875rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .comparison-table thead th.competitor {
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .comparison-table tbody tr {
+            border-bottom: 1px solid rgba(63, 63, 70, 0.5);
+            transition: background 0.2s;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.03);
+        }
+
+        .comparison-table tbody td {
+            padding: 20px;
+            vertical-align: middle;
+        }
+
+        .comparison-table tbody td:first-child {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .comparison-table tbody td.highlight {
+            background: rgba(99, 102, 241, 0.05);
+            border-left: 2px solid var(--primary);
+            border-right: 2px solid var(--primary);
+            text-align: center;
+        }
+
+        .comparison-table tbody td.competitor {
+            text-align: center;
+        }
+
+        /* Feature Icons */
+        .feature-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* Check/X Marks */
+        .check {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: rgba(16, 185, 129, 0.1);
+            border-radius: 6px;
+            color: var(--success);
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .x-mark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: rgba(161, 161, 170, 0.1);
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 16px;
+            font-weight: bold;
+            opacity: 0.5;
+        }
+
+        .partial {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: rgba(245, 158, 11, 0.1);
+            border-radius: 6px;
+            color: var(--warning);
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        /* Value Labels */
+        .value-label {
+            display: inline-block;
+            padding: 4px 10px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 6px;
+            color: var(--accent);
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .value-label.muted {
+            background: rgba(161, 161, 170, 0.1);
+            color: var(--text-muted);
+        }
+
+        /* Price Comparison */
+        .price-tag {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .price-tag.highlight {
+            color: var(--accent);
+        }
+
+        .price-detail {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* CTA */
+        .comparison-cta {
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .comparison-table thead th,
+            .comparison-table tbody td {
+                padding: 12px 10px;
+                font-size: 0.875rem;
+            }
+
+            .feature-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 12px;
+            }
+
+            .price-tag {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="comparison-section">
+        <div class="section-header">
+            <div class="section-badge">Why Choose Smart Screenshot Pro</div>
+            <h2 class="section-title">Built for Legal Professionals</h2>
+            <p class="section-subtitle">Not just another screenshot tool. The only solution designed for court-ready web evidence.</p>
+        </div>
+
+        <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th class="competitor">Manual Screenshots<br>(Browser Default)</th>
+                        <th class="competitor">Snagit</th>
+                        <th class="competitor">Awesome Screenshot</th>
+                        <th class="highlight">Smart Screenshot Pro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Capture Features -->
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">📸</div>
+                                <span>Text-Aware Boundaries</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">📄</div>
+                                <span>Full-Page Capture</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🎯</div>
+                                <span>Region Selection</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <!-- Annotation Features -->
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">✏️</div>
+                                <span>Professional Annotations</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="partial">~</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🔒</div>
+                                <span>Redaction & Blur Tools</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🎙️</div>
+                                <span>Voice Control Annotations</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <!-- Legal Features -->
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">⚖️</div>
+                                <span>Bates Numbering</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">📋</div>
+                                <span>Exhibit Labels</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🔐</div>
+                                <span>Encrypted Vault (AES-256)</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🔍</div>
+                                <span>On-Device OCR</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <!-- Privacy & Export -->
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🏠</div>
+                                <span>100% Local Processing</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">📊</div>
+                                <span>PDF Export</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">📚</div>
+                                <span>Batch Export</span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="check">✓</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight"><span class="check">✓</span></td>
+                    </tr>
+
+                    <!-- Pricing -->
+                    <tr style="border-top: 2px solid var(--border);">
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">💰</div>
+                                <span><strong>Annual Price (per seat)</strong></span>
+                            </div>
+                        </td>
+                        <td class="competitor">
+                            <div class="price-tag">Free</div>
+                            <div class="price-detail">Limited features</div>
+                        </td>
+                        <td class="competitor">
+                            <div class="price-tag">$62.99</div>
+                            <div class="price-detail">Cloud-based</div>
+                        </td>
+                        <td class="competitor">
+                            <div class="price-tag">$72/year</div>
+                            <div class="price-detail">or $6/month</div>
+                        </td>
+                        <td class="highlight">
+                            <div class="price-tag highlight">$6.25</div>
+                            <div class="price-detail">5-seat minimum ($31.25/year)</div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="feature-name">
+                                <div class="feature-icon">🎯</div>
+                                <span><strong>Built for Legal Teams</strong></span>
+                            </div>
+                        </td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="competitor"><span class="x-mark">✗</span></td>
+                        <td class="highlight">
+                            <span class="value-label">Purpose-Built</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="comparison-cta">
+            <a href="https://chromewebstore.google.com/detail/smart-screenshot-pro" class="btn-primary">
+                <span>Get Smart Screenshot Pro</span>
+                <span>→</span>
+            </a>
+            <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.875rem;">
+                Free 30-day trial • No credit card required • 5-seat minimum for teams
+            </p>
+        </div>
+    </div>
+</body>
+</html>

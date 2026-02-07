@@ -1,0 +1,492 @@
+<!--
+    COMPARISON CHART COMPONENT
+    Drop this into smart-screenshot.html wherever you want the comparison table to appear
+    All styles are scoped to avoid conflicts with existing page styles
+-->
+
+<style>
+    .ssp-comparison-section {
+        max-width: 1200px;
+        margin: 80px auto;
+        padding: 0 40px;
+    }
+
+    .ssp-section-header {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .ssp-section-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 20px;
+        color: var(--accent);
+        font-size: 0.875rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .ssp-section-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+    }
+
+    .ssp-section-subtitle {
+        font-size: 1.125rem;
+        color: var(--text-muted);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .ssp-comparison-table-wrapper {
+        overflow-x: auto;
+        margin-bottom: 32px;
+        border-radius: 16px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+    }
+
+    .ssp-comparison-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 800px;
+    }
+
+    .ssp-comparison-table thead th {
+        background: rgba(99, 102, 241, 0.05);
+        padding: 24px 20px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        border-bottom: 2px solid var(--border);
+    }
+
+    .ssp-comparison-table thead th:first-child {
+        border-top-left-radius: 16px;
+        color: var(--text-muted);
+    }
+
+    .ssp-comparison-table thead th.ssp-highlight {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(34, 211, 238, 0.1));
+        border-left: 2px solid var(--primary);
+        border-right: 2px solid var(--primary);
+        text-align: center;
+        position: relative;
+    }
+
+    .ssp-comparison-table thead th.ssp-highlight::before {
+        content: '★ RECOMMENDED';
+        display: block;
+        font-size: 0.6875rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: var(--accent);
+        margin-bottom: 4px;
+    }
+
+    .ssp-comparison-table thead th.ssp-competitor {
+        text-align: center;
+        color: var(--text-muted);
+    }
+
+    .ssp-comparison-table tbody tr {
+        border-bottom: 1px solid rgba(63, 63, 70, 0.5);
+        transition: background 0.2s;
+    }
+
+    .ssp-comparison-table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.03);
+    }
+
+    .ssp-comparison-table tbody td {
+        padding: 20px;
+        vertical-align: middle;
+    }
+
+    .ssp-comparison-table tbody td:first-child {
+        font-weight: 500;
+        color: var(--text);
+    }
+
+    .ssp-comparison-table tbody td.ssp-highlight {
+        background: rgba(99, 102, 241, 0.05);
+        border-left: 2px solid var(--primary);
+        border-right: 2px solid var(--primary);
+        text-align: center;
+    }
+
+    .ssp-comparison-table tbody td.ssp-competitor {
+        text-align: center;
+    }
+
+    .ssp-feature-name {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ssp-feature-icon {
+        width: 32px;
+        height: 32px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .ssp-check {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 6px;
+        color: var(--success);
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .ssp-x-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: rgba(161, 161, 170, 0.1);
+        border-radius: 6px;
+        color: var(--text-muted);
+        font-size: 16px;
+        font-weight: bold;
+        opacity: 0.5;
+    }
+
+    .ssp-partial {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: 6px;
+        color: var(--warning);
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .ssp-value-label {
+        display: inline-block;
+        padding: 4px 10px;
+        background: rgba(99, 102, 241, 0.1);
+        border-radius: 6px;
+        color: var(--accent);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .ssp-price-tag {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .ssp-price-tag.ssp-highlight {
+        color: var(--accent);
+    }
+
+    .ssp-price-detail {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .ssp-comparison-cta {
+        text-align: center;
+        margin-top: 48px;
+    }
+
+    @media (max-width: 768px) {
+        .ssp-comparison-section {
+            padding: 0 20px;
+        }
+
+        .ssp-section-title {
+            font-size: 2rem;
+        }
+
+        .ssp-comparison-table thead th,
+        .ssp-comparison-table tbody td {
+            padding: 12px 10px;
+            font-size: 0.875rem;
+        }
+
+        .ssp-feature-icon {
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+        }
+
+        .ssp-price-tag {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="ssp-comparison-section">
+    <div class="ssp-section-header">
+        <div class="ssp-section-badge">Why Choose Smart Screenshot Pro</div>
+        <h2 class="ssp-section-title">Built for Legal Professionals</h2>
+        <p class="ssp-section-subtitle">Not just another screenshot tool. The only solution designed for court-ready web evidence.</p>
+    </div>
+
+    <div class="ssp-comparison-table-wrapper">
+        <table class="ssp-comparison-table">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th class="ssp-competitor">Manual Screenshots<br>(Browser Default)</th>
+                    <th class="ssp-competitor">Snagit</th>
+                    <th class="ssp-competitor">Awesome Screenshot</th>
+                    <th class="ssp-highlight">Smart Screenshot Pro</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Capture Features -->
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">📸</div>
+                            <span>Text-Aware Boundaries</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">📄</div>
+                            <span>Full-Page Capture</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🎯</div>
+                            <span>Region Selection</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <!-- Annotation Features -->
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">✏️</div>
+                            <span>Professional Annotations</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-partial">~</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🔒</div>
+                            <span>Redaction & Blur Tools</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🎙️</div>
+                            <span>Voice Control Annotations</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <!-- Legal Features -->
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">⚖️</div>
+                            <span>Bates Numbering</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">📋</div>
+                            <span>Exhibit Labels</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🔐</div>
+                            <span>Encrypted Vault (AES-256)</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🔍</div>
+                            <span>On-Device OCR</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <!-- Privacy & Export -->
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🏠</div>
+                            <span>100% Local Processing</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">📊</div>
+                            <span>PDF Export</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">📚</div>
+                            <span>Batch Export</span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-check">✓</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight"><span class="ssp-check">✓</span></td>
+                </tr>
+
+                <!-- Pricing -->
+                <tr style="border-top: 2px solid var(--border);">
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">💰</div>
+                            <span><strong>Annual Price (per seat)</strong></span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor">
+                        <div class="ssp-price-tag">Free</div>
+                        <div class="ssp-price-detail">Limited features</div>
+                    </td>
+                    <td class="ssp-competitor">
+                        <div class="ssp-price-tag">$62.99</div>
+                        <div class="ssp-price-detail">Cloud-based</div>
+                    </td>
+                    <td class="ssp-competitor">
+                        <div class="ssp-price-tag">$72/year</div>
+                        <div class="ssp-price-detail">or $6/month</div>
+                    </td>
+                    <td class="ssp-highlight">
+                        <div class="ssp-price-tag ssp-highlight">$6.25</div>
+                        <div class="ssp-price-detail">5-seat minimum ($31.25/year)</div>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="ssp-feature-name">
+                            <div class="ssp-feature-icon">🎯</div>
+                            <span><strong>Built for Legal Teams</strong></span>
+                        </div>
+                    </td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-competitor"><span class="ssp-x-mark">✗</span></td>
+                    <td class="ssp-highlight">
+                        <span class="ssp-value-label">Purpose-Built</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="ssp-comparison-cta">
+        <a href="https://chromewebstore.google.com/detail/smart-screenshot-pro" class="btn-primary">
+            <span>Get Smart Screenshot Pro</span>
+            <span>→</span>
+        </a>
+        <p style="margin-top: 16px; color: var(--text-muted); font-size: 0.875rem;">
+            Free 30-day trial • No credit card required • 5-seat minimum for teams
+        </p>
+    </div>
+</div>

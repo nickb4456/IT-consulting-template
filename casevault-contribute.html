@@ -128,8 +128,9 @@
                     <option value="">Select state...</option>
                     <option value="CT">Connecticut</option>
                     <option value="MA">Massachusetts</option>
-                    <option value="RI">Rhode Island</option>
+                    <option value="NH">New Hampshire</option>
                     <option value="NY">New York</option>
+                    <option value="RI">Rhode Island</option>
                 </select>
             </div>
 
@@ -194,10 +195,17 @@
         // Check if user filled intake form
         document.addEventListener('DOMContentLoaded', function() {
             const userName = localStorage.getItem('casevault_user_name');
-            if (!userName) {
-                alert('⚠️ Please fill out the intake form first.');
+            const intakeDone = localStorage.getItem('casevault_intake_done');
+            if (!userName || !intakeDone) {
                 window.location.href = '/casevault-intake.html';
                 return;
+            }
+
+            // If user already has valid access, redirect to dashboard
+            const token = localStorage.getItem('casevault_access_token');
+            const expires = localStorage.getItem('casevault_access_expires');
+            if (token && expires && Date.now() < parseInt(expires)) {
+                window.location.href = '/casevault-dashboard.html';
             }
         });
 
@@ -242,9 +250,8 @@
             // Track contribution
             console.log('Contribution submitted:', contribution);
 
-            // Redirect to dashboard with success message
-            alert('✅ Thank you for contributing!\n\nYou now have 10 minutes of full dashboard access.');
-            window.location.href = '/casevault-dashboard.html';
+            // Redirect to calculator (primary tool) with access unlocked
+            window.location.href = '/casevault-calculator.html';
         });
 
         // Generate random token

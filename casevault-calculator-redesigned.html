@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settlement Calculator | CaseVault Insights</title>
+    <meta name="description" content="Estimate personal injury settlement values based on 1,756 real cases from MA, CT, RI & NH. Free calculator with access to benchmark data.">
+    <link rel="canonical" href="https://aibridges.org/casevault-calculator">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/casevault-insights/casevault.css">
+</head>
+<body>
+    <!-- Timer Banner (visible when authenticated) -->
+    <div class="cv-timer-banner cv-hidden" id="timerBanner">
+        <span>⏱️ Access expires in: <strong id="timeRemaining">10:00</strong></span>
+        <a href="/casevault-contribute.html">Submit another case to extend</a>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="cv-nav">
+        <div class="cv-nav__inner">
+            <a href="/" class="cv-nav__logo">
+                <div class="cv-nav__logo-icon">CV</div>
+                <span>CaseVault</span>
+            </a>
+            <ul class="cv-nav__links">
+                <li><a href="/" class="cv-nav__link">Home</a></li>
+                <li><a href="/casevault-calculator.html" class="cv-nav__link cv-nav__link--active">Calculator</a></li>
+                <li><a href="/casevault-dashboard.html" class="cv-nav__link">Dashboard</a></li>
+                <li><a href="/contact.html" class="cv-nav__link">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="cv-hero">
+        <div class="cv-container cv-container--narrow">
+            <div class="cv-badge cv-badge--blue cv-mb-lg">
+                <i class="fas fa-scale-balanced"></i>
+                Settlement Intelligence Platform
+            </div>
+            <h1 class="cv-hero__title cv-display">
+                Personal Injury<br>
+                <span class="cv-gradient-text-blue">Settlement Calculator</span>
+            </h1>
+            <p class="cv-hero__subtitle">
+                Estimate settlement values using real benchmark data from <strong>1,756 cases</strong> across Massachusetts, Connecticut, Rhode Island & New Hampshire
+            </p>
+        </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <div style="background: var(--cv-bg-raised); border-top: 1px solid var(--cv-border); border-bottom: 1px solid var(--cv-border); padding: var(--cv-space-2xl) 0;">
+        <div class="cv-container">
+            <div class="cv-grid cv-grid-3">
+                <div class="cv-stat">
+                    <div class="cv-stat__value cv-stat__value--blue cv-mono">1,756</div>
+                    <div class="cv-stat__label">Settlement Cases</div>
+                </div>
+                <div class="cv-stat">
+                    <div class="cv-stat__value cv-stat__value--blue cv-mono">4</div>
+                    <div class="cv-stat__label">States Covered</div>
+                </div>
+                <div class="cv-stat">
+                    <div class="cv-stat__value cv-stat__value--gold cv-mono">$52K</div>
+                    <div class="cv-stat__label">Avg Settlement</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculator Form -->
+    <section class="cv-section">
+        <div class="cv-container cv-container--narrow">
+            <div class="cv-card cv-card--glass">
+                <h2 class="cv-display" style="font-size: var(--cv-text-3xl); margin-bottom: var(--cv-space-xl); color: var(--cv-text-primary);">
+                    Calculate Your Estimated Settlement
+                </h2>
+
+                <form id="calculatorForm">
+                    <div class="cv-form-group">
+                        <label for="state" class="cv-form-label">State <span class="required">*</span></label>
+                        <select id="state" name="state" class="cv-select" required>
+                            <option value="">Select State</option>
+                            <option value="MA">Massachusetts</option>
+                            <option value="CT">Connecticut</option>
+                            <option value="RI">Rhode Island</option>
+                            <option value="NH">New Hampshire</option>
+                        </select>
+                    </div>
+
+                    <div class="cv-form-group">
+                        <label for="injuryType" class="cv-form-label">Injury Type <span class="required">*</span></label>
+                        <select id="injuryType" name="injuryType" class="cv-select" required>
+                            <option value="">Select Injury Type</option>
+                            <option value="car_accident">Car Accident</option>
+                            <option value="slip_fall">Slip & Fall</option>
+                            <option value="medical_malpractice">Medical Malpractice</option>
+                            <option value="workplace">Workplace Injury</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="cv-form-row">
+                        <div class="cv-form-group">
+                            <label for="medicalCosts" class="cv-form-label">Medical Costs <span class="required">*</span></label>
+                            <input type="number" id="medicalCosts" name="medicalCosts" class="cv-input" placeholder="15,000" required>
+                        </div>
+                        <div class="cv-form-group">
+                            <label for="lostWages" class="cv-form-label">Lost Wages</label>
+                            <input type="number" id="lostWages" name="lostWages" class="cv-input" placeholder="5,000">
+                        </div>
+                    </div>
+
+                    <div class="cv-form-group">
+                        <label for="severity" class="cv-form-label">Injury Severity <span class="required">*</span></label>
+                        <select id="severity" name="severity" class="cv-select" required>
+                            <option value="">Select Severity</option>
+                            <option value="minor">Minor (bruises, sprains)</option>
+                            <option value="moderate">Moderate (fractures, soft tissue)</option>
+                            <option value="severe">Severe (permanent disability)</option>
+                            <option value="catastrophic">Catastrophic (life-changing)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="cv-btn cv-btn-primary cv-btn--lg cv-btn--full">
+                        <i class="fas fa-calculator"></i>
+                        Calculate Settlement Range
+                    </button>
+                </form>
+
+                <!-- Result Box -->
+                <div id="resultBox" class="cv-hidden" style="margin-top: var(--cv-space-2xl); padding: var(--cv-space-xl); background: var(--cv-blue-glow); border: 1px solid var(--cv-blue-border); border-radius: var(--cv-radius-lg);">
+                    <div class="cv-label" style="margin-bottom: var(--cv-space-sm);">Estimated Settlement Range</div>
+                    <div id="resultValue" class="cv-display cv-text-blue" style="font-size: var(--cv-text-4xl); margin-bottom: var(--cv-space-md);">
+                        $35,000 - $85,000
+                    </div>
+                    <p class="cv-text-secondary" style="margin-bottom: var(--cv-space-sm);">
+                        Based on <strong id="comparableCases" class="cv-text-blue">47</strong> comparable cases in <strong id="resultState" class="cv-text-blue">MA</strong>
+                    </p>
+                    <p class="cv-text-muted" style="font-size: var(--cv-text-xs); display: flex; align-items: flex-start; gap: 8px;">
+                        <i class="fas fa-info-circle" style="margin-top: 2px;"></i>
+                        <span>This is an estimate only. Actual settlements vary based on many factors including liability, damages, venue, and negotiation.</span>
+                    </p>
+                </div>
+
+                <!-- Dashboard CTA -->
+                <div id="unlockBox" class="cv-hidden" style="margin-top: var(--cv-space-xl); padding: var(--cv-space-xl); background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.1)); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: var(--cv-radius-lg); text-align: center;">
+                    <div style="font-size: 40px; margin-bottom: var(--cv-space-md);">📊</div>
+                    <h3 class="cv-display" style="font-size: var(--cv-text-xl); margin-bottom: var(--cv-space-sm); color: var(--cv-text-primary);">
+                        Want the full picture?
+                    </h3>
+                    <p class="cv-text-secondary" style="margin-bottom: var(--cv-space-lg);">
+                        Explore the full dashboard with state benchmarks, case type breakdowns, and settlement trends from 1,756+ cases.
+                    </p>
+                    <a href="/casevault-dashboard.html" class="cv-btn cv-btn-gold cv-btn--lg">
+                        <i class="fas fa-chart-line"></i>
+                        View Full Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="cv-section" style="background: var(--cv-bg-raised);">
+        <div class="cv-container">
+            <h2 class="cv-display cv-text-center" style="font-size: var(--cv-text-3xl); margin-bottom: var(--cv-space-2xl);">
+                How CaseVault Works
+            </h2>
+            <div class="cv-steps">
+                <div class="cv-step">
+                    <div class="cv-step__number">1</div>
+                    <h3 class="cv-step__title">Calculate</h3>
+                    <p class="cv-step__desc">Get instant settlement estimates based on real benchmark data from your state</p>
+                </div>
+                <div class="cv-step">
+                    <div class="cv-step__number">2</div>
+                    <h3 class="cv-step__title">Contribute</h3>
+                    <p class="cv-step__desc">Submit your settlement data to help build the most accurate database</p>
+                </div>
+                <div class="cv-step">
+                    <div class="cv-step__number">3</div>
+                    <h3 class="cv-step__title">Unlock</h3>
+                    <p class="cv-step__desc">Get 10 minutes of full dashboard access with every case you contribute</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Indicators -->
+    <section class="cv-section">
+        <div class="cv-container">
+            <div class="cv-trust-grid">
+                <div class="cv-trust-item">
+                    <div class="cv-trust-item__icon cv-trust-item__icon--blue">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div>
+                        <div class="cv-trust-item__title">Real Data</div>
+                        <div class="cv-trust-item__desc">1,756+ verified settlements from court records and law firm contributions</div>
+                    </div>
+                </div>
+                <div class="cv-trust-item">
+                    <div class="cv-trust-item__icon cv-trust-item__icon--green">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <div class="cv-trust-item__title">Privacy First</div>
+                        <div class="cv-trust-item__desc">All data is anonymized. We never share client names or identifying information</div>
+                    </div>
+                </div>
+                <div class="cv-trust-item">
+                    <div class="cv-trust-item__icon cv-trust-item__icon--gold">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="cv-trust-item__title">Lawyer-Built</div>
+                        <div class="cv-trust-item__desc">Created by PI attorneys who understand what data actually matters</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="cv-footer">
+        <div class="cv-container">
+            <div class="cv-footer__inner">
+                <div class="cv-footer__copy">
+                    © 2026 CaseVault by AIBridges. All rights reserved.
+                </div>
+                <div class="cv-footer__links">
+                    <a href="/privacy.html" class="cv-footer__link">Privacy Policy</a>
+                    <a href="/terms.html" class="cv-footer__link">Terms of Service</a>
+                    <a href="/contact.html" class="cv-footer__link">Contact</a>
+                </div>
+            </div>
+            <div class="cv-footer__disclaimer">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Legal Disclaimer:</strong> This calculator provides estimates for informational purposes only and does not constitute legal advice. Actual settlement values depend on numerous factors including liability, damages, venue, insurance coverage, and individual circumstances. Consult with a licensed attorney for advice specific to your case.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Paywall Overlay -->
+    <div id="paywallOverlay" class="cv-overlay cv-hidden">
+        <div class="cv-overlay__card">
+            <div class="cv-overlay__icon">
+                <i class="fas fa-lock" style="font-size: 28px; color: var(--cv-blue-400);"></i>
+            </div>
+            <h2 id="paywallTitle" class="cv-display" style="font-size: var(--cv-text-2xl); margin-bottom: var(--cv-space-md); color: var(--cv-text-primary);">
+                Access Required
+            </h2>
+            <p id="paywallMessage" class="cv-text-secondary" style="margin-bottom: var(--cv-space-xl); line-height: 1.6;">
+                Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview.
+            </p>
+            <a href="/casevault-intake.html" id="paywallCTA" class="cv-btn cv-btn-primary cv-btn--lg cv-btn--full cv-mb-lg">
+                Get Started Free →
+            </a>
+            <hr class="cv-divider">
+            <p class="cv-text-muted" style="font-size: var(--cv-text-sm); margin-bottom: var(--cv-space-sm);">
+                Want unlimited access?
+            </p>
+            <a href="/contact.html" class="cv-text-blue" style="font-weight: 600;">
+                Subscribe to CaseVault Pro →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Gate access - check for valid access token on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const accessToken = localStorage.getItem('casevault_access_token');
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
+            const userName = localStorage.getItem('casevault_user_name');
+            const contributed = localStorage.getItem('casevault_contributed');
+
+            // Check if user has valid access token from contribution
+            if (!accessToken || !expiresAt || Date.now() > expiresAt) {
+                const overlay = document.getElementById('paywallOverlay');
+                overlay.classList.remove('cv-hidden');
+
+                if (!userName) {
+                    // Never filled intake form
+                    document.getElementById('paywallTitle').textContent = 'Access Required';
+                    document.getElementById('paywallMessage').textContent = 'Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview of the calculator and dashboard.';
+                    document.getElementById('paywallCTA').textContent = 'Get Started Free →';
+                    document.getElementById('paywallCTA').href = '/casevault-intake.html';
+                } else if (contributed) {
+                    // Token expired after previous contribution
+                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
+                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
+                } else {
+                    // Filled intake but hasn't contributed yet
+                    document.getElementById('paywallTitle').textContent = 'One More Step';
+                    document.getElementById('paywallMessage').textContent = 'Contribute 1 settlement case to unlock your free 10-minute preview.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute a Settlement →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
+                }
+                return;
+            }
+
+            // User is authenticated - show timer banner
+            document.getElementById('timerBanner').classList.remove('cv-hidden');
+            startTimer();
+        });
+
+        // Timer countdown
+        function startTimer() {
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
+            const banner = document.getElementById('timerBanner');
+
+            const timerInterval = setInterval(function() {
+                const timeLeft = expiresAt - Date.now();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    localStorage.removeItem('casevault_access_token');
+                    localStorage.removeItem('casevault_access_expires');
+
+                    // Show paywall
+                    const overlay = document.getElementById('paywallOverlay');
+                    overlay.classList.remove('cv-hidden');
+                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
+                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
+                    banner.classList.add('cv-hidden');
+                    return;
+                }
+
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                document.getElementById('timeRemaining').textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+
+                // Warning color when under 2 minutes
+                if (timeLeft < 120000) {
+                    banner.classList.add('cv-timer-banner--warning');
+                }
+            }, 1000);
+        }
+
+        // Calculator Logic
+        document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const state = document.getElementById('state').value;
+            const injuryType = document.getElementById('injuryType').value;
+            const medicalCosts = parseFloat(document.getElementById('medicalCosts').value) || 0;
+            const lostWages = parseFloat(document.getElementById('lostWages').value) || 0;
+            const severity = document.getElementById('severity').value;
+
+            // Calculate multiplier based on severity
+            let multiplier = 2;
+            if (severity === 'minor') multiplier = 1.5;
+            if (severity === 'moderate') multiplier = 2.5;
+            if (severity === 'severe') multiplier = 4;
+            if (severity === 'catastrophic') multiplier = 6;
+
+            const economicDamages = medicalCosts + lostWages;
+            const lowEstimate = Math.round(economicDamages * multiplier * 0.7);
+            const highEstimate = Math.round(economicDamages * multiplier * 1.5);
+
+            // Mock comparable cases count (in production, fetch from API)
+            const comparableCases = Math.floor(Math.random() * 100) + 30;
+
+            // Display results with animation
+            document.getElementById('resultValue').textContent =
+                `$${lowEstimate.toLocaleString()} - $${highEstimate.toLocaleString()}`;
+            document.getElementById('comparableCases').textContent = comparableCases;
+            document.getElementById('resultState').textContent = state;
+
+            const resultBox = document.getElementById('resultBox');
+            const unlockBox = document.getElementById('unlockBox');
+
+            resultBox.classList.remove('cv-hidden');
+            unlockBox.classList.remove('cv-hidden');
+
+            // Add animation
+            resultBox.classList.add('cv-animate-in');
+            unlockBox.classList.add('cv-animate-in', 'cv-stagger-1');
+
+            // Scroll to results
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+</html>

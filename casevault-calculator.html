@@ -88,25 +88,6 @@
         .unlock-box.show {
             display: block;
         }
-        .unlock-form {
-            margin-top: 20px;
-        }
-        .unlock-form input {
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            margin-right: 10px;
-            width: 60%;
-        }
-        .unlock-form button {
-            padding: 12px 24px;
-            background: #f59e0b;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-        }
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -129,17 +110,6 @@
             font-size: 14px;
             color: #64748b;
             margin-top: 8px;
-        }
-        .contribution-form {
-            display: none;
-            margin-top: 30px;
-            padding: 30px;
-            background: #f0fdf4;
-            border-left: 4px solid #10b981;
-            border-radius: 8px;
-        }
-        .contribution-form.show {
-            display: block;
         }
     </style>
 </head>
@@ -245,69 +215,15 @@
             </p>
         </div>
 
-        <!-- Unlock Dashboard CTA -->
+        <!-- Dashboard CTA -->
         <div id="unlockBox" class="unlock-box">
-            <h3 style="margin-bottom: 16px; color: #92400e;">🔒 Want to see the full dashboard?</h3>
+            <h3 style="margin-bottom: 16px; color: #92400e;">📊 Want the full picture?</h3>
             <p style="color: #78350f; margin-bottom: 20px;">
-                Submit one settlement case to unlock 10 minutes of full access to our benchmark dashboard with 1,756 cases.
+                Explore the full dashboard with benchmarks, trends, and data from 1,756+ settlements.
             </p>
-            <button id="contributeBtn" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); max-width: 400px; margin: 0 auto;">
-                Contribute a Case & Unlock Dashboard
-            </button>
-        </div>
-
-        <!-- Contribution Form -->
-        <div id="contributionForm" class="contribution-form">
-            <h3 style="margin-bottom: 20px; color: #065f46;">📊 Submit Your Settlement Data</h3>
-            <p style="color: #047857; margin-bottom: 24px;">
-                Your email unlocks 10 minutes of dashboard access. We'll also notify you when we add more data.
-            </p>
-
-            <form id="submitCaseForm">
-                <div class="form-group">
-                    <label for="contribEmail">Your Email *</label>
-                    <input type="email" id="contribEmail" name="email" required placeholder="you@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="contribState">State *</label>
-                    <select id="contribState" name="state" required>
-                        <option value="">Select State</option>
-                        <option value="MA">Massachusetts</option>
-                        <option value="CT">Connecticut</option>
-                        <option value="RI">Rhode Island</option>
-                        <option value="NH">New Hampshire</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="contribAmount">Settlement Amount ($) *</label>
-                    <input type="number" id="contribAmount" name="amount" required placeholder="e.g., 50000">
-                </div>
-
-                <div class="form-group">
-                    <label for="contribType">Case Type *</label>
-                    <input type="text" id="contribType" name="caseType" required placeholder="e.g., Car accident, Slip & fall">
-                </div>
-
-                <div class="form-group">
-                    <label for="contribRepresented">Represented by Attorney? *</label>
-                    <select id="contribRepresented" name="represented" required>
-                        <option value="">Select</option>
-                        <option value="yes">Yes - Had attorney representation</option>
-                        <option value="no">No - Self-represented</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="contribDetails">Additional Details (optional)</label>
-                    <input type="text" id="contribDetails" name="details" placeholder="Brief description of injuries, timeline, etc.">
-                </div>
-
-                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                    Submit Case & Unlock Dashboard
-                </button>
-            </form>
+            <a href="/casevault-dashboard.html" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); max-width: 400px; margin: 0 auto; display: inline-block; text-decoration: none;">
+                View Full Dashboard →
+            </a>
         </div>
     </div>
 
@@ -341,31 +257,59 @@
         </p>
     </footer>
 
+    <!-- Paywall Overlay (shown if not authenticated) -->
+    <div id="paywallOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 50px; border-radius: 16px; text-align: center; max-width: 520px; margin: 20px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
+            <h2 style="color: #0f172a; margin-bottom: 16px;" id="paywallTitle">Access Required</h2>
+            <p style="color: #64748b; margin-bottom: 28px; line-height: 1.6; font-size: 16px;" id="paywallMessage">
+                Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview.
+            </p>
+            <a href="/casevault-intake.html" id="paywallCTA" class="btn-primary" style="text-decoration: none; display: inline-block; margin-bottom: 16px;">
+                Get Started Free →
+            </a>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 8px;">Want unlimited access?</p>
+                <a href="/contact.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Subscribe to CaseVault Pro →</a>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Gate access - check for valid access token on page load
         document.addEventListener('DOMContentLoaded', function() {
             const accessToken = localStorage.getItem('casevault_access_token');
             const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
+            const userName = localStorage.getItem('casevault_user_name');
+            const contributed = localStorage.getItem('casevault_contributed');
 
             // Check if user has valid access token from contribution
             if (!accessToken || !expiresAt || Date.now() > expiresAt) {
-                // No valid access - check if they've at least filled intake form
-                const userName = localStorage.getItem('casevault_user_name');
+                const overlay = document.getElementById('paywallOverlay');
+                overlay.style.display = 'flex';
+
                 if (!userName) {
-                    alert('⚠️ Please fill out the intake form first.');
-                    window.location.href = '/casevault-intake.html';
+                    // Never filled intake form
+                    document.getElementById('paywallTitle').textContent = 'Access Required';
+                    document.getElementById('paywallMessage').textContent = 'Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview of the calculator and dashboard.';
+                    document.getElementById('paywallCTA').textContent = 'Get Started Free →';
+                    document.getElementById('paywallCTA').href = '/casevault-intake.html';
+                } else if (!contributed || (accessToken && Date.now() > expiresAt)) {
+                    // Filled intake but token expired or never contributed
+                    document.getElementById('paywallTitle').textContent = contributed ? 'Subscribe to Continue' : 'One More Step';
+                    document.getElementById('paywallMessage').textContent = contributed
+                        ? 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.'
+                        : 'You\'re almost there! Contribute 1 settlement case to unlock your free 10-minute preview.';
+                    document.getElementById('paywallCTA').textContent = contributed ? 'Contribute Another Case →' : 'Contribute a Settlement →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
                 } else {
-                    alert('⚠️ You must contribute a settlement case to access the calculator.');
-                    window.location.href = '/casevault-contribute.html';
+                    // Hasn't contributed yet
+                    document.getElementById('paywallTitle').textContent = 'One More Step';
+                    document.getElementById('paywallMessage').textContent = 'Contribute 1 settlement case to unlock your free 10-minute preview.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute a Settlement →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
                 }
                 return;
-            }
-
-            // Valid access - allow calculator usage
-            const userEmail = localStorage.getItem('casevault_user_email');
-            const contribEmailField = document.getElementById('contribEmail');
-            if (contribEmailField && userEmail) {
-                contribEmailField.value = userEmail;
             }
         });
 
@@ -406,81 +350,6 @@
             document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
-        // Redirect to contribution page
-        document.getElementById('contributeBtn').addEventListener('click', function() {
-            window.location.href = '/casevault-contribute.html';
-        });
-
-        // Submit case and unlock dashboard
-        document.getElementById('submitCaseForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const email = document.getElementById('contribEmail').value.trim();
-            const state = document.getElementById('contribState').value;
-            const amount = document.getElementById('contribAmount').value;
-            const caseType = document.getElementById('contribType').value.trim();
-            const represented = document.getElementById('contribRepresented').value;
-            const details = document.getElementById('contribDetails').value.trim();
-
-            // Validation
-            if (!email || !state || !amount || !caseType || !represented) {
-                alert('Please fill out all required fields.');
-                return;
-            }
-
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert('Please enter a valid email address.');
-                return;
-            }
-
-            if (parseFloat(amount) <= 0) {
-                alert('Please enter a valid settlement amount.');
-                return;
-            }
-
-            const formData = {
-                email: email,
-                state: state,
-                amount: parseFloat(amount),
-                caseType: caseType,
-                represented: represented,
-                details: details,
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                // Store the contribution locally
-                const submissions = JSON.parse(localStorage.getItem('casevault_submissions') || '[]');
-                submissions.push(formData);
-                localStorage.setItem('casevault_submissions', JSON.stringify(submissions));
-
-                // Generate 10-minute access token
-                const token = generateToken();
-                const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes from now
-
-                // Store access token in localStorage (persists across page refreshes within session)
-                localStorage.setItem('casevault_access_token', token);
-                localStorage.setItem('casevault_access_expires', expiresAt.toString());
-
-                console.log('Contribution submitted:', formData);
-                console.log('Access granted until:', new Date(expiresAt).toISOString());
-
-                // Redirect to dashboard
-                alert('✅ Thank you for contributing! You now have 10 minutes of dashboard access.');
-                window.location.href = '/casevault-dashboard.html';
-            } catch (error) {
-                console.error('Submission error:', error);
-                alert('An error occurred. Please try again.');
-            }
-        });
-
-        // Generate random token
-        function generateToken() {
-            const array = new Uint8Array(32);
-            crypto.getRandomValues(array);
-            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-        }
     </script>
 
     <!-- Font Awesome -->

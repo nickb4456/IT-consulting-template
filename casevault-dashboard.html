@@ -170,13 +170,14 @@
     <!-- Access Locked Overlay (shown if not authenticated) -->
     <div id="lockedOverlay" class="locked-overlay" style="display: none;">
         <div class="locked-message">
-            <i class="fas fa-lock" style="font-size: 64px; color: #f59e0b; margin-bottom: 24px;"></i>
-            <h2>🔒 Access Expired</h2>
-            <p>Your 10-minute preview has ended. Submit another case for 10 more minutes, or subscribe for unlimited access.</p>
-            <a href="/casevault-contribute.html" class="btn-primary">Contribute Another Case</a>
-            <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
-                Want unlimited access? <a href="/contact.html" style="color: #2563eb; text-decoration: underline;">Contact us about subscriptions</a>
-            </p>
+            <div style="font-size: 64px; margin-bottom: 24px;">🔒</div>
+            <h2 id="lockTitle">Subscribe to Continue</h2>
+            <p id="lockMessage">Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access to settlement benchmarks.</p>
+            <a href="/casevault-contribute.html" class="btn-primary" id="lockCTA" style="margin-bottom: 12px;">Contribute Another Case →</a>
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 8px;">Want unlimited access?</p>
+                <a href="/contact.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Subscribe to CaseVault Pro →</a>
+            </div>
         </div>
     </div>
 
@@ -418,18 +419,39 @@
     <script>
         // Auth Check - Verify access token from contribution
         async function checkAuth() {
-            // Check if they have dashboard access token (from contribution)
             const accessToken = localStorage.getItem('casevault_access_token');
             const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
+            const userName = localStorage.getItem('casevault_user_name');
+            const contributed = localStorage.getItem('casevault_contributed');
 
             // Validate token exists and hasn't expired
             if (!accessToken || !expiresAt || Date.now() > expiresAt) {
-                // No valid access, show lock screen
-                document.getElementById('lockedOverlay').style.display = 'flex';
+                const overlay = document.getElementById('lockedOverlay');
+                overlay.style.display = 'flex';
+
+                if (!userName) {
+                    // Never completed intake
+                    document.getElementById('lockTitle').textContent = 'Access Required';
+                    document.getElementById('lockMessage').textContent = 'Complete the intake form and contribute 1 settlement case to unlock your free 10-minute dashboard preview.';
+                    document.getElementById('lockCTA').textContent = 'Get Started Free →';
+                    document.getElementById('lockCTA').href = '/casevault-intake.html';
+                } else if (contributed) {
+                    // Token expired
+                    document.getElementById('lockTitle').textContent = 'Subscribe to Continue';
+                    document.getElementById('lockMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access to settlement benchmarks.';
+                    document.getElementById('lockCTA').textContent = 'Contribute Another Case →';
+                    document.getElementById('lockCTA').href = '/casevault-contribute.html';
+                } else {
+                    // Filled intake but hasn't contributed
+                    document.getElementById('lockTitle').textContent = 'One More Step';
+                    document.getElementById('lockMessage').textContent = 'Contribute 1 settlement case to unlock your free 10-minute dashboard preview.';
+                    document.getElementById('lockCTA').textContent = 'Contribute a Settlement →';
+                    document.getElementById('lockCTA').href = '/casevault-contribute.html';
+                }
+
                 return false;
             }
 
-            // Valid access token found
             return true;
         }
 

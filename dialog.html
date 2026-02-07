@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://appsforoffice.microsoft.com; style-src 'self' 'unsafe-inline'; connect-src 'self' https://6b2bpmn8f8.execute-api.us-east-1.amazonaws.com; img-src 'self' data:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+    <title>DraftBridge - Form</title>
+    <link rel="stylesheet" href="dialog.css">
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+</head>
+<body>
+    <div class="dialog-container">
+        <!-- Header -->
+        <header class="dialog-header">
+            <div class="dialog-logo">
+                <span class="logo-icon">DB</span>
+                <span class="logo-text">Draft<span>Bridge</span></span>
+            </div>
+            <h1 class="dialog-title" id="formTitle">Loading...</h1>
+            <button class="dialog-close" onclick="closeDialog()" title="Close">×</button>
+        </header>
+
+        <!-- Main Content - Two Column Layout -->
+        <main class="dialog-main">
+            <!-- Left: Form Section -->
+            <section class="form-section">
+                <div class="form-scroll">
+                    <!-- Demand Letter Form -->
+                    <div id="form-demand-letter" class="form-content hidden">
+                        <div class="form-group">
+                            <label class="form-label">Date</label>
+                            <input type="date" id="demand-date" class="form-input">
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Recipient Name *</label>
+                                <input type="text" id="demand-recipient" class="form-input" placeholder="John Smith" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Recipient Title</label>
+                                <input type="text" id="demand-recipient-title" class="form-input" placeholder="CEO, Manager, etc.">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Company/Organization</label>
+                            <input type="text" id="demand-company" class="form-input" placeholder="ABC Corporation">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Recipient Address *</label>
+                            <textarea id="demand-address" class="form-textarea" placeholder="123 Main Street&#10;City, State 12345" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span>Demand Details</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">RE: Subject Matter *</label>
+                            <input type="text" id="demand-subject" class="form-input" placeholder="e.g., Breach of Contract - Invoice #12345" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Amount Demanded *</label>
+                                <input type="text" id="demand-amount" class="form-input" placeholder="$50,000.00" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Response Deadline</label>
+                                <input type="date" id="demand-deadline" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Basis for Demand</label>
+                            <textarea id="demand-basis" class="form-textarea" placeholder="Briefly describe the factual and legal basis for this demand..." rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Tone</label>
+                            <select id="demand-tone" class="form-select">
+                                <option value="firm">Firm but Professional</option>
+                                <option value="formal">Formal</option>
+                                <option value="aggressive">Aggressive</option>
+                                <option value="conciliatory">Conciliatory</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span>Sender Information</span>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Your Name *</label>
+                                <input type="text" id="demand-sender" class="form-input" placeholder="Attorney Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Your Title</label>
+                                <input type="text" id="demand-sender-title" class="form-input" placeholder="Partner, Associate, etc.">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Firm Name</label>
+                            <input type="text" id="demand-firm" class="form-input" placeholder="Smith & Associates LLP">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Delivery Method</label>
+                            <select id="demand-delivery" class="form-select">
+                                <option value="">None specified</option>
+                                <option value="Via Certified Mail, Return Receipt Requested">Certified Mail, RRR</option>
+                                <option value="Via Email">Via Email</option>
+                                <option value="Via Federal Express">Via Federal Express</option>
+                                <option value="Via Hand Delivery">Via Hand Delivery</option>
+                                <option value="Via First Class Mail">Via First Class Mail</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Motion to Dismiss Form -->
+                    <div id="form-motion-to-dismiss" class="form-content hidden">
+                        <div class="form-group">
+                            <label class="form-label">Court *</label>
+                            <select id="motion-court" class="form-select" required>
+                                <option value="">Select Court...</option>
+                                <option value="UNITED STATES DISTRICT COURT">U.S. District Court</option>
+                                <option value="UNITED STATES BANKRUPTCY COURT">U.S. Bankruptcy Court</option>
+                                <option value="STATE COURT">State Court</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">District/Jurisdiction *</label>
+                            <input type="text" id="motion-district" class="form-input" placeholder="e.g., Southern District of New York" required>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span>Case Information</span>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Case Number *</label>
+                                <input type="text" id="motion-case-number" class="form-input" placeholder="1:24-cv-12345" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Judge</label>
+                                <input type="text" id="motion-judge" class="form-input" placeholder="Hon. Jane Smith">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Plaintiff(s) *</label>
+                                <input type="text" id="motion-plaintiff" class="form-input" placeholder="JOHN DOE" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Defendant(s) *</label>
+                                <input type="text" id="motion-defendant" class="form-input" placeholder="ABC CORPORATION" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span>Motion Grounds</span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Rule 12(b) Grounds *</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b1" value="12(b)(1)">
+                                    <span>12(b)(1) - Lack of subject matter jurisdiction</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b2" value="12(b)(2)">
+                                    <span>12(b)(2) - Lack of personal jurisdiction</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b3" value="12(b)(3)">
+                                    <span>12(b)(3) - Improper venue</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b4" value="12(b)(4)">
+                                    <span>12(b)(4) - Insufficient process</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b5" value="12(b)(5)">
+                                    <span>12(b)(5) - Insufficient service of process</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b6" value="12(b)(6)" checked>
+                                    <span>12(b)(6) - Failure to state a claim</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="motion-12b7" value="12(b)(7)">
+                                    <span>12(b)(7) - Failure to join a required party</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Brief Summary of Argument</label>
+                            <textarea id="motion-summary" class="form-textarea" placeholder="Summarize your main arguments for dismissal..." rows="4"></textarea>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span>Attorney Information</span>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Attorney Name *</label>
+                                <input type="text" id="motion-attorney" class="form-input" placeholder="Attorney Name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Bar Number</label>
+                                <input type="text" id="motion-bar" class="form-input" placeholder="123456">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Firm Name</label>
+                            <input type="text" id="motion-firm" class="form-input" placeholder="Law Firm LLP">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Firm Address</label>
+                            <textarea id="motion-firm-address" class="form-textarea" placeholder="123 Legal Way&#10;City, State 12345" rows="2"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Phone</label>
+                                <input type="text" id="motion-phone" class="form-input" placeholder="(555) 123-4567">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Email</label>
+                                <input type="email" id="motion-email" class="form-input" placeholder="attorney@firm.com">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generic Template Form (fallback) -->
+                    <div id="form-generic" class="form-content hidden">
+                        <div class="empty-state">
+                            <div class="empty-icon"></div>
+                            <h3>Form Not Found</h3>
+                            <p>The requested form template could not be loaded.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Preview Section -->
+            <section class="preview-section">
+                <div class="preview-header">
+                    <h2>Preview</h2>
+                    <div class="preview-actions">
+                        <button class="preview-btn" onclick="refreshPreview()" title="Refresh Preview">Refresh</button>
+                    </div>
+                </div>
+                <div class="preview-content" id="previewContent">
+                    <div class="preview-placeholder">
+                        <div class="preview-placeholder-icon"></div>
+                        <p>Fill in the form to see a preview</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="dialog-footer">
+            <button class="btn btn-secondary" onclick="closeDialog()">Cancel</button>
+            <button class="btn btn-primary" onclick="insertDocument()" id="insertBtn">
+                <span class="btn-icon"></span>
+                Insert into Document
+            </button>
+        </footer>
+    </div>
+
+    <script src="dialog.js"></script>
+</body>
+</html>

@@ -1,0 +1,789 @@
+/**
+ * DraftBridge Gold - Smart Variables Styles
+ *
+ * Sections:
+ *   1. Template Selector
+ *   2. Form Layout
+ *   3. Validation Warning
+ *   4. Variable Groups
+ *   5. Variables & Labels
+ *   6. Form Inputs (text, select, textarea, checkbox)
+ *   7. Contact Input
+ *   8. Party Input
+ *   9. Caption Preview
+ *  10. Form Actions & Buttons
+ *  11. Derived Values
+ *  12. Profile Editor
+ *  13. Accessibility & States
+ *  14. Print Styles
+ */
+
+/* ═══ SECTION 1: Template Selector ═══════════════════════════════ */
+.sv-template-selector {
+  padding: 16px;
+}
+
+.sv-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--db-primary);
+  margin: 0 0 8px 0;
+}
+
+.sv-description {
+  font-size: 13px;
+  color: var(--db-text-muted);
+  margin: 0 0 16px 0;
+}
+
+.sv-template-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sv-template-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--db-surface);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius-lg);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sv-template-card:hover {
+  border-color: var(--db-primary-light);
+  box-shadow: 0 2px 8px var(--db-input-focus-ring);
+  transform: translateY(-1px);
+}
+
+.sv-template-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--db-surface-warm-subtle);
+  border-radius: var(--db-radius-lg);
+}
+
+.sv-template-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.sv-template-name {
+  font-weight: 600;
+  color: var(--db-text);
+  margin-bottom: 2px;
+}
+
+.sv-template-desc {
+  font-size: 12px;
+  color: var(--db-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sv-template-arrow {
+  color: var(--db-primary-light);
+  font-size: 18px;
+}
+
+/* ═══ SECTION 2: Form Layout ═════════════════════════════════════ */
+
+.sv-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sv-form-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--db-surface);
+  border-bottom: 1px solid var(--db-border);
+}
+
+.sv-back-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  color: var(--db-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sv-back-btn:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+}
+
+.sv-template-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--db-primary);
+  margin: 0;
+}
+
+/* ═══ SECTION 3: Validation Warning ══════════════════════════════ */
+
+.sv-validation-warning {
+  margin: 12px 16px;
+  padding: 10px 14px;
+  background: var(--db-warning-bg);
+  border: 1px solid var(--db-warning-border);
+  border-radius: var(--db-radius-md);
+  font-size: 13px;
+  color: var(--db-warning-text);
+}
+
+/* ═══ SECTION 4: Variable Groups ═════════════════════════════════ */
+
+.sv-group {
+  margin: 0 16px 12px;
+  background: var(--db-surface);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius-lg);
+  overflow: hidden;
+}
+
+.sv-group-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: var(--db-surface-muted);
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.sv-group-header:hover {
+  background: var(--db-surface-hover);
+}
+
+.sv-group-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--db-text);
+}
+
+.sv-group-count {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--db-radius-xl);
+  background: var(--db-border);
+  color: var(--db-text-muted);
+  margin-right: 8px;
+}
+
+.sv-group-arrow {
+  font-size: 10px;
+  color: var(--db-text-muted);
+  transition: transform 0.2s;
+}
+
+.sv-group-header.expanded .sv-group-arrow {
+  transform: rotate(180deg);
+}
+
+.sv-group-content {
+  padding: 14px;
+  border-top: 1px solid var(--db-border-subtle);
+}
+
+/* ═══ SECTION 5: Variables & Labels ══════════════════════════════ */
+
+.sv-variable {
+  margin-bottom: 14px;
+}
+
+.sv-variable:last-child {
+  margin-bottom: 0;
+}
+
+.sv-variable.has-error .sv-input,
+.sv-variable.has-error .sv-select,
+.sv-variable.has-error .sv-textarea {
+  border-color: var(--db-error-input);
+}
+
+.sv-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--db-text);
+  margin-bottom: 4px;
+}
+
+.sv-required {
+  color: var(--db-error-input);
+  margin-left: 2px;
+}
+
+.sv-help {
+  font-size: 11px;
+  color: var(--db-text-muted);
+  margin: 0 0 6px 0;
+}
+
+.sv-error {
+  font-size: 11px;
+  color: var(--db-error-input);
+  margin: 4px 0 0 0;
+}
+
+/* ═══ SECTION 6: Form Inputs ═════════════════════════════════════ */
+
+.sv-input,
+.sv-select,
+.sv-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sv-input:focus,
+.sv-select:focus,
+.sv-textarea:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+  box-shadow: 0 0 0 2px var(--db-input-focus-ring);
+}
+
+.sv-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.sv-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+/* Checkbox */
+.sv-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--db-text);
+}
+
+.sv-checkbox-wrapper input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--db-primary-light);
+}
+
+/* ═══ SECTION 7: Contact Input ═══════════════════════════════════ */
+
+.sv-contact-input {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sv-contact-input input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+}
+
+.sv-contact-input input:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+}
+
+.sv-contact-row {
+  display: flex;
+  gap: 8px;
+}
+
+.sv-contact-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+.sv-contact-preview {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: var(--db-surface-muted);
+  border-radius: var(--db-radius-sm);
+  font-size: 12px;
+  color: var(--db-text-muted);
+}
+
+.sv-contact-preview div {
+  margin-bottom: 2px;
+}
+
+.sv-contact-preview div:last-child {
+  margin-bottom: 0;
+}
+
+/* ═══ SECTION 8: Party Input ═════════════════════════════════════ */
+
+.sv-party-input {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sv-party-card {
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-md);
+  overflow: hidden;
+}
+
+.sv-party-card.plaintiff {
+  border-left: 3px solid var(--db-plaintiff);
+}
+
+.sv-party-card.defendant {
+  border-left: 3px solid var(--db-defendant);
+}
+
+.sv-party-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--db-surface-muted);
+}
+
+.sv-party-icon {
+  font-size: 14px;
+}
+
+.sv-party-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--db-text);
+}
+
+.sv-party-remove {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--db-text-disabled);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sv-party-remove:hover {
+  background: var(--db-error-bg);
+  color: var(--db-error);
+}
+
+.sv-party-form {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sv-party-form input {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+}
+
+.sv-party-form input:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+}
+
+.sv-add-party-btn {
+  padding: 10px;
+  border: 2px dashed var(--db-border-input);
+  border-radius: var(--db-radius-md);
+  background: transparent;
+  color: var(--db-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sv-add-party-btn:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+}
+
+/* ═══ SECTION 9: Caption Preview ═════════════════════════════════ */
+
+.sv-caption-preview {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--db-surface-muted);
+  border: 1px solid var(--db-border-subtle);
+  border-radius: var(--db-radius-md);
+  font-family: var(--db-font-serif);
+  font-size: 13px;
+  text-align: center;
+}
+
+.sv-caption-party {
+  font-weight: bold;
+}
+
+.sv-caption-role {
+  margin-top: 4px;
+  font-style: italic;
+  color: var(--db-text-muted);
+}
+
+/* ═══ SECTION 10: Form Actions & Buttons ═════════════════════════ */
+
+.sv-form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 14px 16px;
+  background: var(--db-surface);
+  border-top: 1px solid var(--db-border);
+  margin-top: auto;
+}
+
+.sv-btn {
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--db-radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sv-btn-secondary {
+  background: var(--db-bg);
+  color: var(--db-text-muted);
+}
+
+.sv-btn-secondary:hover {
+  background: var(--db-border-light);
+  color: var(--db-text);
+}
+
+.sv-btn-primary {
+  background: var(--db-primary-light);
+  color: white;
+}
+
+.sv-btn-primary:hover {
+  background: var(--db-primary-hover);
+}
+
+.sv-btn-primary.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sv-btn-primary.disabled:hover {
+  background: var(--db-primary-light);
+}
+
+/* ═══ SECTION 11: Derived Values ═════════════════════════════════ */
+
+.sv-derived {
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--db-success-bg);
+  border-radius: var(--db-radius-sm);
+  font-size: 12px;
+  color: var(--db-success);
+}
+
+/* ═══ SECTION 12: Profile Editor ═════════════════════════════════ */
+.sv-selector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sv-selector-header .sv-section-title {
+  margin: 0;
+}
+
+.sv-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  color: var(--db-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sv-profile-btn:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+  background: var(--db-surface-warm-subtle);
+}
+
+.sv-profile-btn.has-profile {
+  border-color: var(--db-primary-light);
+  background: var(--db-surface-warm-subtle);
+  color: var(--db-primary-light);
+}
+
+.sv-profile-btn.has-profile::after {
+  content: '✓';
+  margin-left: 4px;
+  color: var(--db-success);
+  font-size: 10px;
+}
+
+/* Profile Editor Container */
+.sv-profile-editor {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sv-profile-intro {
+  padding: 12px 16px;
+  background: var(--db-surface-warm-subtle);
+  border-bottom: 1px solid var(--db-border);
+}
+
+.sv-profile-intro p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--db-text-muted);
+}
+
+.sv-profile-form {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 0;
+}
+
+/* Profile Groups - inherit from existing groups */
+.sv-profile-editor .sv-group {
+  margin: 0 16px 12px;
+}
+
+.sv-profile-editor .sv-group:first-child {
+  margin-top: 0;
+}
+
+/* Profile Preview */
+.sv-profile-preview {
+  margin-top: 12px;
+  padding: 12px;
+  background: var(--db-surface-muted);
+  border: 1px solid var(--db-border-subtle);
+  border-radius: var(--db-radius-md);
+}
+
+.sv-profile-preview-empty {
+  color: var(--db-text-disabled);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.sv-preview-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--db-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.sv-signature-preview {
+  font-family: var(--db-font-serif);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--db-text);
+  padding: 10px;
+  background: var(--db-surface);
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius-sm);
+}
+
+.sv-sig-detail {
+  font-size: 12px;
+  color: var(--db-text-muted);
+}
+
+/* Profile input row overrides */
+.sv-profile-editor .sv-contact-row {
+  display: flex;
+  gap: 10px;
+}
+
+.sv-profile-editor .sv-contact-row > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.sv-profile-editor .sv-contact-row .sv-label {
+  margin-bottom: 4px;
+}
+
+/* Success state for saved profile */
+.sv-profile-saved {
+  padding: 10px 16px;
+  background: var(--db-success-bg);
+  border-bottom: 1px solid var(--db-success-border);
+  font-size: 13px;
+  color: var(--db-success);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sv-profile-saved::before {
+  content: '✓';
+}
+
+/* ═══ SECTION 13: Accessibility & States ═════════════════════════ */
+
+/* Loading states */
+.sv-loading {
+  opacity: 0.6;
+  pointer-events: none;
+  position: relative;
+}
+
+.sv-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border: 2px solid var(--db-border);
+  border-top-color: var(--db-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Focus within groups */
+.sv-variable-group:focus-within {
+  border-color: var(--db-primary-light);
+  box-shadow: var(--db-input-focus-ring);
+}
+
+/* Required field indicator */
+.sv-required::after {
+  content: ' *';
+  color: var(--db-error);
+}
+
+/* Expanded/collapsed states for sections */
+[aria-expanded="false"] + .sv-section-content {
+  display: none;
+}
+
+[aria-expanded="true"] + .sv-section-content {
+  display: block;
+}
+
+/* Focus-visible for back button */
+.sv-back-btn:focus-visible {
+  outline: 2px solid var(--db-primary-light);
+  outline-offset: 2px;
+}
+
+/* Active press state for buttons */
+.sv-btn:active {
+  transform: translateY(1px);
+}
+
+.sv-btn-primary:active {
+  background: var(--db-primary);
+}
+
+/* Focus-visible for primary/secondary buttons */
+.sv-btn:focus-visible {
+  outline: 2px solid var(--db-primary-light);
+  outline-offset: 2px;
+}
+
+/* Valid field success state */
+.sv-variable.is-valid .sv-input,
+.sv-variable.is-valid .sv-select,
+.sv-variable.is-valid .sv-textarea {
+  border-color: var(--db-success);
+}
+
+/* Subtle expand/collapse transition for group content */
+.sv-group-content {
+  animation: sv-fade-in 0.2s ease-out;
+}
+
+@keyframes sv-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ SECTION 14: Print Styles ═══════════════════════════════════ */
+
+@media print {
+  .sv-form-actions,
+  .sv-back-btn,
+  .sv-profile-btn,
+  .sv-add-party-btn,
+  .sv-party-remove,
+  .sv-loading::after {
+    display: none !important;
+  }
+
+  .sv-form,
+  .sv-group,
+  .sv-variable {
+    break-inside: avoid;
+  }
+
+  .sv-group-content {
+    display: block !important;
+  }
+
+  .sv-input,
+  .sv-select,
+  .sv-textarea {
+    border: 1px solid var(--db-border) !important;
+    box-shadow: none !important;
+  }
+}

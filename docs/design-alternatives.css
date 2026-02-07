@@ -1,0 +1,486 @@
+/* ═══════════════════════════════════════════════════════════════
+   DRAFTBRIDGE GOLD — DESIGN ALTERNATIVES
+   Option B: Text + Subtle Accents (Recommended)
+   
+   This file contains ready-to-use CSS for the emoji-free redesign.
+   Import or copy into taskpane.css when ready to implement.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   1. REFINED COLOR VARIABLES
+   ───────────────────────────────────────────────────────────────── */
+
+:root {
+    /* Core palette - keeping the warm brown but refining */
+    --db-primary: #5C4A32;
+    --db-primary-light: #8B7355;
+    --db-accent: #C4A052;
+    --db-accent-light: rgba(196, 160, 82, 0.12);
+    
+    /* Surfaces */
+    --db-bg: #FAFAFA;
+    --db-surface: #FFFFFF;
+    --db-surface-hover: #F5F5F5;
+    --db-border: #E5E5E5;
+    --db-border-hover: #D4D4D4;
+    
+    /* Text */
+    --db-text: #1A1A1A;
+    --db-text-secondary: #525252;
+    --db-text-muted: #737373;
+    
+    /* Status - muted and professional */
+    --db-success: #059669;
+    --db-success-bg: #ECFDF5;
+    --db-success-border: #A7F3D0;
+    
+    --db-error: #DC2626;
+    --db-error-bg: #FEF2F2;
+    --db-error-border: #FECACA;
+    
+    --db-warning: #D97706;
+    --db-warning-bg: #FFFBEB;
+    --db-warning-border: #FDE68A;
+    
+    --db-info: #0284C7;
+    --db-info-bg: #F0F9FF;
+    --db-info-border: #BAE6FD;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   2. TEXT-ONLY OPTION CARDS (replaces emoji cards)
+   ───────────────────────────────────────────────────────────────── */
+
+.option-card-v2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Left accent bar - appears on hover */
+.option-card-v2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--db-accent);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.2s ease-out;
+}
+
+.option-card-v2:hover {
+    border-color: var(--db-primary-light);
+    background: var(--db-surface-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.option-card-v2:hover::before {
+    transform: scaleY(1);
+}
+
+.option-card-v2:active {
+    transform: translateY(0);
+}
+
+.option-card-v2 .title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--db-text);
+    margin-bottom: 2px;
+}
+
+.option-card-v2 .desc {
+    font-size: 12px;
+    color: var(--db-text-muted);
+    line-height: 1.4;
+}
+
+.option-card-v2 .arrow {
+    margin-left: auto;
+    color: var(--db-text-muted);
+    font-size: 16px;
+    transition: transform 0.15s ease-out;
+}
+
+.option-card-v2:hover .arrow {
+    transform: translateX(3px);
+    color: var(--db-primary-light);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   3. CLEAN TOAST NOTIFICATIONS
+   ───────────────────────────────────────────────────────────────── */
+
+.toast-v2 {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border-left: 4px solid;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    transition: all 0.3s ease-out;
+    z-index: 3000;
+    max-width: 320px;
+}
+
+.toast-v2.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.toast-v2.success {
+    background: var(--db-success-bg);
+    border-left-color: var(--db-success);
+    color: #166534;
+}
+
+.toast-v2.error {
+    background: var(--db-error-bg);
+    border-left-color: var(--db-error);
+    color: #991B1B;
+}
+
+.toast-v2.warning {
+    background: var(--db-warning-bg);
+    border-left-color: var(--db-warning);
+    color: #92400E;
+}
+
+.toast-v2.info {
+    background: var(--db-info-bg);
+    border-left-color: var(--db-info);
+    color: #075985;
+}
+
+/* Small status dot (optional, adds subtle visual) */
+.toast-v2::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.toast-v2.success::before { background: var(--db-success); }
+.toast-v2.error::before { background: var(--db-error); }
+.toast-v2.warning::before { background: var(--db-warning); }
+.toast-v2.info::before { background: var(--db-info); }
+
+
+/* ─────────────────────────────────────────────────────────────────
+   4. REFINED TABS (no sparkle emoji)
+   ───────────────────────────────────────────────────────────────── */
+
+.main-tab-v2 {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--db-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    position: relative;
+}
+
+.main-tab-v2:hover {
+    color: var(--db-text-secondary);
+}
+
+.main-tab-v2.active {
+    color: var(--db-primary);
+    border-bottom-color: var(--db-accent);
+}
+
+/* Small badge for "Smart" tab instead of ✨ */
+.tab-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: var(--db-accent);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   5. TEXT-ONLY BUTTONS
+   ───────────────────────────────────────────────────────────────── */
+
+.btn-v2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    border: none;
+}
+
+.btn-v2.primary {
+    background: var(--db-primary-light);
+    color: white;
+}
+
+.btn-v2.primary:hover {
+    background: var(--db-primary);
+}
+
+.btn-v2.secondary {
+    background: var(--db-surface);
+    color: var(--db-text-secondary);
+    border: 1px solid var(--db-border);
+}
+
+.btn-v2.secondary:hover {
+    background: var(--db-surface-hover);
+    border-color: var(--db-border-hover);
+}
+
+/* Ghost button - text only */
+.btn-v2.ghost {
+    background: none;
+    color: var(--db-primary-light);
+    padding: 10px 12px;
+}
+
+.btn-v2.ghost:hover {
+    background: var(--db-accent-light);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   6. STATUS INDICATORS (replace ✅❌⚠️)
+   ───────────────────────────────────────────────────────────────── */
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-dot.success { background: var(--db-success); }
+.status-dot.error { background: var(--db-error); }
+.status-dot.warning { background: var(--db-warning); }
+.status-dot.info { background: var(--db-info); }
+.status-dot.neutral { background: var(--db-text-muted); }
+
+/* Inline status text */
+.status-text {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+}
+
+.status-text.success { color: #166534; }
+.status-text.error { color: #991B1B; }
+.status-text.warning { color: #92400E; }
+
+
+/* ─────────────────────────────────────────────────────────────────
+   7. SECTION HEADERS (stronger typography)
+   ───────────────────────────────────────────────────────────────── */
+
+.section-label-v2 {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--db-text-muted);
+    margin-bottom: 12px;
+}
+
+.divider-v2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.divider-v2::before,
+.divider-v2::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--db-border);
+}
+
+.divider-v2 span {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--db-text-muted);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   8. LIST CONTROL BUTTONS (replace 📋⬆️🔄➕)
+   ───────────────────────────────────────────────────────────────── */
+
+.list-control-v2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+}
+
+.list-control-v2:hover {
+    border-color: var(--db-primary-light);
+    background: var(--db-surface-hover);
+}
+
+.list-control-v2 .lc-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--db-text);
+}
+
+.list-control-v2 .lc-desc {
+    font-size: 12px;
+    color: var(--db-text-muted);
+    margin-top: 2px;
+}
+
+.list-control-v2 .lc-arrow {
+    margin-left: auto;
+    color: var(--db-text-muted);
+    font-size: 18px;
+}
+
+.list-control-v2:hover .lc-arrow {
+    color: var(--db-primary-light);
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   9. SCHEME CARDS (replace 📋📝)
+   ───────────────────────────────────────────────────────────────── */
+
+.scheme-card-v2 {
+    background: var(--db-surface);
+    border: 2px solid var(--db-border);
+    border-radius: 10px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s ease-out;
+    text-align: center;
+}
+
+.scheme-card-v2:hover {
+    border-color: var(--db-primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.scheme-card-v2.selected {
+    border-color: var(--db-accent);
+    background: var(--db-accent-light);
+}
+
+.scheme-card-v2 .sc-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--db-text);
+    margin-bottom: 4px;
+}
+
+.scheme-card-v2 .sc-preview {
+    font-size: 11px;
+    color: var(--db-text-muted);
+    font-family: 'SF Mono', 'Consolas', monospace;
+}
+
+/* Check indicator for selected state */
+.scheme-card-v2 .sc-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: var(--db-accent);
+    color: white;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.scheme-card-v2.selected .sc-check {
+    display: flex;
+}
+
+
+/* ─────────────────────────────────────────────────────────────────
+   10. UTILITY CLASSES
+   ───────────────────────────────────────────────────────────────── */
+
+/* Hide emoji from existing elements (quick fix) */
+.no-emoji .option-icon,
+.no-emoji .palette-icon,
+.no-emoji .scheme-card-icon,
+.no-emoji .list-control-btn-icon,
+.no-emoji .fix-summary-icon,
+.no-emoji .fix-issue-icon {
+    display: none;
+}
+
+/* Add indicator instead */
+.no-emoji .option-card::before,
+.no-emoji .scheme-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--db-accent);
+    border-radius: 2px 0 0 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+}
+
+.no-emoji .option-card:hover::before,
+.no-emoji .scheme-card:hover::before {
+    opacity: 1;
+}

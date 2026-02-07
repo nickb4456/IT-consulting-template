@@ -1,0 +1,270 @@
+{
+  "id": "motion-to-dismiss",
+  "name": "Motion to Dismiss",
+  "description": "Federal Rule 12(b) Motion to Dismiss with supporting memorandum",
+  "category": "litigation/motions",
+  "jurisdiction": "federal",
+  "version": "1.0.0",
+  "components": [
+    {
+      "id": "federal-caption",
+      "slot": "header",
+      "required": true
+    },
+    {
+      "id": "attorney-signature",
+      "slot": "signature",
+      "required": true
+    },
+    {
+      "id": "proof-of-service",
+      "slot": "footer",
+      "required": false
+    }
+  ],
+  "variables": [
+    {
+      "id": "court",
+      "name": "Court",
+      "type": "court",
+      "required": true,
+      "group": "case",
+      "order": 1,
+      "helpText": "Select the court where this motion will be filed"
+    },
+    {
+      "id": "caseNumber",
+      "name": "Case Number",
+      "type": "text",
+      "required": true,
+      "group": "case",
+      "order": 2,
+      "helpText": "Enter the docket or case number",
+      "config": {
+        "pattern": "^\\d+:\\d+-cv-\\d+$"
+      },
+      "validation": [
+        {
+          "type": "pattern",
+          "value": "^\\d+:\\d+-cv-\\d+$",
+          "message": "Case number should be in format 1:24-cv-01234"
+        }
+      ]
+    },
+    {
+      "id": "judge",
+      "name": "Assigned Judge",
+      "type": "text",
+      "required": false,
+      "group": "case",
+      "order": 3,
+      "helpText": "Enter the assigned judge's name (if known)"
+    },
+    {
+      "id": "plaintiffs",
+      "name": "Plaintiffs",
+      "type": "party",
+      "required": true,
+      "group": "parties",
+      "order": 10,
+      "helpText": "Add plaintiff parties",
+      "config": {
+        "allowedRoles": ["plaintiff", "petitioner"],
+        "minItems": 1
+      }
+    },
+    {
+      "id": "defendants",
+      "name": "Defendants",
+      "type": "party",
+      "required": true,
+      "group": "parties",
+      "order": 11,
+      "helpText": "Add defendant parties",
+      "config": {
+        "allowedRoles": ["defendant", "respondent"],
+        "minItems": 1
+      }
+    },
+    {
+      "id": "movingParty",
+      "name": "Moving Party",
+      "type": "select",
+      "required": true,
+      "group": "motion",
+      "order": 20,
+      "helpText": "Select which defendant is filing this motion",
+      "config": {
+        "optionsSource": "defendants"
+      }
+    },
+    {
+      "id": "grounds",
+      "name": "Grounds for Dismissal",
+      "type": "select",
+      "required": true,
+      "group": "motion",
+      "order": 21,
+      "helpText": "Select the Rule 12(b) grounds for dismissal",
+      "config": {
+        "options": [
+          {
+            "value": "12b1",
+            "label": "Lack of Subject Matter Jurisdiction (12(b)(1))"
+          },
+          {
+            "value": "12b2",
+            "label": "Lack of Personal Jurisdiction (12(b)(2))"
+          },
+          {
+            "value": "12b3",
+            "label": "Improper Venue (12(b)(3))"
+          },
+          {
+            "value": "12b4",
+            "label": "Insufficient Process (12(b)(4))"
+          },
+          {
+            "value": "12b5",
+            "label": "Insufficient Service of Process (12(b)(5))"
+          },
+          {
+            "value": "12b6",
+            "label": "Failure to State a Claim (12(b)(6))"
+          },
+          {
+            "value": "12b7",
+            "label": "Failure to Join a Required Party (12(b)(7))"
+          }
+        ]
+      }
+    },
+    {
+      "id": "groundsSummary",
+      "name": "Summary of Grounds",
+      "type": "textarea",
+      "required": true,
+      "group": "motion",
+      "order": 22,
+      "helpText": "Briefly summarize why dismissal is warranted"
+    },
+    {
+      "id": "hearingDate",
+      "name": "Hearing Date",
+      "type": "date",
+      "required": false,
+      "group": "motion",
+      "order": 30,
+      "helpText": "Requested hearing date (if applicable)"
+    },
+    {
+      "id": "hearingTime",
+      "name": "Hearing Time",
+      "type": "text",
+      "required": false,
+      "group": "motion",
+      "order": 31,
+      "conditional": {
+        "dependsOn": "hearingDate",
+        "condition": "notEmpty"
+      },
+      "defaultValue": "9:00 a.m."
+    },
+    {
+      "id": "includeDeclaration",
+      "name": "Include Supporting Declaration",
+      "type": "checkbox",
+      "required": false,
+      "group": "attachments",
+      "order": 40,
+      "defaultValue": false
+    },
+    {
+      "id": "declarant",
+      "name": "Declarant",
+      "type": "attorney",
+      "required": false,
+      "group": "attachments",
+      "order": 41,
+      "conditional": {
+        "dependsOn": "includeDeclaration",
+        "condition": "equals",
+        "value": true
+      }
+    },
+    {
+      "id": "includeExhibits",
+      "name": "Include Exhibits",
+      "type": "checkbox",
+      "required": false,
+      "group": "attachments",
+      "order": 50,
+      "defaultValue": false
+    },
+    {
+      "id": "exhibitList",
+      "name": "Exhibit List",
+      "type": "textarea",
+      "required": false,
+      "group": "attachments",
+      "order": 51,
+      "conditional": {
+        "dependsOn": "includeExhibits",
+        "condition": "equals",
+        "value": true
+      },
+      "helpText": "List exhibits, one per line (e.g., 'Exhibit A - Contract dated...')"
+    },
+    {
+      "id": "includeProofOfService",
+      "name": "Include Proof of Service",
+      "type": "checkbox",
+      "required": false,
+      "group": "attachments",
+      "order": 60,
+      "defaultValue": true
+    },
+    {
+      "id": "serviceMethod",
+      "name": "Service Method",
+      "type": "select",
+      "required": false,
+      "group": "attachments",
+      "order": 61,
+      "conditional": {
+        "dependsOn": "includeProofOfService",
+        "condition": "equals",
+        "value": true
+      },
+      "defaultValue": "ecf",
+      "config": {
+        "options": [
+          {
+            "value": "ecf",
+            "label": "CM/ECF Electronic Filing"
+          },
+          {
+            "value": "email",
+            "label": "Email"
+          },
+          {
+            "value": "mail",
+            "label": "U.S. Mail"
+          },
+          {
+            "value": "hand",
+            "label": "Hand Delivery"
+          },
+          {
+            "value": "overnight",
+            "label": "Overnight Courier"
+          }
+        ]
+      }
+    }
+  ],
+  "body": "{{> federal-caption}}\n\nNOTICE OF MOTION AND MOTION TO DISMISS\n\nTO ALL PARTIES AND THEIR ATTORNEYS OF RECORD:\n\nPLEASE TAKE NOTICE that on {{hearingDate}}, at {{hearingTime}}, or as soon thereafter as the matter may be heard, in Courtroom ___ of the above-entitled Court, located at {{court.address}}, Defendant {{movingParty.$fullName}} (\"{{movingParty.lastName}}\") will and hereby does move this Court for an order dismissing Plaintiff{{#if (gt plaintiffs.length 1)}}s'{{else}}'s{{/if}} Complaint pursuant to Federal Rule of Civil Procedure {{grounds.value}}.\n\nThis Motion is made on the grounds that {{groundsSummary}}.\n\nThis Motion is based upon this Notice of Motion and Motion, the Memorandum of Points and Authorities filed herewith,{{#if includeDeclaration}} the Declaration of {{declarant.$fullName}} filed herewith,{{/if}}{{#if includeExhibits}} the exhibits attached hereto,{{/if}} the pleadings and records on file in this action, and such other matters as may be presented to the Court at the hearing of this Motion.\n\n{{> attorney-signature}}\n\n{{#if includeProofOfService}}\n{{> proof-of-service}}\n{{/if}}",
+  "createdAt": "2026-02-03T22:30:00Z",
+  "updatedAt": "2026-02-03T22:30:00Z",
+  "createdBy": "system"
+}

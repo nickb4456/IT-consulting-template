@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftBridge Numbering Workflow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #c9a227, #e8d48b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #888;
+            margin-bottom: 50px;
+            font-size: 1.1rem;
+        }
+        
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: #c9a227;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-title .icon {
+            font-size: 1.8rem;
+        }
+        
+        /* Flowchart Styles */
+        .flowchart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+        
+        .flow-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .flow-node {
+            background: linear-gradient(145deg, #2d2d44, #1f1f30);
+            border-radius: 12px;
+            padding: 20px 30px;
+            min-width: 200px;
+            text-align: center;
+            border: 2px solid #3d3d5c;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .flow-node:hover {
+            transform: translateY(-3px);
+            border-color: #c9a227;
+            box-shadow: 0 10px 30px rgba(201, 162, 39, 0.2);
+        }
+        
+        .flow-node.start {
+            background: linear-gradient(145deg, #1e5128, #133318);
+            border-color: #2e7d32;
+        }
+        
+        .flow-node.decision {
+            background: linear-gradient(145deg, #4a3728, #2d2118);
+            border-color: #8d6e63;
+            transform: rotate(0deg);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            padding: 40px;
+            min-width: 180px;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .flow-node.action {
+            background: linear-gradient(145deg, #1a3a5c, #0f2438);
+            border-color: #1976d2;
+        }
+        
+        .flow-node.draftbridge {
+            background: linear-gradient(145deg, #5c4a1a, #382d0f);
+            border-color: #c9a227;
+        }
+        
+        .flow-node.end {
+            background: linear-gradient(145deg, #5c1a1a, #380f0f);
+            border-color: #c62828;
+        }
+        
+        .flow-node .label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .flow-node .title {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+        
+        .flow-node .detail {
+            font-size: 0.85rem;
+            color: #aaa;
+            margin-top: 8px;
+        }
+        
+        .arrow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #666;
+            padding: 10px 0;
+        }
+        
+        .arrow .line {
+            width: 3px;
+            height: 40px;
+            background: linear-gradient(to bottom, #c9a227, #8b7355);
+            border-radius: 2px;
+        }
+        
+        .arrow .head {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 15px solid #8b7355;
+        }
+        
+        .arrow .text {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 5px;
+        }
+        
+        .arrow-horizontal {
+            display: flex;
+            align-items: center;
+            color: #666;
+            padding: 0 10px;
+        }
+        
+        .arrow-horizontal .line {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(to right, #c9a227, #8b7355);
+            border-radius: 2px;
+        }
+        
+        .arrow-horizontal .head {
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 15px solid #8b7355;
+        }
+        
+        /* Comparison Table */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .compare-col {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .compare-col h3 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid;
+        }
+        
+        .compare-col.native h3 {
+            color: #64b5f6;
+            border-color: #1976d2;
+        }
+        
+        .compare-col.draftbridge h3 {
+            color: #c9a227;
+            border-color: #c9a227;
+        }
+        
+        .compare-col ul {
+            list-style: none;
+        }
+        
+        .compare-col li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .compare-col li:last-child {
+            border-bottom: none;
+        }
+        
+        .compare-col li .icon {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .compare-col.native li .icon {
+            background: #1976d2;
+        }
+        
+        .compare-col.draftbridge li .icon {
+            background: #c9a227;
+            color: #000;
+        }
+        
+        /* Steps List */
+        .steps {
+            counter-reset: step;
+        }
+        
+        .step {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            align-items: flex-start;
+        }
+        
+        .step-number {
+            counter-increment: step;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #c9a227, #8b7355);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #000;
+            flex-shrink: 0;
+        }
+        
+        .step-content h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        
+        .step-content p {
+            color: #aaa;
+            font-size: 0.95rem;
+        }
+        
+        .step-content code {
+            background: rgba(201, 162, 39, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            color: #c9a227;
+        }
+        
+        /* Keyboard shortcut */
+        kbd {
+            background: linear-gradient(180deg, #444, #333);
+            border: 1px solid #555;
+            border-radius: 5px;
+            padding: 3px 8px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 0 #222;
+        }
+        
+        /* Visual Flowchart */
+        .visual-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 0;
+        }
+        
+        .flow-box {
+            background: rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 20px 40px;
+            text-align: center;
+            position: relative;
+            min-width: 280px;
+        }
+        
+        .flow-box.gold {
+            border: 2px solid #c9a227;
+            background: rgba(201, 162, 39, 0.1);
+        }
+        
+        .flow-box.blue {
+            border: 2px solid #1976d2;
+            background: rgba(25, 118, 210, 0.1);
+        }
+        
+        .flow-box.green {
+            border: 2px solid #2e7d32;
+            background: rgba(46, 125, 50, 0.1);
+        }
+        
+        .flow-connector {
+            width: 3px;
+            height: 30px;
+            background: #555;
+            position: relative;
+        }
+        
+        .flow-connector::after {
+            content: '▼';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #555;
+            font-size: 12px;
+        }
+        
+        .flow-branch {
+            display: flex;
+            justify-content: center;
+            gap: 100px;
+            position: relative;
+        }
+        
+        .flow-branch::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25%;
+            right: 25%;
+            height: 3px;
+            background: #555;
+        }
+        
+        .branch-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .branch-label {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+            
+            .flow-branch {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .flow-branch::before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 DraftBridge Numbering Workflow</h1>
+        <p class="subtitle">How DraftBridge integrates with Word's native numbering system</p>
+        
+        <!-- Main Workflow Section -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🔄</span> The Integration Flow</h2>
+            
+            <div class="visual-flow">
+                <div class="flow-box gold">
+                    <strong>User opens DraftBridge</strong><br>
+                    <small>Numbering Tab</small>
+                </div>
+                
+                <div class="flow-connector"></div>
+                
+                <div class="flow-box">
+                    <strong>Select a Numbering Scheme</strong><br>
+                    <small>Legal Outline, Contract, APA, etc.</small>
+                </div>
+                
+                <div class="flow-connector"></div>
+                
+                <div class="flow-branch">
+                    <div class="branch-item">
+                        <div class="branch-label">Click "Apply"</div>
+                        <div class="flow-box blue">
+                            <strong>DraftBridge applies numbering</strong><br>
+                            <small>To selected text or inserts items</small>
+                        </div>
+                    </div>
+                    <div class="branch-item">
+                        <div class="branch-label">Click "Edit"</div>
+                        <div class="flow-box blue">
+                            <strong>Opens Word's native dialog</strong><br>
+                            <small>Home → Numbering → Define New</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-connector" style="margin-top: 30px;"></div>
+                
+                <div class="flow-box green">
+                    <strong>✓ Document Updated</strong><br>
+                    <small>Numbering applied with linked styles</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DraftBridge vs Native -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">⚖️</span> DraftBridge vs Native Word</h2>
+            
+            <div class="comparison">
+                <div class="compare-col native">
+                    <h3>🔵 Word Native</h3>
+                    <ul>
+                        <li>
+                            <span class="icon">1</span>
+                            <span>Home tab → Numbering dropdown</span>
+                        </li>
+                        <li>
+                            <span class="icon">2</span>
+                            <span>Click "Define New Number Format"</span>
+                        </li>
+                        <li>
+                            <span class="icon">3</span>
+                            <span>Configure each level manually</span>
+                        </li>
+                        <li>
+                            <span class="icon">4</span>
+                            <span>Link to styles via "More >>"</span>
+                        </li>
+                        <li>
+                            <span class="icon">5</span>
+                            <span>Save to gallery for reuse</span>
+                        </li>
+                        <li>
+                            <span class="icon">⏱</span>
+                            <span><strong>Time:</strong> 5-10 minutes per scheme</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="compare-col draftbridge">
+                    <h3>🟡 DraftBridge</h3>
+                    <ul>
+                        <li>
+                            <span class="icon">1</span>
+                            <span>Open Numbering tab</span>
+                        </li>
+                        <li>
+                            <span class="icon">2</span>
+                            <span>Pick from pre-built schemes</span>
+                        </li>
+                        <li>
+                            <span class="icon">3</span>
+                            <span>Click "Apply" - done!</span>
+                        </li>
+                        <li>
+                            <span class="icon">✨</span>
+                            <span>Styles auto-linked</span>
+                        </li>
+                        <li>
+                            <span class="icon">☁️</span>
+                            <span>Cloud sync across firm</span>
+                        </li>
+                        <li>
+                            <span class="icon">⏱</span>
+                            <span><strong>Time:</strong> 5 seconds</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Button Workflow -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">✏️</span> "Edit" Button Workflow</h2>
+            <p style="color: #aaa; margin-bottom: 25px;">
+                DraftBridge provides presets, but when you need fine-grained control, we hand off to Word's powerful native editor.
+            </p>
+            
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Click "Edit" in DraftBridge</h4>
+                        <p>DraftBridge shows you where to go in Word's ribbon</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Navigate to Home Tab</h4>
+                        <p>Find the <strong>Numbering</strong> button in the Paragraph group</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Click the Dropdown Arrow</h4>
+                        <p>Opens the numbering library with all available formats</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Select "Define New Number Format"</h4>
+                        <p>Opens Word's full numbering editor with all options</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-content">
+                        <h4>Customize Your Format</h4>
+                        <p>Set number style, font, alignment, and linked paragraph styles</p>
+                    </div>
+                </div>
+                
+                <div class="step">
+                    <div class="step-number">6</div>
+                    <div class="step-content">
+                        <h4>Save to DraftBridge (Optional)</h4>
+                        <p>Use "Save from Document" to capture your custom scheme for cloud sync</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Keyboard Shortcuts -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">⌨️</span> Keyboard Shortcuts</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
+                    <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>V</kbd>
+                    <p style="color: #aaa; margin-top: 10px;">Toggle Voice Control</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
+                    <kbd>F9</kbd>
+                    <p style="color: #aaa; margin-top: 10px;">Update TOC / Fields</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
+                    <kbd>Alt</kbd> + <kbd>H</kbd>, <kbd>N</kbd>
+                    <p style="color: #aaa; margin-top: 10px;">Open Numbering Menu</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 10px;">
+                    <kbd>Tab</kbd> / <kbd>Shift</kbd> + <kbd>Tab</kbd>
+                    <p style="color: #aaa; margin-top: 10px;">Increase/Decrease indent level</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Why This Architecture -->
+        <div class="section">
+            <h2 class="section-title"><span class="icon">🏗️</span> Why This Architecture?</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-top: 20px;">
+                <div style="background: rgba(201, 162, 39, 0.1); border-left: 4px solid #c9a227; padding: 20px; border-radius: 0 10px 10px 0;">
+                    <h4 style="color: #c9a227; margin-bottom: 10px;">🎯 DraftBridge = Quick Presets</h4>
+                    <p style="color: #aaa;">One-click application of proven numbering schemes. Perfect for 95% of use cases.</p>
+                </div>
+                
+                <div style="background: rgba(25, 118, 210, 0.1); border-left: 4px solid #1976d2; padding: 20px; border-radius: 0 10px 10px 0;">
+                    <h4 style="color: #64b5f6; margin-bottom: 10px;">🔧 Word Native = Full Control</h4>
+                    <p style="color: #aaa;">When you need pixel-perfect customization, Word's 30-year-old editor has every option.</p>
+                </div>
+                
+                <div style="background: rgba(46, 125, 50, 0.1); border-left: 4px solid #2e7d32; padding: 20px; border-radius: 0 10px 10px 0;">
+                    <h4 style="color: #66bb6a; margin-bottom: 10px;">☁️ Cloud Sync = Share Firm-Wide</h4>
+                    <p style="color: #aaa;">Save your custom schemes to DraftBridge and share with your entire firm instantly.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer style="text-align: center; padding: 40px 0; color: #666;">
+            <p>DraftBridge v2.0.1 • Built for Legal Professionals</p>
+        </footer>
+    </div>
+</body>
+</html>

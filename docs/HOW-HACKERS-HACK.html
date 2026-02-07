@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How Hackers Actually Hack — Visual Guide</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #1a0a0a 0%, #0a1a0a 50%, #0a0a1a 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+        .hero h1 span {
+            background: linear-gradient(90deg, #ff4444, #ff8800, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            color: #888;
+            font-size: 1.1em;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .stat-bar {
+            background: #12121a;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+        .stat-item {
+            padding: 15px;
+        }
+        .stat-num {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #ff4444;
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .attack {
+            background: #12121a;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            border: 1px solid #252530;
+        }
+        .attack-header {
+            background: linear-gradient(90deg, #1a1a25, #252530);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .attack-rank {
+            background: #ff4444;
+            color: #000;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        .attack-title {
+            flex: 1;
+        }
+        .attack-title h2 {
+            color: #fff;
+            font-size: 1.3em;
+        }
+        .attack-title span {
+            color: #ff4444;
+            font-size: 0.85em;
+        }
+        .attack-body {
+            padding: 24px;
+        }
+        .attack-desc {
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+        
+        /* Email visualization */
+        .email-container {
+            background: #1a1a25;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .email-header {
+            background: #252530;
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+        }
+        .email-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        .email-label {
+            color: #888;
+            width: 60px;
+        }
+        .email-value {
+            color: #e0e0e0;
+        }
+        .email-value.suspicious {
+            color: #ff4444;
+        }
+        .email-value .highlight {
+            background: rgba(255,68,68,0.3);
+            padding: 0 4px;
+            border-radius: 3px;
+        }
+        .email-body {
+            padding: 20px;
+        }
+        .email-body p {
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+        .email-btn {
+            display: inline-block;
+            background: #0066cc;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .email-btn.malicious {
+            background: linear-gradient(90deg, #ff4444, #ff6666);
+            position: relative;
+        }
+        .email-footer {
+            background: #1a1a20;
+            padding: 12px 20px;
+            font-size: 0.8em;
+            color: #666;
+            border-top: 1px solid #333;
+        }
+        
+        .url-breakdown {
+            background: #0a0a0f;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            border: 1px solid #333;
+        }
+        .url-breakdown h4 {
+            color: #ff8800;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .url-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 600px) {
+            .url-compare { grid-template-columns: 1fr; }
+        }
+        .url-box {
+            background: #1a1a25;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .url-box.legit {
+            border: 2px solid #50fa7b;
+        }
+        .url-box.fake {
+            border: 2px solid #ff4444;
+        }
+        .url-box h5 {
+            margin-bottom: 12px;
+            font-size: 0.85em;
+        }
+        .url-box.legit h5 { color: #50fa7b; }
+        .url-box.fake h5 { color: #ff4444; }
+        .url-box code {
+            display: block;
+            padding: 10px;
+            background: #0a0a0f;
+            border-radius: 4px;
+            font-size: 0.85em;
+            word-break: break-all;
+        }
+        .url-box.legit code { color: #50fa7b; }
+        .url-box.fake code { color: #ff4444; }
+        .url-annotation {
+            margin-top: 12px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        .url-annotation span {
+            color: #ff4444;
+            background: rgba(255,68,68,0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .tricks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .trick-card {
+            background: #1a1a25;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #ff4444;
+        }
+        .trick-card h5 {
+            color: #ff8800;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        .trick-card code {
+            display: block;
+            background: #0a0a0f;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            font-size: 0.8em;
+            color: #ff4444;
+        }
+        .trick-card p {
+            color: #888;
+            font-size: 0.85em;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: #0a0a0f;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .flow-step {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+        }
+        .flow-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .flow-text {
+            font-size: 0.85em;
+            color: #aaa;
+        }
+        .flow-arrow {
+            color: #ff4444;
+            font-size: 1.5em;
+        }
+        
+        .fake-page {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            max-width: 400px;
+        }
+        .fake-browser {
+            background: #e0e0e0;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .browser-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .browser-dot.red { background: #ff5f57; }
+        .browser-dot.yellow { background: #ffbd2e; }
+        .browser-dot.green { background: #28ca42; }
+        .browser-url {
+            flex: 1;
+            background: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #333;
+            font-family: monospace;
+        }
+        .browser-url .bad {
+            color: #ff4444;
+        }
+        .fake-content {
+            padding: 30px;
+            text-align: center;
+            color: #333;
+        }
+        .fake-logo {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+        .fake-input {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        .fake-submit {
+            width: 100%;
+            padding: 12px;
+            background: #0066cc;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .fake-warning {
+            background: #ff4444;
+            color: #fff;
+            padding: 10px;
+            font-size: 0.85em;
+            margin-top: 20px;
+        }
+        
+        .password-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .password-item {
+            background: #1a1a25;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            color: #ff4444;
+        }
+        .password-item span {
+            display: block;
+            color: #666;
+            font-size: 0.8em;
+            margin-top: 5px;
+            font-family: sans-serif;
+        }
+        
+        .protection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .protection-card {
+            background: #0a1a0a;
+            border: 2px solid #50fa7b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .protection-card h4 {
+            color: #50fa7b;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .protection-card p {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .comparison-table th {
+            background: #1a1a25;
+            padding: 15px;
+            text-align: left;
+            color: #ff8800;
+            font-weight: 600;
+        }
+        .comparison-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #252530;
+            color: #ccc;
+        }
+        .comparison-table tr:hover td {
+            background: rgba(255,136,0,0.05);
+        }
+        
+        .warning-box {
+            background: rgba(255,68,68,0.1);
+            border: 2px solid #ff4444;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .warning-box h4 {
+            color: #ff4444;
+            margin-bottom: 10px;
+        }
+        .warning-box ul {
+            margin-left: 20px;
+            color: #ccc;
+        }
+        .warning-box li {
+            margin-bottom: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            border-top: 1px solid #252530;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>🔓 How Hackers <span>Actually</span> Hack</h1>
+        <p>The real techniques used to break into accounts — and how to protect yourself</p>
+    </div>
+    
+    <div class="container">
+        
+        <!-- STATS -->
+        <div class="stat-bar">
+            <div class="stat-item">
+                <div class="stat-num">91%</div>
+                <div class="stat-label">of attacks start with email</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">$4.5M</div>
+                <div class="stat-label">average breach cost</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">15B</div>
+                <div class="stat-label">stolen passwords online</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num">287</div>
+                <div class="stat-label">days to detect breach</div>
+            </div>
+        </div>
+        
+        <!-- ATTACK #1: PHISHING -->
+        <div class="attack">
+            <div class="attack-header">
+                <div class="attack-rank">#1</div>
+                <div class="attack-title">
+                    <h2>Phishing — Fake Emails</h2>
+                    <span>36% of all breaches • Most common attack</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <p class="attack-desc">Hackers send emails that look legitimate but contain malicious links. When you click, you're taken to a fake login page that steals your real credentials.</p>
+                
+                <h4 style="color:#ff8800; margin: 20px 0 15px;">📧 Anatomy of a Phishing Email</h4>
+                
+                <div class="email-container">
+                    <div class="email-header">
+                        <div class="email-row">
+                            <span class="email-label">From:</span>
+                            <span class="email-value suspicious">PayPal Security &lt;security@<span class="highlight">paypa1.com</span>&gt;</span>
+                        </div>
+                        <div class="email-row">
+                            <span class="email-label">To:</span>
+                            <span class="email-value">nick@email.com</span>
+                        </div>
+                        <div class="email-row">
+                            <span class="email-label">Subject:</span>
+                            <span class="email-value">⚠️ Unusual activity detected on your account</span>
+                        </div>
+                    </div>
+                    <div class="email-body">
+                        <p>Dear Customer,</p>
+                        <p>We've detected unusual sign-in activity on your PayPal account. Your account has been temporarily limited until you verify your identity.</p>
+                        <p>Please click the button below to verify your account within 24 hours to avoid permanent suspension:</p>
+                        <a href="#" class="email-btn malicious">🔒 Verify My Account</a>
+                        <p style="margin-top: 20px; font-size: 0.9em;">If you don't verify within 24 hours, your account will be permanently closed.</p>
+                    </div>
+                    <div class="email-footer">
+                        PayPal Holdings, Inc. | This is an automated message.
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>🚨 Red Flags in This Email</h4>
+                    <ul>
+                        <li><strong>Sender domain:</strong> paypa<span style="color:#ff4444;">1</span>.com (number "1" instead of letter "l")</li>
+                        <li><strong>Urgency:</strong> "24 hours or account closed" — pressure tactic</li>
+                        <li><strong>Generic greeting:</strong> "Dear Customer" instead of your name</li>
+                        <li><strong>Threatening language:</strong> "permanently suspended"</li>
+                        <li><strong>Suspicious button:</strong> Hover shows fake URL (see below)</li>
+                    </ul>
+                </div>
+                
+                <div class="url-breakdown">
+                    <h4>🔗 Real vs Fake URLs</h4>
+                    <div class="url-compare">
+                        <div class="url-box legit">
+                            <h5>✓ Legitimate PayPal</h5>
+                            <code>https://www.paypal.com/signin</code>
+                            <p class="url-annotation">
+                                Domain is <strong>paypal.com</strong> — official
+                            </p>
+                        </div>
+                        <div class="url-box fake">
+                            <h5>✗ Phishing Page</h5>
+                            <code>https://paypal-secure-login.ru/signin</code>
+                            <p class="url-annotation">
+                                Domain is <span>paypal-secure-login.ru</span> — Russian scam site!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <h4 style="color:#ff8800; margin: 30px 0 15px;">🎭 URL Tricks Hackers Use</h4>
+                
+                <div class="tricks-grid">
+                    <div class="trick-card">
+                        <h5>Letter Substitution</h5>
+                        <code>paypa1.com</code>
+                        <code>paypaI.com (capital i)</code>
+                        <code>раураl.com (Cyrillic)</code>
+                        <p>Replace letters with lookalikes</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Subdomain Trick</h5>
+                        <code>paypal.com.evil-site.ru</code>
+                        <code>login.paypal.secure.tk</code>
+                        <p>Real domain is at the END</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Extra Words</h5>
+                        <code>paypal-security.com</code>
+                        <code>secure-paypal-login.com</code>
+                        <p>Looks official but isn't</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>URL Shorteners</h5>
+                        <code>bit.ly/3xK9mZ</code>
+                        <code>tinyurl.com/paypal-verify</code>
+                        <p>Hides the real destination</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>@ Symbol Trick</h5>
+                        <code>https://paypal.com@evil.ru/login</code>
+                        <p>Everything before @ is ignored!</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Typosquatting</h5>
+                        <code>paypa.com</code>
+                        <code>paypall.com</code>
+                        <code>paypal.co</code>
+                        <p>Common typos registered</p>
+                    </div>
+                </div>
+                
+                <h4 style="color:#ff8800; margin: 30px 0 15px;">🖥️ The Fake Login Page</h4>
+                <p style="color:#888; margin-bottom:20px;">Click the link and you see this — looks exactly like PayPal:</p>
+                
+                <div class="fake-page">
+                    <div class="fake-browser">
+                        <div class="browser-dots">
+                            <div class="browser-dot red"></div>
+                            <div class="browser-dot yellow"></div>
+                            <div class="browser-dot green"></div>
+                        </div>
+                        <div class="browser-url">
+                            🔒 https://<span class="bad">paypal-secure-login.ru</span>/signin
+                        </div>
+                    </div>
+                    <div class="fake-content">
+                        <div class="fake-logo">🅿️ PayPal</div>
+                        <input class="fake-input" type="email" placeholder="Email address" value="nick@email.com">
+                        <input class="fake-input" type="password" placeholder="Password" value="••••••••••">
+                        <button class="fake-submit">Log In</button>
+                        <div class="fake-warning">
+                            ⚠️ YOUR PASSWORD IS NOW STOLEN
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="flow-icon">📧</div>
+                        <div class="flow-text">Victim gets email</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">🖱️</div>
+                        <div class="flow-text">Clicks link</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">🔐</div>
+                        <div class="flow-text">Enters password</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">💀</div>
+                        <div class="flow-text">Hacker captures it</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">💸</div>
+                        <div class="flow-text">Account drained</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ATTACK #2: CREDENTIAL STUFFING -->
+        <div class="attack">
+            <div class="attack-header">
+                <div class="attack-rank">#2</div>
+                <div class="attack-title">
+                    <h2>Credential Stuffing — Password Reuse</h2>
+                    <span>25% of breaches • Automated attacks</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <p class="attack-desc">When one site gets breached, hackers take those leaked passwords and automatically try them on hundreds of other sites. If you reused that password anywhere, they're in.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <div class="flow-icon">💥</div>
+                        <div class="flow-text">LinkedIn breached<br>700M passwords leaked</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">🤖</div>
+                        <div class="flow-text">Bot tries your email/pass<br>on 100+ sites</div>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <div class="flow-icon">✓</div>
+                        <div class="flow-text">Same password on Gmail?<br>They're in</div>
+                    </div>
+                </div>
+                
+                <div class="warning-box">
+                    <h4>🔍 Check If You've Been Breached</h4>
+                    <p style="margin-top:10px;">
+                        <a href="https://haveibeenpwned.com" target="_blank" style="color:#ff8800;">haveibeenpwned.com</a> — Enter your email to see which breaches include your data.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ATTACK #3: WEAK PASSWORDS -->
+        <div class="attack">
+            <div class="attack-header">
+                <div class="attack-rank">#3</div>
+                <div class="attack-title">
+                    <h2>Weak Passwords</h2>
+                    <span>Cracked in seconds</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <p class="attack-desc">Hackers don't guess randomly — they try the most common passwords first. If yours is on this list, you're already compromised.</p>
+                
+                <h4 style="color:#ff8800; margin: 20px 0 15px;">🔓 Top Passwords Hackers Try First</h4>
+                
+                <div class="password-list">
+                    <div class="password-item">123456 <span>#1 most common</span></div>
+                    <div class="password-item">password <span>#2</span></div>
+                    <div class="password-item">123456789 <span>#3</span></div>
+                    <div class="password-item">qwerty <span>keyboard pattern</span></div>
+                    <div class="password-item">abc123 <span>simple combo</span></div>
+                    <div class="password-item">password1 <span>"added a number"</span></div>
+                    <div class="password-item">iloveyou <span>common phrase</span></div>
+                    <div class="password-item">admin <span>default</span></div>
+                    <div class="password-item">[name][year] <span>nick1990</span></div>
+                    <div class="password-item">[company]123 <span>acme123</span></div>
+                </div>
+                
+                <table class="comparison-table" style="margin-top:30px;">
+                    <thead>
+                        <tr>
+                            <th>Password Type</th>
+                            <th>Example</th>
+                            <th>Time to Crack</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Common word</td>
+                            <td><code>password</code></td>
+                            <td style="color:#ff4444;">Instant</td>
+                        </tr>
+                        <tr>
+                            <td>6 lowercase</td>
+                            <td><code>monkey</code></td>
+                            <td style="color:#ff4444;">10 seconds</td>
+                        </tr>
+                        <tr>
+                            <td>8 lowercase</td>
+                            <td><code>sunshine</code></td>
+                            <td style="color:#ff8800;">5 minutes</td>
+                        </tr>
+                        <tr>
+                            <td>8 mixed case</td>
+                            <td><code>SunShine</code></td>
+                            <td style="color:#ff8800;">22 minutes</td>
+                        </tr>
+                        <tr>
+                            <td>8 mixed + numbers</td>
+                            <td><code>Sun5h1ne</code></td>
+                            <td style="color:#ffff00;">1 hour</td>
+                        </tr>
+                        <tr>
+                            <td>12 mixed + symbols</td>
+                            <td><code>Sun$h1ne!2024</code></td>
+                            <td style="color:#50fa7b;">34,000 years</td>
+                        </tr>
+                        <tr>
+                            <td>Random 16 char</td>
+                            <td><code>kX9#mP2$vL5@nQ8!</code></td>
+                            <td style="color:#50fa7b;">Trillions of years</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ATTACK #4: NO 2FA -->
+        <div class="attack">
+            <div class="attack-header">
+                <div class="attack-rank">#4</div>
+                <div class="attack-title">
+                    <h2>No Two-Factor Authentication</h2>
+                    <span>The missing lock on your door</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <p class="attack-desc">Even if hackers get your password, 2FA requires something else (your phone) to log in. Without it, password = full access.</p>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step" style="border: 2px solid #ff4444; border-radius: 12px; padding: 20px;">
+                        <div class="flow-icon">🔓</div>
+                        <div class="flow-text"><strong>Without 2FA</strong><br>Password stolen → Hacker logs in immediately</div>
+                    </div>
+                    <div class="flow-step" style="border: 2px solid #50fa7b; border-radius: 12px; padding: 20px;">
+                        <div class="flow-icon">🔐</div>
+                        <div class="flow-text"><strong>With 2FA</strong><br>Password stolen → Hacker blocked (needs your phone)</div>
+                    </div>
+                </div>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>2FA Type</th>
+                            <th>Security Level</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>SMS Code</td>
+                            <td style="color:#ffff00;">Medium</td>
+                            <td>Can be SIM swapped</td>
+                        </tr>
+                        <tr>
+                            <td>Authenticator App</td>
+                            <td style="color:#50fa7b;">High</td>
+                            <td>Google Auth, Authy — recommended</td>
+                        </tr>
+                        <tr>
+                            <td>Hardware Key</td>
+                            <td style="color:#50fa7b;">Highest</td>
+                            <td>YubiKey — physical device required</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ATTACK #5: MALWARE -->
+        <div class="attack">
+            <div class="attack-header">
+                <div class="attack-rank">#5</div>
+                <div class="attack-title">
+                    <h2>Malware & Keyloggers</h2>
+                    <span>17% of breaches • Silent watchers</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <p class="attack-desc">Software that secretly installs on your computer and records everything — passwords, banking info, private conversations.</p>
+                
+                <h4 style="color:#ff8800; margin: 20px 0 15px;">🦠 How Malware Gets Installed</h4>
+                
+                <div class="tricks-grid">
+                    <div class="trick-card">
+                        <h5>Fake Software</h5>
+                        <p>"Free PDF Converter" or "Video Downloader" with hidden payload</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Email Attachments</h5>
+                        <p>Word docs with macros: "Enable editing to view"</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Pirated Software</h5>
+                        <p>Cracked games/apps bundled with spyware</p>
+                    </div>
+                    <div class="trick-card">
+                        <h5>Fake Updates</h5>
+                        <p>"Your Flash Player is out of date!" popups</p>
+                    </div>
+                </div>
+                
+                <h4 style="color:#ff8800; margin: 30px 0 15px;">👁️ What Keyloggers Capture</h4>
+                
+                <div class="email-container">
+                    <div class="email-header" style="background:#1a0a0a;">
+                        <span style="color:#ff4444;">🔴 KEYLOGGER OUTPUT — sent to hacker</span>
+                    </div>
+                    <div class="email-body" style="font-family:monospace; font-size:0.85em;">
+                        <p style="color:#888;">[10:32:14] Chrome - gmail.com</p>
+                        <p style="color:#ff4444;">nick.smith@gmail.com</p>
+                        <p style="color:#ff4444;">MyP@ssw0rd123!</p>
+                        <p style="color:#888;">[10:35:22] Chrome - bankofamerica.com</p>
+                        <p style="color:#ff4444;">Username: nicksmith92</p>
+                        <p style="color:#ff4444;">Password: BankPass$99</p>
+                        <p style="color:#888;">[10:40:18] Chrome - amazon.com</p>
+                        <p style="color:#ff4444;">Credit Card: 4532-XXXX-XXXX-8821</p>
+                        <p style="color:#ff4444;">CVV: 847</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PROTECTION -->
+        <div class="attack" style="border-color:#50fa7b;">
+            <div class="attack-header" style="background:linear-gradient(90deg, #0a1a0a, #1a2a1a);">
+                <div class="attack-rank" style="background:#50fa7b;">🛡️</div>
+                <div class="attack-title">
+                    <h2 style="color:#50fa7b;">How to Protect Yourself</h2>
+                    <span style="color:#50fa7b;">Simple steps that block 99% of attacks</span>
+                </div>
+            </div>
+            <div class="attack-body">
+                <div class="protection-grid">
+                    <div class="protection-card">
+                        <h4>🔑 Use a Password Manager</h4>
+                        <p>Generate unique, random passwords for every site. You only remember one master password. Bitwarden, 1Password, LastPass.</p>
+                    </div>
+                    <div class="protection-card">
+                        <h4>📱 Enable 2FA Everywhere</h4>
+                        <p>Especially email, bank, and social media. Use authenticator app (not SMS when possible).</p>
+                    </div>
+                    <div class="protection-card">
+                        <h4>🔗 Never Click Email Links</h4>
+                        <p>Go to the website directly by typing the URL. If PayPal emails you, open paypal.com yourself.</p>
+                    </div>
+                    <div class="protection-card">
+                        <h4>👁️ Check the Sender Address</h4>
+                        <p>Look at the actual email, not the display name. security@paypa1.com ≠ paypal.com</p>
+                    </div>
+                    <div class="protection-card">
+                        <h4>🔄 Keep Software Updated</h4>
+                        <p>Updates patch security holes. Enable auto-updates on everything.</p>
+                    </div>
+                    <div class="protection-card">
+                        <h4>📶 Avoid Public WiFi for Sensitive Stuff</h4>
+                        <p>Or use a VPN. Never log into banking on coffee shop WiFi.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <p>Security Awareness Guide • Stay safe out there 🔐</p>
+    </div>
+</body>
+</html>

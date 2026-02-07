@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OOXML Basics: Understanding Word Document Numbering</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --bg-code: #1a1f26;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --accent-blue: #58a6ff;
+            --accent-green: #3fb950;
+            --accent-purple: #a371f7;
+            --accent-orange: #d29922;
+            --accent-red: #f85149;
+            --accent-cyan: #39c5cf;
+            --border-color: #30363d;
+            --code-string: #a5d6ff;
+            --code-tag: #7ee787;
+            --code-attr: #79c0ff;
+            --code-value: #ffa657;
+            --code-comment: #8b949e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Navigation */
+        .toc {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .toc h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .toc ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .toc a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0;
+            transition: color 0.2s;
+        }
+
+        .toc a:hover {
+            color: var(--accent-purple);
+        }
+
+        .toc-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Sections */
+        section {
+            margin-bottom: 4rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2 .emoji {
+            font-size: 1.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 2rem 0 1rem;
+            color: var(--accent-blue);
+        }
+
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem;
+            color: var(--accent-purple);
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--bg-code);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1rem 0 1.5rem;
+            position: relative;
+        }
+
+        pre::before {
+            content: attr(data-lang);
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: var(--bg-tertiary);
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0 8px 0 8px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Inline code */
+        p code, li code {
+            background: var(--bg-tertiary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--accent-cyan);
+        }
+
+        /* XML Syntax Highlighting */
+        .xml-tag { color: var(--code-tag); }
+        .xml-attr { color: var(--code-attr); }
+        .xml-value { color: var(--code-value); }
+        .xml-comment { color: var(--code-comment); font-style: italic; }
+        .xml-content { color: var(--text-primary); }
+
+        /* Info Boxes */
+        .info-box {
+            border-radius: 8px;
+            padding: 1.25rem 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+
+        .info-box.tip {
+            background: rgba(63, 185, 80, 0.1);
+            border-color: var(--accent-green);
+        }
+
+        .info-box.warning {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: var(--accent-orange);
+        }
+
+        .info-box.danger {
+            background: rgba(248, 81, 73, 0.1);
+            border-color: var(--accent-red);
+        }
+
+        .info-box.info {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: var(--accent-blue);
+        }
+
+        .info-box-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-box.tip .info-box-title { color: var(--accent-green); }
+        .info-box.warning .info-box-title { color: var(--accent-orange); }
+        .info-box.danger .info-box-title { color: var(--accent-red); }
+        .info-box.info .info-box-title { color: var(--accent-blue); }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        td {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        td code {
+            background: var(--bg-tertiary);
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        /* Diagrams */
+        .diagram {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .diagram-box {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--accent-blue);
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .diagram-box.purple {
+            border-color: var(--accent-purple);
+        }
+
+        .diagram-box.green {
+            border-color: var(--accent-green);
+        }
+
+        .diagram-arrow {
+            color: var(--text-muted);
+            margin: 0.5rem 0;
+            font-size: 1.5rem;
+        }
+
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1.5rem 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        li strong {
+            color: var(--accent-blue);
+        }
+
+        /* File tree */
+        .file-tree {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .file-tree-item {
+            padding: 0.25rem 0;
+            color: var(--text-secondary);
+        }
+
+        .file-tree-item.folder {
+            color: var(--accent-blue);
+        }
+
+        .file-tree-item.file {
+            color: var(--accent-green);
+        }
+
+        .file-tree-item .highlight {
+            color: var(--accent-orange);
+            font-weight: 600;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            pre {
+                padding: 1rem;
+                font-size: 0.8rem;
+            }
+
+            .toc ul {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">📄</div>
+        <h1>OOXML Basics Guide</h1>
+        <p class="subtitle">Understanding Office Open XML: How Word Documents Really Work Under the Hood — With a Focus on Legal Document Numbering</p>
+    </header>
+
+    <div class="container">
+        <nav class="toc">
+            <h2>📑 Table of Contents</h2>
+            <ul>
+                <li><a href="#what-is-ooxml"><span class="toc-num">01</span> What is OOXML?</a></li>
+                <li><a href="#docx-structure"><span class="toc-num">02</span> Inside a .docx File</a></li>
+                <li><a href="#numbering-basics"><span class="toc-num">03</span> Numbering Basics</a></li>
+                <li><a href="#abstract-num"><span class="toc-num">04</span> Abstract Numbering Definitions</a></li>
+                <li><a href="#num-instances"><span class="toc-num">05</span> Numbering Instances</a></li>
+                <li><a href="#paragraph-refs"><span class="toc-num">06</span> Paragraph References</a></li>
+                <li><a href="#legal-examples"><span class="toc-num">07</span> Legal Document Examples</a></li>
+                <li><a href="#common-problems"><span class="toc-num">08</span> Common Problems & Fixes</a></li>
+            </ul>
+        </nav>
+
+        <!-- Section 1: What is OOXML -->
+        <section id="what-is-ooxml">
+            <h2><span class="emoji">🌐</span> What is OOXML?</h2>
+            
+            <p><strong>Office Open XML (OOXML)</strong> is the file format used by Microsoft Word, Excel, and PowerPoint since Office 2007. It was standardized as <strong>ECMA-376</strong> and later as <strong>ISO/IEC 29500</strong>.</p>
+
+            <p>The key insight is simple: <strong>a .docx file is just a ZIP archive containing XML files.</strong></p>
+
+            <div class="info-box tip">
+                <div class="info-box-title">💡 Try It Yourself</div>
+                <p>Rename any <code>.docx</code> file to <code>.zip</code>, then extract it. You'll see the XML files inside!</p>
+            </div>
+
+            <h3>Why This Matters</h3>
+            <p>Understanding OOXML means you can:</p>
+            <ul>
+                <li><strong>Programmatically create</strong> Word documents without Microsoft Office</li>
+                <li><strong>Fix corrupted documents</strong> by editing the XML directly</li>
+                <li><strong>Build automation tools</strong> that manipulate documents precisely</li>
+                <li><strong>Understand why Word behaves weirdly</strong> (spoiler: it's the XML)</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: .docx Structure -->
+        <section id="docx-structure">
+            <h2><span class="emoji">📁</span> Inside a .docx File</h2>
+            
+            <p>When you unzip a .docx file, you'll find this structure:</p>
+
+            <div class="file-tree">
+                <div class="file-tree-item folder">📦 MyDocument.docx (renamed to .zip)</div>
+                <div class="file-tree-item folder">&nbsp;&nbsp;├── 📂 _rels/</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── .rels</div>
+                <div class="file-tree-item folder">&nbsp;&nbsp;├── 📂 docProps/</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── app.xml</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── core.xml</div>
+                <div class="file-tree-item folder">&nbsp;&nbsp;├── 📂 word/</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="highlight">document.xml</span> ← Main content</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span class="highlight">numbering.xml</span> ← All numbering definitions!</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── styles.xml</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── settings.xml</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── fontTable.xml</div>
+                <div class="file-tree-item file">&nbsp;&nbsp;└── [Content_Types].xml</div>
+            </div>
+
+            <h3>Key Files for Numbering</h3>
+            <table>
+                <tr>
+                    <th>File</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>word/document.xml</code></td>
+                    <td>Contains all paragraphs and their references to numbering</td>
+                </tr>
+                <tr>
+                    <td><code>word/numbering.xml</code></td>
+                    <td>Defines all numbering schemes (the "master list" of list definitions)</td>
+                </tr>
+                <tr>
+                    <td><code>word/styles.xml</code></td>
+                    <td>Paragraph styles that can be linked to numbering levels</td>
+                </tr>
+            </table>
+        </section>
+
+        <!-- Section 3: Numbering Basics -->
+        <section id="numbering-basics">
+            <h2><span class="emoji">🔢</span> Numbering Basics</h2>
+            
+            <p>OOXML numbering has a <strong>two-layer architecture</strong>:</p>
+
+            <div class="diagram">
+                <div class="diagram-box purple">Abstract Definition<br><small>(w:abstractNum)</small><br>The "template"</div>
+                <div class="diagram-arrow">⬇️</div>
+                <div class="diagram-box">Instance<br><small>(w:num)</small><br>A usage of the template</div>
+                <div class="diagram-arrow">⬇️</div>
+                <div class="diagram-box green">Paragraph<br><small>(w:numPr)</small><br>References the instance</div>
+            </div>
+
+            <h3>Why Two Layers?</h3>
+            <p>This separation allows:</p>
+            <ul>
+                <li><strong>Reuse:</strong> Multiple lists can share the same format definition</li>
+                <li><strong>Overrides:</strong> An instance can modify the abstract definition without changing others</li>
+                <li><strong>Flexibility:</strong> You can have 10 instances of "1, 2, 3..." format, each counting independently</li>
+            </ul>
+
+            <div class="info-box info">
+                <div class="info-box-title">ℹ️ Key Insight</div>
+                <p>A document can have <strong>at most TWO numbering.xml files</strong> — one for the main document and one for the glossary. This constraint is why exhibits and schedules often conflict with main document numbering.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Abstract Numbering -->
+        <section id="abstract-num">
+            <h2><span class="emoji">📐</span> Abstract Numbering Definitions</h2>
+            
+            <p>The <code>&lt;w:abstractNum&gt;</code> element defines the "template" for a numbering scheme. Here's a complete example:</p>
+
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:abstractNum</span> <span class="xml-attr">w:abstractNumId</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-comment">&lt;!-- Unique identifier for this abstract definition --&gt;</span>
+    <span class="xml-tag">&lt;w:nsid</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"099A081C"</span><span class="xml-tag">/&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Type: singleLevel, multilevel, or hybridMultilevel --&gt;</span>
+    <span class="xml-tag">&lt;w:multiLevelType</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"multilevel"</span><span class="xml-tag">/&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 0: Roman numerals (I, II, III) --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"upperRoman"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%1."</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:pPr&gt;</span>
+            <span class="xml-tag">&lt;w:ind</span> <span class="xml-attr">w:left</span>=<span class="xml-value">"720"</span> <span class="xml-attr">w:hanging</span>=<span class="xml-value">"360"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;/w:pPr&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 1: Capital letters (A, B, C) --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"upperLetter"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%2."</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:pPr&gt;</span>
+            <span class="xml-tag">&lt;w:ind</span> <span class="xml-attr">w:left</span>=<span class="xml-value">"1440"</span> <span class="xml-attr">w:hanging</span>=<span class="xml-value">"360"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;/w:pPr&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 2: Arabic numerals (1, 2, 3) --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"2"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"decimal"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%3."</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+<span class="xml-tag">&lt;/w:abstractNum&gt;</span></code></pre>
+
+            <h3>Key Elements Explained</h3>
+            <table>
+                <tr>
+                    <th>Element</th>
+                    <th>Purpose</th>
+                    <th>Example Values</th>
+                </tr>
+                <tr>
+                    <td><code>w:start</code></td>
+                    <td>Starting number for this level</td>
+                    <td><code>1</code>, <code>5</code>, <code>100</code></td>
+                </tr>
+                <tr>
+                    <td><code>w:numFmt</code></td>
+                    <td>Number format type</td>
+                    <td><code>decimal</code>, <code>upperRoman</code>, <code>lowerLetter</code>, <code>bullet</code></td>
+                </tr>
+                <tr>
+                    <td><code>w:lvlText</code></td>
+                    <td>Display template (%1 = level 1 number)</td>
+                    <td><code>%1.</code>, <code>(%1)</code>, <code>Article %1</code></td>
+                </tr>
+                <tr>
+                    <td><code>w:lvlJc</code></td>
+                    <td>Number justification</td>
+                    <td><code>left</code>, <code>center</code>, <code>right</code></td>
+                </tr>
+                <tr>
+                    <td><code>w:pPr</code></td>
+                    <td>Paragraph properties (indentation)</td>
+                    <td>Contains <code>w:ind</code> for left/hanging indent</td>
+                </tr>
+                <tr>
+                    <td><code>w:pStyle</code></td>
+                    <td>Links this level to a paragraph style</td>
+                    <td><code>Heading1</code>, <code>ListParagraph</code></td>
+                </tr>
+            </table>
+
+            <h3>All numFmt Values</h3>
+            <pre data-lang="text"><code>decimal          → 1, 2, 3, 4, 5...
+upperRoman       → I, II, III, IV, V...
+lowerRoman       → i, ii, iii, iv, v...
+upperLetter      → A, B, C, D, E...
+lowerLetter      → a, b, c, d, e...
+ordinal          → 1st, 2nd, 3rd...
+cardinalText     → one, two, three...
+ordinalText      → first, second, third...
+bullet           → • (or custom symbol)
+none             → (no visible number)</code></pre>
+        </section>
+
+        <!-- Section 5: Numbering Instances -->
+        <section id="num-instances">
+            <h2><span class="emoji">🎯</span> Numbering Instances</h2>
+            
+            <p>The <code>&lt;w:num&gt;</code> element creates an <strong>instance</strong> of an abstract definition. Paragraphs reference instances, not abstract definitions directly.</p>
+
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:num</span> <span class="xml-attr">w:numId</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-comment">&lt;!-- Points to abstractNumId="0" --&gt;</span>
+    <span class="xml-tag">&lt;w:abstractNumId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>
+<span class="xml-tag">&lt;/w:num&gt;</span>
+
+<span class="xml-tag">&lt;w:num</span> <span class="xml-attr">w:numId</span>=<span class="xml-value">"2"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-comment">&lt;!-- Same abstract, but with an override --&gt;</span>
+    <span class="xml-tag">&lt;w:abstractNumId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;w:lvlOverride</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:startOverride</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"5"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvlOverride&gt;</span>
+<span class="xml-tag">&lt;/w:num&gt;</span></code></pre>
+
+            <h3>Level Overrides</h3>
+            <p>The <code>&lt;w:lvlOverride&gt;</code> element lets you modify specific levels without creating a new abstract definition:</p>
+
+            <ul>
+                <li><strong>startOverride:</strong> Start numbering at a different number</li>
+                <li><strong>lvl:</strong> Completely replace the level definition</li>
+            </ul>
+
+            <div class="info-box tip">
+                <div class="info-box-title">💡 Pro Tip</div>
+                <p>When you "Restart Numbering" in Word, it creates a new <code>&lt;w:num&gt;</code> instance pointing to the same abstract definition, with a <code>&lt;w:startOverride&gt;</code> setting the start back to 1.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Paragraph References -->
+        <section id="paragraph-refs">
+            <h2><span class="emoji">🔗</span> Paragraph References</h2>
+            
+            <p>In <code>document.xml</code>, paragraphs reference numbering via <code>&lt;w:numPr&gt;</code> inside their properties:</p>
+
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:p&gt;</span>
+    <span class="xml-tag">&lt;w:pPr&gt;</span>
+        <span class="xml-comment">&lt;!-- This paragraph uses numbering --&gt;</span>
+        <span class="xml-tag">&lt;w:numPr&gt;</span>
+            <span class="xml-tag">&lt;w:ilvl</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Level 0 (first level) --&gt;</span>
+            <span class="xml-tag">&lt;w:numId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span> <span class="xml-comment">&lt;!-- References w:num with numId="1" --&gt;</span>
+        <span class="xml-tag">&lt;/w:numPr&gt;</span>
+    <span class="xml-tag">&lt;/w:pPr&gt;</span>
+    <span class="xml-tag">&lt;w:r&gt;</span>
+        <span class="xml-tag">&lt;w:t&gt;</span><span class="xml-content">This is Article I</span><span class="xml-tag">&lt;/w:t&gt;</span>
+    <span class="xml-tag">&lt;/w:r&gt;</span>
+<span class="xml-tag">&lt;/w:p&gt;</span>
+
+<span class="xml-tag">&lt;w:p&gt;</span>
+    <span class="xml-tag">&lt;w:pPr&gt;</span>
+        <span class="xml-tag">&lt;w:numPr&gt;</span>
+            <span class="xml-tag">&lt;w:ilvl</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Level 1 (second level) --&gt;</span>
+            <span class="xml-tag">&lt;w:numId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span> <span class="xml-comment">&lt;!-- Same numbering instance --&gt;</span>
+        <span class="xml-tag">&lt;/w:numPr&gt;</span>
+    <span class="xml-tag">&lt;/w:pPr&gt;</span>
+    <span class="xml-tag">&lt;w:r&gt;</span>
+        <span class="xml-tag">&lt;w:t&gt;</span><span class="xml-content">This is Section A</span><span class="xml-tag">&lt;/w:t&gt;</span>
+    <span class="xml-tag">&lt;/w:r&gt;</span>
+<span class="xml-tag">&lt;/w:p&gt;</span></code></pre>
+
+            <h3>The Two Ways to Apply Numbering</h3>
+
+            <h4>1. Direct Reference (shown above)</h4>
+            <p>The paragraph explicitly contains <code>&lt;w:numPr&gt;</code> with both level and numId.</p>
+
+            <h4>2. Via Paragraph Style</h4>
+            <p>The paragraph uses a style, and the numbering level has <code>&lt;w:pStyle&gt;</code> pointing to that style:</p>
+
+            <pre data-lang="xml"><code><span class="xml-comment">&lt;!-- In numbering.xml --&gt;</span>
+<span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;w:pStyle</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"Heading1"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Linked to Heading1 style --&gt;</span>
+    <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"upperRoman"</span><span class="xml-tag">/&gt;</span>
+    ...
+<span class="xml-tag">&lt;/w:lvl&gt;</span>
+
+<span class="xml-comment">&lt;!-- In document.xml --&gt;</span>
+<span class="xml-tag">&lt;w:p&gt;</span>
+    <span class="xml-tag">&lt;w:pPr&gt;</span>
+        <span class="xml-tag">&lt;w:pStyle</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"Heading1"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Just the style! --&gt;</span>
+        <span class="xml-tag">&lt;w:numPr&gt;</span>
+            <span class="xml-tag">&lt;w:numId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Level determined by style link --&gt;</span>
+        <span class="xml-tag">&lt;/w:numPr&gt;</span>
+    <span class="xml-tag">&lt;/w:pPr&gt;</span>
+    ...
+<span class="xml-tag">&lt;/w:p&gt;</span></code></pre>
+
+            <div class="info-box warning">
+                <div class="info-box-title">⚠️ Important</div>
+                <p>When numbering is linked via <code>&lt;w:pStyle&gt;</code>, a paragraph style can only be linked to ONE numbering list. This is why multiple independent lists are so tricky in Word!</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Legal Document Examples -->
+        <section id="legal-examples">
+            <h2><span class="emoji">⚖️</span> Legal Document Examples</h2>
+            
+            <h3>Traditional Legal Hierarchy</h3>
+            <p>Here's a complete numbering definition for a typical legal document:</p>
+
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:abstractNum</span> <span class="xml-attr">w:abstractNumId</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;w:multiLevelType</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"multilevel"</span><span class="xml-tag">/&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 0: Article I, Article II --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"upperRoman"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"Article %1."</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 1: Section 1.1, 1.2 --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"decimal"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%1.%2"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Uses Article # too! --&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlRestart</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Restart after level 0 --&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 2: (a), (b), (c) --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"2"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"lowerLetter"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"(%3)"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlRestart</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>  <span class="xml-comment">&lt;!-- Restart after level 1 --&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 3: (i), (ii), (iii) (romanettes) --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"3"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"lowerRoman"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"(%4)"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlJc</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"left"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlRestart</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"2"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+<span class="xml-tag">&lt;/w:abstractNum&gt;</span></code></pre>
+
+            <p>This produces:</p>
+            <pre data-lang="text"><code>Article I.  DEFINITIONS
+    1.1  "Agreement" means...
+        (a)  The parties hereto...
+            (i)   First sub-item
+            (ii)  Second sub-item
+        (b)  Including any amendments...
+    1.2  "Effective Date" means...
+Article II.  REPRESENTATIONS
+    2.1  The Company represents...</code></pre>
+
+            <h3>The lvlRestart Element</h3>
+            <p><code>&lt;w:lvlRestart&gt;</code> tells Word to restart this level's numbering after encountering a higher level:</p>
+            <ul>
+                <li><code>w:val="0"</code> → Restart after Level 0</li>
+                <li><code>w:val="1"</code> → Restart after Level 1</li>
+            </ul>
+
+            <div class="info-box tip">
+                <div class="info-box-title">💡 Legal Style Numbering</div>
+                <p>Setting <code>&lt;w:isLgl w:val="true"/&gt;</code> on a level forces "legal style" — where higher levels show as arabic even if defined as roman. Example: "1.1.1" instead of "I.A.1"</p>
+            </div>
+
+            <h3>Modern Tiered Format (1.1.1)</h3>
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:abstractNum</span> <span class="xml-attr">w:abstractNumId</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;w:multiLevelType</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"multilevel"</span><span class="xml-tag">/&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 0: 1. --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"decimal"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%1."</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 1: 1.1 --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"decimal"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%1.%2"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlRestart</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+    
+    <span class="xml-comment">&lt;!-- Level 2: 1.1.1 --&gt;</span>
+    <span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"2"</span><span class="xml-tag">&gt;</span>
+        <span class="xml-tag">&lt;w:start</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:numFmt</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"decimal"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlText</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"%1.%2.%3"</span><span class="xml-tag">/&gt;</span>
+        <span class="xml-tag">&lt;w:lvlRestart</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"1"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:lvl&gt;</span>
+<span class="xml-tag">&lt;/w:abstractNum&gt;</span></code></pre>
+        </section>
+
+        <!-- Section 8: Common Problems -->
+        <section id="common-problems">
+            <h2><span class="emoji">🔧</span> Common Problems & Fixes</h2>
+
+            <h3>Problem 1: Numbering Won't Restart</h3>
+            <div class="info-box danger">
+                <div class="info-box-title">❌ The Problem</div>
+                <p>You have two separate lists but Word continues numbering from the first list instead of restarting.</p>
+            </div>
+
+            <p><strong>What's happening in OOXML:</strong> Both paragraph groups reference the same <code>&lt;w:num&gt;</code> instance.</p>
+
+            <p><strong>The Fix:</strong> Create a second <code>&lt;w:num&gt;</code> pointing to the same <code>&lt;w:abstractNum&gt;</code>:</p>
+
+            <pre data-lang="xml"><code><span class="xml-comment">&lt;!-- First list uses numId="1" --&gt;</span>
+<span class="xml-tag">&lt;w:num</span> <span class="xml-attr">w:numId</span>=<span class="xml-value">"1"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;w:abstractNumId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>
+<span class="xml-tag">&lt;/w:num&gt;</span>
+
+<span class="xml-comment">&lt;!-- Second list uses numId="2" (same abstract, new instance!) --&gt;</span>
+<span class="xml-tag">&lt;w:num</span> <span class="xml-attr">w:numId</span>=<span class="xml-value">"2"</span><span class="xml-tag">&gt;</span>
+    <span class="xml-tag">&lt;w:abstractNumId</span> <span class="xml-attr">w:val</span>=<span class="xml-value">"0"</span><span class="xml-tag">/&gt;</span>
+<span class="xml-tag">&lt;/w:num&gt;</span></code></pre>
+
+            <h3>Problem 2: Font Corruption in Numbered Lists</h3>
+            <div class="info-box danger">
+                <div class="info-box-title">❌ The Problem</div>
+                <p>Numbers suddenly appear in a different font (often Symbol or Wingdings).</p>
+            </div>
+
+            <p><strong>What's happening in OOXML:</strong> The <code>&lt;w:rPr&gt;</code> inside a level definition has corrupted font settings:</p>
+
+            <pre data-lang="xml"><code><span class="xml-tag">&lt;w:lvl</span> <span class="xml-attr">w:ilvl</span>=<span class="xml-value">"0"</span><span class="xml-tag">&gt;</span>
+    ...
+    <span class="xml-tag">&lt;w:rPr&gt;</span>
+        <span class="xml-comment">&lt;!-- This is the corruption! --&gt;</span>
+        <span class="xml-tag">&lt;w:rFonts</span> <span class="xml-attr">w:ascii</span>=<span class="xml-value">"Symbol"</span> <span class="xml-attr">w:hAnsi</span>=<span class="xml-value">"Symbol"</span><span class="xml-tag">/&gt;</span>
+    <span class="xml-tag">&lt;/w:rPr&gt;</span>
+<span class="xml-tag">&lt;/w:lvl&gt;</span></code></pre>
+
+            <p><strong>The Fix:</strong> Remove or correct the <code>&lt;w:rFonts&gt;</code> element in the level's run properties.</p>
+
+            <h3>Problem 3: Styles Linked to Wrong Numbering</h3>
+            <div class="info-box danger">
+                <div class="info-box-title">❌ The Problem</div>
+                <p>Applying "Heading 1" gives incorrect numbering or no numbering at all.</p>
+            </div>
+
+            <p><strong>What's happening:</strong> The <code>&lt;w:pStyle&gt;</code> reference in numbering.xml doesn't match styles.xml.</p>
+
+            <p><strong>The Fix:</strong> Ensure the style name in <code>&lt;w:pStyle w:val="Heading1"/&gt;</code> exactly matches the <code>&lt;w:name w:val="Heading 1"/&gt;</code> in styles.xml (note: spaces matter!).</p>
+
+            <h3>Problem 4: Too Many Numbering Definitions</h3>
+            <div class="info-box warning">
+                <div class="info-box-title">⚠️ The Problem</div>
+                <p>Document becomes slow or unstable; numbering behaves unpredictably.</p>
+            </div>
+
+            <p><strong>What's happening:</strong> Word accumulates orphaned <code>&lt;w:abstractNum&gt;</code> and <code>&lt;w:num&gt;</code> elements over time, especially from copy/paste operations.</p>
+
+            <p><strong>The Fix:</strong> Clean up numbering.xml:</p>
+            <ol>
+                <li>Identify which <code>numId</code> values are actually used in document.xml</li>
+                <li>Remove unused <code>&lt;w:num&gt;</code> elements</li>
+                <li>Remove <code>&lt;w:abstractNum&gt;</code> elements not referenced by any remaining <code>&lt;w:num&gt;</code></li>
+            </ol>
+
+            <div class="info-box tip">
+                <div class="info-box-title">💡 Python Cleanup Script</div>
+                <p>Using <code>python-docx</code> and <code>lxml</code>, you can programmatically clean orphaned numbering definitions. Unzip the .docx, parse numbering.xml, cross-reference with document.xml, remove orphans, rezip.</p>
+            </div>
+        </section>
+
+        <!-- Python Example -->
+        <section>
+            <h2><span class="emoji">🐍</span> Bonus: Python Example</h2>
+            
+            <p>Here's how to read numbering definitions using Python:</p>
+
+            <pre data-lang="python"><code><span style="color: var(--code-attr)">from</span> zipfile <span style="color: var(--code-attr)">import</span> ZipFile
+<span style="color: var(--code-attr)">from</span> lxml <span style="color: var(--code-attr)">import</span> etree
+
+<span style="color: var(--code-comment)"># OOXML namespace</span>
+NSMAP = {<span style="color: var(--code-string)">'w'</span>: <span style="color: var(--code-string)">'http://schemas.openxmlformats.org/wordprocessingml/2006/main'</span>}
+
+<span style="color: var(--code-attr)">def</span> <span style="color: var(--code-tag)">read_numbering</span>(docx_path):
+    <span style="color: var(--code-attr)">with</span> ZipFile(docx_path, <span style="color: var(--code-string)">'r'</span>) <span style="color: var(--code-attr)">as</span> z:
+        <span style="color: var(--code-comment)"># Read numbering.xml</span>
+        numbering_xml = z.read(<span style="color: var(--code-string)">'word/numbering.xml'</span>)
+        root = etree.fromstring(numbering_xml)
+        
+        <span style="color: var(--code-comment)"># Find all abstract numbering definitions</span>
+        abstract_nums = root.findall(<span style="color: var(--code-string)">'.//w:abstractNum'</span>, NSMAP)
+        
+        <span style="color: var(--code-attr)">for</span> abstract <span style="color: var(--code-attr)">in</span> abstract_nums:
+            abs_id = abstract.get(<span style="color: var(--code-string)">'{http://schemas.openxmlformats.org/wordprocessingml/2006/main}abstractNumId'</span>)
+            print(<span style="color: var(--code-string)">f"Abstract Num ID: </span>{abs_id}<span style="color: var(--code-string)">"</span>)
+            
+            <span style="color: var(--code-comment)"># Get levels</span>
+            levels = abstract.findall(<span style="color: var(--code-string)">'w:lvl'</span>, NSMAP)
+            <span style="color: var(--code-attr)">for</span> lvl <span style="color: var(--code-attr)">in</span> levels:
+                ilvl = lvl.get(<span style="color: var(--code-string)">'{http://schemas.openxmlformats.org/wordprocessingml/2006/main}ilvl'</span>)
+                num_fmt = lvl.find(<span style="color: var(--code-string)">'w:numFmt'</span>, NSMAP)
+                fmt = num_fmt.get(<span style="color: var(--code-string)">'{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val'</span>) <span style="color: var(--code-attr)">if</span> num_fmt <span style="color: var(--code-attr)">is not None else</span> <span style="color: var(--code-string)">'none'</span>
+                print(<span style="color: var(--code-string)">f"  Level </span>{ilvl}<span style="color: var(--code-string)">: </span>{fmt}<span style="color: var(--code-string)">"</span>)
+
+read_numbering(<span style="color: var(--code-string)">'contract.docx'</span>)</code></pre>
+
+            <p>Output:</p>
+            <pre data-lang="text"><code>Abstract Num ID: 0
+  Level 0: upperRoman
+  Level 1: decimal
+  Level 2: lowerLetter
+  Level 3: lowerRoman</code></pre>
+        </section>
+
+        <!-- Quick Reference -->
+        <section>
+            <h2><span class="emoji">📋</span> Quick Reference</h2>
+            
+            <table>
+                <tr>
+                    <th>Element</th>
+                    <th>Location</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:abstractNum&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Template definition for a numbering scheme</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:num&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Instance of an abstract definition</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:lvl&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Settings for one level (format, start, indent)</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:numPr&gt;</code></td>
+                    <td>document.xml</td>
+                    <td>Paragraph property referencing a numbering instance</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:lvlOverride&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Instance-specific modifications to levels</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:pStyle&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Links a level to a paragraph style</td>
+                </tr>
+                <tr>
+                    <td><code>&lt;w:lvlRestart&gt;</code></td>
+                    <td>numbering.xml</td>
+                    <td>Which higher level triggers restart</td>
+                </tr>
+            </table>
+        </section>
+    </div>
+
+    <footer>
+        <p>Created by <strong>Pip 🐿️</strong> — The Intelligence & Growth Hacker</p>
+        <p>Part of the <a href="#">DraftBridge</a> project</p>
+        <p style="margin-top: 1rem; font-size: 0.8rem;">
+            References: ECMA-376 Standard, ISO/IEC 29500, <a href="http://officeopenxml.com">officeopenxml.com</a>
+        </p>
+    </footer>
+</body>
+</html>

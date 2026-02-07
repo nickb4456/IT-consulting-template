@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lambda Backend Functions Guide - DraftBridge</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: #f8f9fa;
+        }
+        h1 {
+            color: #8B7355;
+            margin-bottom: 8px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 40px;
+        }
+        h2 {
+            color: #5C4A32;
+            margin-top: 40px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #8B7355;
+        }
+        h3 {
+            color: #333;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        p { margin-bottom: 16px; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .card-icon {
+            font-size: 32px;
+        }
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #333;
+        }
+        .card-desc {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+        .keyword { color: #569cd6; }
+        .string { color: #ce9178; }
+        .comment { color: #6a9955; }
+        .function { color: #dcdcaa; }
+        .number { color: #b5cea8; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background: #f8f8f8;
+            font-weight: 600;
+            color: #5C4A32;
+        }
+        
+        .endpoint {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #f8f8f8;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        .method {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+        .method-get { background: #61affe; color: white; }
+        .method-post { background: #49cc90; color: white; }
+        .method-put { background: #fca130; color: white; }
+        .method-delete { background: #f93e3e; color: white; }
+        .path {
+            font-family: monospace;
+            font-size: 0.95em;
+        }
+        
+        .step {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            background: #8B7355;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .step-content {
+            flex: 1;
+        }
+        
+        .note {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 16px 0;
+        }
+        .note-title {
+            font-weight: 600;
+            color: #e65100;
+            margin-bottom: 4px;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .architecture {
+            background: #e3f2fd;
+            padding: 24px;
+            border-radius: 8px;
+            font-family: monospace;
+            white-space: pre;
+            overflow-x: auto;
+            font-size: 0.85em;
+            line-height: 1.8;
+        }
+        
+        .cost-table td:last-child {
+            text-align: right;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Lambda Backend Guide</h1>
+    <p class="subtitle">Building serverless APIs for DraftBridge with AWS Lambda + API Gateway</p>
+    
+    <h2>📐 Architecture Overview</h2>
+    
+    <div class="architecture">
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   DraftBridge   │────▶│   API Gateway   │────▶│     Lambda      │
+│  (Word Add-in)  │     │   (REST API)    │     │   (Functions)   │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                    ┌────────────────────────────────────┼────────────────────────────────────┐
+                    │                                    │                                    │
+                    ▼                                    ▼                                    ▼
+             ┌─────────────┐                     ┌─────────────┐                     ┌─────────────┐
+             │     S3      │                     │  DynamoDB   │                     │  Textract   │
+             │  (Storage)  │                     │ (Database)  │                     │   (OCR)     │
+             └─────────────┘                     └─────────────┘                     └─────────────┘
+    </div>
+    
+    <h2>📁 Lambda Function Structure</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <span class="card-icon">📦</span>
+            <div>
+                <div class="card-title">Basic Lambda Function</div>
+                <div class="card-desc">Every Lambda follows this pattern</div>
+            </div>
+        </div>
+        
+<pre><code><span class="comment">// handler.js - The entry point for your Lambda</span>
+
+<span class="keyword">const</span> headers = {
+    <span class="string">'Access-Control-Allow-Origin'</span>: <span class="string">'*'</span>,         <span class="comment">// CORS for browser requests</span>
+    <span class="string">'Access-Control-Allow-Headers'</span>: <span class="string">'Content-Type'</span>,
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+};
+
+<span class="keyword">exports</span>.<span class="function">handler</span> = <span class="keyword">async</span> (event) => {
+    <span class="keyword">try</span> {
+        <span class="comment">// 1. Parse input</span>
+        <span class="keyword">const</span> body = <span class="function">JSON.parse</span>(event.body || <span class="string">'{}'</span>);
+        <span class="keyword">const</span> queryParams = event.queryStringParameters || {};
+        
+        <span class="comment">// 2. Do your work</span>
+        <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="function">doSomething</span>(body);
+        
+        <span class="comment">// 3. Return success response</span>
+        <span class="keyword">return</span> {
+            statusCode: <span class="number">200</span>,
+            headers,
+            body: <span class="function">JSON.stringify</span>(result)
+        };
+        
+    } <span class="keyword">catch</span> (err) {
+        <span class="comment">// 4. Handle errors</span>
+        console.<span class="function">error</span>(<span class="string">'Error:'</span>, err);
+        <span class="keyword">return</span> {
+            statusCode: <span class="number">500</span>,
+            headers,
+            body: <span class="function">JSON.stringify</span>({ error: err.message })
+        };
+    }
+};</code></pre>
+    </div>
+    
+    <h2>🔌 Common Integrations</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <span class="card-icon">🗄️</span>
+            <div>
+                <div class="card-title">DynamoDB (Database)</div>
+                <div class="card-desc">Store and retrieve data</div>
+            </div>
+        </div>
+        
+<pre><code><span class="keyword">const</span> { DynamoDBClient } = <span class="function">require</span>(<span class="string">'@aws-sdk/client-dynamodb'</span>);
+<span class="keyword">const</span> { DynamoDBDocumentClient, GetCommand, PutCommand, QueryCommand } 
+    = <span class="function">require</span>(<span class="string">'@aws-sdk/lib-dynamodb'</span>);
+
+<span class="keyword">const</span> client = <span class="keyword">new</span> <span class="function">DynamoDBClient</span>({});
+<span class="keyword">const</span> docClient = <span class="function">DynamoDBDocumentClient.from</span>(client);
+
+<span class="comment">// GET an item</span>
+<span class="keyword">const</span> response = <span class="keyword">await</span> docClient.<span class="function">send</span>(<span class="keyword">new</span> <span class="function">GetCommand</span>({
+    TableName: <span class="string">'my-table'</span>,
+    Key: { id: <span class="string">'123'</span> }
+}));
+<span class="keyword">const</span> item = response.Item;
+
+<span class="comment">// PUT an item</span>
+<span class="keyword">await</span> docClient.<span class="function">send</span>(<span class="keyword">new</span> <span class="function">PutCommand</span>({
+    TableName: <span class="string">'my-table'</span>,
+    Item: { id: <span class="string">'123'</span>, name: <span class="string">'Example'</span>, createdAt: Date.<span class="function">now</span>() }
+}));
+
+<span class="comment">// QUERY items</span>
+<span class="keyword">const</span> results = <span class="keyword">await</span> docClient.<span class="function">send</span>(<span class="keyword">new</span> <span class="function">QueryCommand</span>({
+    TableName: <span class="string">'my-table'</span>,
+    KeyConditionExpression: <span class="string">'firmId = :firm'</span>,
+    ExpressionAttributeValues: { <span class="string">':firm'</span>: <span class="string">'morrison'</span> }
+}));</code></pre>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <span class="card-icon">📦</span>
+            <div>
+                <div class="card-title">S3 (File Storage)</div>
+                <div class="card-desc">Upload, download, and generate presigned URLs</div>
+            </div>
+        </div>
+        
+<pre><code><span class="keyword">const</span> { S3Client, PutObjectCommand, GetObjectCommand } = <span class="function">require</span>(<span class="string">'@aws-sdk/client-s3'</span>);
+<span class="keyword">const</span> { getSignedUrl } = <span class="function">require</span>(<span class="string">'@aws-sdk/s3-request-presigner'</span>);
+
+<span class="keyword">const</span> s3 = <span class="keyword">new</span> <span class="function">S3Client</span>({ region: <span class="string">'us-east-1'</span> });
+
+<span class="comment">// Generate presigned URL for upload (client uploads directly to S3)</span>
+<span class="keyword">const</span> uploadUrl = <span class="keyword">await</span> <span class="function">getSignedUrl</span>(s3, <span class="keyword">new</span> <span class="function">PutObjectCommand</span>({
+    Bucket: <span class="string">'my-bucket'</span>,
+    Key: <span class="string">'uploads/file.pdf'</span>,
+    ContentType: <span class="string">'application/pdf'</span>
+}), { expiresIn: <span class="number">3600</span> });
+
+<span class="comment">// Generate presigned URL for download</span>
+<span class="keyword">const</span> downloadUrl = <span class="keyword">await</span> <span class="function">getSignedUrl</span>(s3, <span class="keyword">new</span> <span class="function">GetObjectCommand</span>({
+    Bucket: <span class="string">'my-bucket'</span>,
+    Key: <span class="string">'uploads/file.pdf'</span>
+}), { expiresIn: <span class="number">3600</span> });</code></pre>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <span class="card-icon">🔍</span>
+            <div>
+                <div class="card-title">Textract (OCR)</div>
+                <div class="card-desc">Extract text from scanned documents</div>
+            </div>
+        </div>
+        
+<pre><code><span class="keyword">const</span> { TextractClient, StartDocumentTextDetectionCommand, 
+         GetDocumentTextDetectionCommand } = <span class="function">require</span>(<span class="string">'@aws-sdk/client-textract'</span>);
+
+<span class="keyword">const</span> textract = <span class="keyword">new</span> <span class="function">TextractClient</span>({ region: <span class="string">'us-east-1'</span> });
+
+<span class="comment">// Start async OCR job (for multi-page PDFs)</span>
+<span class="keyword">const</span> startResponse = <span class="keyword">await</span> textract.<span class="function">send</span>(<span class="keyword">new</span> <span class="function">StartDocumentTextDetectionCommand</span>({
+    DocumentLocation: {
+        S3Object: { Bucket: <span class="string">'my-bucket'</span>, Name: <span class="string">'document.pdf'</span> }
+    }
+}));
+<span class="keyword">const</span> jobId = startResponse.JobId;
+
+<span class="comment">// Poll for results (call in a loop until status is SUCCEEDED)</span>
+<span class="keyword">const</span> getResponse = <span class="keyword">await</span> textract.<span class="function">send</span>(<span class="keyword">new</span> <span class="function">GetDocumentTextDetectionCommand</span>({
+    JobId: jobId
+}));
+
+<span class="keyword">if</span> (getResponse.JobStatus === <span class="string">'SUCCEEDED'</span>) {
+    <span class="keyword">const</span> text = getResponse.Blocks
+        .<span class="function">filter</span>(b => b.BlockType === <span class="string">'LINE'</span>)
+        .<span class="function">map</span>(b => b.Text)
+        .<span class="function">join</span>(<span class="string">'\n'</span>);
+}</code></pre>
+    </div>
+    
+    <h2>🚀 Deployment with SAM</h2>
+    
+    <div class="card">
+        <p><strong>SAM (Serverless Application Model)</strong> is the easiest way to deploy Lambda functions with API Gateway, S3, DynamoDB, and IAM permissions all defined in one file.</p>
+        
+        <h3>File Structure</h3>
+<pre><code>backend/
+├── template.yaml      <span class="comment"># SAM template (infrastructure as code)</span>
+├── package.json       <span class="comment"># Dependencies</span>
+├── handler.js         <span class="comment"># Lambda function code</span>
+└── deploy.sh          <span class="comment"># Deployment script</span></code></pre>
+        
+        <h3>template.yaml (Example)</h3>
+<pre><code>AWSTemplateFormatVersion: <span class="string">'2010-09-09'</span>
+Transform: AWS::Serverless-2016-10-31
+Description: My API
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: <span class="number">30</span>
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref MyTable
+
+Resources:
+  <span class="comment"># API Gateway</span>
+  MyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowOrigin: <span class="string">"'*'"</span>
+        AllowMethods: <span class="string">"'GET,POST,OPTIONS'"</span>
+  
+  <span class="comment"># Lambda Function</span>
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.handler
+      CodeUri: .
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MyTable
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MyApi
+            Path: /items
+            Method: GET
+  
+  <span class="comment"># DynamoDB Table</span>
+  MyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: my-items
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  ApiUrl:
+    Value: !Sub <span class="string">'https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/prod'</span></code></pre>
+        
+        <h3>Deployment Commands</h3>
+<pre><code><span class="comment"># Install dependencies</span>
+npm install
+
+<span class="comment"># Build the SAM application</span>
+sam build
+
+<span class="comment"># Deploy (first time - will prompt for settings)</span>
+sam deploy --guided
+
+<span class="comment"># Deploy (subsequent times)</span>
+sam deploy
+
+<span class="comment"># Get the API URL</span>
+aws cloudformation describe-stacks --stack-name my-stack \
+  --query <span class="string">'Stacks[0].Outputs[?OutputKey==`ApiUrl`].OutputValue'</span> --output text</code></pre>
+    </div>
+    
+    <h2>💰 Cost Breakdown</h2>
+    
+    <div class="card">
+        <table class="cost-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Free Tier</th>
+                    <th>After Free Tier</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Lambda</strong></td>
+                    <td>1M requests/month</td>
+                    <td>$0.20 per 1M requests</td>
+                </tr>
+                <tr>
+                    <td><strong>API Gateway</strong></td>
+                    <td>1M requests/month (first 12 months)</td>
+                    <td>$3.50 per 1M requests</td>
+                </tr>
+                <tr>
+                    <td><strong>DynamoDB</strong></td>
+                    <td>25 GB storage, 25 read/write units</td>
+                    <td>$1.25 per 1M write requests</td>
+                </tr>
+                <tr>
+                    <td><strong>S3</strong></td>
+                    <td>5 GB storage (first 12 months)</td>
+                    <td>$0.023 per GB/month</td>
+                </tr>
+                <tr>
+                    <td><strong>Textract</strong></td>
+                    <td>1,000 pages/month (first 3 months)</td>
+                    <td>$1.50 per 1,000 pages</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="success">
+            <strong>Bottom line:</strong> A typical small app (10k requests/month) costs less than $5/month. Most stays in free tier.
+        </div>
+    </div>
+    
+    <h2>🔒 Security Best Practices</h2>
+    
+    <div class="card">
+        <h3>1. Validate All Input</h3>
+<pre><code><span class="keyword">const</span> { filename, firm } = <span class="function">JSON.parse</span>(event.body);
+
+<span class="keyword">if</span> (!filename || !firm) {
+    <span class="keyword">return</span> { statusCode: <span class="number">400</span>, body: <span class="string">'Missing required fields'</span> };
+}
+
+<span class="comment">// Sanitize filename to prevent path traversal</span>
+<span class="keyword">const</span> safeName = filename.<span class="function">replace</span>(/[^a-zA-Z0-9.-]/g, <span class="string">'_'</span>);</code></pre>
+        
+        <h3>2. Use Least Privilege IAM Policies</h3>
+<pre><code><span class="comment"># Only give the Lambda access to what it needs</span>
+Policies:
+  - DynamoDBCrudPolicy:
+      TableName: !Ref MyTable  <span class="comment"># Only this table, not all tables</span>
+  - S3ReadPolicy:
+      BucketName: !Ref MyBucket  <span class="comment"># Only read, not write</span></code></pre>
+        
+        <h3>3. Use Environment Variables for Config</h3>
+<pre><code><span class="comment"># template.yaml</span>
+Environment:
+  Variables:
+    TABLE_NAME: !Ref MyTable
+    BUCKET_NAME: !Ref MyBucket
+
+<span class="comment"># handler.js</span>
+<span class="keyword">const</span> TABLE = process.env.TABLE_NAME;</code></pre>
+    </div>
+    
+    <h2>📚 Quick Reference: API Endpoints</h2>
+    
+    <div class="card">
+        <h3>DraftBridge OCR API</h3>
+        
+        <div class="endpoint">
+            <span class="method method-post">POST</span>
+            <span class="path">/ocr/presign</span>
+            <span style="margin-left: auto; color: #666;">Get S3 upload URL</span>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-post">POST</span>
+            <span class="path">/ocr/process</span>
+            <span style="margin-left: auto; color: #666;">Start Textract job</span>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/ocr/status?jobId=xxx</span>
+            <span style="margin-left: auto; color: #666;">Check job status</span>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/ocr/result?jobId=xxx</span>
+            <span style="margin-left: auto; color: #666;">Get extracted text</span>
+        </div>
+        
+        <h3 style="margin-top: 24px;">DraftBridge Clauses API</h3>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/clauses/{firm}</span>
+            <span style="margin-left: auto; color: #666;">List all clauses</span>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-post">POST</span>
+            <span class="path">/clauses/{firm}</span>
+            <span style="margin-left: auto; color: #666;">Create clause</span>
+        </div>
+    </div>
+    
+    <div class="note">
+        <div class="note-title">💡 Pro Tip</div>
+        <p>Use <code>sam local start-api</code> to test your API locally before deploying. It simulates API Gateway + Lambda on your machine.</p>
+    </div>
+    
+    <hr style="margin: 40px 0; border: none; border-top: 1px solid #e0e0e0;">
+    <p style="text-align: center; color: #999; font-size: 0.9em;">
+        DraftBridge Lambda Guide • Built with AWS SAM • Last updated: Feb 2026
+    </p>
+</body>
+</html>

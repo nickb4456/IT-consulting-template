@@ -1,0 +1,411 @@
+/* ═══════════════════════════════════════════════════════════════
+   DRAFTBRIDGE GOLD — DIALOG STYLES
+   Styles for the pop-out dialog window (dialog.html).
+   Uses tokens from src/styles/tokens.css.
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('src/styles/tokens.css');
+
+/* ─── Reset ────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--db-font-sans);
+  font-size: var(--db-text-lg);
+  color: var(--db-text);
+  background: var(--db-bg);
+  line-height: 1.5;
+}
+
+/* ─── Dialog Container ─────────────────────────────────────── */
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--db-surface);
+}
+
+/* ─── Header ───────────────────────────────────────────────── */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: var(--db-space-md);
+  padding: var(--db-space-md) var(--db-space-lg);
+  background: linear-gradient(135deg, var(--db-primary-light) 0%, var(--db-primary-dark) 100%);
+  color: white;
+  flex-shrink: 0;
+}
+
+.dialog-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--db-space-sm);
+}
+
+.logo-icon {
+  font-weight: 700;
+  font-size: var(--db-text-md);
+  background: rgba(255, 255, 255, 0.2);
+  padding: var(--db-space-xs) var(--db-space-sm);
+  border-radius: var(--db-radius-sm);
+}
+
+.logo-text {
+  font-size: var(--db-text-lg);
+  font-weight: 400;
+  opacity: 0.9;
+}
+
+.logo-text span {
+  font-weight: 700;
+}
+
+.dialog-title {
+  flex: 1;
+  font-size: var(--db-text-xl);
+  font-weight: 600;
+  margin: 0;
+}
+
+.dialog-close {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: white;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--db-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--db-transition);
+}
+
+.dialog-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ─── Main Layout ──────────────────────────────────────────── */
+.dialog-main {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* ─── Form Section (Left) ──────────────────────────────────── */
+.form-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--db-border);
+  min-width: 0;
+}
+
+.form-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--db-space-xl);
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--db-space-lg);
+}
+
+.form-content.hidden {
+  display: none;
+}
+
+/* ─── Form Elements ────────────────────────────────────────── */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--db-space-xs);
+}
+
+.form-label {
+  font-size: var(--db-text-md);
+  font-weight: 600;
+  color: var(--db-text);
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: var(--db-input-padding);
+  font-size: var(--db-text-md);
+  font-family: var(--db-font-sans);
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  color: var(--db-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+  box-shadow: var(--db-input-focus-ring);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--db-text-disabled);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ─── Form Row (Side-by-Side) ──────────────────────────────── */
+.form-row {
+  display: flex;
+  gap: var(--db-space-md);
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Form Divider ─────────────────────────────────────────── */
+.form-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--db-space-md);
+  margin: var(--db-space-sm) 0;
+}
+
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--db-border);
+}
+
+.form-divider span {
+  font-size: var(--db-text-base);
+  font-weight: 600;
+  color: var(--db-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ─── Checkbox Group ───────────────────────────────────────── */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--db-space-sm);
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--db-space-sm);
+  cursor: pointer;
+  font-size: var(--db-text-md);
+  color: var(--db-text);
+  line-height: 1.4;
+}
+
+.checkbox-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--db-primary-light);
+  flex-shrink: 0;
+}
+
+/* ─── Preview Section (Right) ──────────────────────────────── */
+.preview-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--db-surface-muted);
+  min-width: 0;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--db-space-md) var(--db-space-lg);
+  border-bottom: 1px solid var(--db-border);
+  background: var(--db-surface);
+  flex-shrink: 0;
+}
+
+.preview-header h2 {
+  font-size: var(--db-text-lg);
+  font-weight: 600;
+  color: var(--db-text);
+  margin: 0;
+}
+
+.preview-actions {
+  display: flex;
+  gap: var(--db-space-sm);
+}
+
+.preview-btn {
+  padding: var(--db-btn-padding-sm);
+  font-size: var(--db-text-base);
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  color: var(--db-text-muted);
+  cursor: pointer;
+  transition: var(--db-transition);
+}
+
+.preview-btn:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+}
+
+.preview-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--db-space-xl);
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--db-text-disabled);
+}
+
+.preview-placeholder-icon {
+  font-size: 48px;
+  margin-bottom: var(--db-space-md);
+  opacity: 0.3;
+}
+
+.preview-placeholder p {
+  font-size: var(--db-text-md);
+  margin: 0;
+}
+
+/* ─── Empty State ──────────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--db-space-3xl);
+  text-align: center;
+  color: var(--db-text-muted);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--db-space-md);
+  opacity: 0.4;
+}
+
+.empty-state h3 {
+  font-size: var(--db-text-xl);
+  font-weight: 600;
+  color: var(--db-text);
+  margin-bottom: var(--db-space-sm);
+}
+
+.empty-state p {
+  font-size: var(--db-text-md);
+  margin: 0;
+}
+
+/* ─── Footer ───────────────────────────────────────────────── */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--db-space-md);
+  padding: var(--db-space-md) var(--db-space-lg);
+  border-top: 1px solid var(--db-border);
+  background: var(--db-surface);
+  flex-shrink: 0;
+}
+
+/* ─── Buttons ──────────────────────────────────────────────── */
+.btn {
+  padding: var(--db-btn-padding);
+  font-size: var(--db-text-lg);
+  font-weight: 600;
+  font-family: var(--db-font-sans);
+  border: none;
+  border-radius: var(--db-radius-md);
+  cursor: pointer;
+  transition: var(--db-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--db-space-sm);
+}
+
+.btn-primary {
+  background: var(--db-primary-light);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--db-primary-hover);
+}
+
+.btn-secondary {
+  background: var(--db-bg);
+  color: var(--db-text-muted);
+  border: 1px solid var(--db-border-input);
+}
+
+.btn-secondary:hover {
+  background: var(--db-border-light);
+  color: var(--db-text);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: var(--db-text-xl);
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .dialog-main {
+    flex-direction: column;
+  }
+
+  .form-section {
+    border-right: none;
+    border-bottom: 1px solid var(--db-border);
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: var(--db-space-lg);
+  }
+}

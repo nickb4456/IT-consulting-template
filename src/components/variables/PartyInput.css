@@ -1,0 +1,325 @@
+/**
+ * DraftBridge Gold - Party Input Styles
+ *
+ * Sections:
+ *   1. Container & Party Cards
+ *   2. Header (expand/collapse, remove)
+ *   3. Form & Fields
+ *   4. Party Type Toggle
+ *   5. Add Button & Caption Preview
+ *   6. Validation States
+ *
+ * NOTE: Shared field/row patterns could be consolidated into a shared component CSS file in a future refactor.
+ * Duplicated across ContactInput.css, AttorneyInput.css, and PartyInput.css.
+ */
+
+/* ═══ Container & Party Cards ════════════════════════════════════ */
+
+.party-input {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.single-party {
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-md);
+  overflow: hidden;
+  background: var(--db-surface);
+}
+
+.single-party.plaintiff {
+  border-left: 3px solid var(--db-plaintiff);
+}
+
+.single-party.defendant {
+  border-left: 3px solid var(--db-defendant);
+}
+
+.single-party.other {
+  border-left: 3px solid var(--db-party-neutral);
+}
+
+/* ═══ Header ═════════════════════════════════════════════════════ */
+
+.party-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--db-surface-muted);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.party-header:hover {
+  background: var(--db-surface-hover);
+}
+
+.party-icon {
+  font-size: 16px;
+}
+
+.party-icon.entity {
+  color: var(--db-primary);
+}
+
+.party-icon.individual {
+  color: var(--db-primary-light);
+}
+
+.party-display-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--db-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.party-role-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--db-border-subtle);
+  color: var(--db-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.single-party.plaintiff .party-role-badge {
+  background: var(--db-plaintiff-bg);
+  color: var(--db-plaintiff-text);
+}
+
+.single-party.defendant .party-role-badge {
+  background: var(--db-error-bg);
+  color: var(--db-error);
+}
+
+.party-expand {
+  font-size: 10px;
+  color: var(--db-text-muted);
+  transition: transform 0.2s;
+}
+
+.party-expand.expanded {
+  transform: rotate(180deg);
+}
+
+.party-remove-btn {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--db-text-disabled);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.party-remove-btn:hover {
+  background: var(--db-error-bg);
+  color: var(--db-error);
+}
+
+/* ═══ Form & Fields ══════════════════════════════════════════════ */
+
+.party-form {
+  padding: 16px;
+  border-top: 1px solid var(--db-border-subtle);
+}
+
+.party-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.party-row:last-child {
+  margin-bottom: 0;
+}
+
+.party-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.party-field-small {
+  flex: 0 0 80px;
+}
+
+.party-field-full {
+  flex: 1 1 100%;
+}
+
+.party-field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--db-text-muted);
+  margin-bottom: 4px;
+}
+
+.party-field input,
+.party-field select {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  background: var(--db-surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.party-field input:focus,
+.party-field select:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+  box-shadow: 0 0 0 2px var(--db-input-focus-ring);
+}
+
+/* ═══ Party Type Toggle ══════════════════════════════════════════ */
+
+.party-type-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-sm);
+  overflow: hidden;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 6px 12px;
+  border: none;
+  background: var(--db-surface);
+  color: var(--db-text);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-btn:not(:last-child) {
+  border-right: 1px solid var(--db-border-input);
+}
+
+.type-btn:hover {
+  background: var(--db-bg);
+}
+
+.type-btn.active {
+  background: var(--db-primary-light);
+  color: white;
+}
+
+/* Party Section */
+.party-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--db-border-subtle);
+}
+
+.party-section h4 {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--db-text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Party Checkbox */
+.party-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--db-text);
+}
+
+.party-checkbox input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--db-primary-light);
+}
+
+/* ═══ Add Button & Caption Preview ═══════════════════════════════ */
+
+.party-add-btn {
+  padding: 10px 16px;
+  border: 2px dashed var(--db-border-input);
+  border-radius: var(--db-radius-md);
+  background: transparent;
+  color: var(--db-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.party-add-btn:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+  background: var(--db-surface-warm-subtle);
+}
+
+.party-caption-preview {
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--db-surface-muted);
+  border: 1px solid var(--db-border-subtle);
+  border-radius: var(--db-radius-md);
+  font-family: var(--db-font-serif);
+  font-size: 13px;
+  text-align: center;
+}
+
+.caption-line {
+  margin: 4px 0;
+}
+
+.caption-line.plaintiffs {
+  font-weight: bold;
+}
+
+.caption-line.versus {
+  font-style: italic;
+  margin: 8px 0;
+}
+
+.caption-line.defendants {
+  font-weight: bold;
+}
+
+/* ═══ Validation States ══════════════════════════════════════════ */
+
+.single-party.has-error {
+  border-color: var(--db-error-input);
+}
+
+.single-party.is-valid {
+  border-color: var(--db-success);
+}
+
+.party-header:focus-visible {
+  outline: 2px solid var(--db-primary-light);
+  outline-offset: -2px;
+}
+
+.party-remove-btn:focus-visible {
+  outline: 2px solid var(--db-error);
+  outline-offset: 2px;
+}
+
+.party-add-btn:focus-visible {
+  outline: 2px solid var(--db-primary-light);
+  outline-offset: 2px;
+}

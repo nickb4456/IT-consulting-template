@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaseVault Dashboard | Settlement Benchmarks</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 40px 20px;
+        }
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .timer-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 16px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 30px 0;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-card h3 {
+            color: #0f172a;
+            margin-bottom: 16px;
+            font-size: 20px;
+        }
+        .metric-large {
+            font-size: 48px;
+            font-weight: 700;
+            color: #2563eb;
+            margin: 12px 0;
+        }
+        .metric-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+        .data-table th {
+            background: #f1f5f9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #334155;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+        }
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+        .chart-bar {
+            height: 30px;
+            background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+            border-radius: 4px;
+            margin: 8px 0;
+            position: relative;
+        }
+        .chart-label {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 12px;
+        }
+        .filter-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .filter-group select {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .locked-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .locked-message {
+            background: white;
+            padding: 60px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 500px;
+        }
+        .locked-message h2 {
+            color: #0f172a;
+            margin-bottom: 20px;
+        }
+        .locked-message p {
+            color: #64748b;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Access Locked Overlay (shown if not authenticated) -->
+    <div id="lockedOverlay" class="locked-overlay" style="display: none;">
+        <div class="locked-message">
+            <i class="fas fa-lock" style="font-size: 64px; color: #f59e0b; margin-bottom: 24px;"></i>
+            <h2>🔒 Dashboard Access Required</h2>
+            <p>Submit one settlement case to unlock 10 minutes of full dashboard access with 1,756 settlement benchmarks.</p>
+            <a href="/casevault-calculator.html" class="btn-primary">Go to Calculator</a>
+        </div>
+    </div>
+
+    <!-- Timer Banner -->
+    <div class="timer-banner">
+        ⏱️ Dashboard access expires in: <span id="timeRemaining">10:00</span> |
+        <a href="#" id="extendAccess" style="color: white; text-decoration: underline; margin-left: 12px;">
+            Submit another case to extend
+        </a>
+    </div>
+
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="dashboard-container">
+            <h1 style="font-size: 36px; margin-bottom: 12px;">⚖️ CaseVault Settlement Dashboard</h1>
+            <p style="opacity: 0.9; font-size: 18px;">Live benchmark data from 1,756 personal injury settlements</p>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div class="dashboard-container">
+        <!-- Filters -->
+        <div class="filter-section">
+            <h3 style="margin-bottom: 16px; color: #0f172a;">Filter Data</h3>
+            <div class="filter-group">
+                <label>State</label>
+                <select id="filterState">
+                    <option value="all">All States</option>
+                    <option value="MA">Massachusetts</option>
+                    <option value="CT">Connecticut</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="NH">New Hampshire</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Case Type</label>
+                <select id="filterType">
+                    <option value="all">All Types</option>
+                    <option value="car_accident">Car Accident</option>
+                    <option value="slip_fall">Slip & Fall</option>
+                    <option value="medical_malpractice">Medical Malpractice</option>
+                    <option value="workplace">Workplace</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Settlement Range</label>
+                <select id="filterRange">
+                    <option value="all">All Amounts</option>
+                    <option value="0-25k">$0 - $25K</option>
+                    <option value="25k-50k">$25K - $50K</option>
+                    <option value="50k-100k">$50K - $100K</option>
+                    <option value="100k+">$100K+</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>Total Settlements</h3>
+                <div class="metric-large" id="totalCases">1,756</div>
+                <div class="metric-label">Across 4 states</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Average Settlement</h3>
+                <div class="metric-large" id="avgSettlement">$52,400</div>
+                <div class="metric-label">Median: $38,200</div>
+            </div>
+            <div class="dashboard-card">
+                <h3>Highest Settlement</h3>
+                <div class="metric-large" id="maxSettlement">$2.4M</div>
+                <div class="metric-label">Medical malpractice - MA</div>
+            </div>
+        </div>
+
+        <!-- Settlement Distribution by State -->
+        <div class="dashboard-card" style="margin-top: 24px;">
+            <h3>Settlements by State</h3>
+            <div style="margin-top: 20px;">
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; color: #334155;">Massachusetts</span>
+                        <span style="color: #64748b;">205 cases</span>
+                    </div>
+                    <div class="chart-bar" style="width: 100%;">
+                        <span class="chart-label">205</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; color: #334155;">Connecticut</span>
+                        <span style="color: #64748b;">136 cases</span>
+                    </div>
+                    <div class="chart-bar" style="width: 66%;">
+                        <span class="chart-label">136</span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; color: #334155;">Rhode Island</span>
+                        <span style="color: #64748b;">56 cases</span>
+                    </div>
+                    <div class="chart-bar" style="width: 27%;">
+                        <span class="chart-label">56</span>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                        <span style="font-weight: 600; color: #334155;">New Hampshire</span>
+                        <span style="color: #64748b;">4 cases</span>
+                    </div>
+                    <div class="chart-bar" style="width: 2%;">
+                        <span class="chart-label" style="left: auto; right: 12px;">4</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Settlements Table -->
+        <div class="dashboard-card" style="margin-top: 24px;">
+            <h3>Recent Settlements</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th>Case Type</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="settlementsTable">
+                    <tr>
+                        <td>MA</td>
+                        <td>Car Accident</td>
+                        <td style="font-weight: 600; color: #2563eb;">$85,000</td>
+                        <td>2026-02-05</td>
+                    </tr>
+                    <tr>
+                        <td>CT</td>
+                        <td>Slip & Fall</td>
+                        <td style="font-weight: 600; color: #2563eb;">$42,500</td>
+                        <td>2026-02-04</td>
+                    </tr>
+                    <tr>
+                        <td>MA</td>
+                        <td>Medical Malpractice</td>
+                        <td style="font-weight: 600; color: #2563eb;">$325,000</td>
+                        <td>2026-02-03</td>
+                    </tr>
+                    <tr>
+                        <td>RI</td>
+                        <td>Workplace Injury</td>
+                        <td style="font-weight: 600; color: #2563eb;">$67,800</td>
+                        <td>2026-02-02</td>
+                    </tr>
+                    <tr>
+                        <td>CT</td>
+                        <td>Car Accident</td>
+                        <td style="font-weight: 600; color: #2563eb;">$52,000</td>
+                        <td>2026-02-01</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p style="text-align: center; margin-top: 20px; color: #64748b; font-size: 14px;">
+                Showing 5 of 1,756 total settlements
+            </p>
+        </div>
+
+        <!-- Case Type Breakdown -->
+        <div class="dashboard-grid" style="margin-top: 24px;">
+            <div class="dashboard-card">
+                <h3>By Case Type</h3>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <td>Car Accidents</td>
+                            <td style="font-weight: 600; text-align: right;">892</td>
+                        </tr>
+                        <tr>
+                            <td>Slip & Fall</td>
+                            <td style="font-weight: 600; text-align: right;">423</td>
+                        </tr>
+                        <tr>
+                            <td>Medical Malpractice</td>
+                            <td style="font-weight: 600; text-align: right;">187</td>
+                        </tr>
+                        <tr>
+                            <td>Workplace Injury</td>
+                            <td style="font-weight: 600; text-align: right;">254</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="dashboard-card">
+                <h3>Settlement Ranges</h3>
+                <table class="data-table">
+                    <tbody>
+                        <tr>
+                            <td>Under $25K</td>
+                            <td style="font-weight: 600; text-align: right;">614</td>
+                        </tr>
+                        <tr>
+                            <td>$25K - $50K</td>
+                            <td style="font-weight: 600; text-align: right;">521</td>
+                        </tr>
+                        <tr>
+                            <td>$50K - $100K</td>
+                            <td style="font-weight: 600; text-align: right;">387</td>
+                        </tr>
+                        <tr>
+                            <td>Over $100K</td>
+                            <td style="font-weight: 600; text-align: right;">234</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- CTA to extend -->
+        <div style="background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 12px; padding: 40px; text-align: center; margin: 40px 0;">
+            <h2 style="color: #0c4a6e; margin-bottom: 16px;">Need More Time?</h2>
+            <p style="color: #075985; margin-bottom: 24px; font-size: 18px;">
+                Submit another settlement case to extend your access for 10 more minutes.
+            </p>
+            <a href="/casevault-calculator.html#contribute" class="btn-primary">
+                Contribute Another Case
+            </a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; margin-top: 60px;">
+        <p style="opacity: 0.8;">© 2026 AIBridges CaseVault. All rights reserved.</p>
+        <p style="margin-top: 12px; opacity: 0.6; font-size: 14px;">
+            ⚠️ For informational purposes only. Not legal advice.
+        </p>
+    </footer>
+
+    <script>
+        // Auth Check
+        function checkAuth() {
+            const accessToken = sessionStorage.getItem('casevault_access_token');
+            const expiresAt = parseInt(sessionStorage.getItem('casevault_access_expires'));
+
+            if (!accessToken || !expiresAt || Date.now() > expiresAt) {
+                // Access denied or expired
+                document.getElementById('lockedOverlay').style.display = 'flex';
+                return false;
+            }
+
+            return true;
+        }
+
+        // Timer Countdown
+        function startTimer() {
+            const expiresAt = parseInt(sessionStorage.getItem('casevault_access_expires'));
+
+            const timerInterval = setInterval(() => {
+                const now = Date.now();
+                const timeLeft = expiresAt - now;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    sessionStorage.removeItem('casevault_access_token');
+                    sessionStorage.removeItem('casevault_access_expires');
+                    document.getElementById('lockedOverlay').style.display = 'flex';
+                    return;
+                }
+
+                const minutes = Math.floor(timeLeft / 60000);
+                const seconds = Math.floor((timeLeft % 60000) / 1000);
+                document.getElementById('timeRemaining').textContent =
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                // Warning color when under 2 minutes
+                if (timeLeft < 120000) {
+                    document.querySelector('.timer-banner').style.background =
+                        'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                }
+            }, 1000);
+        }
+
+        // Extend access link
+        document.getElementById('extendAccess').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.location.href = '/casevault-calculator.html#contribute';
+        });
+
+        // Filter functionality (placeholder - in production, fetch from API)
+        document.getElementById('filterState').addEventListener('change', function() {
+            console.log('Filter by state:', this.value);
+            // In production: fetch filtered data from API
+        });
+
+        document.getElementById('filterType').addEventListener('change', function() {
+            console.log('Filter by type:', this.value);
+            // In production: fetch filtered data from API
+        });
+
+        document.getElementById('filterRange').addEventListener('change', function() {
+            console.log('Filter by range:', this.value);
+            // In production: fetch filtered data from API
+        });
+
+        // Initialize
+        if (checkAuth()) {
+            startTimer();
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>

@@ -171,9 +171,12 @@
     <div id="lockedOverlay" class="locked-overlay" style="display: none;">
         <div class="locked-message">
             <i class="fas fa-lock" style="font-size: 64px; color: #f59e0b; margin-bottom: 24px;"></i>
-            <h2>🔒 Dashboard Access Required</h2>
-            <p>Submit one settlement case to unlock 10 minutes of full dashboard access with 1,756 settlement benchmarks.</p>
-            <a href="/casevault-calculator.html" class="btn-primary">Go to Calculator</a>
+            <h2>🔒 Access Expired</h2>
+            <p>Your 10-minute preview has ended. Submit another case for 10 more minutes, or subscribe for unlimited access.</p>
+            <a href="/casevault-calculator.html" class="btn-primary">Contribute Another Case</a>
+            <p style="margin-top: 20px; color: #64748b; font-size: 14px;">
+                Want unlimited access? <a href="/contact.html" style="color: #2563eb; text-decoration: underline;">Contact us about subscriptions</a>
+            </p>
         </div>
     </div>
 
@@ -413,47 +416,26 @@
     </footer>
 
     <script>
-        const VERIFY_API = 'https://YOUR_API_GATEWAY_URL/verify-access';
-
-        // Auth Check - Verify token with backend
+        // Auth Check - Verify access token from contribution
         async function checkAuth() {
-            const accessToken = sessionStorage.getItem('casevault_access_token');
-            const expiresAt = parseInt(sessionStorage.getItem('casevault_access_expires'));
+            // Check if they have dashboard access token (from contribution)
+            const accessToken = localStorage.getItem('casevault_access_token');
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
 
-            // Quick client-side check first
+            // Validate token exists and hasn't expired
             if (!accessToken || !expiresAt || Date.now() > expiresAt) {
+                // No valid access, show lock screen
                 document.getElementById('lockedOverlay').style.display = 'flex';
                 return false;
             }
 
-            // Verify with backend
-            try {
-                const response = await fetch(`${VERIFY_API}?token=${encodeURIComponent(accessToken)}`);
-                const data = await response.json();
-
-                if (!data.valid) {
-                    // Token invalid or expired on backend
-                    sessionStorage.removeItem('casevault_access_token');
-                    sessionStorage.removeItem('casevault_access_expires');
-                    document.getElementById('lockedOverlay').style.display = 'flex';
-                    return false;
-                }
-
-                // Update expiration time from backend (in case of clock skew)
-                sessionStorage.setItem('casevault_access_expires', data.expiresAt);
-                return true;
-
-            } catch (error) {
-                console.error('Token verification failed:', error);
-                // On network error, fall back to client-side check
-                // This allows offline usage if token was previously valid
-                return Date.now() < expiresAt;
-            }
+            // Valid access token found
+            return true;
         }
 
         // Timer Countdown
         function startTimer() {
-            const expiresAt = parseInt(sessionStorage.getItem('casevault_access_expires'));
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
 
             const timerInterval = setInterval(() => {
                 const now = Date.now();
@@ -461,8 +443,8 @@
 
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    sessionStorage.removeItem('casevault_access_token');
-                    sessionStorage.removeItem('casevault_access_expires');
+                    localStorage.removeItem('casevault_access_token');
+                    localStorage.removeItem('casevault_access_expires');
                     document.getElementById('lockedOverlay').style.display = 'flex';
                     return;
                 }

@@ -291,6 +291,15 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="contribRepresented">Represented by Attorney? *</label>
+                    <select id="contribRepresented" name="represented" required>
+                        <option value="">Select</option>
+                        <option value="yes">Yes - Had attorney representation</option>
+                        <option value="no">No - Self-represented</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label for="contribDetails">Additional Details (optional)</label>
                     <input type="text" id="contribDetails" name="details" placeholder="Brief description of injuries, timeline, etc.">
                 </div>
@@ -333,6 +342,25 @@
     </footer>
 
     <script>
+        // Gate access - check for intake form completion on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const userName = localStorage.getItem('casevault_user_name');
+            const userEmail = localStorage.getItem('casevault_user_email');
+
+            if (!userName || !userEmail) {
+                // No intake form completion, redirect to intake form
+                alert('⚠️ Please fill out the intake form to access CaseVault.');
+                window.location.href = '/casevault-intake.html';
+                return;
+            }
+
+            // Pre-fill contribution form email if available
+            const contribEmailField = document.getElementById('contribEmail');
+            if (contribEmailField && userEmail) {
+                contribEmailField.value = userEmail;
+            }
+        });
+
         // Calculator Logic
         document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -380,60 +408,72 @@
         document.getElementById('submitCaseForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const email = document.getElementById('contribEmail').value.trim();
+            const state = document.getElementById('contribState').value;
+            const amount = document.getElementById('contribAmount').value;
+            const caseType = document.getElementById('contribType').value.trim();
+            const represented = document.getElementById('contribRepresented').value;
+            const details = document.getElementById('contribDetails').value.trim();
+
+            // Validation
+            if (!email || !state || !amount || !caseType || !represented) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+            if (parseFloat(amount) <= 0) {
+                alert('Please enter a valid settlement amount.');
+                return;
+            }
+
             const formData = {
-                email: document.getElementById('contribEmail').value,
-                state: document.getElementById('contribState').value,
-                amount: document.getElementById('contribAmount').value,
-                caseType: document.getElementById('contribType').value,
-                details: document.getElementById('contribDetails').value,
+                email: email,
+                state: state,
+                amount: parseFloat(amount),
+                caseType: caseType,
+                represented: represented,
+                details: details,
                 timestamp: new Date().toISOString()
             };
 
             try {
-                // API Gateway endpoint - update with your actual endpoint after deploying Lambda
-                const API_ENDPOINT = 'https://YOUR_API_GATEWAY_URL/submit-case';
+                // Store the contribution locally
+                const submissions = JSON.parse(localStorage.getItem('casevault_submissions') || '[]');
+                submissions.push(formData);
+                localStorage.setItem('casevault_submissions', JSON.stringify(submissions));
 
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
+                // Generate 10-minute access token
+                const token = generateToken();
+                const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes from now
 
-                if (response.ok) {
-                    const data = await response.json();
+                // Store access token in localStorage (persists across page refreshes within session)
+                localStorage.setItem('casevault_access_token', token);
+                localStorage.setItem('casevault_access_expires', expiresAt.toString());
 
-                    // Validate response structure
-                    if (!data.accessToken || !data.expiresAt) {
-                        throw new Error('Invalid response from server');
-                    }
+                console.log('Contribution submitted:', formData);
+                console.log('Access granted until:', new Date(expiresAt).toISOString());
 
-                    // Store access token in sessionStorage
-                    sessionStorage.setItem('casevault_access_token', data.accessToken);
-                    sessionStorage.setItem('casevault_access_expires', data.expiresAt);
-
-                    // Track submission locally for UX
-                    const submissions = JSON.parse(localStorage.getItem('casevault_submissions') || '[]');
-                    submissions.push({
-                        email: formData.email,
-                        state: formData.state,
-                        timestamp: formData.timestamp
-                    });
-                    localStorage.setItem('casevault_submissions', JSON.stringify(submissions));
-
-                    // Redirect to dashboard
-                    alert('✅ Submission successful! Redirecting to dashboard...');
-                    window.location.href = '/casevault-dashboard.html';
-                } else {
-                    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    alert(`Error: ${error.error || 'Failed to submit case. Please try again.'}`);
-                }
+                // Redirect to dashboard
+                alert('✅ Thank you for contributing! You now have 10 minutes of dashboard access.');
+                window.location.href = '/casevault-dashboard.html';
             } catch (error) {
                 console.error('Submission error:', error);
-                alert('Unable to connect to server. Please check your connection and try again.');
+                alert('An error occurred. Please try again.');
             }
         });
+
+        // Generate random token
+        function generateToken() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
     </script>
 
     <!-- Font Awesome -->

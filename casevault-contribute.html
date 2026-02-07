@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribute Settlement Data | CaseVault by AIBridges</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .casevault-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .contribute-container {
+            max-width: 700px;
+            margin: -40px auto 60px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 40px;
+        }
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #2563eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .info-box h3 {
+            margin: 0 0 12px 0;
+            color: #0f172a;
+            font-size: 18px;
+        }
+        .info-box p {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .radio-option input[type="radio"] {
+            width: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0" style="background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <a href="/" class="navbar-brand p-0" style="font-size: 24px; font-weight: 700; color: #2563eb;">
+            <i class="fas fa-robot me-2"></i>AIBridges
+        </a>
+        <div style="margin-left: auto;">
+            <a href="/casevault-calculator.html" style="padding: 10px 20px; color: #334155; font-weight: 500;">Calculator</a>
+            <a href="/" style="padding: 10px 20px; color: #334155; font-weight: 500;">Home</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="casevault-hero">
+        <h1 style="font-size: 42px; margin-bottom: 16px;">🤝 Contribute a Settlement</h1>
+        <p style="font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+            Share 1 real settlement case to unlock 10-minute dashboard access
+        </p>
+    </div>
+
+    <!-- Contribution Form -->
+    <div class="contribute-container">
+        <div class="info-box">
+            <h3>📊 Why Contribute?</h3>
+            <p>
+                Your data helps build a more comprehensive settlement database. In return, you get 10 minutes
+                of full dashboard access to explore benchmarks, trends, and insights from 1,756+ cases.
+            </p>
+        </div>
+
+        <form id="contributeForm">
+            <div class="form-group">
+                <label for="state">State *</label>
+                <select id="state" name="state" required>
+                    <option value="">Select state...</option>
+                    <option value="CT">Connecticut</option>
+                    <option value="MA">Massachusetts</option>
+                    <option value="RI">Rhode Island</option>
+                    <option value="NY">New York</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="injuryType">Injury Type *</label>
+                <select id="injuryType" name="injuryType" required>
+                    <option value="">Select injury type...</option>
+                    <option value="soft-tissue">Soft Tissue</option>
+                    <option value="fracture">Fracture/Broken Bone</option>
+                    <option value="head-injury">Head/Brain Injury</option>
+                    <option value="spinal">Spinal Cord Injury</option>
+                    <option value="burn">Burn Injury</option>
+                    <option value="amputation">Amputation</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="settlementAmount">Settlement Amount ($) *</label>
+                <input
+                    type="number"
+                    id="settlementAmount"
+                    name="settlementAmount"
+                    required
+                    min="1000"
+                    step="1000"
+                    placeholder="50000"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Client Had Legal Representation? *</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" id="repYes" name="representation" value="yes" required>
+                        <label for="repYes" style="margin: 0; font-weight: normal;">Yes</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="repNo" name="representation" value="no" required>
+                        <label for="repNo" style="margin: 0; font-weight: normal;">No</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Unlock Dashboard Access →</button>
+        </form>
+
+        <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 24px;">
+            🔒 All submissions are anonymized. We never share identifying information.
+        </p>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; margin-top: 80px;">
+        <p style="opacity: 0.8;">© 2026 AIBridges. All rights reserved.</p>
+        <p style="margin-top: 12px; opacity: 0.6; font-size: 14px;">
+            ⚠️ For informational purposes only. Not legal advice. Consult with a licensed attorney.
+        </p>
+    </footer>
+
+    <script>
+        // Check if user filled intake form
+        document.addEventListener('DOMContentLoaded', function() {
+            const userName = localStorage.getItem('casevault_user_name');
+            if (!userName) {
+                alert('⚠️ Please fill out the intake form first.');
+                window.location.href = '/casevault-intake.html';
+                return;
+            }
+        });
+
+        // Handle contribution form submission
+        document.getElementById('contributeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const state = document.getElementById('state').value;
+            const injuryType = document.getElementById('injuryType').value;
+            const settlementAmount = document.getElementById('settlementAmount').value;
+            const representation = document.querySelector('input[name="representation"]:checked').value;
+
+            // Validate inputs
+            if (!state || !injuryType || !settlementAmount || !representation) {
+                alert('Please fill out all required fields.');
+                return;
+            }
+
+            // Store contribution data
+            const contribution = {
+                state,
+                injuryType,
+                settlementAmount: parseInt(settlementAmount),
+                representation,
+                timestamp: new Date().toISOString(),
+                userEmail: localStorage.getItem('casevault_user_email')
+            };
+
+            // Save contribution (in production, this would POST to backend)
+            localStorage.setItem('casevault_contribution', JSON.stringify(contribution));
+
+            // Generate full access token with 10-minute expiry
+            const accessToken = generateToken();
+            const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes
+
+            localStorage.setItem('casevault_access_token', accessToken);
+            localStorage.setItem('casevault_access_expires', expiresAt.toString());
+
+            // Mark that user has contributed
+            localStorage.setItem('casevault_contributed', 'true');
+
+            // Track contribution
+            console.log('Contribution submitted:', contribution);
+
+            // Redirect to dashboard with success message
+            alert('✅ Thank you for contributing!\n\nYou now have 10 minutes of full dashboard access.');
+            window.location.href = '/casevault-dashboard.html';
+        });
+
+        // Generate random token
+        function generateToken() {
+            const array = new Uint8Array(32);
+            crypto.getRandomValues(array);
+            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+        }
+    </script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</body>
+</html>

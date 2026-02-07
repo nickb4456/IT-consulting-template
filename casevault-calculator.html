@@ -342,19 +342,27 @@
     </footer>
 
     <script>
-        // Gate access - check for intake form completion on page load
+        // Gate access - check for valid access token on page load
         document.addEventListener('DOMContentLoaded', function() {
-            const userName = localStorage.getItem('casevault_user_name');
-            const userEmail = localStorage.getItem('casevault_user_email');
+            const accessToken = localStorage.getItem('casevault_access_token');
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
 
-            if (!userName || !userEmail) {
-                // No intake form completion, redirect to intake form
-                alert('⚠️ Please fill out the intake form to access CaseVault.');
-                window.location.href = '/casevault-intake.html';
+            // Check if user has valid access token from contribution
+            if (!accessToken || !expiresAt || Date.now() > expiresAt) {
+                // No valid access - check if they've at least filled intake form
+                const userName = localStorage.getItem('casevault_user_name');
+                if (!userName) {
+                    alert('⚠️ Please fill out the intake form first.');
+                    window.location.href = '/casevault-intake.html';
+                } else {
+                    alert('⚠️ You must contribute a settlement case to access the calculator.');
+                    window.location.href = '/casevault-contribute.html';
+                }
                 return;
             }
 
-            // Pre-fill contribution form email if available
+            // Valid access - allow calculator usage
+            const userEmail = localStorage.getItem('casevault_user_email');
             const contribEmailField = document.getElementById('contribEmail');
             if (contribEmailField && userEmail) {
                 contribEmailField.value = userEmail;
@@ -398,10 +406,9 @@
             document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
 
-        // Show contribution form
+        // Redirect to contribution page
         document.getElementById('contributeBtn').addEventListener('click', function() {
-            document.getElementById('contributionForm').classList.add('show');
-            document.getElementById('contributionForm').scrollIntoView({ behavior: 'smooth' });
+            window.location.href = '/casevault-contribute.html';
         });
 
         // Submit case and unlock dashboard

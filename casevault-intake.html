@@ -251,19 +251,12 @@
             localStorage.setItem('casevault_user_email', email);
             localStorage.setItem('casevault_user_firm', lawFirm);
 
-            // Generate intake access token (grants access to calculator, but NOT dashboard)
-            const intakeToken = generateToken();
-            const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes from now
-
-            localStorage.setItem('casevault_intake_token', intakeToken);
-            localStorage.setItem('casevault_intake_expires', expiresAt.toString());
-
             // Track submission (for analytics - could send to backend in production)
             console.log('Intake submission:', { name, email, lawFirm, timestamp: new Date().toISOString() });
 
-            // Redirect to calculator (they can use calculator but must contribute to access dashboard)
-            alert('✅ Access granted! You can now use the calculator.\n\n💡 Contribute a settlement case to unlock the full dashboard.');
-            window.location.href = '/casevault-calculator.html';
+            // Redirect to contribute page - user MUST contribute before accessing anything
+            alert('✅ Welcome! Now submit 1 settlement case to unlock your 10-minute preview.');
+            window.location.href = '/casevault-contribute.html';
         });
 
         // Generate random token

@@ -111,9 +111,32 @@
             color: #64748b;
             margin-top: 8px;
         }
+        .timer-banner {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+        .timer-banner a {
+            color: white;
+            text-decoration: underline;
+            margin-left: 12px;
+        }
     </style>
 </head>
 <body>
+    <!-- Timer Banner (visible when authenticated) -->
+    <div class="timer-banner" id="timerBanner" style="display: none;">
+        ⏱️ Access expires in: <span id="timeRemaining">10:00</span> |
+        <a href="/casevault-contribute.html">Submit another case to extend</a>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0" style="background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <a href="/" class="navbar-brand p-0" style="font-size: 24px; font-weight: 700; color: #2563eb;">
@@ -294,16 +317,14 @@
                     document.getElementById('paywallMessage').textContent = 'Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview of the calculator and dashboard.';
                     document.getElementById('paywallCTA').textContent = 'Get Started Free →';
                     document.getElementById('paywallCTA').href = '/casevault-intake.html';
-                } else if (!contributed || (accessToken && Date.now() > expiresAt)) {
-                    // Filled intake but token expired or never contributed
-                    document.getElementById('paywallTitle').textContent = contributed ? 'Subscribe to Continue' : 'One More Step';
-                    document.getElementById('paywallMessage').textContent = contributed
-                        ? 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.'
-                        : 'You\'re almost there! Contribute 1 settlement case to unlock your free 10-minute preview.';
-                    document.getElementById('paywallCTA').textContent = contributed ? 'Contribute Another Case →' : 'Contribute a Settlement →';
+                } else if (contributed) {
+                    // Token expired after previous contribution
+                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
+                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
                     document.getElementById('paywallCTA').href = '/casevault-contribute.html';
                 } else {
-                    // Hasn't contributed yet
+                    // Filled intake but hasn't contributed yet
                     document.getElementById('paywallTitle').textContent = 'One More Step';
                     document.getElementById('paywallMessage').textContent = 'Contribute 1 settlement case to unlock your free 10-minute preview.';
                     document.getElementById('paywallCTA').textContent = 'Contribute a Settlement →';
@@ -311,7 +332,39 @@
                 }
                 return;
             }
+
+            // User is authenticated - show timer banner
+            document.getElementById('timerBanner').style.display = 'block';
+            startTimer();
         });
+
+        // Timer countdown
+        function startTimer() {
+            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
+            const timerInterval = setInterval(function() {
+                const timeLeft = expiresAt - Date.now();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    localStorage.removeItem('casevault_access_token');
+                    localStorage.removeItem('casevault_access_expires');
+                    // Show paywall
+                    document.getElementById('paywallOverlay').style.display = 'flex';
+                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
+                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
+                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
+                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
+                    document.getElementById('timerBanner').style.display = 'none';
+                    return;
+                }
+                var minutes = Math.floor(timeLeft / 60000);
+                var seconds = Math.floor((timeLeft % 60000) / 1000);
+                document.getElementById('timeRemaining').textContent = minutes + ':' + seconds.toString().padStart(2, '0');
+                // Warning color when under 2 minutes
+                if (timeLeft < 120000) {
+                    document.getElementById('timerBanner').style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                }
+            }, 1000);
+        }
 
         // Calculator Logic
         document.getElementById('calculatorForm').addEventListener('submit', async function(e) {

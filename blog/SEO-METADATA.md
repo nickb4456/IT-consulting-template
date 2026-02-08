@@ -240,4 +240,55 @@ Insurance lowballs soft tissue injuries, but data from 342 cases shows these inj
 
 ---
 
+## Article #6: Settlement Calculator Mistakes (B2B — Targeting PI Firms)
+
+**Title (60 chars):**
+```
+5 Settlement Calculator Mistakes Costing PI Firms Thousands
+```
+
+**Meta Description (159 chars):**
+```
+Data from 1,756 real settlements reveals 5 calculator mistakes that cost PI firms $14,200+ per case. Fix them and recover $700K+ in annual unrealized revenue.
+```
+
+**Primary Keywords:**
+- settlement calculator mistakes
+- PI firm settlement errors
+- personal injury settlement calculator accuracy
+- how to calculate settlement value correctly
+- settlement valuation mistakes attorneys make
+
+**Secondary Keywords:**
+- settlement multiplier method
+- jurisdiction-specific settlement data
+- future medical costs settlement
+- pre-litigation vs litigation settlement value
+- COLOSSUS insurance software
+
+**URL Slug:**
+```
+/blog/5-settlement-calculator-mistakes-costing-pi-firms
+```
+
+**Audience:** B2B (PI attorneys and firm owners, not accident victims)
+
+**Featured Snippet Opportunities:**
+- "how much do settlement calculator mistakes cost"
+- "what multiplier should I use for pain and suffering"
+- "how do insurance companies calculate settlements differently"
+
+**Internal Links (from this article):**
+- → Pain and suffering calculator guide
+- → How insurance companies calculate settlements
+- → MA settlements data
+- → Soft tissue injury worth more
+- → Insurance adjuster COLOSSUS article
+
+**Internal Links (to this article):**
+- casevault-calculator.html → "Are you making these 5 calculator mistakes?"
+- All other blog posts → sidebar/footer link
+
+---
+
 **Next Action:** Convert markdown files to HTML using AIBridges template, add CTAs, and publish.

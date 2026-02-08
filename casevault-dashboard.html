@@ -426,6 +426,12 @@
 
             // Validate token exists and hasn't expired
             if (!accessToken || !expiresAt || Date.now() > expiresAt) {
+                // Clean up expired tokens
+                if (accessToken && expiresAt && Date.now() > expiresAt) {
+                    localStorage.removeItem('casevault_access_token');
+                    localStorage.removeItem('casevault_access_expires');
+                }
+
                 const overlay = document.getElementById('lockedOverlay');
                 overlay.style.display = 'flex';
 
@@ -436,7 +442,7 @@
                     document.getElementById('lockCTA').textContent = 'Get Started Free →';
                     document.getElementById('lockCTA').href = '/casevault-intake.html';
                 } else if (contributed) {
-                    // Token expired
+                    // Token expired after previous contribution
                     document.getElementById('lockTitle').textContent = 'Subscribe to Continue';
                     document.getElementById('lockMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access to settlement benchmarks.';
                     document.getElementById('lockCTA').textContent = 'Contribute Another Case →';

@@ -428,6 +428,57 @@
             display: none !important;
         }
 
+        /* Dropdown menu */
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown > a::after {
+            content: ' ▾';
+            font-size: 0.7rem;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 1000;
+            margin-top: 0.5rem;
+        }
+
+        .nav-dropdown:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 0.6rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+        }
+
+        .dropdown-menu a::after {
+            display: none !important;
+        }
+
         /* Mobile hamburger menu */
         .hamburger {
             display: none;
@@ -3019,7 +3070,8 @@
         <a href="#demo" data-mobile-link>AI Demo</a>
         <a href="#testimonials" data-mobile-link>Reviews</a>
         <a href="blog.html" data-mobile-link>Blog</a>
-        <a href="/trends" data-mobile-link>Trends 📊</a>
+        <a href="/trends" data-mobile-link>📊 YouTube Trends</a>
+        <a href="/intake" data-mobile-link>⚖️ Case Trends</a>
         <a href="#contact" data-mobile-link>Contact Us</a>
     </div>
 
@@ -3034,7 +3086,13 @@
                 <li><a href="#demo" data-nav>AI Demo</a></li>
                 <li><a href="#testimonials" data-nav>Reviews</a></li>
                 <li><a href="blog.html" data-nav>Blog</a></li>
-                <li><a href="/trends" data-nav>Trends 📊</a></li>
+                <li class="nav-dropdown">
+                    <a href="#" data-nav>Trends</a>
+                    <div class="dropdown-menu">
+                        <a href="/trends">📊 YouTube Trends</a>
+                        <a href="/intake">⚖️ Case Trends</a>
+                    </div>
+                </li>
                 <li><a href="#contact" class="nav-cta">Contact Us</a></li>
             </ul>
             <button class="hamburger" id="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileMenu">

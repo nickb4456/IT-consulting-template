@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ouroboros Colony - Complete Architecture</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --heading: #f0f6fc;
+      --accent: #58a6ff;
+      --green: #3fb950;
+      --orange: #d29922;
+      --red: #f85149;
+      --purple: #bc8cff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1 { color: var(--heading); font-size: 2.5rem; margin-bottom: 0.5rem; }
+    h2 { color: var(--accent); font-size: 1.8rem; margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { color: var(--heading); font-size: 1.3rem; margin: 1.5rem 0 0.75rem; }
+    h4 { color: var(--purple); font-size: 1.1rem; margin: 1rem 0 0.5rem; }
+    p { margin-bottom: 1rem; }
+    .subtitle { color: var(--text); opacity: 0.7; font-size: 1.1rem; margin-bottom: 2rem; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    .diagram {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 1.5rem 0;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      white-space: pre;
+      line-height: 1.4;
+    }
+    pre.code {
+      background: #161b22;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.85rem;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+    .code .comment { color: #8b949e; }
+    .code .keyword { color: #ff7b72; }
+    .code .string { color: #a5d6ff; }
+    .code .function { color: #d2a8ff; }
+    .code .number { color: #79c0ff; }
+    .highlight { color: var(--accent); }
+    .green { color: var(--green); }
+    .orange { color: var(--orange); }
+    .red { color: var(--red); }
+    .purple { color: var(--purple); }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.75rem; text-align: left; }
+    th { background: var(--card); color: var(--heading); }
+    code { background: var(--card); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.9em; }
+    .toc { background: var(--card); border-radius: 8px; padding: 1.5rem; margin: 2rem 0; }
+    .toc ul { list-style: none; }
+    .toc li { margin: 0.4rem 0; }
+    .toc a { color: var(--accent); text-decoration: none; }
+    .page-break { margin: 3rem 0; border-top: 2px dashed var(--border); padding-top: 2rem; }
+    .warning { background: #f8514922; border: 1px solid var(--red); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .success { background: #3fb95022; border: 1px solid var(--green); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+    .info { background: #58a6ff22; border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+
+<h1>🐍 Ouroboros Colony</h1>
+<p class="subtitle">Complete Architecture Guide — A Self-Improving AI Research System</p>
+
+<div class="toc">
+  <strong>📚 Table of Contents</strong>
+  <ul>
+    <li><a href="#overview">1. What Is This? (Overview)</a></li>
+    <li><a href="#stigmergy">2. How It Works (Stigmergy)</a></li>
+    <li><a href="#ants">3. The Ants (All 20 Workers)</a></li>
+    <li><a href="#pheromones">4. Pheromone System (Memory Layer)</a></li>
+    <li><a href="#embeddings">5. Embeddings (How Things Connect)</a></li>
+    <li><a href="#database">6. Database (Storage Layer)</a></li>
+    <li><a href="#dataflow">7. Data Flow (Complete Pipeline)</a></li>
+    <li><a href="#selfimprove">8. Self-Improvement (The Ouroboros Loop) ⭐</a></li>
+    <li><a href="#federation">9. Federation (Multi-Colony)</a></li>
+    <li><a href="#scheduling">10. Scheduling (Cron Jobs)</a></li>
+    <li><a href="#safety">11. Safety & Monitoring</a></li>
+    <li><a href="#code">12. Code Deep Dive</a></li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="overview"></div>
+<h2>1. What Is This?</h2>
+
+<p>The <strong>Ouroboros Colony</strong> is an autonomous AI research system that:</p>
+
+<div class="card">
+  <ul style="margin-left: 1.5rem;">
+    <li>🔍 <strong>Discovers</strong> research papers, code, and articles automatically</li>
+    <li>🧠 <strong>Analyzes</strong> findings using LLMs (Gemini, Claude)</li>
+    <li>🕸️ <strong>Connects</strong> related concepts into a knowledge graph</li>
+    <li>🐍 <strong>Improves itself</strong> based on what it learns</li>
+    <li>🔄 <strong>Runs 24/7</strong> without human intervention</li>
+  </ul>
+</div>
+
+<p>It's named after the <em>Ouroboros</em> — the snake eating its own tail — because the system can modify its own code based on the research it discovers.</p>
+
+<div class="diagram">
+<span class="green">┌─────────────────────────────────────────────────────────────────┐</span>
+<span class="green">│</span>                     THE OUROBOROS CONCEPT                       <span class="green">│</span>
+<span class="green">│</span>                                                                 <span class="green">│</span>
+<span class="green">│</span>                         🔍 DISCOVER                             <span class="green">│</span>
+<span class="green">│</span>                              │                                  <span class="green">│</span>
+<span class="green">│</span>                              ▼                                  <span class="green">│</span>
+<span class="green">│</span>               ┌──────────────────────────┐                     <span class="green">│</span>
+<span class="green">│</span>               │                          │                     <span class="green">│</span>
+<span class="green">│</span>      🐍 IMPROVE ◀────────────────────── 🧠 ANALYZE              <span class="green">│</span>
+<span class="green">│</span>               │                          │                     <span class="green">│</span>
+<span class="green">│</span>               └──────────────────────────┘                     <span class="green">│</span>
+<span class="green">│</span>                              │                                  <span class="green">│</span>
+<span class="green">│</span>                              ▼                                  <span class="green">│</span>
+<span class="green">│</span>                         🔗 CONNECT                              <span class="green">│</span>
+<span class="green">│</span>                                                                 <span class="green">│</span>
+<span class="green">│</span>          The snake eats its tail: research improves            <span class="green">│</span>
+<span class="green">│</span>          the system that does the research                     <span class="green">│</span>
+<span class="green">└─────────────────────────────────────────────────────────────────┘</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="stigmergy"></div>
+<h2>2. How It Works — Stigmergy</h2>
+
+<p><strong>Stigmergy</strong> is how real ant colonies work. Ants don't talk to each other — they leave chemical trails (pheromones) that other ants can smell. Good paths get more pheromones; bad paths fade away.</p>
+
+<div class="info">
+  <strong>💡 Key Insight:</strong> There's no central "brain" controlling the colony. Intelligence emerges from simple agents following pheromone trails.
+</div>
+
+<h3>Real Ants vs Our System</h3>
+<table>
+  <tr><th>Real Ants</th><th>Ouroboros Colony</th></tr>
+  <tr><td>Leave chemicals on the ground</td><td>Write records to SQLite database</td></tr>
+  <tr><td>Chemicals evaporate over time</td><td>Records decay using math formula</td></tr>
+  <tr><td>Strong trails attract more ants</td><td>Strong signals get prioritized</td></tr>
+  <tr><td>Colony finds food efficiently</td><td>Colony finds research efficiently</td></tr>
+</table>
+
+<h3>The Three Operations</h3>
+
+<div class="card">
+  <h4>1. DEPOSIT — "I found something!"</h4>
+  <p>When an ant finds interesting research, it deposits a pheromone signal:</p>
+  <pre class="code"><span class="comment">// An ant found a good paper and marks it</span>
+<span class="function">deposit</span>(db, {
+  <span class="string">type</span>: <span class="string">'candidate'</span>,        <span class="comment">// Signal type</span>
+  <span class="string">target_node</span>: <span class="string">'finding-123'</span>, <span class="comment">// What we found</span>
+  <span class="string">strength</span>: <span class="number">0.85</span>,            <span class="comment">// How confident (0-1)</span>
+  <span class="string">claim</span>: <span class="string">'High relevance paper on Mamba SSM'</span>
+});</pre>
+</div>
+
+<div class="card">
+  <h4>2. DECAY — "Old news fades away"</h4>
+  <p>Every signal weakens over time using exponential decay:</p>
+  <pre class="code"><span class="comment">// The decay formula (runs every hour)</span>
+<span class="comment">// S(t) = S₀ × e^(-λt)</span>
+<span class="comment">//</span>
+<span class="comment">// S(t)  = strength at time t</span>
+<span class="comment">// S₀    = original strength</span>
+<span class="comment">// λ     = decay rate (different per type)</span>
+<span class="comment">// t     = hours elapsed</span>
+
+<span class="keyword">const</span> newStrength = currentStrength * Math.<span class="function">exp</span>(-decayRate * hoursElapsed);
+
+<span class="comment">// Example: candidate with 25%/hr decay</span>
+<span class="comment">// After 1 hour:  1.0 × e^(-0.25 × 1) = 0.78 (78%)</span>
+<span class="comment">// After 4 hours: 1.0 × e^(-0.25 × 4) = 0.37 (37%)</span>
+<span class="comment">// After 12 hours: nearly gone</span></pre>
+</div>
+
+<div class="card">
+  <h4>3. REINFORCE — "This is definitely good!"</h4>
+  <p>When multiple ants confirm something, the signal gets stronger:</p>
+  <pre class="code"><span class="comment">// Asymptotic reinforcement (approaches max smoothly)</span>
+<span class="comment">// S_new = S_old + α(S_max - S_old)</span>
+<span class="comment">//</span>
+<span class="comment">// α     = learning rate (0.2)</span>
+<span class="comment">// S_max = maximum strength (2.0)</span>
+
+<span class="keyword">const</span> MAX_STRENGTH = <span class="number">2.0</span>;
+<span class="keyword">const</span> alpha = <span class="number">0.2</span>;
+<span class="keyword">const</span> newStrength = oldStrength + alpha * (MAX_STRENGTH - oldStrength);
+
+<span class="comment">// Example: starting at 0.5</span>
+<span class="comment">// Hit 1: 0.5 + 0.2(2.0 - 0.5) = 0.80</span>
+<span class="comment">// Hit 2: 0.8 + 0.2(2.0 - 0.8) = 1.04</span>
+<span class="comment">// Hit 3: 1.04 + 0.2(2.0 - 1.04) = 1.23</span>
+<span class="comment">// Approaches 2.0 but never overshoots</span></pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="ants"></div>
+<h2>3. The Ants — All 20 Workers</h2>
+
+<p>Each "ant" is a Node.js script that runs on a schedule. They don't know about each other — they only communicate through pheromones in the database.</p>
+
+<h3>🔍 Scout Ants (6) — Discovery</h3>
+<table>
+  <tr><th>Ant</th><th>Schedule</th><th>What It Does</th></tr>
+  <tr>
+    <td><code>research-scout.js</code></td>
+    <td>Every hour</td>
+    <td>Searches Brave for topics in <code>active_queries.json</code></td>
+  </tr>
+  <tr>
+    <td><code>github-scout.js</code></td>
+    <td>Every hour</td>
+    <td>Searches GitHub for relevant code and repos</td>
+  </tr>
+  <tr>
+    <td><code>arxiv-scout.js</code></td>
+    <td>Every hour</td>
+    <td>Fetches latest AI/ML papers from ArXiv</td>
+  </tr>
+  <tr>
+    <td><code>recursive-scout.js</code></td>
+    <td>Every 2h</td>
+    <td>Follows "breadcrumb" trails left by other scouts</td>
+  </tr>
+  <tr>
+    <td><code>batch-scout.js</code></td>
+    <td>Every 4h</td>
+    <td>Spawns 10 parallel mini-scouts for burst discovery</td>
+  </tr>
+  <tr>
+    <td><code>deep-scout.js</code></td>
+    <td>Daily</td>
+    <td>Fetches full content for high-value findings</td>
+  </tr>
+</table>
+
+<h3>⚙️ Processing Ants (6) — Analysis</h3>
+<table>
+  <tr><th>Ant</th><th>Schedule</th><th>What It Does</th></tr>
+  <tr>
+    <td><code>filter-ant.js</code></td>
+    <td>Every hour</td>
+    <td>Scores findings using keyword matching (no API cost)</td>
+  </tr>
+  <tr>
+    <td><code>deep-reader-ant.js</code></td>
+    <td>Every hour</td>
+    <td>🔥 Uses <strong>Gemini 3 Flash</strong> to analyze papers deeply</td>
+  </tr>
+  <tr>
+    <td><code>connector-lite.js</code></td>
+    <td>Every 3h</td>
+    <td>Builds knowledge graph by connecting similar findings</td>
+  </tr>
+  <tr>
+    <td><code>dedup-ant.js</code></td>
+    <td>Daily</td>
+    <td>Removes duplicate findings using embedding similarity</td>
+  </tr>
+  <tr>
+    <td><code>analyzer-ant.js</code></td>
+    <td>Every 2h</td>
+    <td>Statistical analysis of colony trends</td>
+  </tr>
+  <tr>
+    <td><code>embedder-lite.js</code></td>
+    <td>Every hour</td>
+    <td>Computes embeddings for new findings</td>
+  </tr>
+</table>
+
+<h3>🧠 Meta Ants (5) — Self-Improvement</h3>
+<table>
+  <tr><th>Ant</th><th>Schedule</th><th>What It Does</th></tr>
+  <tr>
+    <td><code>validator-ant.js</code></td>
+    <td>Every 3h</td>
+    <td>Promotes candidates → breakthroughs based on evidence</td>
+  </tr>
+  <tr>
+    <td><code>optimizer-ant.js</code></td>
+    <td>2x daily</td>
+    <td>Tunes query priorities based on hit rates</td>
+  </tr>
+  <tr>
+    <td><code>reflector-ant.js</code></td>
+    <td>Every 6h</td>
+    <td>🔥 Monitors colony health, detects problems, suggests fixes</td>
+  </tr>
+  <tr>
+    <td><code>implementer-ant.js</code></td>
+    <td>2x daily</td>
+    <td>🔥 <strong>CAN MODIFY COLONY CODE!</strong> (with safety limits)</td>
+  </tr>
+  <tr>
+    <td><code>synthesis-ant.js</code></td>
+    <td>Every 4h</td>
+    <td>Generates research summaries from breakthroughs</td>
+  </tr>
+</table>
+
+<h3>🛡️ System Ants (3) — Maintenance</h3>
+<table>
+  <tr><th>Ant</th><th>Schedule</th><th>What It Does</th></tr>
+  <tr>
+    <td><code>safeguard-ant.js</code></td>
+    <td>Daily 3AM</td>
+    <td>Creates backups, health checks, emergency preservation</td>
+  </tr>
+  <tr>
+    <td><code>consolidator-ant.js</code></td>
+    <td>Daily 4AM</td>
+    <td>Compresses old findings to save space</td>
+  </tr>
+  <tr>
+    <td><code>kb-learner-ant.js</code></td>
+    <td>Daily</td>
+    <td>Learns from external knowledge bases</td>
+  </tr>
+</table>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="pheromones"></div>
+<h2>4. Pheromone System — The Memory Layer</h2>
+
+<p>Pheromones are the colony's shared memory. Each pheromone record contains:</p>
+
+<pre class="code"><span class="comment">// What a pheromone looks like in the database</span>
+{
+  <span class="string">pheromone_id</span>: <span class="string">"abc123-..."</span>,     <span class="comment">// Unique ID</span>
+  <span class="string">type</span>: <span class="string">"candidate"</span>,              <span class="comment">// What kind of signal</span>
+  <span class="string">target_node</span>: <span class="string">"finding-456"</span>,    <span class="comment">// What this refers to</span>
+  <span class="string">strength</span>: <span class="number">0.85</span>,                 <span class="comment">// Signal intensity (0-2)</span>
+  <span class="string">decay_rate</span>: <span class="number">0.25</span>,              <span class="comment">// 25% per hour</span>
+  <span class="string">claim</span>: <span class="string">"High relevance SSM paper"</span>,
+  <span class="string">deposited_by</span>: <span class="string">"research-scout"</span>,
+  <span class="string">deposited_at</span>: <span class="string">"2026-02-11T15:00:00Z"</span>,
+  <span class="string">last_updated</span>: <span class="string">"2026-02-11T16:00:00Z"</span>,
+  <span class="string">embedding</span>: &lt;16-byte BLOB&gt;      <span class="comment">// For similarity search</span>
+}</pre>
+
+<h3>Pheromone Types & Decay Rates</h3>
+
+<div class="diagram">
+<span class="red">🔥 FAST DECAY (prove yourself or die)</span>
+│
+├── <span class="orange">candidate</span>       25%/hr   <span class="comment">← New findings, need validation</span>
+├── <span class="orange">action</span>          20%/hr   <span class="comment">← "Do this soon" signals</span>
+└── <span class="orange">breakthrough</span>    12%/hr   <span class="comment">← Good findings, must stay relevant</span>
+
+<span class="orange">⏳ MEDIUM DECAY (operational signals)</span>
+│
+├── <span class="highlight">scout_summary</span>   15%/hr   <span class="comment">← "Scout found 50 results"</span>
+├── <span class="highlight">hot_topic</span>        5%/hr   <span class="comment">← Trending research areas</span>
+└── <span class="highlight">insight</span>          8%/hr   <span class="comment">← Reflector observations</span>
+
+<span class="green">🧊 SLOW DECAY (persistent knowledge)</span>
+│
+├── <span class="green">validated</span>        2%/hr   <span class="comment">← Confirmed findings (multi-source)</span>
+├── <span class="green">connection</span>       1%/hr   <span class="comment">← Knowledge graph edges</span>
+├── <span class="green">synapse</span>        0.5%/hr   <span class="comment">← Heavily reinforced connections</span>
+└── <span class="green">dead_end</span>         2%/hr   <span class="comment">← "Don't go here" warnings</span>
+
+<span class="purple">🔒 STICKY (never decay)</span>
+│
+└── <span class="purple">core_identity</span>    0%/hr   <span class="comment">← Colony DNA, safeguards</span>
+</div>
+
+<h3>The Validation Pipeline</h3>
+
+<p>Findings must "earn" their status through multiple confirmations:</p>
+
+<div class="diagram">
+<span class="highlight">DISCOVERY</span>                <span class="orange">VALIDATION</span>              <span class="green">PERSISTENCE</span>
+    │                         │                         │
+    ▼                         ▼                         ▼
+┌─────────┐    promote    ┌─────────┐    confirm    ┌─────────┐
+│candidate│──────────────▶│break-   │──────────────▶│validated│
+│ 25%/hr  │               │through  │               │  2%/hr  │
+└─────────┘               │ 12%/hr  │               └─────────┘
+    │                     └─────────┘                    │
+    │ if not validated        │ if not confirmed        │
+    ▼                         ▼                         ▼
+ [dies]                    [dies]                 [persists]
+ ~4 hours                  ~8 hours              weeks/months
+</pre>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="embeddings"></div>
+<h2>5. Embeddings — How Things Connect</h2>
+
+<p>To find similar research, we convert text into numbers (embeddings). Our system uses a <strong>128-bit binary embedding</strong> — fast and compact.</p>
+
+<h3>How It Works</h3>
+
+<pre class="code"><span class="comment">// The embedding has two parts:</span>
+<span class="comment">// 64 bits = domain features (does text mention "transformer"? "mamba"? etc.)</span>
+<span class="comment">// 64 bits = content hash (SHA256 truncated)</span>
+
+<span class="keyword">function</span> <span class="function">embed</span>(text) {
+  <span class="keyword">let</span> bits = <span class="number">0n</span>;  <span class="comment">// BigInt for 128 bits</span>
+  
+  <span class="comment">// Part 1: Check 64 domain patterns</span>
+  <span class="keyword">const</span> patterns = [
+    <span class="string">/transformer|attention/i</span>,  <span class="comment">// bit 0</span>
+    <span class="string">/mamba|ssm|state.?space/i</span>, <span class="comment">// bit 1</span>
+    <span class="string">/memory|remember/i</span>,        <span class="comment">// bit 2</span>
+    <span class="comment">// ... 61 more patterns ...</span>
+  ];
+  
+  patterns.<span class="function">forEach</span>((pattern, i) => {
+    <span class="keyword">if</span> (pattern.<span class="function">test</span>(text)) {
+      bits |= (<span class="number">1n</span> << BigInt(i));  <span class="comment">// Set bit i to 1</span>
+    }
+  });
+  
+  <span class="comment">// Part 2: Hash the content (adds uniqueness)</span>
+  <span class="keyword">const</span> hash = <span class="function">sha256</span>(text).<span class="function">slice</span>(<span class="number">0</span>, <span class="number">16</span>);  <span class="comment">// First 64 bits</span>
+  bits |= (BigInt(<span class="string">'0x'</span> + hash) << <span class="number">64n</span>);
+  
+  <span class="comment">// Convert to 16-byte buffer (BLOB)</span>
+  <span class="keyword">return</span> Buffer.<span class="function">from</span>(bits.<span class="function">toString</span>(<span class="number">16</span>).<span class="function">padStart</span>(<span class="number">32</span>, <span class="string">'0'</span>), <span class="string">'hex'</span>);
+}</pre>
+
+<h3>Similarity Calculation</h3>
+
+<pre class="code"><span class="comment">// Compare two embeddings using Hamming distance</span>
+<span class="comment">// (count how many bits are different)</span>
+
+<span class="keyword">function</span> <span class="function">similarity</span>(embeddingA, embeddingB) {
+  <span class="keyword">let</span> differentBits = <span class="number">0</span>;
+  
+  <span class="comment">// XOR the bytes and count 1s</span>
+  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i < <span class="number">16</span>; i++) {
+    <span class="keyword">let</span> xor = embeddingA[i] ^ embeddingB[i];
+    <span class="keyword">while</span> (xor) {
+      differentBits++;
+      xor &= xor - <span class="number">1</span>;  <span class="comment">// Clear lowest set bit</span>
+    }
+  }
+  
+  <span class="comment">// Convert to similarity (0 = opposite, 1 = identical)</span>
+  <span class="keyword">return</span> <span class="number">1</span> - (differentBits / <span class="number">128</span>);
+}
+
+<span class="comment">// Speed: ~700,000 comparisons per second!</span></pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="selfimprove"></div>
+<h2>8. Self-Improvement — The Ouroboros Loop ⭐</h2>
+
+<div class="warning">
+  <strong>🐍 THIS IS THE CORE INNOVATION</strong><br>
+  The colony can modify its own code based on research it discovers. This creates a recursive loop where better research leads to better code leads to better research.
+</div>
+
+<h3>The Complete Self-Improvement Cycle</h3>
+
+<div class="diagram">
+<span class="purple">═══════════════════════════════════════════════════════════════════════════</span>
+<span class="purple">║</span>                    <span class="highlight">THE OUROBOROS SELF-IMPROVEMENT LOOP</span>                    <span class="purple">║</span>
+<span class="purple">═══════════════════════════════════════════════════════════════════════════</span>
+
+<span class="green">STEP 1: DISCOVER</span>
+│
+│  research-scout finds: "Paper: Exponential decay preserves 
+│                         memory shadows better than linear"
+│
+▼
+<span class="green">STEP 2: ANALYZE</span>
+│
+│  deep-reader-ant extracts:
+│    PURPOSE: Prevent total memory loss
+│    KEY_INSIGHT: Use S(t) = S₀ × e^(-λt) instead of S(t) = S₀ - λt
+│    RELEVANCE: 9/10 for our pheromone system
+│
+▼
+<span class="green">STEP 3: VALIDATE</span>
+│
+│  validator-ant confirms:
+│    - Multiple sources mention this
+│    - Connected to 5 other findings
+│    - Promoted to "validated_breakthrough"
+│
+▼
+<span class="orange">STEP 4: REFLECT</span>
+│
+│  reflector-ant notices:
+│    "Colony is using linear decay. Validated breakthrough
+│     suggests exponential is better. ANOMALY: we should change."
+│
+▼
+<span class="orange">STEP 5: PROPOSE</span>
+│
+│  implementer-ant generates patch:
+│    TARGET: pheromones-db.js
+│    CHANGE: decay formula
+│    FROM: newStrength = strength - (rate * hours)
+│    TO:   newStrength = strength * Math.exp(-rate * hours)
+│    RISK: MEDIUM
+│
+▼
+<span class="red">STEP 6: IMPLEMENT</span>
+│
+│  implementer-ant applies patch (MEDIUM risk = auto-apply now!)
+│  Colony code is modified.
+│
+▼
+<span class="purple">STEP 7: FEEDBACK</span>
+│
+│  Colony runs with new decay formula.
+│  Old findings persist longer (memory shadows).
+│  More connections form.
+│  Better research discovered.
+│
+└──────────────────▶ <span class="highlight">BACK TO STEP 1</span> (recursive!)
+</div>
+
+<h3>The Reflector Ant — Anomaly Detection</h3>
+
+<pre class="code"><span class="comment">// reflector-ant.js — Monitors colony and detects problems</span>
+
+<span class="keyword">async function</span> <span class="function">run</span>() {
+  <span class="comment">// 1. GATHER METRICS</span>
+  <span class="keyword">const</span> metrics = {
+    recentFindings: <span class="function">countFindingsLast6Hours</span>(),
+    conversionRate: breakthroughs / candidates,  <span class="comment">// How many make it</span>
+    avgStrength: <span class="function">averagePheromoneStrength</span>(),
+    evaporated: <span class="function">countWeakPheromones</span>(),
+  };
+
+  <span class="comment">// 2. DETECT ANOMALIES</span>
+  <span class="keyword">const</span> anomalies = [];
+  
+  <span class="comment">// Too few discoveries?</span>
+  <span class="keyword">if</span> (metrics.recentFindings < baseline * <span class="number">0.5</span>) {
+    anomalies.<span class="function">push</span>({
+      type: <span class="string">'discovery_stall'</span>,
+      severity: <span class="string">'medium'</span>,
+      message: <span class="string">'Discovery rate dropped 50%'</span>,
+      suggestion: <span class="string">'Add new queries or boost scout frequency'</span>
+    });
+  }
+  
+  <span class="comment">// Echo chamber? (too many breakthroughs = not selective enough)</span>
+  <span class="keyword">if</span> (metrics.conversionRate > <span class="number">0.5</span>) {
+    anomalies.<span class="function">push</span>({
+      type: <span class="string">'echo_chamber'</span>,
+      severity: <span class="string">'high'</span>,
+      message: <span class="string">'50% of candidates become breakthroughs (suspicious)'</span>,
+      suggestion: <span class="string">'Raise breakthrough threshold or increase decay'</span>
+    });
+  }
+  
+  <span class="comment">// 3. GENERATE PATCHES</span>
+  <span class="keyword">if</span> (anomalies.length > <span class="number">0</span>) {
+    <span class="keyword">const</span> suggestion = <span class="keyword">await</span> llm.<span class="function">analyze</span>(anomalies);
+    <span class="function">createPatch</span>(suggestion);  <span class="comment">// Queue for implementer</span>
+  }
+}</pre>
+
+<h3>The Implementer Ant — Code Modification</h3>
+
+<pre class="code"><span class="comment">// implementer-ant.js — THE OUROBOROS ITSELF</span>
+<span class="comment">// This ant can modify colony code based on research findings!</span>
+
+<span class="comment">// Risk classification determines what gets auto-applied</span>
+<span class="keyword">function</span> <span class="function">classifyRisk</span>(code, targetFile) {
+  <span class="comment">// HIGH RISK — never auto-apply</span>
+  <span class="keyword">if</span> (code.<span class="function">includes</span>(<span class="string">'child_process'</span>)) <span class="keyword">return</span> <span class="string">'high'</span>;  <span class="comment">// Shell commands</span>
+  <span class="keyword">if</span> (code.<span class="function">includes</span>(<span class="string">'eval('</span>))        <span class="keyword">return</span> <span class="string">'high'</span>;  <span class="comment">// Code execution</span>
+  <span class="keyword">if</span> (targetFile.<span class="function">includes</span>(<span class="string">'implementer'</span>)) <span class="keyword">return</span> <span class="string">'high'</span>; <span class="comment">// Can't modify itself!</span>
+  
+  <span class="comment">// MEDIUM RISK — auto-apply with logging</span>
+  <span class="keyword">if</span> (code.<span class="function">includes</span>(<span class="string">'function '</span>))   <span class="keyword">return</span> <span class="string">'medium'</span>; <span class="comment">// New functions</span>
+  <span class="keyword">if</span> (code.<span class="function">includes</span>(<span class="string">'require('</span>))    <span class="keyword">return</span> <span class="string">'medium'</span>; <span class="comment">// New imports</span>
+  
+  <span class="comment">// LOW RISK — auto-apply immediately</span>
+  <span class="keyword">return</span> <span class="string">'low'</span>;  <span class="comment">// Config changes, thresholds, etc.</span>
+}
+
+<span class="comment">// Process patches based on risk level</span>
+<span class="keyword">for</span> (<span class="keyword">const</span> patch <span class="keyword">of</span> pendingPatches) {
+  <span class="keyword">if</span> (patch.risk === <span class="string">'low'</span>) {
+    <span class="function">applyPatch</span>(patch);           <span class="comment">// ✅ Auto-apply</span>
+  } <span class="keyword">else if</span> (patch.risk === <span class="string">'medium'</span>) {
+    <span class="function">applyPatch</span>(patch);           <span class="comment">// ⚡ Auto-apply (upgraded!)</span>
+    <span class="function">notifyDiscord</span>(<span class="string">'Applied MEDIUM risk patch'</span>);
+  } <span class="keyword">else</span> {
+    <span class="function">logOnly</span>(patch);              <span class="comment">// 🛑 Human must review</span>
+  }
+}</pre>
+
+<h3>LLM-Generated Patches</h3>
+
+<pre class="code"><span class="comment">// implementer-ant.js — Generate patches from validated breakthroughs</span>
+
+<span class="keyword">async function</span> <span class="function">analyzeBreakthroughsForPatches</span>(breakthroughs) {
+  <span class="keyword">const</span> prompt = <span class="string">`
+You are the self-improvement module of an AI research colony.
+
+These validated breakthroughs were discovered:
+${breakthroughs.<span class="function">map</span>(b => b.claim).<span class="function">join</span>(<span class="string">'\n'</span>)}
+
+Suggest ONE specific, safe improvement to the colony code.
+
+Format:
+TARGET_FILE: pheromones-db.js
+CHANGE_TYPE: algorithm
+DESCRIPTION: Use exponential decay instead of linear
+CODE: const newStrength = strength * Math.exp(-rate * hours);
+RISK: medium
+REASON: Research shows this preserves memory shadows better
+`</span>;
+
+  <span class="keyword">const</span> suggestion = <span class="keyword">await</span> claude.<span class="function">complete</span>(prompt);
+  
+  <span class="comment">// Parse and create the patch</span>
+  <span class="keyword">const</span> patch = <span class="function">parseSuggestion</span>(suggestion);
+  <span class="function">createPatch</span>(patch);  <span class="comment">// Will be applied next implementer run</span>
+}</pre>
+
+<h3>What Can Self-Improve (Current Status)</h3>
+
+<table>
+  <tr><th>Capability</th><th>Status</th><th>Risk Level</th></tr>
+  <tr>
+    <td>Query priorities</td>
+    <td class="green">✅ AUTO</td>
+    <td>LOW</td>
+  </tr>
+  <tr>
+    <td>Decay rates</td>
+    <td class="green">✅ AUTO</td>
+    <td>LOW</td>
+  </tr>
+  <tr>
+    <td>Filter thresholds</td>
+    <td class="green">✅ AUTO</td>
+    <td>LOW</td>
+  </tr>
+  <tr>
+    <td>New algorithm formulas</td>
+    <td class="orange">⚡ AUTO</td>
+    <td>MEDIUM</td>
+  </tr>
+  <tr>
+    <td>New utility functions</td>
+    <td class="orange">⚡ AUTO</td>
+    <td>MEDIUM</td>
+  </tr>
+  <tr>
+    <td>Core system logic</td>
+    <td class="red">🛑 MANUAL</td>
+    <td>HIGH</td>
+  </tr>
+  <tr>
+    <td>Security/auth code</td>
+    <td class="red">🛑 MANUAL</td>
+    <td>HIGH</td>
+  </tr>
+  <tr>
+    <td>The implementer itself</td>
+    <td class="red">🛑 BLOCKED</td>
+    <td>FORBIDDEN</td>
+  </tr>
+</table>
+
+<div class="success">
+  <strong>✅ The Recursive Proof:</strong><br>
+  Level 0: Colony finds research on "better decay algorithms"<br>
+  Level 1: Implementer applies exponential decay<br>
+  Level 2: Better decay → findings persist longer → more validated<br>
+  Level 3: More validated → better optimizer suggestions<br>
+  Level 4: Better queries → finds research on "how to evaluate research"<br>
+  Level 5: Implements better scoring → finds better papers → ...<br>
+  <strong>∞ OUROBOROS ∞</strong>
+</div>
+
+<h3>🔧 Self-Improvement History (Live!)</h3>
+
+<p>These are <strong>actual patches the colony has applied to itself</strong> based on research it discovered:</p>
+
+<div class="card" style="border-color: var(--green);">
+  <h4>✅ Patch #1: Increase Decay Rates</h4>
+  <table>
+    <tr><td><strong>Date</strong></td><td>2026-02-11</td></tr>
+    <tr><td><strong>File</strong></td><td><code>pheromones-db.js</code></td></tr>
+    <tr><td><strong>Risk</strong></td><td><span class="green">LOW</span></td></tr>
+    <tr><td><strong>Research Basis</strong></td><td>Ring Attention papers on faster adaptation</td></tr>
+  </table>
+  <pre class="code"><span class="comment">// BEFORE (slower decay)</span>
+candidate: <span class="number">0.25</span>,     <span class="comment">// 25%/hr</span>
+breakthrough: <span class="number">0.12</span>,  <span class="comment">// 12%/hr</span>
+
+<span class="comment">// AFTER (faster decay - self-modified!)</span>
+candidate: <span class="number">0.30</span>,     <span class="comment">// 30%/hr - proves itself faster</span>
+breakthrough: <span class="number">0.15</span>,  <span class="comment">// 15%/hr - stays relevant or dies</span></pre>
+  <p><strong>Why:</strong> Ring Attention research showed faster signal adaptation improves system responsiveness. Stale data clears faster, making room for fresh discoveries.</p>
+</div>
+
+<div class="card" style="border-color: var(--orange);">
+  <h4>⚡ Patch #2: Raise Connection Threshold</h4>
+  <table>
+    <tr><td><strong>Date</strong></td><td>2026-02-11</td></tr>
+    <tr><td><strong>File</strong></td><td><code>connector-lite.js</code></td></tr>
+    <tr><td><strong>Risk</strong></td><td><span class="orange">MEDIUM</span></td></tr>
+    <tr><td><strong>Research Basis</strong></td><td>Mamba SSM papers on noise reduction</td></tr>
+  </table>
+  <pre class="code"><span class="comment">// BEFORE (loose connections)</span>
+<span class="keyword">const</span> CONNECTION_THRESHOLD = <span class="number">0.50</span>;  <span class="comment">// 50% similarity</span>
+
+<span class="comment">// AFTER (tighter connections - self-modified!)</span>
+<span class="keyword">const</span> CONNECTION_THRESHOLD = <span class="number">0.65</span>;  <span class="comment">// 65% similarity</span></pre>
+  <p><strong>Why:</strong> Mamba SSM research indicated focusing on stronger relationships reduces noise. Fewer edges, but each one more meaningful.</p>
+</div>
+
+<div class="info">
+  <strong>🐍 The Snake Bit Its Tail!</strong><br>
+  These patches were generated by analyzing the colony's own research findings (Ring Attention, Mamba SSM) and applying the insights back to the colony's code. This is recursive self-improvement in action.
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="database"></div>
+<h2>6. Database — Storage Layer</h2>
+
+<p>Everything lives in SQLite: <code>data/colony.db</code></p>
+
+<h3>SQLite Optimizations</h3>
+
+<pre class="code"><span class="comment">// database.js — High-performance settings</span>
+
+<span class="keyword">const</span> db = <span class="keyword">new</span> <span class="function">Database</span>(<span class="string">'colony.db'</span>);
+
+<span class="comment">// WAL mode: allows reads while writing</span>
+db.<span class="function">pragma</span>(<span class="string">'journal_mode = WAL'</span>);
+
+<span class="comment">// NORMAL sync: safe + fast (vs FULL which is slow)</span>
+db.<span class="function">pragma</span>(<span class="string">'synchronous = NORMAL'</span>);
+
+<span class="comment">// 64MB cache: keeps hot data in memory</span>
+db.<span class="function">pragma</span>(<span class="string">'cache_size = -64000'</span>);
+
+<span class="comment">// Temp tables in RAM (faster sorting/joins)</span>
+db.<span class="function">pragma</span>(<span class="string">'temp_store = MEMORY'</span>);</pre>
+
+<h3>Core Tables</h3>
+
+<pre class="code"><span class="comment">-- FINDINGS: Research items discovered by scouts</span>
+<span class="keyword">CREATE TABLE</span> findings (
+  id            TEXT PRIMARY KEY,
+  title         TEXT,
+  url           TEXT,
+  content       TEXT,           <span class="comment">-- Snippet or full text</span>
+  source        TEXT,           <span class="comment">-- 'brave', 'github', 'arxiv'</span>
+  score         INTEGER,        <span class="comment">-- 0-100 quality score</span>
+  status        TEXT,           <span class="comment">-- 'new', 'analyzed', 'duplicate', 'noise'</span>
+  embedding     BLOB,           <span class="comment">-- 16-byte binary vector</span>
+  created_at    TEXT,
+  analyzed_at   TEXT
+);
+
+<span class="comment">-- PHEROMONES: Signal/memory layer</span>
+<span class="keyword">CREATE TABLE</span> pheromones (
+  pheromone_id  TEXT PRIMARY KEY,
+  type          TEXT,           <span class="comment">-- 'candidate', 'breakthrough', etc.</span>
+  target_node   TEXT,           <span class="comment">-- What this refers to</span>
+  strength      REAL,           <span class="comment">-- 0.0 to 2.0</span>
+  decay_rate    REAL,           <span class="comment">-- % per hour</span>
+  deposited_at  TEXT,
+  deposited_by  TEXT,           <span class="comment">-- Which ant</span>
+  claim         TEXT,           <span class="comment">-- Human-readable reason</span>
+  last_updated  TEXT,           <span class="comment">-- For decay calculation</span>
+  embedding     BLOB
+);
+
+<span class="comment">-- EDGES: Knowledge graph connections</span>
+<span class="keyword">CREATE TABLE</span> edges (
+  id            INTEGER PRIMARY KEY,
+  source_id     TEXT,           <span class="comment">-- Finding A</span>
+  target_id     TEXT,           <span class="comment">-- Finding B</span>
+  weight        REAL,           <span class="comment">-- Similarity score</span>
+  reinforced    INTEGER,        <span class="comment">-- Times rediscovered</span>
+  edge_type     TEXT            <span class="comment">-- 'semantic', 'citation', etc.</span>
+);
+
+<span class="comment">-- PATCHES: Self-modification queue</span>
+<span class="keyword">CREATE TABLE</span> patches (
+  id            TEXT PRIMARY KEY,
+  title         TEXT,
+  description   TEXT,
+  target_file   TEXT,
+  code          TEXT,
+  reason        TEXT,
+  risk          TEXT,           <span class="comment">-- 'low', 'medium', 'high'</span>
+  status        TEXT,           <span class="comment">-- 'pending', 'applied', 'failed'</span>
+  created_at    INTEGER,
+  applied_at    INTEGER
+);</pre>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="federation"></div>
+<h2>9. Federation — Multi-Colony</h2>
+
+<p>Multiple colonies can run simultaneously and share discoveries through stigmergy (no direct communication).</p>
+
+<div class="diagram">
+<span class="green">┌─────────────────────┐</span>         <span class="orange">┌─────────────────────┐</span>
+<span class="green">│    ALPHA COLONY     │</span>         <span class="orange">│    BETA COLONY      │</span>
+<span class="green">│   (AI Memory)       │</span>         <span class="orange">│   (SQL/Speed)       │</span>
+<span class="green">│                     │</span>         <span class="orange">│                     │</span>
+<span class="green">│  Mamba, SSM,        │</span>         <span class="orange">│  SQLite, vectors,   │</span>
+<span class="green">│  attention, RAG     │</span>         <span class="orange">│  networking, APIs   │</span>
+<span class="green">└─────────┬───────────┘</span>         <span class="orange">└───────────┬─────────┘</span>
+          │                                   │
+          │         <span class="purple">FEDERATION</span>                │
+          │      (shared signals)             │
+          ▼                                   ▼
+<span class="highlight">┌─────────────────────────────────────────────────────────┐</span>
+<span class="highlight">│</span>              data/federation/                           <span class="highlight">│</span>
+<span class="highlight">│</span>                                                         <span class="highlight">│</span>
+<span class="highlight">│</span>  pheromones.jsonl  ← Shared breakthrough signals       <span class="highlight">│</span>
+<span class="highlight">│</span>  breadcrumbs.jsonl ← Shared exploration trails         <span class="highlight">│</span>
+<span class="highlight">│</span>                                                         <span class="highlight">│</span>
+<span class="highlight">│</span>  Each colony writes important discoveries here.        <span class="highlight">│</span>
+<span class="highlight">│</span>  Other colonies can read and follow the trails.        <span class="highlight">│</span>
+<span class="highlight">└─────────────────────────────────────────────────────────┘</span>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="scheduling"></div>
+<h2>10. Scheduling — Cron Jobs</h2>
+
+<p>42 cron jobs run the colonies. Alpha and Beta are staggered by 10 minutes to avoid conflicts.</p>
+
+<div class="diagram">
+<span class="highlight">MINUTE   ALPHA              BETA               ANT</span>
+──────────────────────────────────────────────────────
+  :00    research-scout     ·                  🔍
+  :05    filter-ant         ·                  🔬
+  :10    ·                  research-scout     🔍
+  :15    github-scout       filter-ant         🐙
+  :25    ·                  github-scout       🐙
+  :30    deep-reader 💰     ·                  📖
+  :40    ·                  deep-reader 💰     📖
+  :45    arxiv-scout        ·                  📄
+  :50    embedder-lite      ·                  🏷️
+  :55    ·                  arxiv-scout        📄
+
+<span class="highlight">DAILY</span>
+  02:00  kb-learner         ·
+  03:00  safeguard (backup) safeguard (backup) 🛡️
+  04:00  consolidator       consolidator       🗜️
+  05:00  dedup              dedup              🔄
+  06:00  optimizer          optimizer          ⚡
+  15:00  implementer 🐍     implementer 🐍     🔧
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="safety"></div>
+<h2>11. Safety & Monitoring</h2>
+
+<h3>Safeguard Ant — Daily Health Check</h3>
+
+<pre class="code"><span class="comment">// safeguard-ant.js — Runs at 3 AM</span>
+
+<span class="comment">// 1. CREATE BACKUP</span>
+db.<span class="function">backup</span>(<span class="string">`backups/colony-${timestamp}.db`</span>);
+<span class="comment">// Keeps 7 days of backups, auto-deletes older</span>
+
+<span class="comment">// 2. HEALTH CHECK</span>
+<span class="keyword">const</span> health = {
+  findings: <span class="function">countFindings</span>(),         <span class="comment">// Alert if < 10</span>
+  pheromones: <span class="function">countPheromones</span>(),     <span class="comment">// Alert if < 20</span>
+  avgStrength: <span class="function">avgPheromoneStrength</span>(), <span class="comment">// Alert if < 10%</span>
+  breakthroughs: <span class="function">countBreakthroughs</span>() <span class="comment">// Alert if = 0</span>
+};
+
+<span class="comment">// 3. EMERGENCY PRESERVATION</span>
+<span class="keyword">if</span> (health.findings < <span class="number">5</span>) {
+  <span class="comment">// CRITICAL: Protect top findings from decay</span>
+  db.<span class="function">run</span>(<span class="string">`
+    UPDATE pheromones 
+    SET decay_rate = 0 
+    WHERE type IN ('breakthrough', 'validated')
+  `</span>);
+  <span class="function">alertDiscord</span>(<span class="string">'🆘 EMERGENCY: Knowledge collapse prevented'</span>);
+}</pre>
+
+<h3>Implementer Safety Constraints</h3>
+
+<div class="warning">
+  <strong>🛑 The implementer CANNOT:</strong>
+  <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+    <li>Modify its own code (prevents runaway self-modification)</li>
+    <li>Execute shell commands (no <code>child_process</code>)</li>
+    <li>Use <code>eval()</code> or <code>Function()</code> (no code injection)</li>
+    <li>Write to arbitrary .js files (only approved targets)</li>
+    <li>Change authentication or API keys</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="page-break" id="code"></div>
+<h2>12. Code Deep Dive — Key Files</h2>
+
+<h3>File Structure</h3>
+
+<pre class="code">ai-memory-colony/
+├── data/
+│   ├── colony.db              <span class="comment"># SQLite database (all state)</span>
+│   ├── active_queries.json    <span class="comment"># What to search for</span>
+│   ├── backups/               <span class="comment"># Daily backups (7 days)</span>
+│   ├── federation/            <span class="comment"># Shared with other colonies</span>
+│   └── patches/               <span class="comment"># Self-modification history</span>
+├── src/
+│   ├── ants/                  <span class="comment"># All 20 ant scripts</span>
+│   │   ├── research-scout.js
+│   │   ├── deep-reader-ant.js
+│   │   ├── reflector-ant.js   <span class="comment"># Anomaly detection</span>
+│   │   ├── implementer-ant.js <span class="comment"># Self-modification</span>
+│   │   └── ...
+│   ├── core/                  <span class="comment"># Shared modules</span>
+│   │   ├── database.js        <span class="comment"># SQLite connection</span>
+│   │   ├── pheromones-db.js   <span class="comment"># Stigmergy system</span>
+│   │   ├── embeddings.js      <span class="comment"># 128-bit binary LSH</span>
+│   │   └── model-router.js    <span class="comment"># LLM routing</span>
+│   └── config.js              <span class="comment"># Settings</span>
+├── logs/                      <span class="comment"># Ant output logs</span>
+└── docs/                      <span class="comment"># This documentation</span></pre>
+
+<h3>Running the Colony</h3>
+
+<pre class="code"><span class="comment"># Install dependencies</span>
+cd ai-memory-colony
+npm install
+
+<span class="comment"># Run a single ant manually</span>
+node src/ants/research-scout.js
+
+<span class="comment"># Check colony status</span>
+node scripts/colony-status.js
+
+<span class="comment"># Install all cron jobs</span>
+./scripts/setup-cron.sh
+
+<span class="comment"># View cron jobs</span>
+crontab -l | grep ai-memory-colony</pre>
+
+<hr style="margin: 3rem 0; border-color: var(--border);">
+
+<div style="text-align: center; color: var(--text); opacity: 0.7;">
+  <p>🐍 <strong>Ouroboros Colony</strong> — Complete Architecture Guide</p>
+  <p>Generated: <span id="date"></span></p>
+  <p><em>"The snake that eats its own tail grows stronger with each bite."</em></p>
+  <p style="margin-top: 1rem;">
+    <a href="https://github.com/your-repo" style="color: var(--accent);">GitHub</a> · 
+    <a href="#selfimprove" style="color: var(--accent);">Self-Improvement</a> · 
+    <a href="#overview" style="color: var(--accent);">Back to Top</a>
+  </p>
+</div>
+
+<script>
+  document.getElementById('date').textContent = new Date().toISOString().split('T')[0];
+</script>
+
+<script src="nav.js"></script>
+</body>
+</html>

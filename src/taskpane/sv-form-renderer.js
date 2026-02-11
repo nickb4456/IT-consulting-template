@@ -15,6 +15,7 @@ Object.assign(SmartVariables, {
   // ============================================================================
 
   _contactSearchTimer: null,
+  _templateSearchTimer: null,
 
   /**
    * Debounced contact search handler (250ms delay).
@@ -35,14 +36,34 @@ Object.assign(SmartVariables, {
    * Show the template selector grid (main entry screen).
    * @param {string} containerId - DOM container ID to render into
    */
+  // Current template filter state
+  _templateSearchQuery: '',
+  _templateFilterCategory: null,
+
   showTemplateSelector(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const templateList = Object.values(this.templates);
+    // Reset filters when entering selector fresh
+    this._templateSearchQuery = '';
+    this._templateFilterCategory = null;
+
+    this._renderTemplateList(containerId);
+  },
+
+  /**
+   * Render the template list with current search/filter state.
+   * @param {string} containerId - DOM container ID
+   */
+  _renderTemplateList(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
     const hasProfile = this.userProfile?.firstName || this.userProfile?.lastName;
-    const customTemplates = templateList.filter(template => template.isCustom);
-    const builtInTemplates = templateList.filter(template => !template.isCustom);
+    const categories = this.getTemplateCategories();
+    const filtered = this.filterTemplates(this._templateSearchQuery, this._templateFilterCategory);
+    const customTemplates = filtered.filter(template => template.isCustom);
+    const builtInTemplates = filtered.filter(template => !template.isCustom);
 
     container.innerHTML = `
       <div class="sv-template-selector">
@@ -52,6 +73,9 @@ Object.assign(SmartVariables, {
             <button class="sv-icon-btn" title="Import Template" onclick="SmartVariables.showImportDialog('${this.safeId(containerId)}')">
               Import
             </button>
+            <button class="sv-icon-btn" title="Bridge Document" onclick="SmartVariables.showBridgingWizard('${this.safeId(containerId)}')">
+              Bridge
+            </button>
             <button class="sv-profile-btn ${hasProfile ? 'has-profile' : ''}"
                     onclick="SmartVariables.showProfileEditor('${this.safeId(containerId)}')">
               My Profile
@@ -59,9 +83,25 @@ Object.assign(SmartVariables, {
           </div>
         </div>
         <p class="sv-description">Choose a template to get started with intelligent auto-fill.</p>
-        <div class="sv-template-grid" role="listbox" aria-label="Template selection">
-          ${builtInTemplates.map(tpl => `
-            <div class="sv-template-card" role="option" aria-selected="false" onclick="SmartVariables.selectTemplate('${this.safeId(tpl.id)}', '${this.safeId(containerId)}')">
+
+        <div class="sv-template-search-bar">
+          <input type="text" class="sv-input sv-template-search" placeholder="Search templates..."
+                 value="${this.escapeHtml(this._templateSearchQuery)}"
+                 oninput="SmartVariables._handleTemplateSearch(this.value, '${this.safeId(containerId)}')">
+        </div>
+
+        <div class="sv-filter-chips" role="group" aria-label="Filter by category">
+          <button class="sv-chip ${!this._templateFilterCategory ? 'active' : ''}"
+                  onclick="SmartVariables._handleCategoryFilter(null, '${this.safeId(containerId)}')">All</button>
+          ${categories.map(cat => `
+            <button class="sv-chip ${this._templateFilterCategory === cat.value ? 'active' : ''}"
+                    onclick="SmartVariables._handleCategoryFilter('${this.safeId(cat.value)}', '${this.safeId(containerId)}')">${this.escapeHtml(cat.label)}</button>
+          `).join('')}
+        </div>
+
+        <div class="sv-template-grid stagger-children" role="listbox" aria-label="Template selection">
+          ${builtInTemplates.length > 0 ? builtInTemplates.map(tpl => `
+            <div class="sv-template-card" role="option" tabindex="0" aria-selected="false" onclick="SmartVariables.selectTemplate('${this.safeId(tpl.id)}', '${this.safeId(containerId)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
               <div class="sv-template-icon">${this.getCategoryIcon(tpl.category)}</div>
               <div class="sv-template-info">
                 <div class="sv-template-name">${this.escapeHtml(tpl.name)}</div>
@@ -72,14 +112,14 @@ Object.assign(SmartVariables, {
                 <span class="sv-template-arrow">→</span>
               </div>
             </div>
-          `).join('')}
+          `).join('') : `<div class="sv-picker-empty">No templates match your search.</div>`}
         </div>
         ${customTemplates.length > 0 ? `
           <div class="sv-custom-templates">
             <h4 class="sv-subsection-title">My Custom Templates</h4>
-            <div class="sv-template-grid" role="listbox" aria-label="Custom template selection">
+            <div class="sv-template-grid stagger-children" role="listbox" aria-label="Custom template selection">
               ${customTemplates.map(tpl => `
-                <div class="sv-template-card custom" role="option" aria-selected="false" onclick="SmartVariables.selectTemplate('${this.safeId(tpl.id)}', '${this.safeId(containerId)}')">
+                <div class="sv-template-card custom" role="option" tabindex="0" aria-selected="false" onclick="SmartVariables.selectTemplate('${this.safeId(tpl.id)}', '${this.safeId(containerId)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
                   <div class="sv-template-icon">${this.getCategoryIcon(tpl.category)}</div>
                   <div class="sv-template-info">
                     <div class="sv-template-name">${this.escapeHtml(tpl.name)}</div>
@@ -97,6 +137,29 @@ Object.assign(SmartVariables, {
         ` : ''}
       </div>
     `;
+  },
+
+  /**
+   * Handle template search input.
+   * @param {string} query - search text
+   * @param {string} containerId - DOM container ID
+   */
+  _handleTemplateSearch(query, containerId) {
+    this._templateSearchQuery = query;
+    clearTimeout(this._templateSearchTimer);
+    this._templateSearchTimer = setTimeout(() => {
+      this._renderTemplateList(containerId);
+    }, 250);
+  },
+
+  /**
+   * Handle category filter chip click.
+   * @param {string|null} category - category value or null for all
+   * @param {string} containerId - DOM container ID
+   */
+  _handleCategoryFilter(category, containerId) {
+    this._templateFilterCategory = category;
+    this._renderTemplateList(containerId);
   },
 
   /**
@@ -123,6 +186,15 @@ Object.assign(SmartVariables, {
         this.state.values[variable.id] = new Date().toISOString().split('T')[0];
       }
     });
+
+    // Check for saved draft
+    const draft = this._loadDraft(templateId);
+    if (draft && draft.values && Object.keys(draft.values).length > 0) {
+      // Show draft recovery toast after rendering
+      setTimeout(() => {
+        this._showDraftRecoveryToast(templateId, containerId, draft);
+      }, 300);
+    }
 
     // Auto-fill derived attorney values from profile
     if (this.userProfile) {
@@ -158,11 +230,21 @@ Object.assign(SmartVariables, {
     const groups = this.groupVariables(template.variables);
     const isValid = this.validateAll();
 
+    // Calculate overall completion
+    const totalRequired = template.variables.filter(v => v.required).length;
+    const filledRequired = template.variables.filter(v => v.required && !this.isEmpty(this.state.values[v.id])).length;
+    const progressPercent = totalRequired > 0 ? Math.round((filledRequired / totalRequired) * 100) : 100;
+
     container.innerHTML = `
-      <div class="sv-form" role="form" aria-label="Document variables">
+      <div class="sv-form panel-enter" role="form" aria-label="Document variables">
         <div class="sv-form-header">
           <button class="sv-back-btn" onclick="SmartVariables.showTemplateSelector('${this.safeId(containerId)}')">← Back</button>
           <h3 class="sv-template-title">${template.name}</h3>
+        </div>
+
+        <div class="sv-progress-bar-container" title="${filledRequired} of ${totalRequired} required fields completed">
+          <div class="sv-progress-bar" style="width: ${progressPercent}%"></div>
+          <span class="sv-progress-label">${progressPercent}% complete</span>
         </div>
 
         ${!isValid ? `
@@ -178,8 +260,11 @@ Object.assign(SmartVariables, {
             Cancel
           </button>
           <button class="sv-btn sv-btn-primary ${!isValid ? 'disabled' : ''}"
-                  onclick="SmartVariables.generateDocument()" ${!isValid ? 'disabled' : ''}>
+                  onclick="SmartVariables.generateDocument('${this.safeId(containerId)}')" ${!isValid ? 'disabled' : ''}>
             ${isValid ? 'Generate Document' : 'Complete Required Fields'}
+          </button>
+          <button class="sv-btn sv-btn-secondary" onclick="SmartVariables.showExportPanel('${this.safeId(containerId)}')" ${!isValid ? 'disabled' : ''}>
+            Export
           </button>
         </div>
       </div>
@@ -232,20 +317,32 @@ Object.assign(SmartVariables, {
 
     const isExpanded = this.state.expandedGroups.has(groupId);
 
+    // Per-group progress
+    const requiredInGroup = variables.filter(v => v.required);
+    const filledInGroup = requiredInGroup.filter(v => !this.isEmpty(this.state.values[v.id]));
+    const groupComplete = requiredInGroup.length > 0 && filledInGroup.length === requiredInGroup.length;
+    const groupProgress = requiredInGroup.length > 0 ? Math.round((filledInGroup.length / requiredInGroup.length) * 100) : 100;
+
     return `
       <div class="sv-group">
         <button class="sv-group-header ${isExpanded ? 'expanded' : ''}"
                 aria-expanded="${isExpanded ? 'true' : 'false'}"
                 onclick="SmartVariables.toggleGroup('${this.safeId(groupId)}', '${this.safeId(containerId)}')">
           <span class="sv-group-title">${titles[groupId] || groupId}</span>
+          ${requiredInGroup.length > 0 ? `
+            <span class="sv-group-progress ${groupComplete ? 'complete' : ''}">${filledInGroup.length}/${requiredInGroup.length}</span>
+          ` : ''}
           <span class="sv-group-count">${variables.length}</span>
           <span class="sv-group-arrow">▼</span>
         </button>
-        ${isExpanded ? `
-          <div class="sv-group-content">
-            ${variables.map(variable => this.renderVariable(variable, containerId)).join('')}
+        ${requiredInGroup.length > 0 ? `
+          <div class="sv-group-progress-track">
+            <div class="sv-group-progress-fill ${groupComplete ? 'complete' : ''}" style="width: ${groupProgress}%"></div>
           </div>
         ` : ''}
+        <div class="sv-group-content ${isExpanded ? 'sv-group-expanded' : 'sv-group-collapsed'}">
+          ${variables.map(variable => this.renderVariable(variable, containerId)).join('')}
+        </div>
       </div>
     `;
   },
@@ -327,7 +424,6 @@ Object.assign(SmartVariables, {
       case 'select':
         // Check if this is a court field - use dynamic court database
         if (variable.id === 'court' && this.courts.length > 0) {
-          const courtOptions = this.getCourtOptions();
           return `
             <div class="sv-court-select-wrapper">
               <select id="${id}" class="sv-select" aria-required="${variable.required ? 'true' : 'false'}" onchange="${onChange}">
@@ -343,7 +439,7 @@ Object.assign(SmartVariables, {
           <select id="${id}" class="sv-select" aria-required="${variable.required ? 'true' : 'false'}" onchange="${onChange}">
             <option value="">Select...</option>
             ${options.map(option => `
-              <option value="${option.value}" ${value === option.value ? 'selected' : ''}>${option.label}</option>
+              <option value="${this.escapeHtml(option.value)}" ${value === option.value ? 'selected' : ''}>${this.escapeHtml(option.label)}</option>
             `).join('')}
           </select>
         `;
@@ -355,9 +451,9 @@ Object.assign(SmartVariables, {
           <div class="sv-checkbox-group" id="${id}">
             ${groupOptions.map(option => `
               <label class="sv-checkbox-wrapper">
-                <input type="checkbox" value="${option.value}" ${selectedValues.includes(option.value) ? 'checked' : ''}
+                <input type="checkbox" value="${this.escapeHtml(option.value)}" ${selectedValues.includes(option.value) ? 'checked' : ''}
                        onchange="SmartVariables.handleCheckboxGroupChange('${this.safeId(variable.id)}', '${this.safeId(option.value)}', this.checked, '${this.safeId(containerId)}')">
-                <span>${option.label}</span>
+                <span>${this.escapeHtml(option.label)}</span>
               </label>
             `).join('')}
           </div>
@@ -380,13 +476,31 @@ Object.assign(SmartVariables, {
    * @returns {string} HTML string of optgroup/option elements
    */
   renderCourtOptionsGrouped(selectedValue) {
-    // Group courts by state
-    const states = [...new Set(this.courts.map(court => court.state))].sort();
-    // H9: stateNames moved to shared SmartVariables.STATE_NAMES in sv-state.js
+    // Use pre-computed courtsByState index from courts.json (loaded in sv-courts.js)
+    // to avoid O(n*m) filtering on every render.
     const stateNames = this.STATE_NAMES;
+    const stateIndex = this.courtsByState;
+    const states = Object.keys(stateIndex).sort();
+
+    // Fallback: if stateIndex is empty (courts.json didn't load or had no stateIndex),
+    // build it on the fly from the courts array.
+    if (states.length === 0 && this.courts.length > 0) {
+      const fallbackStates = [...new Set(this.courts.map(court => court.state))].sort();
+      return fallbackStates.map(state => {
+        const stateCourts = this.courts.filter(court => court.state === state);
+        return `
+          <optgroup label="${stateNames[state] || state}">
+            ${stateCourts.map(court => `
+              <option value="${court.id}" ${selectedValue === court.id ? 'selected' : ''}>${court.abbreviation} - ${court.city}</option>
+            `).join('')}
+          </optgroup>
+        `;
+      }).join('');
+    }
 
     return states.map(state => {
-      const stateCourts = this.courts.filter(court => court.state === state);
+      const courtIds = stateIndex[state] || [];
+      const stateCourts = courtIds.map(id => this.courtsById[id]).filter(Boolean);
       return `
         <optgroup label="${stateNames[state] || state}">
           ${stateCourts.map(court => `
@@ -621,7 +735,7 @@ Object.assign(SmartVariables, {
     const displaySubtitle = subtitle ? this._highlightMatch(subtitle, highlightQuery) : '';
 
     return `
-      <div class="sv-picker-item" role="option" onclick="SmartVariables.selectContact('${this.safeId(contact.id)}')">
+      <div class="sv-picker-item" role="option" tabindex="0" onclick="SmartVariables.selectContact('${this.safeId(contact.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click()}">
         <span class="sv-picker-icon">${contact.isEntity ? '[Co]' : '[P]'}</span>
         <div class="sv-picker-info">
           <div class="sv-picker-name">${displayName}</div>
@@ -939,7 +1053,7 @@ Object.assign(SmartVariables, {
       ((contact.firstName?.[0] || '') + (contact.lastName?.[0] || '')).toUpperCase() || '?';
 
     return `
-      <div class="sv-contact-card" data-contact-id="${contact.id}">
+      <div class="sv-contact-card" data-contact-id="${contact.id}" tabindex="0">
         <div class="sv-contact-avatar ${contact.isEntity ? 'entity' : ''}">${initials}</div>
         <div class="sv-contact-info">
           <div class="sv-contact-name">${this.escapeHtml(name)}</div>
@@ -1164,7 +1278,7 @@ Object.assign(SmartVariables, {
    * Show a confirmation dialog before deleting a contact.
    * @param {string} contactId - the contact to delete
    */
-  confirmDeleteContact(contactId) {
+  async confirmDeleteContact(contactId) {
     const contact = this.getSavedContacts().find(
       existing => existing.id === contactId
     );
@@ -1173,7 +1287,8 @@ Object.assign(SmartVariables, {
     const displayName = contact.isEntity ? contact.company :
       [contact.firstName, contact.lastName].filter(Boolean).join(' ') || 'this contact';
 
-    if (confirm(`Delete "${displayName}"? This cannot be undone.`)) {
+    const confirmed = await this.showConfirm(`Delete "${displayName}"? This cannot be undone.`, { confirmText: 'Delete', destructive: true });
+    if (confirmed) {
       this.deleteContact(contactId);
       this.refreshContactsManager();
       toast('Contact deleted', 'success');

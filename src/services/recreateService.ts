@@ -386,15 +386,18 @@ async function wordRunWithTimeout<T>(
   fn: (context: Word.RequestContext) => Promise<T>,
   timeoutMs: number = 10000
 ): Promise<{ success: true; data: T } | { success: false; error: string }> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const data = await Promise.race([
       Word.run(fn),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Word.run timed out after ${timeoutMs}ms`)), timeoutMs)
-      )
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`Word.run timed out after ${timeoutMs}ms`)), timeoutMs);
+      })
     ]);
+    clearTimeout(timer);
     return { success: true, data };
   } catch (error) {
+    clearTimeout(timer);
     const message = error instanceof Error ? error.message : String(error);
     console.error('[recreateService] Word.run failed:', message);
     return { success: false, error: message };

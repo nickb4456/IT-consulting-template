@@ -126,35 +126,24 @@ function inferPrefix(contact: Contact): string | undefined {
  */
 function buildAddressBlock(contact: Contact): string {
   const lines: string[] = [];
-  
+
   // Name line
   const name = buildFullNameFormal(contact);
   lines.push(name);
-  
+
   // Title line (if present)
   if (contact.title) {
     lines.push(contact.title);
   }
-  
+
   // Company line (if present)
   if (contact.company) {
     lines.push(contact.company);
   }
-  
-  // Address lines
-  if (contact.address) {
-    if (contact.address.street1) {
-      lines.push(contact.address.street1);
-    }
-    if (contact.address.street2) {
-      lines.push(contact.address.street2);
-    }
-    const cityLine = buildCityStateZip(contact.address);
-    if (cityLine) {
-      lines.push(cityLine);
-    }
-  }
-  
+
+  // Address lines (reuse helper)
+  lines.push(...formatAddressLines(contact.address));
+
   return lines.join('\n');
 }
 
@@ -440,6 +429,7 @@ function buildFirmBlock(attorney: Attorney): string {
 // STATE NAME MAPPING
 // ============================================================================
 
+// KEEP IN SYNC with src/taskpane/sv-state.js STATE_NAMES (55 entries: 50 states + DC + 5 territories)
 const STATE_NAMES: Record<string, string> = {
   'AL': 'Alabama',
   'AK': 'Alaska',
@@ -491,5 +481,10 @@ const STATE_NAMES: Record<string, string> = {
   'WV': 'West Virginia',
   'WI': 'Wisconsin',
   'WY': 'Wyoming',
-  'DC': 'District of Columbia'
+  'DC': 'District of Columbia',
+  'PR': 'Puerto Rico',
+  'VI': 'Virgin Islands',
+  'GU': 'Guam',
+  'MP': 'Northern Mariana Islands',
+  'AS': 'American Samoa'
 };

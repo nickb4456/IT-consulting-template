@@ -95,7 +95,7 @@ export const PartyInput: React.FC<PartyInputProps> = ({
   const addParty = useCallback(() => {
     const defaultRole = allowedRoles[0]?.value || 'plaintiff';
     const newParty: Party = {
-      id: `party-${Date.now()}`,
+      id: `party-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
       firstName: '',
       lastName: '',
       role: defaultRole,

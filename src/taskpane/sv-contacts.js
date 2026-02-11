@@ -81,12 +81,18 @@ Object.assign(SmartVariables, {
     });
   },
 
-  /** Load recently used contacts from localStorage. */
+  /** Load recently used contacts from localStorage with shape validation. */
   loadRecentContacts() {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.RECENT_CONTACTS);
       if (saved) {
-        this.recentContacts = JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.every(c => c && typeof c === 'object' && typeof c.id === 'string')) {
+          this.recentContacts = parsed;
+        } else {
+          console.warn('[SmartVariables] Recent contacts failed shape validation, resetting');
+          this.recentContacts = [];
+        }
       }
     } catch (e) {
       this.recentContacts = [];

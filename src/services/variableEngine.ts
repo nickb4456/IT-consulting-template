@@ -469,7 +469,7 @@ export class VariableEngine {
           return {
             variableId: varDef.id,
             rule: 'custom',
-            message: `${varDef.name} must have first and last name`
+            message: `${varDef.name} must have a name (first + last) or company`
           };
         }
         break;
@@ -601,10 +601,10 @@ function isValidPhone(phone: string): boolean {
 function isValidContact(value: unknown): boolean {
   if (!value || typeof value !== 'object') return false;
   const obj = value as Record<string, unknown>;
-  return typeof obj.firstName === 'string' && 
-         obj.firstName.trim() !== '' &&
-         typeof obj.lastName === 'string' && 
-         obj.lastName.trim() !== '';
+  const hasFirstName = typeof obj.firstName === 'string' && obj.firstName.trim() !== '';
+  const hasLastName = typeof obj.lastName === 'string' && obj.lastName.trim() !== '';
+  const hasCompany = typeof obj.company === 'string' && obj.company.trim() !== '';
+  return hasFirstName || hasLastName || hasCompany;
 }
 
 // ============================================================================

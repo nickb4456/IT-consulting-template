@@ -27,7 +27,7 @@
   z-index: 9999;
   padding: var(--db-space-sm) var(--db-space-lg);
   background: var(--db-primary);
-  color: white;
+  color: var(--db-text-on-primary);
   text-decoration: none;
   font-weight: 600;
 }
@@ -57,7 +57,7 @@ body {
 /* ─── Buttons ────────────────────────────────────────────────── */
 .btn {
   background: var(--db-primary-light);
-  color: white;
+  color: var(--db-text-on-primary);
   border: none;
   padding: var(--db-btn-padding);
   border-radius: 5px;
@@ -166,15 +166,17 @@ body {
   bottom: var(--db-space-xl);
   left: 50%;
   transform: translateX(-50%) translateY(100px);
-  background: var(--db-text);
-  color: white;
-  padding: var(--db-space-md) var(--db-space-2xl);
+  min-width: 280px;
+  max-width: 420px;
   border-radius: var(--db-radius-lg);
-  font-size: var(--db-text-lg);
+  font-size: var(--db-text-md);
   z-index: 3000;
   opacity: 0;
-  transition: transform 0.3s, opacity 0.3s;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, opacity 0.3s ease, bottom 0.3s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  background: var(--db-surface);
+  border-left: 4px solid var(--db-text);
 }
 
 .toast-notification.show {
@@ -182,10 +184,66 @@ body {
   opacity: 1;
 }
 
-.toast-success { background: var(--db-success); }
-.toast-error { background: var(--db-error); }
-.toast-warning { background: var(--db-warning); }
-.toast-info { background: var(--db-info); }
+.toast-body {
+  display: flex;
+  align-items: center;
+  gap: var(--db-space-sm);
+  padding: var(--db-space-md) var(--db-space-lg);
+}
+
+.toast-message {
+  flex: 1;
+  color: var(--db-text);
+  font-size: var(--db-text-md);
+  line-height: 1.4;
+}
+
+.toast-time {
+  font-size: var(--db-text-xs);
+  color: var(--db-text-disabled);
+  white-space: nowrap;
+}
+
+.toast-dismiss {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--db-radius-sm);
+  background: transparent;
+  color: var(--db-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: var(--db-transition-fast);
+}
+
+.toast-dismiss:hover {
+  background: var(--db-surface-hover);
+  color: var(--db-text);
+}
+
+.toast-progress {
+  height: 3px;
+  background: var(--db-border-subtle);
+}
+
+.toast-progress-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--db-primary-light);
+  transition: width 0.3s linear;
+}
+
+.toast-success { border-left-color: var(--db-success); }
+.toast-success .toast-progress-bar { background: var(--db-success); }
+.toast-error { border-left-color: var(--db-error); }
+.toast-warning { border-left-color: var(--db-warning); }
+.toast-warning .toast-progress-bar { background: var(--db-warning); }
+.toast-info { border-left-color: var(--db-info); }
+.toast-info .toast-progress-bar { background: var(--db-info); }
 
 /* ─── Spinner ────────────────────────────────────────────────── */
 @keyframes spin {

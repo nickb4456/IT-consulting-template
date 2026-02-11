@@ -200,7 +200,7 @@ function renderInput(
           value={value as Attorney | undefined}
           onChange={onChange}
           derivedValues={derivedValues}
-        variableId={variable.id}
+          variableId={variable.id}
           {...inputProps}
         />
       );
@@ -277,23 +277,37 @@ interface NumberInputProps {
   disabled?: boolean;
 }
 
-const NumberInput: React.FC<NumberInputProps> = ({ 
-  value, 
-  onChange, 
+const NumberInput: React.FC<NumberInputProps> = ({
+  value,
+  onChange,
   config,
-  ...props 
-}) => (
-  <input
-    type="number"
-    className="input-number"
-    value={value ?? ''}
-    onChange={(e) => onChange(parseFloat(e.target.value))}
-    min={config?.min}
-    max={config?.max}
-    step={config?.step}
-    {...props}
-  />
-);
+  ...props
+}) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    if (val === '') {
+      onChange(undefined as unknown as number); // Allow clearing
+    } else {
+      const parsed = parseFloat(val);
+      if (!isNaN(parsed)) {
+        onChange(parsed);
+      }
+    }
+  };
+
+  return (
+    <input
+      type="number"
+      className="input-number"
+      value={value ?? ''}
+      onChange={handleChange}
+      min={config?.min}
+      max={config?.max}
+      step={config?.step}
+      {...props}
+    />
+  );
+};
 
 interface DateInputProps {
   value: string;

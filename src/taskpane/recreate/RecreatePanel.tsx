@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import {
-  DocumentType,
+  RecreateDocumentType,
   TargetFormat,
   RecreateOptions,
   TRANSFORM_TEMPLATES,
@@ -31,7 +31,7 @@ type TransformStatus = 'idle' | 'loading' | 'success' | 'error';
 export const RecreatePanel: React.FC<RecreatePanelProps> = ({ onClose }) => {
   // State
   const [documentContent, setDocumentContent] = useState<string>('');
-  const [detectedType, setDetectedType] = useState<DocumentType>('unknown');
+  const [detectedType, setDetectedType] = useState<RecreateDocumentType>('unknown');
   const [confidence, setConfidence] = useState<number>(0);
   const [selectedTarget, setSelectedTarget] = useState<TargetFormat>('memo');
   const [preservedText, setPreservedText] = useState<string[]>([]);

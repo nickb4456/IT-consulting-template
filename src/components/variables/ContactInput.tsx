@@ -37,10 +37,13 @@ export const ContactInput: React.FC<ContactInputProps> = ({
   showPreview = true
 }) => {
   const [expanded, setExpanded] = useState(false);
-  
+
+  // Stable fallback ID for empty contact (generated once per component instance)
+  const [fallbackId] = useState(() => `contact-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
+
   // Initialize empty contact if needed
   const contact: Contact = value || {
-    id: `contact-${Date.now()}`,
+    id: fallbackId,
     firstName: '',
     lastName: ''
   };

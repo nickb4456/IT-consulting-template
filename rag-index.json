@@ -1,0 +1,666 @@
+{
+  "meta": {
+    "created": "2026-02-07",
+    "purpose": "Vector RAG index for DraftBridge Gold - semantic retrieval of codebase knowledge",
+    "updated_by": "draft-bridges-team",
+    "version": 1
+  },
+  "index": [
+    {
+      "id": "arch-001",
+      "topic": "Architecture Overview",
+      "keywords": ["dual-layer", "vanilla JS", "TypeScript", "Office.js", "Word Add-in", "legal"],
+      "summary": "Two-tier architecture: Vanilla JS taskpane (sv-*.js modules via Object.assign on SmartVariables namespace) + TypeScript service layer (singleton pattern, Handlebars, LRU caches). Loosely coupled, convergence opportunity.",
+      "files": ["taskpane.html", "src/taskpane/sv-state.js", "src/services/templateRenderer.ts", "src/services/variableEngine.ts"],
+      "relations": ["arch-002", "arch-003"]
+    },
+    {
+      "id": "arch-002",
+      "topic": "Module Load Order",
+      "keywords": ["load order", "namespace", "Object.assign", "SmartVariables", "script tags"],
+      "summary": "sv-state (defines namespace) -> sv-courts -> sv-contacts -> sv-templates -> sv-profile -> sv-form-renderer -> sv-validation -> sv-document-generator. Misordering causes silent undefined errors.",
+      "files": ["src/taskpane/sv-state.js", "taskpane.html"],
+      "relations": ["arch-001", "bug-004"]
+    },
+    {
+      "id": "arch-003",
+      "topic": "State Management",
+      "keywords": ["state", "values", "derivedValues", "errors", "expandedGroups", "localStorage", "persistence"],
+      "summary": "Flat state object on SmartVariables.state. Direct mutation, manual re-renders via renderForm(). localStorage persistence under 3 keys: user_profile, recent_contacts, custom_templates. No reactivity.",
+      "files": ["src/taskpane/sv-state.js", "src/services/userProfileService.ts"],
+      "relations": ["arch-001"]
+    },
+    {
+      "id": "arch-004",
+      "topic": "Office.js Integration",
+      "keywords": ["Word.run", "context.sync", "insertParagraph", "wordRunWithTimeout", "document insertion"],
+      "summary": "Document insertion via Word.run() with paragraph-by-paragraph insertion. recreateService wraps in 10s timeout. Selection-based insertion with style application.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/services/recreateService.ts"],
+      "relations": ["arch-001"]
+    },
+    {
+      "id": "design-001",
+      "topic": "Design Token System",
+      "keywords": ["CSS tokens", "--db-*", "custom properties", "dark mode", "palette", "spacing", "typography", "shadows"],
+      "summary": "Full token system in tokens.css: 90+ tokens across palette, surfaces, borders, text, status, legal semantic, spacing (4px grid), radius, typography, shadows, transitions. Dark mode via @media prefers-color-scheme.",
+      "files": ["src/styles/tokens.css", "src/styles/base.css", "src/styles/taskpane.css", "src/styles/smart-variables.css"],
+      "relations": ["design-002", "design-003"]
+    },
+    {
+      "id": "design-002",
+      "topic": "CSS Load Order & Cascade",
+      "keywords": ["CSS order", "tokens", "base", "taskpane", "smart-variables", "cascade"],
+      "summary": "tokens.css -> base.css -> taskpane.css -> smart-variables.css. Tokens available to all. Base resets first. smart-variables can override taskpane defaults.",
+      "files": ["src/styles/tokens.css", "src/styles/base.css", "src/styles/taskpane.css", "src/styles/smart-variables.css"],
+      "relations": ["design-001"]
+    },
+    {
+      "id": "design-003",
+      "topic": "Accessibility & Responsive",
+      "keywords": ["a11y", "ARIA", "skip-link", "focus-visible", "reduced-motion", "breakpoints", "responsive"],
+      "summary": "Skip-link, focus-visible outlines, prefers-reduced-motion, ARIA-driven visibility. 3 breakpoints: 360px (min), 420px (small), 600px (standard taskpane).",
+      "files": ["src/styles/base.css", "src/styles/smart-variables.css"],
+      "relations": ["design-001"]
+    },
+    {
+      "id": "sec-001",
+      "topic": "XSS Prevention",
+      "keywords": ["XSS", "safeId", "escapeHtml", "escapeAttr", "sanitization", "innerHTML", "onclick"],
+      "summary": "Three sanitization functions: safeId() (regex allowlist for IDs), escapeAttr() (JS string + HTML encoding), escapeHtml() (HTML entity encoding). Applied across 28+ handlers.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["sec-002"]
+    },
+    {
+      "id": "sec-002",
+      "topic": "Security Hardening",
+      "keywords": ["ReDoS", "CSP", "prototype pollution", "regex cache", "content security policy"],
+      "summary": "ReDoS prevention (200-char pattern limit, nested quantifier detection), CSP headers, prototype pollution blocking (BLOCKED_KEYS set), profile validation.",
+      "files": ["src/services/variableEngine.ts", "taskpane.html", "src/services/cascadeEngine.ts"],
+      "relations": ["sec-001"]
+    },
+    {
+      "id": "feat-001",
+      "topic": "Template System",
+      "keywords": ["templates", "motion-to-dismiss", "demand-letter", "complaint", "discovery", "buildContent"],
+      "summary": "Templates defined as plain objects with typed variable arrays. Each has buildXxxContent() method in document-generator. Switch routing. Shared helpers for caption, signature, date sections.",
+      "files": ["src/taskpane/sv-templates.js", "src/taskpane/sv-document-generator.js", "src/types/variables.ts"],
+      "relations": ["feat-002"]
+    },
+    {
+      "id": "feat-002",
+      "topic": "Contact & Party System",
+      "keywords": ["contacts", "parties", "plaintiff", "defendant", "attorney", "contact picker", "derivation"],
+      "summary": "Multi-stage data flow: input -> state update -> derivation (fullName, salutation, namesEtAl) -> validation -> re-render -> persistence. Contact picker modal. Party roles.",
+      "files": ["src/taskpane/sv-contacts.js", "src/services/contactHandler.ts", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "feat-003",
+      "topic": "Court Database",
+      "keywords": ["courts", "jurisdiction", "filing", "ECF", "federal", "state courts"],
+      "summary": "JSON court database with jurisdiction lookup, filing requirements, ECF links. Loaded in sv-courts.js.",
+      "files": ["src/data/courts.json", "src/taskpane/sv-courts.js", "src/services/courtService.ts"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "bug-001",
+      "topic": "P0: Monolith File Still Loaded",
+      "keywords": ["monolith", "smart-variables.js", "duplicate", "namespace collision"],
+      "summary": "Original monolith smart-variables.js (2935 lines) may still be loaded alongside sv-*.js modules, causing SmartVariables namespace to be defined twice. Needs deletion.",
+      "files": ["src/taskpane/smart-variables.js"],
+      "relations": ["arch-002"]
+    },
+    {
+      "id": "bug-002",
+      "topic": "P0: Missing Modal CSS",
+      "keywords": ["modal", "contact picker", "CSS", "missing styles"],
+      "summary": "Contact picker modal missing CSS styles. Modal opens but lacks proper styling.",
+      "files": ["src/styles/smart-variables.css"],
+      "relations": ["feat-002"]
+    },
+    {
+      "id": "bug-003",
+      "topic": "P0: Incomplete Label Maps",
+      "keywords": ["discovery", "defense", "label map", "undefined", "runtime error"],
+      "summary": "Discovery request and defense label maps are incomplete, causing undefined values at runtime for some template types.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-templates.js"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "bug-004",
+      "topic": "P0: escapeHtml Load Order",
+      "keywords": ["escapeHtml", "load order", "undefined", "fragility"],
+      "summary": "escapeHtml() defined in sv-state.js but called by modules that may load before it in edge cases. Needs guaranteed availability before first use.",
+      "files": ["src/taskpane/sv-state.js"],
+      "relations": ["sec-001", "arch-002"]
+    },
+    {
+      "id": "sprint-001",
+      "topic": "Cycle 1 Sprint Plan",
+      "keywords": ["sprint", "cycle 1", "brainstormer", "priorities", "improvements"],
+      "summary": "8-item prioritized plan. P0: (1) Delete monolith smart-variables.js (fixes 3 P0s), (2) Add modal CSS for sv-modal-overlay/sv-modal, (3) Move escapeHtml to sv-state.js. P1: (4) Fix label maps (discovery combined, 4 missing complaint causes, defense mismatches), (5) Fix isValidContact for entities. P2: (6) Numbering engine MVP, (7) Contact form UX (stop full re-render), (8) Dark mode + a11y polish.",
+      "files": ["QA-REPORT.md", "docs/NUMBERING-RESEARCH.md"],
+      "relations": ["bug-001", "bug-002", "bug-003", "bug-004", "feat-004", "bug-005"]
+    },
+    {
+      "id": "feat-004",
+      "topic": "Numbering Engine Opportunity",
+      "keywords": ["numbering", "legal formatting", "multilevel list", "fix numbering", "scan repair", "Litera", "competitor"],
+      "summary": "Word's numbering is broken for legal docs since 1997. Competitors (Litera $50-200/mo, BigHand, Adaugeo) are expensive/complex. Gap for simple web-based 'Fix Numbering' scan-and-repair tool. Cross-reference detection and defined term tracking are future opportunities.",
+      "files": ["docs/NUMBERING-RESEARCH.md"],
+      "relations": ["sprint-001", "arch-004"]
+    },
+    {
+      "id": "bug-005",
+      "topic": "P1: Entity Contact Validation Fails",
+      "keywords": ["isValidContact", "entity", "corporation", "LLC", "company", "validation", "variableEngine"],
+      "summary": "VariableEngine.isValidContact() requires firstName+lastName, rejecting corporations/LLCs that only have company field. JS-side sv-validation.js correctly accepts company-only contacts. Fix: accept (firstName+lastName) || company.",
+      "files": ["src/services/variableEngine.ts", "src/taskpane/sv-validation.js"],
+      "relations": ["feat-002", "bug-003"]
+    },
+    {
+      "id": "bug-006",
+      "topic": "P2: Contact Form Full Re-render",
+      "keywords": ["handleContactChange", "renderForm", "DOM re-render", "focus loss", "cursor position", "UX"],
+      "summary": "handleContactChange() calls renderForm() on every field keystroke (7+ fields per contact), causing full DOM replacement that loses focus and cursor position. Should debounce or use targeted DOM updates like handleChange() does.",
+      "files": ["src/taskpane/sv-validation.js", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["feat-002", "arch-003"]
+    },
+    {
+      "id": "design-004",
+      "topic": "Export Panel UI Design",
+      "keywords": ["export", "word count", "section numbering", "roman", "decimal", "legal numbering", "clipboard", "page estimate"],
+      "summary": "Export panel with 3-stat bar (words/sections/pages), numbering scheme radio group (Roman/Decimal/Legal/None), and export format buttons (Insert to Word, Copy to Clipboard). Uses db-export-* CSS classes, panelSlideUp animation.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-001", "arch-004", "design-001"]
+    },
+    {
+      "id": "design-005",
+      "topic": "Document Bridging Import Flow",
+      "keywords": ["import", "bridge", "wizard", "stepper", "dropzone", "drag and drop", "file upload", "variable detection", "merge"],
+      "summary": "3-step wizard (Upload → Preview → Merge) with stepper progress indicator, drag-and-drop zone (.docx/.pdf/.txt/.rtf), file preview card with detected variables shown as chips. Step transitions use stepFadeIn animation.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-001", "design-001"]
+    },
+    {
+      "id": "design-006",
+      "topic": "UI Transition Utilities",
+      "keywords": ["animation", "transition", "fade", "slide", "scale", "shimmer", "stagger", "panel-enter", "slide-in-right", "reduced-motion"],
+      "summary": "Reusable CSS animation utility classes: panel-enter (fade), slide-in-right (sub-panels), slide-in-up (modals), scale-in (popups), shimmer (loading), stagger-children (lists with delay), btn-press (active feedback), focus-glow. All respect prefers-reduced-motion via base.css.",
+      "files": ["src/styles/taskpane.css", "src/styles/base.css"],
+      "relations": ["design-001", "design-003"]
+    },
+    {
+      "id": "design-007",
+      "topic": "Quick-Insert Snippet Library",
+      "keywords": ["snippet", "quick insert", "FAB", "floating action button", "palette", "clause library", "cursor insertion", "search"],
+      "summary": "Floating action button (bottom-right, z-1800) opens searchable snippet palette with category tabs (Captions/Signatures/Clauses). Items insert at Word cursor position via Office.js. Palette animates with snippetPaletteIn. FAB icon rotates 45deg when open.",
+      "files": ["src/styles/taskpane.css", "src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-001", "arch-004", "design-001"]
+    },
+    {
+      "id": "impl-001",
+      "topic": "Template Search & Category Filter",
+      "keywords": ["template search", "filter chips", "category filter", "search bar", "sv-chip", "filterTemplates", "getTemplateCategories"],
+      "summary": "Search bar + category filter chips on template selector. filterTemplates() in sv-templates.js filters by query and category. _renderTemplateList() re-renders on input. CSS: .sv-template-search-bar, .sv-filter-chips, .sv-chip, .sv-chip.active.",
+      "files": ["src/taskpane/sv-templates.js", "src/taskpane/sv-form-renderer.js", "src/taskpane/smart-variables.css"],
+      "relations": ["feat-001", "design-001"]
+    },
+    {
+      "id": "impl-002",
+      "topic": "Form Progress Bars & Group Progress",
+      "keywords": ["progress bar", "form completion", "group progress", "sv-progress-bar", "sv-group-progress", "collapse animation"],
+      "summary": "Overall progress bar at top of form shows % of required fields filled. Per-group progress badges (e.g. 2/3) and thin progress tracks. Collapse/expand uses CSS animation (sv-slide-down). Targeted DOM updates via _updateProgressIndicators() avoid full re-render.",
+      "files": ["src/taskpane/sv-form-renderer.js", "src/taskpane/sv-validation.js", "src/taskpane/smart-variables.css"],
+      "relations": ["feat-001", "design-001", "bug-006"]
+    },
+    {
+      "id": "impl-003",
+      "topic": "Toast Notification Upgrade",
+      "keywords": ["toast", "notification", "stacking", "progress bar", "dismiss", "_toastStack", "_dismissToast"],
+      "summary": "Upgraded toast system: stacks up to 3 toasts, border-left accent color by type, countdown progress bar, dismiss button. Errors require manual dismiss. _toastStack array manages positioning. CSS: .toast-body, .toast-progress, .toast-progress-bar, .toast-dismiss.",
+      "files": ["taskpane.html", "src/taskpane/sv-state.js", "src/styles/base.css"],
+      "relations": ["design-001"]
+    },
+    {
+      "id": "impl-004",
+      "topic": "Targeted Field Updates (Anti-flicker)",
+      "keywords": ["targeted update", "anti-flicker", "_updateFieldState", "_updateProgressIndicators", "_debouncedValidateAndUpdate", "no re-render"],
+      "summary": "handleChange() now calls _debouncedValidateAndUpdate() which updates individual field error state and progress indicators via DOM manipulation instead of full renderForm(). Prevents focus loss and cursor jumping on text input keystrokes.",
+      "files": ["src/taskpane/sv-validation.js"],
+      "relations": ["bug-006", "arch-003"]
+    },
+    {
+      "id": "fix-001",
+      "topic": "Entity Contact Validation Fixed",
+      "keywords": ["isValidContact", "entity", "corporation", "firstName", "lastName", "company"],
+      "summary": "Fixed isValidContact() in variableEngine.ts to accept firstName OR lastName OR company (was requiring firstName AND lastName). Entities with only company name now validate correctly.",
+      "files": ["src/services/variableEngine.ts"],
+      "relations": ["bug-005", "feat-002"]
+    },
+    {
+      "id": "feat-005",
+      "topic": "Word Count on Document Generation",
+      "keywords": ["word count", "countWords", "countParagraphs", "statistics", "document stats", "export"],
+      "summary": "Added countWords() and countParagraphs() to sv-document-generator.js. Returns {total, body, headings, caption} breakdown. insertIntoDocument() now returns word count stats. generateDocument() toast displays word count after successful generation.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-validation.js"],
+      "relations": ["feat-001", "arch-004"]
+    },
+    {
+      "id": "fix-002",
+      "topic": "Ordinal Word Bug Fix (Teens)",
+      "keywords": ["ordinal", "_getOrdinalWord", "11TH", "12TH", "13TH", "suffix", "numbering"],
+      "summary": "Fixed _getOrdinalWord() which incorrectly generated 11ST, 12ND, 13RD instead of 11TH, 12TH, 13TH. Teens (11-13) now always use TH suffix. Affects affirmative defense numbering in Answer to Complaint.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "fix-003",
+      "topic": "Complaint Paragraph Numbering Continuity",
+      "keywords": ["paragraph numbering", "partyNum", "factual allegations", "complaint", "continuous numbering"],
+      "summary": "Fixed buildComplaintContent() where paragraph counter (partyNum) was not incremented after factual allegations, causing subsequent causes of action references to potentially use overlapping paragraph numbers. Also filters empty lines from allegations.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "fix-004",
+      "topic": "Discovery Caption Consistency",
+      "keywords": ["discovery", "caption", "_buildCaptionSection", "DRY", "refactor"],
+      "summary": "Refactored buildDiscoveryContent() to use shared _buildCaptionSection() helper instead of manually building caption. Ensures consistent formatting across all litigation templates (motion, complaint, answer, discovery).",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-001"]
+    },
+    {
+      "id": "fix-005",
+      "topic": "Enhanced Document Formatting for Legal Export",
+      "keywords": ["Times New Roman", "double spacing", "legal formatting", "Word styles", "font", "paragraph spacing", "export quality"],
+      "summary": "Improved insertIntoDocument() with proper legal document formatting: Times New Roman font throughout, 14pt bold underlined titles, 12pt headings with spacing, double-spaced body text (lineSpacing=24), proper signature spacing. Replaces minimal styling that only set alignment and bold.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["arch-004", "design-004"]
+    },
+    {
+      "id": "qa-001",
+      "topic": "Cycle 1 QA Report",
+      "keywords": ["QA", "test results", "bugs found", "P1", "P2", "approval", "cycle 1"],
+      "summary": "QA passed with 2 P2 issues. P0 bugs resolved: monolith deleted, modal CSS added, label maps complete, escapeHtml in sv-state.js, isValidContact fixed. P2-1: hardcoded 'color: white' in .sv-chip.active and .sv-btn-primary (breaks dark mode). P2-2: template search re-renders full list on every keystroke (no debounce). All 12 checklist items verified via static code analysis.",
+      "files": ["src/taskpane/smart-variables.css", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["sprint-001", "fix-001", "fix-002", "fix-003", "fix-004", "fix-005"]
+    },
+    {
+      "id": "feat-006",
+      "topic": "Export Panel with Stats and Numbering",
+      "keywords": ["export panel", "showExportPanel", "word count", "section count", "page estimate", "numbering scheme", "radio group", "export actions"],
+      "summary": "Export panel (showExportPanel) replaces form after validation. Shows 3-stat bar (words/sections/~pages), numbering scheme radio (Roman/Decimal/Legal/None), and two action buttons (Insert to Word, Copy to Clipboard). generateDocument() now routes to export panel instead of direct insertion.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-validation.js", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["design-004", "feat-005", "feat-007"]
+    },
+    {
+      "id": "feat-007",
+      "topic": "Numbering Scheme Application",
+      "keywords": ["applyNumberingScheme", "roman numerals", "decimal", "legal", "_toRoman", "heading prefix", "section numbering"],
+      "summary": "applyNumberingScheme(sections, scheme) prefixes heading sections with Roman (I. II. III.), Decimal (1. 2. 3.), Legal (A. B. C.), or None. _toRoman() helper converts integers to Roman numerals. Applied before both Word insertion and clipboard export.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-006", "feat-004"]
+    },
+    {
+      "id": "feat-008",
+      "topic": "Clipboard Export",
+      "keywords": ["clipboard", "exportToClipboard", "navigator.clipboard", "plain text", "copy", "formatted text"],
+      "summary": "exportToClipboard() formats cached sections as clean plain text (titles uppercased, headings/signatures spaced, body paragraphs joined) and copies via navigator.clipboard.writeText(). Applies selected numbering scheme before formatting.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-006"]
+    },
+    {
+      "id": "feat-009",
+      "topic": "Numbering Scan-and-Repair (Existing)",
+      "keywords": ["scanForNumberingIssues", "fixAllNumberingIssues", "fix numbering", "scan repair", "health badge", "list controls"],
+      "summary": "Full scan-and-repair system in taskpane.html (not SmartVariables module). scanForNumberingIssues() scans all paragraphs via Word.run, detects unexpected restarts, fragmented lists, inconsistent formats, orphaned items. fixAllNumberingIssues() previews and applies fixes. Health badge shows score. List controls: Continue/Restart/New List.",
+      "files": ["taskpane.html"],
+      "relations": ["feat-004", "arch-004"]
+    },
+    {
+      "id": "impl-005",
+      "topic": "Document Bridging Wizard Implementation",
+      "keywords": ["bridging", "wizard", "stepper", "showBridgingWizard", "_renderBridgeStep", "_handleBridgeFile", "dropzone", "variable detection", "merge", "import document"],
+      "summary": "3-step document bridging wizard in sv-document-generator.js. Step 1: drag-and-drop .docx upload with file browse fallback. Step 2: preview detected {{variable}} placeholders shown as chips. Step 3: merge confirmation and insert via Office.js. Entry point via 'Bridge' button in template selector header. Uses _bridgeState for wizard state management.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-form-renderer.js", "src/styles/taskpane.css"],
+      "relations": ["design-005", "arch-004", "feat-001"]
+    },
+    {
+      "id": "impl-006",
+      "topic": "Quick-Insert Snippet Library Implementation",
+      "keywords": ["snippet", "FAB", "toggleSnippetPalette", "_renderSnippetPalette", "_insertSnippet", "_snippets", "captions", "signatures", "clauses", "quick insert"],
+      "summary": "Snippet library with FAB button in taskpane.html that toggles searchable palette. 3 categories: Captions (Standard/Family/Appellate), Signatures (Standard/Certificate of Service/Verification), Clauses (Wherefore/Incorporation/Jury Demand/Reservation of Rights). Inserts at Word cursor via Office.js. Search filters by title, keywords, and text content.",
+      "files": ["src/taskpane/sv-document-generator.js", "taskpane.html", "src/styles/taskpane.css"],
+      "relations": ["design-007", "arch-004", "feat-001"]
+    },
+    {
+      "id": "impl-007",
+      "topic": "Export Button in Form Footer",
+      "keywords": ["export button", "form actions", "showExportPanel", "form footer"],
+      "summary": "Added Export button next to Generate Document button in form footer. Routes to showExportPanel() for full export workflow with stats and numbering options. Disabled when form is invalid (same as Generate button).",
+      "files": ["src/taskpane/sv-form-renderer.js"],
+      "relations": ["feat-006", "design-004"]
+    },
+    {
+      "id": "sprint-002",
+      "topic": "Cycle 2 Sprint Plan",
+      "keywords": ["sprint", "cycle 2", "brainstormer", "priorities", "color white", "debounce", "transitions", "keyboard shortcuts", "autosave", "draft recovery"],
+      "summary": "5-item plan. P2 fixes: (1) Replace 22+ hardcoded color:white with --db-text-on-primary/--db-text-inverse tokens, (2) Add 250ms debounce to _handleTemplateSearch(). Features: (3) Wire CSS transition utilities (panel-enter, stagger-children, btn-press, shimmer) into sv-*.js rendering, (4) Keyboard shortcuts (Ctrl+Enter generate, Ctrl+S save profile, Ctrl+/ snippets, Tab/arrow template nav), (5) Autosave + draft recovery via localStorage with resume toast.",
+      "files": ["src/styles/taskpane.css", "src/taskpane/sv-form-renderer.js", "src/taskpane/sv-state.js", "src/taskpane/sv-validation.js"],
+      "relations": ["sprint-001", "qa-001", "design-006", "impl-001"]
+    },
+    {
+      "id": "design-008",
+      "topic": "Transition Utility Application Map",
+      "keywords": ["transition map", "panel-enter", "stagger-children", "btn-press", "slide-in-right", "slide-in-up", "shimmer", "scale-in", "animation application"],
+      "summary": "Mapping of where to apply existing CSS animation utilities: panel-enter on form containers, stagger-children on template grid + snippet list, btn-press on all .btn/.sv-btn, slide-in-right on .sub-panel.active, slide-in-up on modals, shimmer on loading skeletons, scale-in on toast. Mostly CSS-only additions, minimal JS changes.",
+      "files": ["src/styles/taskpane.css", "src/styles/base.css", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["design-006", "sprint-002"]
+    },
+    {
+      "id": "design-009",
+      "topic": "Keyboard Shortcuts Help Overlay",
+      "keywords": ["keyboard shortcuts", "Ctrl+/", "kbd", "key badge", "shortcut overlay", "accessibility", "focus-visible", "arrow key navigation"],
+      "summary": "Modal overlay (Ctrl+/ to toggle, z-2500) showing shortcuts in 3 groups: Navigation (Esc, arrows, Enter), Form (Tab, Shift+Tab, Ctrl+Enter), Quick Actions (Ctrl+S snippets, Ctrl+E export). Visual kbd badges with bottom border. Template grid gets focus-visible outlines and aria-selected for keyboard navigation.",
+      "files": ["src/styles/taskpane.css", "src/taskpane/sv-state.js"],
+      "relations": ["design-003", "sprint-002"]
+    },
+    {
+      "id": "design-010",
+      "topic": "Autosave & Draft Recovery UI",
+      "keywords": ["autosave", "draft recovery", "resume draft", "localStorage", "draft toast", "saving indicator", "db-autosave", "db-draft-toast"],
+      "summary": "Two components: (A) Resume draft toast with Resume/New/Dismiss buttons, gold accent border, shown when re-selecting template with saved data. (B) Autosave indicator (.db-autosave) in form header with pulsing dot, shows Saving→Saved→fade sequence. Draft stored as draftbridge_draft_{templateId} in localStorage. Debounced 2s after handleChange().",
+      "files": ["src/taskpane/sv-form-renderer.js", "src/taskpane/sv-state.js", "src/styles/taskpane.css"],
+      "relations": ["arch-003", "sprint-002"]
+    },
+    {
+      "id": "fix-006",
+      "topic": "Token-ize color:white (P2)",
+      "keywords": ["color white", "--db-text-on-primary", "--db-text-inverse", "dark mode", "token", "hardcoded"],
+      "summary": "Added --db-text-on-primary (#FFFFFF light / #1a1a1a dark) and --db-text-inverse tokens to tokens.css. Replaced all 24+ hardcoded 'color: white' across smart-variables.css (2), base.css (2), and taskpane.css (20). Fixes dark mode contrast issues where white text was invisible on light dark-mode surfaces.",
+      "files": ["src/styles/tokens.css", "src/taskpane/smart-variables.css", "src/styles/base.css", "src/styles/taskpane.css"],
+      "relations": ["design-001", "qa-001", "sprint-002"]
+    },
+    {
+      "id": "fix-007",
+      "topic": "Debounce Template Search (P2)",
+      "keywords": ["debounce", "template search", "_handleTemplateSearch", "_templateSearchTimer", "250ms", "performance"],
+      "summary": "Added 250ms debounce to _handleTemplateSearch() in sv-form-renderer.js matching the contact search debounce pattern. Prevents full template grid re-render on every keystroke. Timer cleaned up in destroy().",
+      "files": ["src/taskpane/sv-form-renderer.js", "src/taskpane/sv-state.js"],
+      "relations": ["impl-001", "qa-001", "sprint-002"]
+    },
+    {
+      "id": "impl-008",
+      "topic": "Transition Utilities Wired Into Rendering",
+      "keywords": ["panel-enter", "stagger-children", "slideInUp", "panelFadeIn", "btn-press", "animation", "CSS class wiring"],
+      "summary": "Wired existing CSS animation utilities into JS rendering. panel-enter on .sv-form, panelFadeIn on .sv-template-selector, stagger-children on .sv-template-grid, slideInUp on .sv-modal, scale(0.97) active state on .sv-btn/.sv-icon-btn/.sv-mini-btn. All CSS-only or class additions, no new keyframes.",
+      "files": ["src/taskpane/sv-form-renderer.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-006", "design-008", "sprint-002"]
+    },
+    {
+      "id": "impl-009",
+      "topic": "Keyboard Shortcuts System",
+      "keywords": ["keyboard shortcuts", "Ctrl+/", "Ctrl+Enter", "Ctrl+S", "Ctrl+E", "arrow keys", "toggleShortcutsOverlay", "_initKeyboardShortcuts", "tabindex", "focus-visible"],
+      "summary": "Global keyboard handler in sv-state.js via _initKeyboardShortcuts(). Shortcuts: Ctrl+/ (help overlay), Ctrl+Enter (generate), Ctrl+S (snippet palette), Ctrl+E (export), Escape (close overlays), Arrow Up/Down (template nav), Enter (select focused template). Template cards have tabindex=0 and focus-visible styles. Overlay uses .db-shortcuts-modal with kbd badges.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/sv-form-renderer.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-009", "design-003", "sprint-002"]
+    },
+    {
+      "id": "impl-010",
+      "topic": "Autosave & Draft Recovery",
+      "keywords": ["autosave", "_debouncedAutosave", "_saveDraft", "_loadDraft", "_clearDraft", "_resumeDraft", "_showDraftRecoveryToast", "draft recovery", "localStorage"],
+      "summary": "Autosave system in sv-validation.js. handleChange() triggers _debouncedAutosave() (2s debounce). Saves values+derivedValues to localStorage as draftbridge_draft_{templateId}. Autosave indicator (.db-autosave) in form header shows Saving→Saved→fade. selectTemplate() checks for drafts and shows recovery toast with Resume/New/Dismiss actions. CSS: db-autosave, db-draft-toast in smart-variables.css.",
+      "files": ["src/taskpane/sv-validation.js", "src/taskpane/sv-form-renderer.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-010", "arch-003", "sprint-002"]
+    },
+    {
+      "id": "fix-008",
+      "topic": "applyNumberingScheme Bug Fix",
+      "keywords": ["applyNumberingScheme", "numbering", "ternary bug", "heading prefix", "text replacement"],
+      "summary": "Fixed always-truthy ternary in applyNumberingScheme() that caused incorrect heading text. String.replace() always returns a string (truthy), so the else branch was unreachable. Replaced with clean strip-and-prepend: strip leading newline, prepend prefix+tab, restore newline.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-007"]
+    },
+    {
+      "id": "fix-009",
+      "topic": "DRY Paragraph Formatting Helper",
+      "keywords": ["_applyParagraphStyle", "DRY", "refactor", "Word paragraph", "formatting", "duplicate code"],
+      "summary": "Extracted _applyParagraphStyle(paragraph, style) shared helper from duplicated 40-line switch blocks in exportToWord() and insertIntoDocument(). Sets Times New Roman 12pt base, then applies style-specific formatting (alignment, bold, underline, spacing). Eliminates ~80 lines of duplicate code.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["fix-005", "arch-004"]
+    },
+    {
+      "id": "fix-010",
+      "topic": "Export Clears Draft + Keyboard Shortcut Fix",
+      "keywords": ["exportToWord", "_clearDraft", "Ctrl+Enter", "containerId", "keyboard shortcut"],
+      "summary": "Two fixes: (1) exportToWord() now calls _clearDraft() after successful Word insertion so autosaved drafts don't persist after export. (2) Ctrl+Enter keyboard shortcut now resolves containerId from DOM (matching Ctrl+E pattern) instead of relying on default 'sv-container' fallback.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-state.js"],
+      "relations": ["impl-010", "impl-009", "feat-006"]
+    },
+    {
+      "id": "qa-002",
+      "topic": "Cycle 2 QA Report",
+      "keywords": ["QA", "test results", "cycle 2", "P2 fixes verified", "approval", "color white residual", "component CSS"],
+      "summary": "QA APPROVED with 1 P2 residual. All 10 checklist items verified. P2-1 fix confirmed: color:white removed from smart-variables.css. P2-2 fix confirmed: _handleTemplateSearch() now debounced 250ms. New features verified: transitions (panel-enter, stagger-children, btn-press, reduced-motion), keyboard shortcuts (5 bindings + overlay), autosave+draft recovery (2s debounce, resume toast, clearDraft on export). Exporter fixes verified: applyNumberingScheme 4 schemes, _applyParagraphStyle DRY, Ctrl+Enter DOM resolution. P2 residual: 5 hardcoded 'color: white' remain in legacy component CSS (PartyInput.css, RecreatePanel.css, VariableForm.css, AttorneyInput.css) — not in sv-*.js rendering path.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/sv-validation.js", "src/taskpane/sv-document-generator.js", "src/taskpane/sv-form-renderer.js"],
+      "relations": ["sprint-002", "fix-006", "fix-007", "fix-008", "fix-009", "fix-010", "impl-008", "impl-009", "impl-010"]
+    },
+    {
+      "id": "sprint-003",
+      "topic": "Cycle 3 Sprint Plan",
+      "keywords": ["sprint", "cycle 3", "brainstormer", "final polish", "onboarding", "confirm dialog", "shimmer", "micro-interactions", "color white residual"],
+      "summary": "5-item final polish plan. (1) Token-ize 5 remaining color:white in legacy component CSS (PartyInput, RecreatePanel, VariableForm, AttorneyInput). (2) Wire onboarding flow (CSS exists, no JS) with first-run detection + 3-feature highlight. (3) Replace 3 browser confirm() dialogs with styled sv-modal confirmations. (4) Add shimmer loading skeletons for template grid, contact list, export panel. (5) Wire focus-glow on inputs, scale-in on errors, smooth group collapse transitions.",
+      "files": ["src/components/variables/PartyInput.css", "src/components/variables/VariableForm.css", "src/components/variables/AttorneyInput.css", "src/taskpane/recreate/RecreatePanel.css", "src/styles/taskpane.css", "src/taskpane/sv-form-renderer.js", "src/taskpane/sv-validation.js"],
+      "relations": ["sprint-002", "qa-002", "design-006", "design-003"]
+    },
+    {
+      "id": "design-011",
+      "topic": "Onboarding Flow Design",
+      "keywords": ["onboarding", "first-run", "welcome", "feature highlights", "get started", "localStorage", "completeOnboarding"],
+      "summary": "First-run onboarding modal using existing .onboarding-* CSS. 3 feature cards: Smart Templates, Intelligent Variables, Quick Snippets. 'Get Started' CTA + 'Skip for now'. localStorage flag draftbridge_onboarding_complete. Dismisses with fade-out animation. slideInUp on modal entry.",
+      "files": ["src/taskpane/sv-state.js", "src/styles/taskpane.css"],
+      "relations": ["sprint-003", "design-001"]
+    },
+    {
+      "id": "design-012",
+      "topic": "Custom Confirmation Dialog",
+      "keywords": ["confirm", "confirmation", "dialog", "showConfirm", "promise", "danger", "delete", "remove party", "alertdialog"],
+      "summary": "Promise-based showConfirm() replaces browser confirm(). Reusable .sv-confirm modal with title, message, confirm/cancel buttons. Danger variant: red confirm button (.sv-confirm-ok--danger) for delete actions. Supports Escape key and backdrop click to cancel. Used in removeParty, deleteTemplate, deleteContact.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/smart-variables.css", "src/taskpane/sv-validation.js"],
+      "relations": ["sprint-003", "sec-001"]
+    },
+    {
+      "id": "design-013",
+      "topic": "Shimmer Skeleton Layouts",
+      "keywords": ["shimmer", "skeleton", "loading", "placeholder", "template skeleton", "contact skeleton", "export skeleton"],
+      "summary": "3 skeleton layouts using existing .shimmer class. Template cards: 40x40 icon + title/desc lines. Contact rows: 32px circle avatar + name/detail lines. Export panel: 3 stat blocks + 4 numbering option blocks. All use aria-hidden=true and stagger-children for entry.",
+      "files": ["src/taskpane/sv-form-renderer.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-006", "sprint-003"]
+    },
+    {
+      "id": "design-014",
+      "topic": "Form Field Micro-Interactions",
+      "keywords": ["micro-interaction", "focus-glow", "fieldShake", "error shake", "is-valid", "has-error", "checkPop", "loading spinner", "button loading"],
+      "summary": "CSS-only micro-interactions: focus-visible glow on inputs, fieldShake animation on validation error (.has-error), errorFadeIn on error messages, green border on valid fields (.is-valid), checkPop on checkbox check, button loading spinner (.sv-btn.loading::after). All via class toggles, no new JS logic needed.",
+      "files": ["src/taskpane/smart-variables.css"],
+      "relations": ["design-003", "sprint-003"]
+    },
+    {
+      "id": "impl-011",
+      "topic": "Token-ize Legacy Component CSS",
+      "keywords": ["color white", "token", "dark mode", "legacy CSS", "PartyInput", "RecreatePanel", "VariableForm", "AttorneyInput"],
+      "summary": "Replaced 5 remaining color:white instances in legacy component CSS files with var(--db-text-on-primary). Files: PartyInput.css (.type-btn.active), RecreatePanel.css (.apply-btn, .transform-btn), VariableForm.css (.btn-primary), AttorneyInput.css (.attorney-badge). Zero hardcoded white remaining in codebase.",
+      "files": ["src/components/variables/PartyInput.css", "src/taskpane/recreate/RecreatePanel.css", "src/components/variables/VariableForm.css", "src/components/variables/AttorneyInput.css"],
+      "relations": ["fix-006", "sprint-003"]
+    },
+    {
+      "id": "impl-012",
+      "topic": "Onboarding Flow",
+      "keywords": ["onboarding", "first-run", "welcome", "modal", "localStorage", "ONBOARDING_COMPLETE"],
+      "summary": "First-run onboarding modal showing 3 features (Smart Templates, Attorney Profile, Contact Manager). Detected via localStorage key draftbridge_onboarding_complete. Shows on init() after 500ms delay. showOnboarding() renders modal, completeOnboarding() sets flag and closes. CSS in Section 13c.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-011", "sprint-003"]
+    },
+    {
+      "id": "impl-013",
+      "topic": "Custom Confirmation Dialog",
+      "keywords": ["confirm", "showConfirm", "Promise", "dialog", "modal", "destructive", "async"],
+      "summary": "Promise-based showConfirm(message, options) replacing native confirm(). Options: confirmText, cancelText, destructive (red button). Supports Escape to cancel. Replaced 3 confirm() calls: removeParty (sv-validation.js), confirmDeleteContact (sv-form-renderer.js), deleteTemplate (sv-templates.js). CSS in Section 13d.",
+      "files": ["src/taskpane/sv-state.js", "src/taskpane/sv-validation.js", "src/taskpane/sv-form-renderer.js", "src/taskpane/sv-templates.js", "src/taskpane/smart-variables.css"],
+      "relations": ["design-012", "sprint-003"]
+    },
+    {
+      "id": "impl-014",
+      "topic": "Shimmer Loading Skeletons CSS",
+      "keywords": ["shimmer", "skeleton", "loading", "animation", "placeholder", "db-skeleton"],
+      "summary": "CSS shimmer loading skeleton classes: .db-skeleton (base with shimmer animation), .db-skeleton-text, .db-skeleton-card, .db-skeleton-avatar, .db-skeleton-btn, .db-skeleton-template-grid. Uses linear-gradient animation at 1.5s interval. Section 13e in smart-variables.css.",
+      "files": ["src/taskpane/smart-variables.css"],
+      "relations": ["design-013", "sprint-003"]
+    },
+    {
+      "id": "impl-015",
+      "topic": "Form Field Micro-Interactions CSS",
+      "keywords": ["micro-interaction", "focus-glow", "shake", "error", "valid", "checkbox-pop", "loading", "spin", "scale-in"],
+      "summary": "CSS micro-interactions: enhanced focus glow (3px ring), db-shake for error fields (.has-error.shake), error message fade-in, valid field green border, .sv-btn.loading spinner, checkbox db-check-pop animation, group collapse opacity transition, db-scale-in for party cards. Section 13f in smart-variables.css.",
+      "files": ["src/taskpane/smart-variables.css"],
+      "relations": ["design-014", "sprint-003"]
+    },
+    {
+      "id": "fix-011",
+      "topic": "Ctrl+E Keyboard Shortcut Validation Bypass Fix",
+      "keywords": ["Ctrl+E", "keyboard shortcut", "export panel", "validation bypass", "generateDocument", "showExportPanel"],
+      "summary": "Ctrl+E shortcut called showExportPanel() directly, bypassing validateAll(). This allowed users to open the export panel with invalid/incomplete form data. Fixed by routing Ctrl+E through generateDocument() which validates first, making it consistent with Ctrl+Enter and the Generate Document button.",
+      "files": ["src/taskpane/sv-state.js"],
+      "relations": ["fix-010", "feat-006"]
+    },
+    {
+      "id": "qa-003",
+      "topic": "Cycle 3 Final QA Report + report.html",
+      "keywords": ["QA", "final", "cycle 3", "report", "approval", "zero P0", "zero P1", "onboarding", "confirm dialog", "shimmer", "micro-interactions"],
+      "summary": "Final QA APPROVED — 19/19 checklist items passed, 0 bugs found. Verified: zero color:white in entire codebase (grep 0 matches), onboarding modal with localStorage flag, showConfirm() replaces all 3 native confirm() calls (removeParty, confirmDeleteContact, deleteTemplate), shimmer skeleton CSS classes defined (6 variants), form micro-interactions (focus-glow, db-shake, error fade-in, is-valid green border, button loading spinner, checkbox pop), Ctrl+E routes through generateDocument(). Full regression across Cycles 1-3 passed. Generated report.html summarizing all 3 cycles.",
+      "files": ["report.html", "src/taskpane/sv-state.js", "src/taskpane/sv-validation.js", "src/taskpane/sv-form-renderer.js", "src/taskpane/sv-templates.js", "src/taskpane/smart-variables.css"],
+      "relations": ["sprint-003", "impl-011", "impl-012", "impl-013", "impl-014", "impl-015", "fix-011", "qa-001", "qa-002"]
+    },
+    {
+      "id": "sprint-004",
+      "topic": "Cycle 4 Sprint Plan — Multilevel Numbering & TOC",
+      "keywords": ["sprint", "cycle 4", "multilevel", "numbering", "TOC", "table of contents", "heading styles", "cross-reference", "continuation", "scheme preview", "legal outline"],
+      "summary": "7-item plan. (1) Extend applyNumberingScheme() for hierarchical levels (I→A→1→(a)→(i)) using level property on sections. (2) Map heading levels to Word Heading 1-5 styles in _applyParagraphStyle(). (3) TOC checkbox in export panel using existing OOXML insertToc() pattern. (4) Mini scheme preview in export panel reusing .preview-card. (5) Cross-reference scan in scanForNumberingIssues() for broken REF fields. (6) Continuation paragraphs (extension styles) with inherited indentation. (7) Save scheme from generated document to localStorage for taskpane.html reuse.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/taskpane/sv-form-renderer.js", "taskpane.html", "docs/NUMBERING-RESEARCH.md"],
+      "relations": ["feat-004", "feat-007", "feat-009", "arch-004"]
+    },
+    {
+      "id": "design-015",
+      "topic": "TOC Insertion Toggle Design",
+      "keywords": ["TOC", "table of contents", "toggle switch", "export option", "aria-checked", "checkbox"],
+      "summary": "Toggle switch in export panel for 'Include Table of Contents'. Uses .export-option-row with label+description and custom .toggle-switch (role=switch, aria-checked). 40x22px track, 18px thumb, slides 18px on toggle. Focus-visible ring. Dark mode via existing tokens.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-006", "sprint-004", "design-004"]
+    },
+    {
+      "id": "design-016",
+      "topic": "Numbering Style Preview Card Design",
+      "keywords": ["style preview", "numbering hierarchy", "preview card", "levels", "I A 1 (a) (i)", "continuation paragraph", "pilcrow"],
+      "summary": "Mini-preview card extending .preview-card with left accent gradient bar (primary→accent). Shows 5 indented levels (I. → A. → 1. → (a) → (i)) with sample legal text. Integrates continuation paragraph indicator: dashed left-border, pilcrow marker, italic muted text to differentiate body text from numbered items.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-010", "sprint-004", "design-004"]
+    },
+    {
+      "id": "design-017",
+      "topic": "Cross-Reference Scan Results Design",
+      "keywords": ["cross-reference", "xref", "broken reference", "scan results", "fix numbering", "status dot", "bulk action"],
+      "summary": "Extends .fix-results pattern. Summary bar with 'Update All' bulk action button (warning color). Individual .xref-item rows with status dots (red=broken, green=valid), reference name, detail text, per-item Fix button. Fix button transitions to primary on hover. Check mark for valid refs.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-009", "sprint-004"]
+    },
+    {
+      "id": "design-018",
+      "topic": "Save This Scheme Action Design",
+      "keywords": ["save scheme", "action link", "inline form", "star icon", "expand", "name input", "My Saved Schemes"],
+      "summary": "Post-generation action link with star icon that expands into mini naming form (scale-in animation). Input field + Save/Cancel buttons. Link uses primary-light color, hover shows warm surface bg. Form contained in bordered card. Saves to My Saved Schemes in localStorage.",
+      "files": ["src/styles/taskpane.css"],
+      "relations": ["feat-010", "sprint-004", "design-004"]
+    },
+    {
+      "id": "feat-010",
+      "topic": "Existing Numbering Infrastructure (taskpane.html)",
+      "keywords": ["numberingSchemes", "legal-outline", "contract-sections", "heading-style", "pleading-format", "scheme-card", "preview-card", "styleAssociations", "user schemes", "localStorage"],
+      "summary": "4 predefined schemes in taskpane.html: Legal Outline (I/A/1/(a)/(i)), Contract Sections (ARTICLE I/Section 1/a/(i)/(A)), Heading Style (1./1.1/1.1.1 legal numbering), Pleading Format (1/a/(1)/(a)/(i)). Each has 5 levels with before/style/after/follow config, restart/legal/rightAlign options, and Heading 1-5 styleAssociations. Live preview card updates on hover. User-saved schemes in localStorage under draftbridge_numbering_schemes. Scheme editor for custom creation. 'Save from Document' captures existing doc numbering.",
+      "files": ["taskpane.html"],
+      "relations": ["feat-009", "feat-007", "sprint-004"]
+    },
+    {
+      "id": "impl-016",
+      "topic": "Multilevel Numbering in Document Generation",
+      "keywords": ["multilevel", "numbering", "applyNumberingScheme", "level", "hierarchy", "I A 1 (a) (i)", "_formatLevelNumber", "_toAlpha"],
+      "summary": "Extended applyNumberingScheme() to support hierarchical levels 1-5 via section.level property. Per-level counters with auto-reset of deeper levels. Three schemes (roman/decimal/legal) each define 5 level formats. Added _formatLevelNumber(n, level, scheme) and _toAlpha(n, upper) helpers. Backward-compatible: sections without level default to level 1.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["feat-010", "sprint-004"]
+    },
+    {
+      "id": "impl-017",
+      "topic": "Heading Style Mapping to Word Built-in Styles",
+      "keywords": ["heading", "Heading 1", "Heading 2", "styleBuiltIn", "Word styles", "TOC support", "outline"],
+      "summary": "Updated _applyParagraphStyle() to map heading levels to Word's built-in Heading 1-5 styles via paragraph.styleBuiltIn. Enables Word's TOC and outline view. Falls back to manual bold formatting if built-in style fails. Added level-based indentation (36pt per level). Added 'continuation' style type for unnumbered body text under headings with matching indent.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["impl-016", "sprint-004"]
+    },
+    {
+      "id": "impl-018",
+      "topic": "TOC Insertion Toggle in Export Panel",
+      "keywords": ["TOC", "table of contents", "toggle switch", "OOXML", "_insertTocOoxml", "_exportIncludeToc", "F9"],
+      "summary": "Added _exportIncludeToc flag and toggle switch UI in export panel. Toggle uses .db-toggle-switch with role=switch, aria-checked. When enabled, exportToWord() calls _insertTocOoxml() which inserts OOXML TOC field (heading levels 1-3) before document body. Field shows 'Press F9 to update' placeholder. CSS: .db-export-option-row, .db-toggle-switch, .db-toggle-thumb with 40x22px track and 18px thumb.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/styles/taskpane.css"],
+      "relations": ["design-015", "sprint-004"]
+    },
+    {
+      "id": "impl-019",
+      "topic": "Numbering Style Preview Card",
+      "keywords": ["preview", "scheme preview", "hierarchy", "levels", "continuation paragraph", "pilcrow"],
+      "summary": "Added _renderSchemePreview(scheme) in export panel showing 5 indented levels with sample legal text and number prefixes. Includes continuation paragraph indicator with dashed left-border, pilcrow marker, and italic muted text. CSS: .db-scheme-preview-card with 3px primary left border, .db-preview-line.db-preview-l1 through l5 with increasing padding-left, .db-preview-continuation, .db-preview-pilcrow.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/styles/taskpane.css"],
+      "relations": ["design-016", "sprint-004"]
+    },
+    {
+      "id": "impl-020",
+      "topic": "Cross-Reference Scan",
+      "keywords": ["cross-reference", "xref", "REF field", "PAGEREF", "scan", "broken", "update", "bulk action"],
+      "summary": "Added scanCrossReferences() which scans Word document for REF/PAGEREF fields, detects broken references (empty/error results), and shows results in modal via _showXrefResults(). UI: summary bar with broken count + 'Update All' button, individual .db-xref-item rows with status dots (red=broken, green=valid), per-item Fix button, check mark for valid. _fixXref() and _updateAllXrefs() use field.updateResult(). Preview mode with sample data when Word unavailable.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/styles/taskpane.css"],
+      "relations": ["design-017", "sprint-004"]
+    },
+    {
+      "id": "impl-021",
+      "topic": "Save This Scheme Action",
+      "keywords": ["save scheme", "localStorage", "draftbridge_numbering_schemes", "user schemes", "inline form", "star icon"],
+      "summary": "Added post-generation '★ Save This Scheme' link in export panel that expands into inline naming form (_showSaveSchemeForm). _saveCurrentScheme() saves to localStorage under draftbridge_numbering_schemes key in taskpane.html-compatible format (levels array with before/style/after/follow, options, styleAssociations). CSS: .db-save-scheme-link, .db-save-scheme-form with scale-in animation.",
+      "files": ["src/taskpane/sv-document-generator.js", "src/styles/taskpane.css"],
+      "relations": ["design-018", "feat-010", "sprint-004"]
+    },
+    {
+      "id": "fix-012",
+      "topic": "Clipboard Export Multilevel Indentation",
+      "keywords": ["clipboard", "multilevel", "indentation", "plain text", "heading level", "continuation"],
+      "summary": "Clipboard export (exportToClipboard) did not indent multilevel headings in plain text output. All headings appeared at the same indentation regardless of level. Fixed by computing indent from section.level ('  '.repeat(level-1)) and applying it to heading and continuation lines. Continuation style also handled in clipboard output.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["impl-016", "feat-008"]
+    },
+    {
+      "id": "fix-013",
+      "topic": "Autosave Preserves Export Preferences",
+      "keywords": ["autosave", "draft", "numbering scheme", "TOC", "_exportNumberingScheme", "_exportIncludeToc", "resume draft"],
+      "summary": "Autosave (_saveDraft) did not persist _exportNumberingScheme or _exportIncludeToc. When resuming a draft, the user's selected numbering scheme and TOC toggle were lost, reverting to defaults (roman, no TOC). Fixed by including both fields in the draft object and restoring them in _resumeDraft().",
+      "files": ["src/taskpane/sv-validation.js"],
+      "relations": ["impl-009", "impl-018", "impl-016"]
+    },
+    {
+      "id": "fix-014",
+      "topic": "Duplicate JSDoc Block Cleanup",
+      "keywords": ["JSDoc", "duplicate", "stale comment", "_applyParagraphStyle", "cleanup"],
+      "summary": "Stale duplicate JSDoc block on _applyParagraphStyle() from before the implementer added the level parameter and continuation style. Merged into single accurate JSDoc listing all 7 style types and level parameter.",
+      "files": ["src/taskpane/sv-document-generator.js"],
+      "relations": ["impl-017"]
+    }
+  ]
+}

@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DraftBridge Gold — 4-Cycle Development Report</title>
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --text: #1a1a1a;
+    --text-muted: #6b7280;
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --success: #16a34a;
+    --warning: #d97706;
+    --error: #dc2626;
+    --border: #e5e7eb;
+    --code-bg: #f3f4f6;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111;
+      --surface: #1e1e1e;
+      --text: #e0e0e0;
+      --text-muted: #9ca3af;
+      --border: #333;
+      --code-bg: #2a2a2a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 40px 20px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  h2 { font-size: 22px; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 17px; margin: 24px 0 10px; color: var(--primary-light); }
+  h4 { font-size: 14px; margin: 16px 0 6px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  p, li { font-size: 14px; margin-bottom: 8px; }
+  ul { padding-left: 20px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin: 12px 0;
+    box-shadow: var(--shadow);
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-value { font-size: 28px; font-weight: 700; color: var(--primary); }
+  .stat-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .badge-p0 { background: #fecaca; color: #991b1b; }
+  .badge-p1 { background: #fed7aa; color: #9a3412; }
+  .badge-p2 { background: #fef08a; color: #854d0e; }
+  .badge-fixed { background: #bbf7d0; color: #166534; }
+  .badge-new { background: #bfdbfe; color: #1e40af; }
+  .badge-cycle { background: #e0e7ff; color: #3730a3; padding: 3px 10px; font-size: 12px; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  pre {
+    background: var(--code-bg);
+    padding: 14px 18px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 10px 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 600; color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .timeline { border-left: 3px solid var(--primary); padding-left: 20px; margin: 16px 0; }
+  .timeline-item { margin-bottom: 20px; position: relative; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+  }
+  .file-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .file-tag { background: var(--code-bg); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 24px 0; }
+  .toc a { color: var(--primary); text-decoration: none; font-size: 13px; }
+  .toc a:hover { text-decoration: underline; }
+  .toc ul { list-style: none; padding-left: 16px; }
+  .toc > ul { padding-left: 0; }
+  .cycle-header { display: flex; align-items: center; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>DraftBridge Gold</h1>
+<p class="subtitle">4-Cycle Development Report &mdash; February 2026<br>
+Team: draft-bridges-team (Brainstormer, Designer, Implementer, Exporter, QA)</p>
+
+<!-- STATS OVERVIEW -->
+<div class="stat-grid">
+  <div class="stat-card"><div class="stat-value">20</div><div class="stat-label">Tasks Completed</div></div>
+  <div class="stat-card"><div class="stat-value">26</div><div class="stat-label">Features Built</div></div>
+  <div class="stat-card"><div class="stat-value">14</div><div class="stat-label">Bugs Fixed</div></div>
+  <div class="stat-card"><div class="stat-value">0</div><div class="stat-label">P0/P1 Bugs Remaining</div></div>
+  <div class="stat-card"><div class="stat-value">4</div><div class="stat-label">Cycles Completed</div></div>
+  <div class="stat-card"><div class="stat-value">64</div><div class="stat-label">RAG Index Entries</div></div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <strong>Contents</strong>
+  <ul>
+    <li><a href="#architecture">1. Architecture Overview</a></li>
+    <li><a href="#cycle1">2. Cycle 1 &mdash; Foundation &amp; Critical Fixes</a></li>
+    <li><a href="#cycle2">3. Cycle 2 &mdash; UX Polish &amp; New Features</a></li>
+    <li><a href="#cycle3">4. Cycle 3 &mdash; Final Polish &amp; Micro-Interactions</a></li>
+    <li><a href="#cycle4">5. Cycle 4 &mdash; Multilevel Styles, Numbering &amp; TOC</a></li>
+    <li><a href="#bugs">6. Bug Tracker</a></li>
+    <li><a href="#code">7. Key Code Snippets</a></li>
+    <li><a href="#rag">8. RAG Index Summary</a></li>
+    <li><a href="#files">9. Files Modified</a></li>
+    <li><a href="#qa">10. QA Summary</a></li>
+  </ul>
+</div>
+
+<!-- 1. ARCHITECTURE -->
+<h2 id="architecture">1. Architecture Overview</h2>
+
+<div class="card">
+  <h3>Dual-Layer Architecture</h3>
+  <p>DraftBridge Gold is a Microsoft Word Add-in for legal professionals, built with a dual-layer architecture:</p>
+  <ul>
+    <li><strong>Vanilla JS Taskpane</strong> &mdash; <code>sv-*.js</code> modules extending a shared <code>SmartVariables</code> namespace via <code>Object.assign()</code></li>
+    <li><strong>TypeScript Services</strong> &mdash; Singleton-pattern services for variable engine, contact handling, template rendering</li>
+    <li><strong>Office.js Integration</strong> &mdash; Document insertion via <code>Word.run()</code> with paragraph-by-paragraph formatting</li>
+    <li><strong>Design Token System</strong> &mdash; 90+ CSS custom properties (<code>--db-*</code>) with full dark mode support</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h3>Module Load Order</h3>
+  <p>Script tags must follow this order (misordering causes silent undefined errors):</p>
+  <pre>sv-state.js       &rarr; Namespace definition, escapeHtml, safeId, onboarding, showConfirm
+sv-courts.js      &rarr; Courts database loading
+sv-contacts.js    &rarr; Contact CRUD, search, recent contacts
+sv-templates.js   &rarr; Template definitions, import/export, filtering
+sv-profile.js     &rarr; Attorney profile editor
+sv-form-renderer.js &rarr; Template selector, form rendering, contact/party pickers
+sv-validation.js  &rarr; Event handlers, validation, autosave, generateDocument entry
+sv-document-generator.js &rarr; Content builders, Word insertion, export, snippets, bridging</pre>
+</div>
+
+<!-- 2. CYCLE 1 -->
+<h2 id="cycle1">2. Cycle 1 &mdash; Foundation &amp; Critical Fixes</h2>
+<p><span class="badge badge-cycle">Cycle 1</span> Focused on resolving 4 P0 bugs, 1 P1, and establishing baseline features.</p>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>P0 Fixes (Critical)</h4>
+    <ul>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Monolith Deletion</strong> &mdash; Deleted 2935-line <code>smart-variables.js</code> monolith that caused namespace collisions with the modular <code>sv-*.js</code> system</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Modal CSS</strong> &mdash; Added missing styles for <code>.sv-modal-overlay</code>, <code>.sv-modal</code>, contact picker, party picker</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Label Maps</strong> &mdash; Completed discovery combined type, added 4 missing complaint causes (civil-rights, employment-discrimination, products-liability, defamation), fixed defense label mismatches</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>escapeHtml Load Order</strong> &mdash; Moved <code>escapeHtml()</code> to <code>sv-state.js</code> (loads first), guaranteeing availability</li>
+    </ul>
+  </div>
+  <div class="timeline-item">
+    <h4>P1 Fixes</h4>
+    <ul>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Entity Contact Validation</strong> &mdash; <code>isValidContact()</code> in <code>variableEngine.ts</code> now accepts <code>firstName OR lastName OR company</code> (was requiring both firstName AND lastName)</li>
+    </ul>
+  </div>
+  <div class="timeline-item">
+    <h4>New Features</h4>
+    <ul>
+      <li><span class="badge badge-new">New</span> <strong>Template Search &amp; Filter</strong> &mdash; Search bar + category filter chips on template selector</li>
+      <li><span class="badge badge-new">New</span> <strong>Form Progress Bars</strong> &mdash; Overall + per-group progress indicators with targeted DOM updates</li>
+      <li><span class="badge badge-new">New</span> <strong>Toast Notifications</strong> &mdash; Upgraded to stack up to 3, countdown progress bar, dismiss button, type-specific accents</li>
+      <li><span class="badge badge-new">New</span> <strong>XSS Prevention</strong> &mdash; <code>safeId()</code> (regex allowlist) + <code>escapeHtml()</code> (entity encoding) applied across all 28+ handlers</li>
+      <li><span class="badge badge-new">New</span> <strong>Word Count</strong> &mdash; <code>countWords()</code> with breakdown by section type (body/headings/caption)</li>
+      <li><span class="badge badge-new">New</span> <strong>Ordinal Fix</strong> &mdash; <code>_getOrdinalWord()</code> correctly handles teens (11TH, 12TH, 13TH)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 3. CYCLE 2 -->
+<h2 id="cycle2">3. Cycle 2 &mdash; UX Polish &amp; New Features</h2>
+<p><span class="badge badge-cycle">Cycle 2</span> Addressed P2 bugs from QA, added transitions, keyboard shortcuts, and autosave.</p>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>P2 Fixes</h4>
+    <ul>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Token-ize color:white</strong> &mdash; Replaced 24+ hardcoded <code>color: white</code> with <code>var(--db-text-on-primary)</code> across smart-variables.css, base.css, taskpane.css</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Template Search Debounce</strong> &mdash; <code>_handleTemplateSearch()</code> now has 250ms debounce matching contact search pattern</li>
+    </ul>
+  </div>
+  <div class="timeline-item">
+    <h4>New Features</h4>
+    <ul>
+      <li><span class="badge badge-new">New</span> <strong>Export Panel</strong> &mdash; Stats bar (words/sections/pages), numbering scheme radio (Roman/Decimal/Legal/None), Insert to Word + Copy to Clipboard</li>
+      <li><span class="badge badge-new">New</span> <strong>Numbering Scheme Engine</strong> &mdash; <code>applyNumberingScheme()</code> with <code>_toRoman()</code> helper for Roman numerals</li>
+      <li><span class="badge badge-new">New</span> <strong>Clipboard Export</strong> &mdash; <code>exportToClipboard()</code> via <code>navigator.clipboard.writeText()</code> with numbering applied</li>
+      <li><span class="badge badge-new">New</span> <strong>Keyboard Shortcuts</strong> &mdash; Ctrl+/ (help), Ctrl+Enter (generate), Ctrl+S (snippets), Ctrl+E (export), Arrow keys (template nav)</li>
+      <li><span class="badge badge-new">New</span> <strong>Autosave + Draft Recovery</strong> &mdash; 2s debounced save to localStorage, recovery toast on template re-select with Resume/New/Dismiss</li>
+      <li><span class="badge badge-new">New</span> <strong>CSS Transitions</strong> &mdash; <code>panel-enter</code>, <code>stagger-children</code>, <code>btn-press</code>, <code>slide-in-up</code>, <code>shimmer</code> utilities wired into rendering</li>
+      <li><span class="badge badge-new">New</span> <strong>Document Bridging Wizard</strong> &mdash; 3-step import flow (Upload &rarr; Preview &rarr; Merge) with drag-and-drop, variable detection</li>
+      <li><span class="badge badge-new">New</span> <strong>Snippet Library</strong> &mdash; Searchable palette with 3 categories (Captions/Signatures/Clauses), inserts at Word cursor</li>
+      <li><span class="badge badge-new">New</span> <strong>DRY Paragraph Formatting</strong> &mdash; <code>_applyParagraphStyle()</code> shared helper eliminates ~80 lines of duplicate Word formatting code</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 4. CYCLE 3 -->
+<h2 id="cycle3">4. Cycle 3 &mdash; Final Polish &amp; Micro-Interactions</h2>
+<p><span class="badge badge-cycle">Cycle 3</span> Final polish: token cleanup, onboarding, custom dialogs, shimmer, micro-interactions.</p>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>Fixes</h4>
+    <ul>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Legacy CSS Token-ize</strong> &mdash; Replaced remaining 5 <code>color: white</code> in component CSS (PartyInput, RecreatePanel, VariableForm, AttorneyInput) with <code>var(--db-text-on-primary)</code>. Zero hardcoded white in entire codebase.</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Ctrl+E Validation Bypass</strong> &mdash; Keyboard shortcut now routes through <code>generateDocument()</code> (validates first) instead of calling <code>showExportPanel()</code> directly</li>
+    </ul>
+  </div>
+  <div class="timeline-item">
+    <h4>New Features</h4>
+    <ul>
+      <li><span class="badge badge-new">New</span> <strong>Onboarding Flow</strong> &mdash; First-run modal with 3 feature highlights (Smart Templates, Attorney Profile, Contact Manager). localStorage flag prevents re-show.</li>
+      <li><span class="badge badge-new">New</span> <strong>Custom Confirm Dialog</strong> &mdash; Promise-based <code>showConfirm()</code> replaces native <code>window.confirm()</code>. Danger variant for destructive actions. Escape + backdrop to cancel.</li>
+      <li><span class="badge badge-new">New</span> <strong>Shimmer Skeletons</strong> &mdash; CSS loading placeholders: <code>.db-skeleton</code>, <code>.db-skeleton-text</code>, <code>.db-skeleton-card</code>, <code>.db-skeleton-avatar</code>, <code>.db-skeleton-btn</code></li>
+      <li><span class="badge badge-new">New</span> <strong>Form Micro-Interactions</strong> &mdash; Focus glow (3px ring), error shake animation, error message fade-in, valid field green border, button loading spinner, checkbox pop animation</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 5. CYCLE 4 -->
+<h2 id="cycle4">5. Cycle 4 &mdash; Multilevel Styles, Numbering &amp; TOC</h2>
+<p><span class="badge badge-cycle">Cycle 4</span> Focused refinement: 5-level multilevel numbering, Word built-in heading styles, OOXML TOC insertion, scheme preview, cross-references, continuation paragraphs.</p>
+
+<div class="timeline">
+  <div class="timeline-item">
+    <h4>Fixes</h4>
+    <ul>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Clipboard Multilevel Indentation</strong> &mdash; Headings now indent by level in plain-text clipboard export using <code>'&nbsp;&nbsp;'.repeat(level-1)</code></li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>Autosave Export Preferences</strong> &mdash; <code>_saveDraft()</code> now persists <code>exportNumberingScheme</code> and <code>exportIncludeToc</code> in draft object</li>
+      <li><span class="badge badge-fixed">Fixed</span> <strong>JSDoc Cleanup</strong> &mdash; Removed duplicate JSDoc blocks and standardized parameter documentation across document generator</li>
+    </ul>
+  </div>
+  <div class="timeline-item">
+    <h4>New Features</h4>
+    <ul>
+      <li><span class="badge badge-new">New</span> <strong>5-Level Multilevel Numbering</strong> &mdash; Hierarchical numbering engine with per-level counters and auto-reset: I &rarr; A &rarr; 1 &rarr; (a) &rarr; (i). Supports Roman, Decimal, Legal, and Outline schemes.</li>
+      <li><span class="badge badge-new">New</span> <strong>Word Built-In Heading Styles</strong> &mdash; <code>paragraph.styleBuiltIn</code> mapping for Heading 1&ndash;5, enabling native Word TOC and Navigation Pane integration</li>
+      <li><span class="badge badge-new">New</span> <strong>OOXML TOC Insertion</strong> &mdash; <code>_insertTocOoxml()</code> inserts a &ldquo;Table of Contents&rdquo; heading plus OOXML field codes (<code>TOC \\o "1-5"</code>) before the document body</li>
+      <li><span class="badge badge-new">New</span> <strong>Scheme Preview Card</strong> &mdash; <code>_renderSchemePreview()</code> live-renders a 5-level sample when user selects a numbering scheme in the export panel</li>
+      <li><span class="badge badge-new">New</span> <strong>Cross-Reference Scanner</strong> &mdash; <code>scanCrossReferences()</code> detects &ldquo;Section X&rdquo;/&ldquo;Article X&rdquo; references in document body and highlights matches in a results panel</li>
+      <li><span class="badge badge-new">New</span> <strong>Continuation Paragraphs</strong> &mdash; Body paragraphs under a heading inherit the parent&rsquo;s level for proper indentation in Word output</li>
+      <li><span class="badge badge-new">New</span> <strong>Save Numbering Scheme</strong> &mdash; <code>_saveCurrentScheme()</code> persists user&rsquo;s preferred numbering scheme to localStorage for future sessions</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 6. BUG TRACKER -->
+<h2 id="bugs">6. Bug Tracker</h2>
+
+<table>
+  <thead>
+    <tr><th>ID</th><th>Severity</th><th>Description</th><th>Status</th><th>Cycle</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>bug-001</td><td><span class="badge badge-p0">P0</span></td><td>Monolith smart-variables.js still loaded alongside sv-*.js modules</td><td><span class="badge badge-fixed">Fixed</span></td><td>1</td></tr>
+    <tr><td>bug-002</td><td><span class="badge badge-p0">P0</span></td><td>Contact picker modal missing CSS styles</td><td><span class="badge badge-fixed">Fixed</span></td><td>1</td></tr>
+    <tr><td>bug-003</td><td><span class="badge badge-p0">P0</span></td><td>Discovery/defense label maps incomplete</td><td><span class="badge badge-fixed">Fixed</span></td><td>1</td></tr>
+    <tr><td>bug-004</td><td><span class="badge badge-p0">P0</span></td><td>escapeHtml() load order fragility</td><td><span class="badge badge-fixed">Fixed</span></td><td>1</td></tr>
+    <tr><td>bug-005</td><td><span class="badge badge-p1">P1</span></td><td>isValidContact() rejects entity-only contacts</td><td><span class="badge badge-fixed">Fixed</span></td><td>1</td></tr>
+    <tr><td>QA P2-1</td><td><span class="badge badge-p2">P2</span></td><td>Hardcoded <code>color: white</code> breaks dark mode (24+ instances in sv-* CSS)</td><td><span class="badge badge-fixed">Fixed</span></td><td>2</td></tr>
+    <tr><td>QA P2-2</td><td><span class="badge badge-p2">P2</span></td><td>Template search re-renders on every keystroke (no debounce)</td><td><span class="badge badge-fixed">Fixed</span></td><td>2</td></tr>
+    <tr><td>QA P2-3</td><td><span class="badge badge-p2">P2</span></td><td>5 residual <code>color: white</code> in legacy component CSS</td><td><span class="badge badge-fixed">Fixed</span></td><td>3</td></tr>
+    <tr><td>fix-008</td><td><span class="badge badge-p2">P2</span></td><td>applyNumberingScheme always-truthy ternary bug</td><td><span class="badge badge-fixed">Fixed</span></td><td>2</td></tr>
+    <tr><td>fix-010</td><td><span class="badge badge-p2">P2</span></td><td>Ctrl+Enter hardcoded container fallback</td><td><span class="badge badge-fixed">Fixed</span></td><td>2</td></tr>
+    <tr><td>fix-011</td><td><span class="badge badge-p2">P2</span></td><td>Ctrl+E bypasses validation (calls showExportPanel directly)</td><td><span class="badge badge-fixed">Fixed</span></td><td>3</td></tr>
+    <tr><td>fix-012</td><td><span class="badge badge-p2">P2</span></td><td>Clipboard export missing multilevel indentation for headings</td><td><span class="badge badge-fixed">Fixed</span></td><td>4</td></tr>
+    <tr><td>fix-013</td><td><span class="badge badge-p2">P2</span></td><td>Autosave not persisting export numbering scheme and TOC toggle</td><td><span class="badge badge-fixed">Fixed</span></td><td>4</td></tr>
+    <tr><td>fix-014</td><td><span class="badge badge-p2">P2</span></td><td>Duplicate JSDoc blocks in document generator methods</td><td><span class="badge badge-fixed">Fixed</span></td><td>4</td></tr>
+  </tbody>
+</table>
+
+<!-- 7. KEY CODE SNIPPETS -->
+<h2 id="code">7. Key Code Snippets</h2>
+
+<h3>XSS Prevention &mdash; <code>sv-state.js</code></h3>
+<pre>safeId(id) {
+  if (typeof id !== 'string') return '';
+  if (!/^[a-zA-Z0-9_\-:.]+$/.test(id)) {
+    console.warn('[SmartVariables] Rejected unsafe ID:', id);
+    return '';
+  }
+  return id;
+},
+
+escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&amp;/g, '&amp;amp;')
+    .replace(/&lt;/g, '&amp;lt;')
+    .replace(/>/g, '&amp;gt;')
+    .replace(/"/g, '&amp;quot;')
+    .replace(/'/g, '&amp;#039;');
+}</pre>
+
+<h3>Promise-Based Confirm Dialog &mdash; <code>sv-state.js</code></h3>
+<pre>showConfirm(message, options = {}) {
+  const confirmText = options.confirmText || 'Confirm';
+  const destructive = options.destructive || false;
+
+  return new Promise((resolve) =&gt; {
+    const overlay = document.createElement('div');
+    overlay.className = 'sv-modal-overlay';
+    const btnClass = destructive ? 'db-confirm-btn-danger' : 'sv-btn-primary';
+    // ... render modal with confirm/cancel buttons ...
+    overlay.querySelector('#db-confirm-ok')
+      .addEventListener('click', () =&gt; cleanup(true));
+    const escHandler = (e) =&gt; {
+      if (e.key === 'Escape') cleanup(false);
+    };
+    document.addEventListener('keydown', escHandler);
+  });
+}</pre>
+
+<h3>Autosave with Debounce &mdash; <code>sv-validation.js</code></h3>
+<pre>handleChange(variableId, value, containerId) {
+  this.state.values[variableId] = value;
+  this.processDerivations(variableId);
+  this._debouncedValidateAndUpdate(variableId, containerId);
+  this._debouncedAutosave();  // 2s debounce &rarr; localStorage
+},
+
+_saveDraft() {
+  const key = `draftbridge_draft_${this.state.template.id}`;
+  const draft = {
+    templateId: this.state.template.id,
+    values: this.state.values,
+    derivedValues: this.state.derivedValues,
+    savedAt: new Date().toISOString()
+  };
+  localStorage.setItem(key, JSON.stringify(draft));
+}</pre>
+
+<h3>Numbering Scheme Engine &mdash; <code>sv-document-generator.js</code></h3>
+<pre>applyNumberingScheme(sections, scheme) {
+  if (scheme === 'none') return sections;
+  let headingCounter = 0;
+  return sections.map(section =&gt; {
+    if (section.style !== 'heading') return section;
+    headingCounter++;
+    let prefix;
+    switch (scheme) {
+      case 'roman':  prefix = this._toRoman(headingCounter) + '.'; break;
+      case 'decimal': prefix = headingCounter + '.'; break;
+      case 'legal':  prefix = String.fromCharCode(64 + headingCounter) + '.'; break;
+    }
+    const stripped = section.text.replace(/^\n/, '');
+    return { ...section, text: `\n${prefix}\t${stripped}` };
+  });
+}</pre>
+
+<h3>5-Level Multilevel Numbering &mdash; <code>sv-document-generator.js</code></h3>
+<pre>applyNumberingScheme(sections, scheme) {
+  if (scheme === 'none') return sections;
+  const counters = [0, 0, 0, 0, 0];  // per-level counters
+  return sections.map(section =&gt; {
+    if (section.style !== 'heading') return section;
+    const level = Math.min(section.level || 1, 5);
+    counters[level - 1]++;
+    // Reset child counters
+    for (let i = level; i &lt; 5; i++) counters[i] = 0;
+    const prefix = this._formatLevelNumber(counters[level - 1], level, scheme);
+    const stripped = section.text.replace(/^\n/, '');
+    return { ...section, text: `\n${prefix}\t${stripped}` };
+  });
+},
+
+_formatLevelNumber(num, level, scheme) {
+  // Level 1: I / 1 / A    Level 2: A / a / 1
+  // Level 3: 1 / i / a    Level 4: (a) / (1) / (i)
+  // Level 5: (i) / (a) / (A)
+  const formats = {
+    roman:   [n =&gt; this._toRoman(n)+'.',  n =&gt; this._toAlpha(n,true)+'.',
+              n =&gt; n+'.',  n =&gt; '('+this._toAlpha(n,false)+')',
+              n =&gt; '('+this._toRoman(n).toLowerCase()+')'],
+    // ... decimal, legal, outline variants
+  };
+  return formats[scheme][level - 1](num);
+}</pre>
+
+<h3>OOXML TOC Insertion &mdash; <code>sv-document-generator.js</code></h3>
+<pre>async _insertTocOoxml(body) {
+  const tocHeading = body.insertParagraph('Table of Contents', Word.InsertLocation.start);
+  tocHeading.styleBuiltIn = Word.BuiltInStyle.heading1;
+  tocHeading.font.bold = true;
+  tocHeading.font.size = 14;
+
+  const tocOoxml = '&lt;pkg:package ...&gt;' +
+    '&lt;w:p&gt;&lt;w:r&gt;&lt;w:fldChar w:fldCharType="begin"/&gt;&lt;/w:r&gt;' +
+    '&lt;w:r&gt;&lt;w:instrText&gt; TOC \\o "1-5" \\h \\z \\u &lt;/w:instrText&gt;&lt;/w:r&gt;' +
+    '&lt;w:r&gt;&lt;w:fldChar w:fldCharType="end"/&gt;&lt;/w:r&gt;&lt;/w:p&gt;';
+  body.insertOoxml(tocOoxml, Word.InsertLocation.end);
+}</pre>
+
+<h3>DRY Paragraph Formatting &mdash; <code>sv-document-generator.js</code></h3>
+<pre>_applyParagraphStyle(paragraph, style) {
+  paragraph.font.name = 'Times New Roman';
+  paragraph.font.size = 12;
+  switch (style) {
+    case 'caption': paragraph.alignment = Word.Alignment.centered; break;
+    case 'title':
+      paragraph.alignment = Word.Alignment.centered;
+      paragraph.font.bold = true;
+      paragraph.font.size = 14;
+      paragraph.font.underline = Word.UnderlineType.single;
+      break;
+    case 'heading': paragraph.font.bold = true; break;
+    case 'body': paragraph.lineSpacing = 24; break;  // double-spaced
+  }
+}</pre>
+
+<!-- 8. RAG INDEX -->
+<h2 id="rag">8. RAG Index Summary</h2>
+
+<div class="card">
+  <p>The semantic RAG index at <code>rag-index.json</code> contains <strong>64 entries</strong> organized across these categories:</p>
+  <ul>
+    <li><strong>Architecture</strong> (arch-001 to arch-004): Dual-layer overview, module load order, state management, Office.js integration</li>
+    <li><strong>Design</strong> (design-001 to design-014): Token system, CSS cascade, accessibility, export panel, bridging, transitions, shortcuts, autosave, onboarding, confirm dialog, shimmer, micro-interactions</li>
+    <li><strong>Security</strong> (sec-001, sec-002): XSS prevention, ReDoS protection, CSP, prototype pollution blocking</li>
+    <li><strong>Features</strong> (feat-001 to feat-009): Templates, contacts, courts, numbering, word count, export, clipboard, numbering scan-repair</li>
+    <li><strong>Implementation</strong> (impl-001 to impl-015+): Template search, progress bars, toast upgrade, targeted updates, bridging wizard, snippet library, export button, transitions, shortcuts, autosave, token-ize, onboarding, confirm dialog, shimmer, micro-interactions, multilevel numbering, TOC, heading styles</li>
+    <li><strong>Fixes</strong> (fix-001 to fix-014): Entity validation, ordinal teens, complaint numbering, discovery caption, legal formatting, token-ize white, debounce search, numbering ternary, DRY helper, export+shortcut, Ctrl+E bypass, clipboard indent, autosave prefs, JSDoc cleanup</li>
+    <li><strong>Sprints</strong> (sprint-001 to sprint-004): Cycle plans with prioritized items</li>
+    <li><strong>QA</strong> (qa-001 to qa-004): QA reports for each cycle</li>
+  </ul>
+  <p>Each entry includes: <code>id</code>, <code>topic</code>, <code>keywords[]</code>, <code>summary</code>, <code>files[]</code>, <code>relations[]</code></p>
+</div>
+
+<!-- 9. FILES MODIFIED -->
+<h2 id="files">9. Files Modified</h2>
+
+<h3>Primary (sv-*.js &mdash; Vanilla JS Modules)</h3>
+<div class="file-list">
+  <span class="file-tag">sv-state.js</span>
+  <span class="file-tag">sv-courts.js</span>
+  <span class="file-tag">sv-contacts.js</span>
+  <span class="file-tag">sv-templates.js</span>
+  <span class="file-tag">sv-profile.js</span>
+  <span class="file-tag">sv-form-renderer.js</span>
+  <span class="file-tag">sv-validation.js</span>
+  <span class="file-tag">sv-document-generator.js</span>
+</div>
+
+<h3>TypeScript Services</h3>
+<div class="file-list">
+  <span class="file-tag">variableEngine.ts</span>
+  <span class="file-tag">contactHandler.ts</span>
+  <span class="file-tag">recreateService.ts</span>
+</div>
+
+<h3>Styles</h3>
+<div class="file-list">
+  <span class="file-tag">tokens.css</span>
+  <span class="file-tag">base.css</span>
+  <span class="file-tag">taskpane.css</span>
+  <span class="file-tag">smart-variables.css</span>
+  <span class="file-tag">PartyInput.css</span>
+  <span class="file-tag">VariableForm.css</span>
+  <span class="file-tag">AttorneyInput.css</span>
+  <span class="file-tag">RecreatePanel.css</span>
+</div>
+
+<h3>Other</h3>
+<div class="file-list">
+  <span class="file-tag">taskpane.html</span>
+  <span class="file-tag">rag-index.json</span>
+  <span class="file-tag">smart-variables.js (DELETED)</span>
+</div>
+
+<!-- 10. QA SUMMARY -->
+<h2 id="qa">10. QA Summary</h2>
+
+<table>
+  <thead>
+    <tr><th>Cycle</th><th>Checklist Items</th><th>Passed</th><th>Bugs Found</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><span class="badge badge-cycle">Cycle 1</span></td><td>12</td><td>12/12</td><td>2 P2</td><td><strong>APPROVED</strong></td></tr>
+    <tr><td><span class="badge badge-cycle">Cycle 2</span></td><td>10</td><td>10/10</td><td>1 P2 residual</td><td><strong>APPROVED</strong></td></tr>
+    <tr><td><span class="badge badge-cycle">Cycle 3</span></td><td>19</td><td>19/19</td><td>0</td><td><strong>APPROVED</strong></td></tr>
+    <tr><td><span class="badge badge-cycle">Cycle 4</span></td><td>10</td><td>10/10</td><td>0</td><td><strong>APPROVED</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="card">
+  <h3>QA Methodology</h3>
+  <p>All QA was performed via <strong>static code analysis</strong> (no runtime test runner available). Each cycle included:</p>
+  <ul>
+    <li>Full file reads of all modified modules</li>
+    <li>Grep-based searches for regressions (hardcoded values, missing imports, native API calls)</li>
+    <li>Cross-reference verification between JS and CSS (class names, animation names, token usage)</li>
+    <li>Security audit (escapeHtml/safeId coverage, innerHTML patterns, onclick handlers)</li>
+    <li>Accessibility checks (ARIA attributes, keyboard navigation, focus-visible, reduced-motion)</li>
+    <li>Dark mode compliance (token usage vs. hardcoded colors)</li>
+  </ul>
+</div>
+
+<div class="card" style="border-left: 4px solid var(--success);">
+  <h3>Final Status</h3>
+  <p><strong>All 4 cycles approved.</strong> Zero P0 or P1 bugs remaining. Zero hardcoded <code>color: white</code> in the codebase.
+  All native <code>confirm()</code> calls replaced with styled <code>showConfirm()</code>. Full dark mode compliance.
+  Comprehensive keyboard shortcut system. Autosave with draft recovery. Onboarding flow for first-time users.
+  5-level multilevel numbering with Word built-in heading styles, OOXML TOC insertion, and cross-reference scanning.</p>
+</div>
+
+<p style="text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 48px;">
+  Generated by QA Agent &mdash; DraftBridge Gold &mdash; February 2026
+</p>
+
+</div>
+</body>
+</html>

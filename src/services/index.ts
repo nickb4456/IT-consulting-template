@@ -42,6 +42,20 @@ export {
   BUILT_IN_PARTIALS
 } from './templateRenderer';
 
+// Numbering service
+export {
+  NumberingService,
+  getNumberingService,
+  toOoxmlLevel,
+  toDisplayLevel,
+  type NumberFormat,
+  type MultilevelPreset,
+  type LevelConfig,
+  type NumberingConfig,
+  type AbstractNumDefinition,
+  type NumInstance
+} from './numberingService';
+
 // Court service (if exists)
 export * from './courtService';
 

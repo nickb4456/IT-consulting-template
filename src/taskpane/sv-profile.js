@@ -310,7 +310,8 @@ Object.assign(SmartVariables, {
     if (profile.firmName) lines.push(profile.firmName);
     if (profile.firmStreet) lines.push(profile.firmStreet);
     if (profile.firmCity || profile.firmState || profile.firmZip) {
-      lines.push(`${profile.firmCity || ''}, ${profile.firmState || ''} ${profile.firmZip || ''}`.trim());
+      const cityState = [profile.firmCity, profile.firmState].filter(Boolean).join(', ');
+      lines.push([cityState, profile.firmZip].filter(Boolean).join(' '));
     }
     if (profile.phone) lines.push(`Tel: ${profile.phone}`);
     if (profile.email) lines.push(profile.email);

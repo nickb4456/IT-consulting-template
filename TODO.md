@@ -1,8 +1,8 @@
 # DraftBridge TODO
 
 ## 🔴 Critical (Before Beta)
-- [ ] **API key headers** — Frontend fetch calls need `X-API-Key` header
-- [ ] Move template storage from localStorage → DynamoDB per firm
+- [x] **API key headers** — Frontend fetch calls use `X-API-Key` header via `apiHeaders()` helper ✅
+- [ ] Move template storage from localStorage → DynamoDB per firm (frontend sync already built: offline queue, conflict detection, sync badge — needs backend Lambda/DynamoDB deployment)
 
 ## 🟡 High Priority
 - [ ] **Template Editor Phase 2**
@@ -10,7 +10,7 @@
   - [ ] Insert tables as actual Word tables (OOXML)
   - [ ] "Keep together" paragraph formatting
 - [ ] **Fill Variables improvements**
-  - [ ] Better modal instead of `prompt()` dialogs
+  - [x] Better modal instead of `prompt()` dialogs (showPrompt + showConfirm modals)
   - [ ] Preview before filling
 - [x] **Security fixes** ✅
   - [x] Template ID XSS — data attributes + event delegation
@@ -24,15 +24,15 @@
   - [x] Variable chips insert at cursor, not just copy ✅
   - [x] Show preview by default ✅
 - [x] First-run onboarding experience ✅
-- [ ] Keyboard accessibility for scheme cards
-- [ ] Context-aware empty states in Library
+- [x] Keyboard accessibility for scheme cards (tabindex + Enter/Space onkeydown)
+- [x] Context-aware empty states in Library (5 scenarios: search+filter, search-only, filter-only, empty library, fallback)
 
 ## 🔵 Future / Phase 3
 - [ ] Loop blocks in templates (for parties, recipients)
-- [ ] Template categories/folders
+- [x] Template categories/filter chips (search + category filter in template selector) ✅
 - [ ] Template sharing between firms
 - [ ] Template versioning
-- [ ] Import/export templates
+- [x] Import/export templates (import with deep validation, export via JSON) ✅
 - [ ] Multi-column table blocks
 
 ## ✅ Done Today (2026-02-03)
@@ -57,6 +57,6 @@
 - [x] Merged Detect Bookmarks + Global Variables → Fill Variables
 
 ## 📊 Stats
-- **Lines of Code:** ~7,100
+- **Lines of Code:** ~18,000 (taskpane.html + sv-*.js + services/*.ts)
 - **Functions:** ~130
 - **Panels:** 5 (Generate, Edit, Numbering, Library, Settings)

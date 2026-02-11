@@ -97,10 +97,13 @@ export const AttorneyInput: React.FC<AttorneyInputProps> = ({
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [showSignaturePreview, setShowSignaturePreview] = useState(false);
-  
+
+  // Stable fallback ID for empty attorney (generated once per component instance)
+  const [fallbackId] = useState(() => `attorney-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`);
+
   // Initialize empty attorney if needed
   const attorney: Attorney = value || {
-    id: `attorney-${Date.now()}`,
+    id: fallbackId,
     firstName: '',
     lastName: '',
     barNumber: '',

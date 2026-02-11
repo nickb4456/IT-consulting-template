@@ -70,10 +70,42 @@
     <nav class="main-tabs-container" role="tablist" aria-label="Main navigation">
         <button class="tab-arrow" id="tab-prev" onclick="slideTab(-1)" disabled>‹</button>
         <div class="main-tabs" id="main-tabs">
-            <button class="main-tab active" onclick="switchPanel('generate')" aria-label="Generate documents">Generate</button>
-            <button class="main-tab" onclick="switchPanel('numbering')" aria-label="Numbering and table of contents">Numbering</button>
-            <button class="main-tab" onclick="switchPanel('library')" aria-label="Clause library">Library</button>
-            <button class="main-tab" onclick="switchPanel('admin')" aria-label="Application settings">Settings</button>
+            <button class="main-tab active" onclick="switchPanel('generate')" aria-label="Generate documents">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="12" y1="18" x2="12" y2="12"/>
+                    <line x1="9" y1="15" x2="15" y2="15"/>
+                </svg>
+                <span class="tab-label">Generate</span>
+            </button>
+            <button class="main-tab" onclick="switchPanel('numbering')" aria-label="Numbering and table of contents">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <line x1="10" y1="6" x2="21" y2="6"/>
+                    <line x1="10" y1="12" x2="21" y2="12"/>
+                    <line x1="10" y1="18" x2="21" y2="18"/>
+                    <path d="M4 6h1v4"/>
+                    <path d="M4 10h2"/>
+                    <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                </svg>
+                <span class="tab-label">Numbering</span>
+            </button>
+            <button class="main-tab" onclick="switchPanel('library')" aria-label="Clause library">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    <line x1="8" y1="6" x2="16" y2="6"/>
+                    <line x1="8" y1="10" x2="14" y2="10"/>
+                </svg>
+                <span class="tab-label">Library</span>
+            </button>
+            <button class="main-tab" onclick="switchPanel('admin')" aria-label="Application settings">
+                <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span class="tab-label">Settings</span>
+            </button>
         </div>
         <button class="tab-arrow" id="tab-next" onclick="slideTab(1)">›</button>
     </nav>
@@ -1107,7 +1139,7 @@
             <div class="section-header">Settings</div>
             <div class="section-desc">Configure your preferences</div>
             
-            <div class="option-card" onclick="comingSoon('Firm Settings')">
+            <div class="option-card" onclick="showFirmSettings()">
                 <span class="option-icon"></span>
                 <div class="option-text">
                     <div class="option-title">Firm Settings</div>
@@ -1503,6 +1535,69 @@
             toast(`${featureName} is not yet available. We're working on it!`, 'info', 4000);
         }
         
+        // ========== FIRM SETTINGS ==========
+
+        function showFirmSettings() {
+            const profile = JSON.parse(localStorage.getItem('draftbridge_user_profile') || '{}');
+            const html = `
+                <div class="section-header">Firm Information</div>
+                <div class="section-desc">This information auto-fills firm fields in all templates</div>
+
+                <div class="field">
+                    <label>Firm Name</label>
+                    <input type="text" id="firm-name" class="input" value="${escapeHtmlAttr(profile.firmName || '')}" placeholder="Smith & Associates LLP">
+                </div>
+
+                <div class="field">
+                    <label>Street Address</label>
+                    <input type="text" id="firm-street" class="input" value="${escapeHtmlAttr(profile.firmStreet || '')}" placeholder="123 Main Street, Suite 400">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="field" style="flex: 2;">
+                        <label>City</label>
+                        <input type="text" id="firm-city" class="input" value="${escapeHtmlAttr(profile.firmCity || '')}">
+                    </div>
+                    <div class="field" style="flex: 1;">
+                        <label>State</label>
+                        <input type="text" id="firm-state" class="input" maxlength="2" value="${escapeHtmlAttr(profile.firmState || '')}" placeholder="CA">
+                    </div>
+                    <div class="field" style="flex: 1;">
+                        <label>ZIP</label>
+                        <input type="text" id="firm-zip" class="input" maxlength="10" value="${escapeHtmlAttr(profile.firmZip || '')}" placeholder="02101">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn secondary" onclick="closeModal()" style="flex: 1;">Cancel</button>
+                    <button class="btn" onclick="saveFirmSettings()" style="flex: 1;">Save Settings</button>
+                </div>
+            `;
+            showModal('Firm Settings', html);
+        }
+
+        function saveFirmSettings() {
+            const profile = JSON.parse(localStorage.getItem('draftbridge_user_profile') || '{}');
+            profile.firmName = document.getElementById('firm-name').value.trim();
+            profile.firmStreet = document.getElementById('firm-street').value.trim();
+            profile.firmCity = document.getElementById('firm-city').value.trim();
+            profile.firmState = document.getElementById('firm-state').value.trim().toUpperCase();
+            profile.firmZip = document.getElementById('firm-zip').value.trim();
+            localStorage.setItem('draftbridge_user_profile', JSON.stringify(profile));
+
+            // Sync with SmartVariables if loaded
+            if (typeof SmartVariables !== 'undefined') {
+                SmartVariables.userProfile = profile;
+            }
+
+            closeModal();
+            toast('Firm settings saved!', 'success');
+        }
+
+        function escapeHtmlAttr(str) {
+            return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         // ========== API KEY MANAGEMENT ==========
         
         function showApiKeySettings() {
@@ -1599,7 +1694,7 @@
                 console.error('API key validation failed:', err);
                 statusEl.style.background = '#fff3e0';
                 statusEl.style.border = '1px solid #ff9800';
-                statusEl.innerHTML = `<span style="color: #e65100;">Could not validate: ${err.message}</span>`;
+                statusEl.innerHTML = `<span style="color: #e65100;">Could not validate: ${escapeHtml(err.message)}</span>`;
             } finally {
                 saveBtn.disabled = false;
                 saveBtnText.textContent = 'Validate & Save';
@@ -1631,44 +1726,58 @@
             updateApiKeyStatus(!!API_KEY);
         }
         
-        // Enhanced toast notification with timestamps (Evvie UX fix)
+        // Toast notification system with stacking, progress bar, and type-specific behavior
+        const _toastStack = [];
+        const MAX_TOASTS = 3;
+
         function toast(message, type = 'info', duration = 3000) {
-            // Remove any existing toast
-            const existing = document.querySelector('.toast-notification');
-            if (existing) existing.remove();
-            
+            // Enforce max visible toasts — remove oldest
+            while (_toastStack.length >= MAX_TOASTS) {
+                const oldest = _toastStack.shift();
+                if (oldest && oldest.parentElement) {
+                    oldest.classList.remove('show');
+                    setTimeout(() => oldest.remove(), 300);
+                }
+            }
+
             const toastEl = document.createElement('div');
             toastEl.className = `toast-notification toast-${type}`;
-            
-            // Add timestamp for transparency (Evvie: "When did this happen?")
+
             const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            // V2 Design: No emoji icons, using CSS border-left accent instead
-            const icon = '';
-            
+
             toastEl.innerHTML = `
-                <span class="toast-icon">${icon}</span>
-                <span class="toast-message">${escapeHtml(message)}</span>
-                <span class="toast-time">${time}</span>
-                <button class="toast-dismiss" onclick="this.parentElement.remove()" title="Dismiss">x</button>
+                <div class="toast-body">
+                    <span class="toast-message">${escapeHtml(message)}</span>
+                    <span class="toast-time">${time}</span>
+                    <button class="toast-dismiss" onclick="SmartVariables._dismissToast(this.closest('.toast-notification'))" title="Dismiss" aria-label="Dismiss notification">&times;</button>
+                </div>
+                ${type !== 'error' ? '<div class="toast-progress"><div class="toast-progress-bar"></div></div>' : ''}
             `;
+
             document.body.appendChild(toastEl);
-            
+            _toastStack.push(toastEl);
+
+            // Reposition stack
+            _toastStack.forEach((t, i) => {
+                t.style.bottom = `${20 + i * 56}px`;
+            });
+
             // Animate in
             setTimeout(() => toastEl.classList.add('show'), 10);
-            
-            // For errors, require manual dismissal (Evvie: "I need to read this!")
-            if (type === 'error') {
-                // Don't auto-dismiss errors - user must click X
-                return;
+
+            // Errors require manual dismiss
+            if (type === 'error') return;
+
+            // Animate progress bar countdown
+            const actualDuration = type === 'success' ? Math.max(duration, 4000) : duration;
+            const progressBar = toastEl.querySelector('.toast-progress-bar');
+            if (progressBar) {
+                progressBar.style.transition = `width ${actualDuration}ms linear`;
+                requestAnimationFrame(() => { progressBar.style.width = '0%'; });
             }
-            
-            // Remove after duration (longer default for non-errors)
-            const actualDuration = type === 'success' ? Math.max(duration, 5000) : duration;
+
             setTimeout(() => {
-                if (toastEl.parentElement) {
-                    toastEl.classList.remove('show');
-                    setTimeout(() => toastEl.remove(), 300);
-                }
+                SmartVariables._dismissToast(toastEl);
             }, actualDuration);
         }
         
@@ -3500,8 +3609,9 @@
         }
         
         // Delete a user-saved scheme
-        function deleteUserScheme(schemeId) {
-            if (!confirm('Delete this numbering scheme?')) return;
+        async function deleteUserScheme(schemeId) {
+            const confirmed = await SmartVariables.showConfirm('Delete this numbering scheme?', { destructive: true, confirmText: 'Delete' });
+            if (!confirmed) return;
             
             delete userSchemes[schemeId];
             localStorage.setItem('draftbridge_numbering_schemes', JSON.stringify(userSchemes));
@@ -4148,10 +4258,43 @@ COMMENTS:
             renderedCount = 0;
             
             if (clauses.length === 0) {
+                const searchTerm = document.getElementById('search').value.trim();
+                const isFiltered = currentCategory !== 'all';
+                const hasAnyClauses = allClauses.length > 0;
+
+                let emptyTitle, emptyDesc, emptyAction;
+
+                if (searchTerm && isFiltered) {
+                    // Searching within a category
+                    emptyTitle = 'No matching clauses';
+                    emptyDesc = `No ${currentCategory} clauses match "${searchTerm}". Try a broader search or switch categories.`;
+                    emptyAction = `<button class="btn btn-sm" onclick="document.getElementById('search').value='';setCategory('all')">Clear filters</button>`;
+                } else if (searchTerm) {
+                    // Searching across all categories
+                    emptyTitle = 'No results found';
+                    emptyDesc = `No clauses match "${searchTerm}". Try different keywords or check spelling.`;
+                    emptyAction = `<button class="btn btn-sm" onclick="document.getElementById('search').value='';filterClauses()">Clear search</button>`;
+                } else if (isFiltered) {
+                    // Category filter with no results
+                    emptyTitle = `No ${currentCategory} clauses`;
+                    emptyDesc = `Your library doesn't have any ${currentCategory} clauses yet. Save highlighted text from a document or switch categories.`;
+                    emptyAction = `<button class="btn btn-sm" onclick="setCategory('all')">Show all clauses</button>`;
+                } else if (!hasAnyClauses) {
+                    // Completely empty library
+                    emptyTitle = 'Your clause library is empty';
+                    emptyDesc = 'Highlight text in your document, then use Settings > Save Highlighted Text to build your library.';
+                    emptyAction = `<button class="btn btn-sm" onclick="switchPanel('admin')">Go to Settings</button>`;
+                } else {
+                    emptyTitle = 'No clauses found';
+                    emptyDesc = 'Try adjusting your search or filters.';
+                    emptyAction = '';
+                }
+
                 clausesEl.innerHTML = `
-                    <div class="empty">
-                        <div class="empty-icon"></div>
-                        <div>No clauses found</div>
+                    <div class="empty-state empty-state--centered">
+                        <div class="empty-title">${emptyTitle}</div>
+                        <div class="empty-desc">${emptyDesc}</div>
+                        ${emptyAction}
                     </div>
                 `;
                 return;
@@ -8715,7 +8858,8 @@ COMMENTS:
             const template = savedTemplates.find(t => t.id === templateId);
             const templateName = template ? template.name : 'this template';
             
-            if (!confirm(`Are you sure you want to delete "${templateName}"?\n\nThis cannot be undone.`)) return;
+            const confirmed = await SmartVariables.showConfirm(`Are you sure you want to delete "${templateName}"? This cannot be undone.`, { destructive: true, confirmText: 'Delete' });
+            if (!confirmed) return;
             
             try {
                 // Delete from API
@@ -8772,7 +8916,10 @@ COMMENTS:
             );
             
             if (usesClient) {
-                const clientName = prompt('Enter client name:', '');
+                const clientName = await SmartVariables.showPrompt('Enter client name:', {
+                    placeholder: 'e.g. Acme Corporation',
+                    confirmText: 'Continue'
+                });
                 if (clientName) variables.client.name = clientName;
             }
             
@@ -8898,5 +9045,8 @@ COMMENTS:
     <script src="src/taskpane/sv-form-renderer.js"></script>
     <script src="src/taskpane/sv-validation.js"></script>
     <script src="src/taskpane/sv-document-generator.js"></script>
+
+    <!-- Quick-Insert Snippet FAB (Design D) -->
+    <button class="db-snippet-fab" id="db-snippet-fab" onclick="SmartVariables.toggleSnippetPalette()" title="Quick-Insert Snippets">+</button>
 </body>
 </html>

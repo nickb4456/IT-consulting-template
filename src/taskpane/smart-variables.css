@@ -21,6 +21,7 @@
 /* ═══ SECTION 1: Template Selector ═══════════════════════════════ */
 .sv-template-selector {
   padding: 16px;
+  animation: panelFadeIn 0.25s ease-out;
 }
 
 .sv-section-title {
@@ -95,6 +96,59 @@
   font-size: 18px;
 }
 
+/* ═══ SECTION 1b: Template Search & Filter Chips ═════════════════ */
+
+.sv-template-search-bar {
+  margin-bottom: var(--db-space-sm);
+}
+
+.sv-template-search {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  border: 1px solid var(--db-border-input);
+  border-radius: var(--db-radius-md);
+  background: var(--db-surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.sv-template-search:focus {
+  outline: none;
+  border-color: var(--db-primary-light);
+  box-shadow: 0 0 0 2px var(--db-input-focus-ring);
+}
+
+.sv-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--db-space-md);
+}
+
+.sv-chip {
+  padding: 4px 12px;
+  border: 1px solid var(--db-border);
+  border-radius: var(--db-radius-badge);
+  background: var(--db-surface);
+  color: var(--db-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.sv-chip:hover {
+  border-color: var(--db-primary-light);
+  color: var(--db-primary-light);
+}
+
+.sv-chip.active {
+  background: var(--db-primary-light);
+  border-color: var(--db-primary-light);
+  color: var(--db-text-on-primary);
+}
+
 /* ═══ SECTION 2: Form Layout ═════════════════════════════════════ */
 
 .sv-form {
@@ -133,6 +187,31 @@
   font-weight: 600;
   color: var(--db-primary);
   margin: 0;
+}
+
+/* ═══ SECTION 2b: Progress Bar ═══════════════════════════════════ */
+
+.sv-progress-bar-container {
+  position: relative;
+  height: 6px;
+  background: var(--db-border-subtle);
+  overflow: hidden;
+}
+
+.sv-progress-bar {
+  height: 100%;
+  background: var(--db-primary-light);
+  transition: width 0.4s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+.sv-progress-label {
+  position: absolute;
+  right: var(--db-space-md);
+  top: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--db-text-muted);
 }
 
 /* ═══ SECTION 3: Validation Warning ══════════════════════════════ */
@@ -200,9 +279,56 @@
   transform: rotate(180deg);
 }
 
+/* Per-group progress track */
+.sv-group-progress {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--db-radius-badge);
+  background: var(--db-warning-bg);
+  color: var(--db-warning-text);
+  margin-right: 4px;
+}
+
+.sv-group-progress.complete {
+  background: var(--db-success-bg);
+  color: var(--db-success);
+}
+
+.sv-group-progress-track {
+  height: 3px;
+  background: var(--db-border-subtle);
+}
+
+.sv-group-progress-fill {
+  height: 100%;
+  background: var(--db-warning);
+  transition: width 0.3s ease;
+}
+
+.sv-group-progress-fill.complete {
+  background: var(--db-success);
+}
+
+/* Collapse/expand animation */
 .sv-group-content {
   padding: 14px;
   border-top: 1px solid var(--db-border-subtle);
+  overflow: hidden;
+}
+
+.sv-group-collapsed {
+  display: none;
+}
+
+.sv-group-expanded {
+  display: block;
+  animation: sv-slide-down 0.2s ease-out;
+}
+
+@keyframes sv-slide-down {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 2000px; }
 }
 
 /* ═══ SECTION 5: Variables & Labels ══════════════════════════════ */
@@ -498,7 +624,7 @@
 
 .sv-btn-primary {
   background: var(--db-primary-light);
-  color: white;
+  color: var(--db-text-on-primary);
 }
 
 .sv-btn-primary:hover {
@@ -722,9 +848,11 @@
   outline-offset: 2px;
 }
 
-/* Active press state for buttons */
-.sv-btn:active {
-  transform: translateY(1px);
+/* Active press state for buttons (uses btn-press utility) */
+.sv-btn:active,
+.sv-icon-btn:active,
+.sv-mini-btn:active {
+  transform: scale(0.97);
 }
 
 .sv-btn-primary:active {
@@ -752,6 +880,378 @@
 @keyframes sv-fade-in {
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══ SECTION 13a: Autosave Indicator & Draft Recovery ══════════ */
+
+.db-autosave {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--db-text-sm);
+  color: var(--db-text-muted);
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.db-autosave.visible {
+  opacity: 1;
+}
+
+.db-autosave-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.db-autosave-dot.saving {
+  background: var(--db-warning);
+  animation: db-pulse 1s ease-in-out infinite;
+}
+
+.db-autosave-dot.saved {
+  background: var(--db-success);
+}
+
+@keyframes db-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Draft recovery toast */
+.db-draft-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: var(--db-surface);
+  border: 1px solid var(--db-accent);
+  border-left: 4px solid var(--db-accent);
+  border-radius: var(--db-radius-lg);
+  box-shadow: var(--db-shadow-lg);
+  padding: var(--db-space-md) var(--db-space-lg);
+  min-width: 280px;
+  max-width: 360px;
+  animation: slideInUp 0.3s ease-out;
+}
+
+.db-draft-toast-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: var(--db-space-sm);
+}
+
+.db-draft-toast-text strong {
+  font-size: var(--db-text-md);
+  color: var(--db-text);
+}
+
+.db-draft-toast-text span {
+  font-size: var(--db-text-sm);
+  color: var(--db-text-muted);
+}
+
+.db-draft-toast-actions {
+  display: flex;
+  gap: var(--db-space-xs);
+}
+
+.db-draft-toast-actions .sv-btn {
+  padding: 4px 12px;
+  font-size: var(--db-text-sm);
+}
+
+/* ═══ SECTION 13b: Keyboard Shortcuts Overlay ═══════════════════ */
+
+.db-shortcuts-modal {
+  max-width: 380px;
+}
+
+.db-shortcut-group {
+  margin-bottom: var(--db-space-lg);
+}
+
+.db-shortcut-group:last-child {
+  margin-bottom: 0;
+}
+
+.db-shortcut-group-title {
+  font-size: var(--db-text-sm);
+  font-weight: 600;
+  color: var(--db-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--db-space-sm);
+  padding-bottom: var(--db-space-xs);
+  border-bottom: 1px solid var(--db-border-subtle);
+}
+
+.db-shortcut-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: var(--db-text-md);
+  color: var(--db-text);
+}
+
+.db-shortcut-row kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  font-family: var(--db-font-mono);
+  font-size: var(--db-text-sm);
+  background: var(--db-surface-muted);
+  border: 1px solid var(--db-border);
+  border-bottom-width: 2px;
+  border-radius: var(--db-radius-sm);
+  color: var(--db-text);
+  min-width: 22px;
+  text-align: center;
+}
+
+/* Focused template card (keyboard navigation) */
+.sv-template-card.focused,
+.sv-template-card:focus-visible {
+  outline: 2px solid var(--db-primary-light);
+  outline-offset: 2px;
+  border-color: var(--db-primary-light);
+  box-shadow: 0 2px 8px var(--db-input-focus-ring);
+}
+
+/* ═══ SECTION 13c: Onboarding Modal ═════════════════════════════ */
+
+.db-onboarding-modal {
+  max-width: 400px;
+}
+
+.db-onboarding-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--db-space-lg);
+}
+
+.db-onboarding-feature {
+  display: flex;
+  gap: var(--db-space-md);
+  align-items: flex-start;
+}
+
+.db-onboarding-feature-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--db-surface-warm-subtle);
+  border-radius: var(--db-radius-lg);
+}
+
+.db-onboarding-feature-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.db-onboarding-feature-text strong {
+  font-size: var(--db-text-md);
+  color: var(--db-text);
+}
+
+.db-onboarding-feature-text span {
+  font-size: var(--db-text-sm);
+  color: var(--db-text-muted);
+  line-height: 1.4;
+}
+
+/* ═══ SECTION 13d: Custom Confirmation Dialog ═══════════════════ */
+
+.db-confirm-modal {
+  max-width: 360px;
+}
+
+.db-confirm-message {
+  font-size: var(--db-text-md);
+  color: var(--db-text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.db-confirm-btn-danger {
+  background: var(--db-error);
+  color: var(--db-text-on-primary);
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--db-radius-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-confirm-btn-danger:hover {
+  opacity: 0.9;
+}
+
+.db-confirm-btn-danger:focus-visible {
+  outline: 2px solid var(--db-error);
+  outline-offset: 2px;
+}
+
+/* ═══ SECTION 13e: Shimmer Loading Skeletons ════════════════════ */
+
+@keyframes db-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.db-skeleton {
+  background: var(--db-border-subtle);
+  background-image: linear-gradient(
+    90deg,
+    var(--db-border-subtle) 0px,
+    var(--db-surface-hover) 40px,
+    var(--db-border-subtle) 80px
+  );
+  background-size: 200px 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--db-radius-sm);
+  animation: db-shimmer 1.5s ease-in-out infinite;
+}
+
+.db-skeleton-text {
+  height: 12px;
+  margin-bottom: 8px;
+  width: 80%;
+}
+
+.db-skeleton-text:last-child {
+  width: 60%;
+}
+
+.db-skeleton-card {
+  height: 60px;
+  border-radius: var(--db-radius-lg);
+  margin-bottom: 10px;
+}
+
+.db-skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--db-radius-pill);
+}
+
+.db-skeleton-btn {
+  height: 36px;
+  width: 120px;
+  border-radius: var(--db-radius-md);
+}
+
+/* Template grid shimmer placeholder */
+.db-skeleton-template-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+/* ═══ SECTION 13f: Form Field Micro-Interactions ════════════════ */
+
+/* Focus glow — enhanced ring on focus */
+.sv-input:focus,
+.sv-select:focus,
+.sv-textarea:focus {
+  box-shadow: 0 0 0 3px var(--db-input-focus-ring);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Error shake animation on invalid submit */
+@keyframes db-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-4px); }
+  40%, 80% { transform: translateX(4px); }
+}
+
+.sv-variable.has-error.shake .sv-input,
+.sv-variable.has-error.shake .sv-select,
+.sv-variable.has-error.shake .sv-textarea {
+  animation: db-shake 0.4s ease-in-out;
+}
+
+/* Error message fade-in */
+.sv-error {
+  animation: sv-fade-in 0.2s ease-out;
+}
+
+/* Valid field green border with check */
+.sv-variable.is-valid .sv-input,
+.sv-variable.is-valid .sv-select,
+.sv-variable.is-valid .sv-textarea {
+  border-color: var(--db-success);
+  transition: border-color 0.2s ease;
+}
+
+/* Button loading spinner */
+.sv-btn.loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.sv-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid var(--db-border);
+  border-top-color: var(--db-text-on-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Checkbox pop animation */
+@keyframes db-check-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.sv-checkbox-wrapper input[type="checkbox"]:checked {
+  animation: db-check-pop 0.2s ease-out;
+}
+
+/* Group collapse/expand opacity transition */
+.sv-group-content {
+  transition: opacity 0.2s ease;
+}
+
+.sv-group-collapsed {
+  opacity: 0;
+}
+
+.sv-group-expanded {
+  opacity: 1;
+}
+
+/* Scale-in for newly added party cards */
+@keyframes db-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.sv-party-card {
+  animation: db-scale-in 0.2s ease-out;
 }
 
 /* ═══ SECTION 14: Print Styles ═══════════════════════════════════ */
@@ -812,6 +1312,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  animation: slideInUp 0.25s ease-out;
 }
 
 /* Modal header with title and close button */

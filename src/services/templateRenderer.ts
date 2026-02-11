@@ -9,12 +9,18 @@
  */
 
 import Handlebars from 'handlebars';
-import { 
-  TemplateDefinition, 
+import {
+  TemplateDefinition,
   TemplateRenderResult,
   DocumentState
 } from '../types/variables';
 import { VariableEngine } from './variableEngine';
+import {
+  NumberingService,
+  getNumberingService,
+  MultilevelPreset,
+  toOoxmlLevel
+} from './numberingService';
 
 // ============================================================================
 // HANDLEBARS SETUP
@@ -128,9 +134,284 @@ hbs.registerHelper('pluralize', (count: number, singular: string, plural?: strin
 });
 
 // Default value helper
-hbs.registerHelper('default', (value: unknown, defaultValue: unknown) => 
+hbs.registerHelper('default', (value: unknown, defaultValue: unknown) =>
   value !== undefined && value !== null && value !== '' ? value : defaultValue
 );
+
+// ============================================================================
+// NUMBERING HELPERS
+// ============================================================================
+
+/**
+ * Track current numbering state during rendering.
+ * This is used by the multilevel block helper.
+ */
+interface NumberingState {
+  type: MultilevelPreset;
+  numId: number;
+  counters: number[];
+}
+
+let currentNumberingState: NumberingState | null = null;
+
+/**
+ * Block helper for multilevel numbered content.
+ * Usage: {{#multilevel type="legal" start=1}}...content...{{/multilevel}}
+ */
+hbs.registerHelper('multilevel', function (
+  this: unknown,
+  options: Handlebars.HelperOptions
+) {
+  const type = (options.hash.type || 'numbered') as MultilevelPreset;
+  const start = typeof options.hash.start === 'number' ? options.hash.start : 1;
+
+  // Initialize counters for all 9 levels
+  const counters = Array(9).fill(start);
+
+  // Set up numbering state for child helpers
+  const service = getNumberingService();
+  const numDef = service.createMultilevelList(type);
+  const numInstance = service.createNumInstance(numDef.abstractNumId);
+
+  currentNumberingState = {
+    type,
+    numId: numInstance.numId,
+    counters
+  };
+
+  // Render the block content
+  const result = options.fn(this);
+
+  // Clear state after rendering
+  currentNumberingState = null;
+
+  return result;
+});
+
+/**
+ * Helper to mark content at a specific level within a multilevel block.
+ * Usage: {{level 1}}Content goes here{{/level}}
+ * Levels are 1-9 (mapped to OOXML 0-8 internally)
+ */
+hbs.registerHelper('level', function (
+  this: unknown,
+  levelNum: number,
+  options: Handlebars.HelperOptions
+) {
+  if (!currentNumberingState) {
+    // Not inside a multilevel block, just return content
+    return options.fn ? options.fn(this) : '';
+  }
+
+  const ilvl = toOoxmlLevel(levelNum);
+  const state = currentNumberingState;
+
+  // Get current counter for this level
+  const counter = state.counters[ilvl];
+
+  // Increment counter for next time
+  state.counters[ilvl]++;
+
+  // Reset all deeper levels
+  for (let i = ilvl + 1; i < 9; i++) {
+    state.counters[i] = 1;
+  }
+
+  // Build the number prefix based on type
+  let prefix = '';
+  if (state.type === 'legal') {
+    // Legal format: 1.1.1
+    const parts: number[] = [];
+    for (let i = 0; i <= ilvl; i++) {
+      parts.push(state.counters[i] - (i === ilvl ? 1 : 0) || 1);
+    }
+    // Fix: use actual counter values
+    parts[ilvl] = counter;
+    prefix = parts.join('.');
+  } else if (state.type === 'outline') {
+    // Outline format varies by level
+    prefix = formatOutlineNumber(ilvl, counter);
+  } else {
+    // Simple numbered: just the counter
+    prefix = `${counter}.`;
+  }
+
+  // Render content with number prefix
+  const content = options.fn ? options.fn(this) : '';
+  const indent = '  '.repeat(ilvl);
+
+  return new Handlebars.SafeString(
+    `<p class="level-${levelNum}" data-ilvl="${ilvl}" data-numid="${state.numId}">${indent}${prefix} ${content}</p>`
+  );
+});
+
+/**
+ * Simple numbered list helper (no nesting).
+ * Usage: {{#numbered}}{{item}}First{{/item}}{{item}}Second{{/item}}{{/numbered}}
+ */
+hbs.registerHelper('numbered', function (
+  this: unknown,
+  options: Handlebars.HelperOptions
+) {
+  let counter = typeof options.hash.start === 'number' ? options.hash.start : 1;
+
+  // Register a temporary item helper
+  const originalItem = hbs.helpers['item'];
+  hbs.registerHelper('item', function (
+    this: unknown,
+    itemOptions: Handlebars.HelperOptions
+  ) {
+    const num = counter++;
+    const content = itemOptions.fn ? itemOptions.fn(this) : '';
+    return new Handlebars.SafeString(`<li value="${num}">${content}</li>`);
+  });
+
+  const result = `<ol>${options.fn(this)}</ol>`;
+
+  // Restore original helper
+  if (originalItem) {
+    hbs.registerHelper('item', originalItem);
+  } else {
+    hbs.unregisterHelper('item');
+  }
+
+  return new Handlebars.SafeString(result);
+});
+
+/**
+ * Simple bulleted list helper.
+ * Usage: {{#bulleted}}{{item}}First{{/item}}{{item}}Second{{/item}}{{/bulleted}}
+ */
+hbs.registerHelper('bulleted', function (
+  this: unknown,
+  options: Handlebars.HelperOptions
+) {
+  const bulletStyle = options.hash.style || 'disc';
+
+  // Register a temporary item helper
+  const originalItem = hbs.helpers['item'];
+  hbs.registerHelper('item', function (
+    this: unknown,
+    itemOptions: Handlebars.HelperOptions
+  ) {
+    const content = itemOptions.fn ? itemOptions.fn(this) : '';
+    return new Handlebars.SafeString(`<li>${content}</li>`);
+  });
+
+  const result = `<ul style="list-style-type: ${bulletStyle}">${options.fn(this)}</ul>`;
+
+  // Restore original helper
+  if (originalItem) {
+    hbs.registerHelper('item', originalItem);
+  } else {
+    hbs.unregisterHelper('item');
+  }
+
+  return new Handlebars.SafeString(result);
+});
+
+/**
+ * Inline numbering reference helper.
+ * Usage: {{numbering type="legal" level=2 value=3}}
+ * Outputs: "1.3" (or whatever the current state dictates)
+ */
+hbs.registerHelper('numbering', function (options: Handlebars.HelperOptions) {
+  const type = (options.hash.type || 'decimal') as string;
+  const level = typeof options.hash.level === 'number' ? options.hash.level : 1;
+  const value = typeof options.hash.value === 'number' ? options.hash.value : 1;
+
+  if (type === 'legal' && currentNumberingState?.type === 'legal') {
+    // Build legal number from current state
+    const parts: number[] = [];
+    for (let i = 0; i < level; i++) {
+      parts.push(currentNumberingState.counters[i] || 1);
+    }
+    parts[level - 1] = value;
+    return parts.join('.');
+  }
+
+  // Simple format
+  return formatNumber(type, value);
+});
+
+/**
+ * Format a number in outline style based on level.
+ */
+function formatOutlineNumber(ilvl: number, value: number): string {
+  switch (ilvl) {
+    case 0:
+      return toRoman(value, true) + '.';    // I.
+    case 1:
+      return toLetter(value, true) + '.';   // A.
+    case 2:
+      return value + '.';                    // 1.
+    case 3:
+      return toLetter(value, false) + ')';  // a)
+    case 4:
+      return toRoman(value, false) + ')';   // i)
+    default:
+      return value + ')';
+  }
+}
+
+/**
+ * Format a number in the specified format.
+ */
+function formatNumber(format: string, value: number): string {
+  switch (format) {
+    case 'decimal':
+      return String(value);
+    case 'lowerLetter':
+      return toLetter(value, false);
+    case 'upperLetter':
+      return toLetter(value, true);
+    case 'lowerRoman':
+      return toRoman(value, false);
+    case 'upperRoman':
+      return toRoman(value, true);
+    default:
+      return String(value);
+  }
+}
+
+/**
+ * Convert number to letter (1=a, 2=b, ..., 27=aa, etc.)
+ */
+function toLetter(n: number, upper: boolean): string {
+  let result = '';
+  let num = n;
+  while (num > 0) {
+    num--;
+    result = String.fromCharCode((num % 26) + (upper ? 65 : 97)) + result;
+    num = Math.floor(num / 26);
+  }
+  return result || (upper ? 'A' : 'a');
+}
+
+/**
+ * Convert number to Roman numeral.
+ */
+function toRoman(n: number, upper: boolean): string {
+  if (n <= 0 || n > 3999) return String(n);
+
+  const romanNumerals: Array<[number, string]> = [
+    [1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'],
+    [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'],
+    [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']
+  ];
+
+  let result = '';
+  let remaining = n;
+
+  for (const [value, numeral] of romanNumerals) {
+    while (remaining >= value) {
+      result += numeral;
+      remaining -= value;
+    }
+  }
+
+  return upper ? result : result.toLowerCase();
+}
 
 // ============================================================================
 // DATE FORMATTING
@@ -396,6 +677,69 @@ export const BUILT_IN_PARTIALS: Record<string, string> = {
 <p>{{default closing "Sincerely,"}}</p>
 <br><br><br>
 <p>{{author$.fullNameFormal}}</p>
+`,
+
+  // Numbered List
+  'numbered-list': `
+{{#numbered start=1}}
+{{#each items}}
+{{#item}}{{this}}{{/item}}
+{{/each}}
+{{/numbered}}
+`,
+
+  // Bulleted List
+  'bulleted-list': `
+{{#bulleted}}
+{{#each items}}
+{{#item}}{{this}}{{/item}}
+{{/each}}
+{{/bulleted}}
+`,
+
+  // Legal Outline (for briefs, contracts)
+  'legal-outline': `
+{{#multilevel type="legal"}}
+{{#each sections}}
+{{#level 1}}{{this.title}}{{/level}}
+{{#each this.subsections}}
+{{#level 2}}{{this.title}}{{/level}}
+{{#each this.paragraphs}}
+{{#level 3}}{{this}}{{/level}}
+{{/each}}
+{{/each}}
+{{/each}}
+{{/multilevel}}
+`,
+
+  // Outline Format (I, A, 1, a, i)
+  'outline-format': `
+{{#multilevel type="outline"}}
+{{#each sections}}
+{{#level 1}}{{this.title}}{{/level}}
+{{#each this.items}}
+{{#level 2}}{{this}}{{/level}}
+{{/each}}
+{{/each}}
+{{/multilevel}}
+`,
+
+  // Contract Sections (common legal document format)
+  'contract-sections': `
+{{#multilevel type="legal" start=1}}
+{{#each articles}}
+{{#level 1}}ARTICLE {{@index}} - {{uppercase this.title}}{{/level}}
+{{#each this.sections}}
+{{#level 2}}{{this.title}}{{/level}}
+{{#if this.content}}
+<p class="contract-text">{{this.content}}</p>
+{{/if}}
+{{#each this.subsections}}
+{{#level 3}}{{this}}{{/level}}
+{{/each}}
+{{/each}}
+{{/each}}
+{{/multilevel}}
 `
 };
 

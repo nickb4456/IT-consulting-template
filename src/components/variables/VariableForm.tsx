@@ -125,11 +125,19 @@ export const VariableForm: React.FC<VariableFormProps> = ({
     }
   }, [engine, values, derivedValues, onComplete]);
   
-  // Notify parent of initial state
+  // Notify parent of initial state (use refs to avoid stale closures)
+  const onValuesChangeRef = React.useRef(onValuesChange);
+  const onValidationChangeRef = React.useRef(onValidationChange);
+  onValuesChangeRef.current = onValuesChange;
+  onValidationChangeRef.current = onValidationChange;
+
   useEffect(() => {
-    onValuesChange?.(values, derivedValues);
-    onValidationChange?.(validation.isValid, validation.errors);
-  }, []); // Only on mount
+    const initialValues = engine.getAllValues();
+    const initialDerived = engine.getAllDerivedValues();
+    const initialValidation = engine.getValidationState();
+    onValuesChangeRef.current?.(initialValues, initialDerived);
+    onValidationChangeRef.current?.(initialValidation.isValid, initialValidation.errors);
+  }, [engine]); // Only on mount - engine is stable
   
   // Group titles (friendly names)
   const groupTitles: Record<string, string> = {

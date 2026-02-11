@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DraftBridge Ribbon Icons</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 30px;
+        }
+        h1 { font-weight: 300; text-align: center; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .icon-card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .icon-card h3 {
+            margin: 0;
+            color: #C4A052;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .icon-card .desc { color: #888; font-size: 11px; }
+        .sizes { display: flex; gap: 15px; align-items: flex-end; }
+        .size-box { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .size-box span { font-size: 10px; color: #666; }
+        canvas {
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            background: repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 50% / 8px 8px;
+        }
+        .download-all {
+            background: #C4A052;
+            color: #1a1a1a;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        .download-all:hover { background: #d4b062; }
+    </style>
+</head>
+<body>
+    <h1>DraftBridge Ribbon Icons</h1>
+    <p class="subtitle">Complete icon set - Brown/Gold theme</p>
+    <div style="text-align:center;margin-bottom:20px;">
+        <button onclick="downloadEverything()" style="background:#C4A052;color:#1a1a1a;border:none;padding:15px 40px;border-radius:8px;cursor:pointer;font-weight:bold;font-size:16px;">DOWNLOAD ALL ICONS</button>
+    </div>
+    <div class="icon-grid" id="iconGrid"></div>
+
+<script>
+// Polyfill for roundRect
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (typeof r === 'number') r = {tl: r, tr: r, br: r, bl: r};
+        this.beginPath();
+        this.moveTo(x + r.tl, y);
+        this.lineTo(x + w - r.tr, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r.tr);
+        this.lineTo(x + w, y + h - r.br);
+        this.quadraticCurveTo(x + w, y + h, x + w - r.br, y + h);
+        this.lineTo(x + r.bl, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r.bl);
+        this.lineTo(x, y + r.tl);
+        this.quadraticCurveTo(x, y, x + r.tl, y);
+        this.closePath();
+    };
+}
+
+function drawRoundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+}
+
+function drawBase(ctx, s) {
+    const gradient = ctx.createLinearGradient(0, 0, s, s);
+    gradient.addColorStop(0, '#5C4A32');
+    gradient.addColorStop(1, '#4a3d2a');
+    drawRoundRect(ctx, 0, 0, s, s, s * 0.15);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+}
+
+const ICONS = {
+    generate: {
+        name: 'Generate',
+        desc: 'Create new document',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.fillStyle = '#FDF8F3';
+            ctx.lineWidth = Math.max(1, s * 0.05);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Document
+            ctx.beginPath();
+            ctx.moveTo(s*0.2, s*0.15);
+            ctx.lineTo(s*0.2, s*0.72);
+            ctx.lineTo(s*0.58, s*0.72);
+            ctx.lineTo(s*0.58, s*0.28);
+            ctx.lineTo(s*0.45, s*0.15);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Fold
+            ctx.beginPath();
+            ctx.moveTo(s*0.45, s*0.15);
+            ctx.lineTo(s*0.45, s*0.28);
+            ctx.lineTo(s*0.58, s*0.28);
+            ctx.fillStyle = '#E8DCC8';
+            ctx.fill();
+            ctx.stroke();
+
+            // Plus circle
+            ctx.beginPath();
+            ctx.arc(s*0.72, s*0.65, s*0.18, 0, Math.PI*2);
+            ctx.fillStyle = '#C4A052';
+            ctx.fill();
+
+            // Plus sign
+            ctx.strokeStyle = '#FDF8F3';
+            ctx.lineWidth = Math.max(1, s * 0.06);
+            ctx.beginPath();
+            ctx.moveTo(s*0.72 - s*0.09, s*0.65);
+            ctx.lineTo(s*0.72 + s*0.09, s*0.65);
+            ctx.moveTo(s*0.72, s*0.65 - s*0.09);
+            ctx.lineTo(s*0.72, s*0.65 + s*0.09);
+            ctx.stroke();
+        }
+    },
+    templates: {
+        name: 'Templates',
+        desc: 'Document templates',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.lineWidth = Math.max(1, s * 0.04);
+            ctx.lineCap = 'round';
+
+            // Back doc
+            ctx.fillStyle = '#D4C4A8';
+            drawRoundRect(ctx, s*0.32, s*0.12, s*0.48, s*0.52, s*0.03);
+            ctx.fill();
+            ctx.stroke();
+
+            // Middle doc
+            ctx.fillStyle = '#E8DCC8';
+            drawRoundRect(ctx, s*0.24, s*0.20, s*0.48, s*0.52, s*0.03);
+            ctx.fill();
+            ctx.stroke();
+
+            // Front doc
+            ctx.fillStyle = '#FDF8F3';
+            drawRoundRect(ctx, s*0.16, s*0.28, s*0.48, s*0.52, s*0.03);
+            ctx.fill();
+            ctx.stroke();
+
+            // Lines
+            ctx.strokeStyle = '#C4A052';
+            ctx.lineWidth = Math.max(1, s * 0.035);
+            ctx.beginPath();
+            ctx.moveTo(s*0.24, s*0.44);
+            ctx.lineTo(s*0.52, s*0.44);
+            ctx.moveTo(s*0.24, s*0.54);
+            ctx.lineTo(s*0.56, s*0.54);
+            ctx.moveTo(s*0.24, s*0.64);
+            ctx.lineTo(s*0.44, s*0.64);
+            ctx.stroke();
+        }
+    },
+    numbering: {
+        name: 'Numbering',
+        desc: 'Multilevel lists',
+        draw: function(ctx, s) {
+            ctx.fillStyle = '#C4A052';
+            ctx.strokeStyle = '#C4A052';
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'left';
+
+            const fontSize = Math.max(8, s * 0.22);
+            ctx.font = 'bold ' + fontSize + 'px Arial';
+
+            ctx.fillText('1.', s*0.12, s*0.26);
+            ctx.fillText('2.', s*0.12, s*0.50);
+            ctx.fillText('3.', s*0.12, s*0.74);
+
+            ctx.strokeStyle = '#C4A052';
+            ctx.lineWidth = Math.max(1, s * 0.045);
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(s*0.40, s*0.26);
+            ctx.lineTo(s*0.85, s*0.26);
+            ctx.moveTo(s*0.40, s*0.50);
+            ctx.lineTo(s*0.75, s*0.50);
+            ctx.moveTo(s*0.40, s*0.74);
+            ctx.lineTo(s*0.80, s*0.74);
+            ctx.stroke();
+        }
+    },
+    toc: {
+        name: 'TOC',
+        desc: 'Table of contents',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.fillStyle = '#C4A052';
+            ctx.lineWidth = Math.max(1, s * 0.04);
+            ctx.lineCap = 'round';
+
+            // Lines with varying lengths
+            var ys = [0.24, 0.40, 0.56, 0.72];
+            var lens = [0.50, 0.45, 0.55, 0.40];
+
+            for (var i = 0; i < ys.length; i++) {
+                ctx.beginPath();
+                ctx.moveTo(s*0.15, s*ys[i]);
+                ctx.lineTo(s*(0.15 + lens[i]), s*ys[i]);
+                ctx.stroke();
+            }
+
+            // Page numbers
+            ctx.font = 'bold ' + Math.max(6, s*0.14) + 'px Arial';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#C4A052';
+            for (var i = 0; i < ys.length; i++) {
+                ctx.fillText(String(i+1), s*0.88, s*ys[i]);
+            }
+        }
+    },
+    fix: {
+        name: 'Fix',
+        desc: 'Fix numbering',
+        draw: function(ctx, s) {
+            ctx.fillStyle = '#C4A052';
+            ctx.strokeStyle = '#C4A052';
+
+            ctx.save();
+            ctx.translate(s*0.5, s*0.5);
+            ctx.rotate(-Math.PI/4);
+
+            // Wrench handle
+            drawRoundRect(ctx, -s*0.07, -s*0.02, s*0.14, s*0.38, s*0.03);
+            ctx.fill();
+
+            // Wrench head
+            ctx.beginPath();
+            ctx.moveTo(-s*0.16, -s*0.30);
+            ctx.lineTo(-s*0.16, -s*0.10);
+            ctx.lineTo(-s*0.07, -s*0.02);
+            ctx.lineTo(s*0.07, -s*0.02);
+            ctx.lineTo(s*0.16, -s*0.10);
+            ctx.lineTo(s*0.16, -s*0.30);
+            ctx.lineTo(s*0.05, -s*0.18);
+            ctx.lineTo(-s*0.05, -s*0.18);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+    },
+    clauses: {
+        name: 'Clauses',
+        desc: 'Clause library',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.fillStyle = '#FDF8F3';
+            ctx.lineWidth = Math.max(1, s * 0.045);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Left page
+            ctx.beginPath();
+            ctx.moveTo(s*0.5, s*0.22);
+            ctx.quadraticCurveTo(s*0.32, s*0.20, s*0.14, s*0.26);
+            ctx.lineTo(s*0.14, s*0.76);
+            ctx.quadraticCurveTo(s*0.32, s*0.72, s*0.5, s*0.74);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Right page
+            ctx.beginPath();
+            ctx.moveTo(s*0.5, s*0.22);
+            ctx.quadraticCurveTo(s*0.68, s*0.20, s*0.86, s*0.26);
+            ctx.lineTo(s*0.86, s*0.76);
+            ctx.quadraticCurveTo(s*0.68, s*0.72, s*0.5, s*0.74);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Spine
+            ctx.beginPath();
+            ctx.moveTo(s*0.5, s*0.22);
+            ctx.lineTo(s*0.5, s*0.74);
+            ctx.stroke();
+
+            // Text lines
+            ctx.lineWidth = Math.max(1, s * 0.025);
+            ctx.beginPath();
+            ctx.moveTo(s*0.20, s*0.38); ctx.lineTo(s*0.42, s*0.38);
+            ctx.moveTo(s*0.20, s*0.48); ctx.lineTo(s*0.40, s*0.48);
+            ctx.moveTo(s*0.20, s*0.58); ctx.lineTo(s*0.44, s*0.58);
+            ctx.moveTo(s*0.58, s*0.38); ctx.lineTo(s*0.80, s*0.38);
+            ctx.moveTo(s*0.58, s*0.48); ctx.lineTo(s*0.78, s*0.48);
+            ctx.moveTo(s*0.58, s*0.58); ctx.lineTo(s*0.82, s*0.58);
+            ctx.stroke();
+        }
+    },
+    settings: {
+        name: 'Settings',
+        desc: 'Add-in settings',
+        draw: function(ctx, s) {
+            ctx.fillStyle = '#C4A052';
+            var cx = s*0.5, cy = s*0.5;
+            var outer = s*0.34, teeth = 8;
+
+            ctx.beginPath();
+            for (var i = 0; i < teeth * 2; i++) {
+                var angle = (i * Math.PI) / teeth - Math.PI/2;
+                var r = (i % 2 === 0) ? outer : outer - s*0.08;
+                var x = cx + Math.cos(angle) * r;
+                var y = cy + Math.sin(angle) * r;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // Center hole
+            ctx.beginPath();
+            ctx.arc(cx, cy, s*0.18, 0, Math.PI*2);
+            ctx.fillStyle = '#5C4A32';
+            ctx.fill();
+
+            // Inner dot
+            ctx.beginPath();
+            ctx.arc(cx, cy, s*0.10, 0, Math.PI*2);
+            ctx.fillStyle = '#C4A052';
+            ctx.fill();
+        }
+    },
+    demand: {
+        name: 'Demand Letter',
+        desc: 'Demand letter',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.fillStyle = '#FDF8F3';
+            ctx.lineWidth = Math.max(1, s * 0.045);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Envelope body
+            drawRoundRect(ctx, s*0.12, s*0.30, s*0.76, s*0.48, s*0.04);
+            ctx.fill();
+            ctx.stroke();
+
+            // Envelope flap
+            ctx.beginPath();
+            ctx.moveTo(s*0.12, s*0.34);
+            ctx.lineTo(s*0.5, s*0.58);
+            ctx.lineTo(s*0.88, s*0.34);
+            ctx.stroke();
+
+            // Alert badge
+            ctx.beginPath();
+            ctx.arc(s*0.75, s*0.25, s*0.12, 0, Math.PI*2);
+            ctx.fillStyle = '#C4A052';
+            ctx.fill();
+
+            ctx.fillStyle = '#5C4A32';
+            ctx.font = 'bold ' + Math.max(8, s*0.16) + 'px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('!', s*0.75, s*0.25);
+        }
+    },
+    motion: {
+        name: 'Motion',
+        desc: 'Motion to dismiss',
+        draw: function(ctx, s) {
+            ctx.fillStyle = '#C4A052';
+            ctx.strokeStyle = '#C4A052';
+            ctx.lineWidth = Math.max(1, s * 0.05);
+            ctx.lineCap = 'round';
+
+            // Gavel head
+            ctx.save();
+            ctx.translate(s*0.5, s*0.32);
+            ctx.rotate(-Math.PI/6);
+            drawRoundRect(ctx, -s*0.24, -s*0.09, s*0.48, s*0.18, s*0.04);
+            ctx.fill();
+            ctx.restore();
+
+            // Handle
+            ctx.lineWidth = Math.max(2, s * 0.10);
+            ctx.beginPath();
+            ctx.moveTo(s*0.5, s*0.38);
+            ctx.lineTo(s*0.5, s*0.70);
+            ctx.stroke();
+
+            // Sound block
+            ctx.fillStyle = '#8B7355';
+            drawRoundRect(ctx, s*0.22, s*0.78, s*0.56, s*0.10, s*0.02);
+            ctx.fill();
+        }
+    },
+    contract: {
+        name: 'Contract',
+        desc: 'Contract template',
+        draw: function(ctx, s) {
+            ctx.strokeStyle = '#C4A052';
+            ctx.fillStyle = '#FDF8F3';
+            ctx.lineWidth = Math.max(1, s * 0.045);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+
+            // Document
+            drawRoundRect(ctx, s*0.14, s*0.12, s*0.52, s*0.68, s*0.03);
+            ctx.fill();
+            ctx.stroke();
+
+            // Text lines
+            ctx.lineWidth = Math.max(1, s * 0.03);
+            ctx.beginPath();
+            ctx.moveTo(s*0.22, s*0.26); ctx.lineTo(s*0.56, s*0.26);
+            ctx.moveTo(s*0.22, s*0.36); ctx.lineTo(s*0.52, s*0.36);
+            ctx.moveTo(s*0.22, s*0.46); ctx.lineTo(s*0.54, s*0.46);
+            ctx.moveTo(s*0.22, s*0.64); ctx.lineTo(s*0.48, s*0.64);
+            ctx.stroke();
+
+            // Checkmark
+            ctx.strokeStyle = '#C4A052';
+            ctx.lineWidth = Math.max(2, s * 0.07);
+            ctx.beginPath();
+            ctx.moveTo(s*0.58, s*0.52);
+            ctx.lineTo(s*0.70, s*0.68);
+            ctx.lineTo(s*0.88, s*0.32);
+            ctx.stroke();
+        }
+    }
+};
+
+var sizes = [80, 32, 16];
+var grid = document.getElementById('iconGrid');
+
+Object.keys(ICONS).forEach(function(key) {
+    var icon = ICONS[key];
+    var card = document.createElement('div');
+    card.className = 'icon-card';
+    card.innerHTML = '<h3>' + icon.name + '</h3><p class="desc">' + icon.desc + '</p><div class="sizes" id="sizes-' + key + '"></div><button class="download-all" onclick="downloadAll(\'' + key + '\')">Download All Sizes</button>';
+    grid.appendChild(card);
+
+    var sizesDiv = document.getElementById('sizes-' + key);
+    sizes.forEach(function(size) {
+        var box = document.createElement('div');
+        box.className = 'size-box';
+
+        var canvas = document.createElement('canvas');
+        canvas.id = key + '-' + size;
+        canvas.width = size;
+        canvas.height = size;
+
+        box.appendChild(canvas);
+        var span = document.createElement('span');
+        span.textContent = size + 'px';
+        box.appendChild(span);
+        sizesDiv.appendChild(box);
+
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, size, size);
+        // Add white background for numbering and toc icons
+        if (key === 'numbering' || key === 'toc') {
+            drawRoundRect(ctx, 0, 0, size, size, size * 0.15);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fill();
+        }
+        icon.draw(ctx, size);
+    });
+});
+
+function downloadAll(iconId) {
+    sizes.forEach(function(size) {
+        var canvas = document.getElementById(iconId + '-' + size);
+        var link = document.createElement('a');
+        link.download = 'icon-' + iconId + '-' + size + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+}
+
+function downloadEverything() {
+    var iconKeys = Object.keys(ICONS);
+    var delay = 0;
+    iconKeys.forEach(function(iconId) {
+        sizes.forEach(function(size) {
+            setTimeout(function() {
+                var canvas = document.getElementById(iconId + '-' + size);
+                var link = document.createElement('a');
+                link.download = 'icon-' + iconId + '-' + size + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }, delay);
+            delay += 150; // Stagger downloads to avoid browser blocking
+        });
+    });
+    alert('Downloading ' + (iconKeys.length * sizes.length) + ' icons! Check your Downloads folder.');
+}
+</script>
+</body>
+</html>

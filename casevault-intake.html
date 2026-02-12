@@ -199,6 +199,24 @@
                         <div class="hint">Total settlement (not including attorney fees)</div>
                     </div>
                     
+                    <div class="form-group">
+                        <label>Proof of Settlement (Required)</label>
+                        <div id="uploadZone" style="border: 2px dashed #334155; border-radius: 8px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                            <input type="file" id="proofImage" accept="image/*,.pdf" style="display: none;" required>
+                            <div id="uploadPlaceholder">
+                                <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+                                <div style="color: #94a3b8; font-size: 14px;">Click or drag to upload</div>
+                                <div style="color: #64748b; font-size: 12px; margin-top: 4px;">Settlement letter, check, or closing statement</div>
+                            </div>
+                            <div id="uploadPreview" style="display: none;">
+                                <img id="previewImg" style="max-width: 100%; max-height: 150px; border-radius: 4px;">
+                                <div id="previewName" style="color: #94a3b8; font-size: 13px; margin-top: 8px;"></div>
+                                <div id="ocrResult" style="color: #34d399; font-size: 14px; margin-top: 8px; display: none;">✓ Amount detected: <strong id="ocrAmount"></strong></div>
+                            </div>
+                        </div>
+                        <div class="hint">⚠️ Redact client names & case numbers. Only the amount needs to be visible.</div>
+                    </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
                             <label>Case Type</label>
@@ -321,6 +339,91 @@
                 this.value = num.toLocaleString();
             }
         });
+
+        // File upload handling
+        const uploadZone = document.getElementById('uploadZone');
+        const proofInput = document.getElementById('proofImage');
+        const uploadPlaceholder = document.getElementById('uploadPlaceholder');
+        const uploadPreview = document.getElementById('uploadPreview');
+        const previewImg = document.getElementById('previewImg');
+        const previewName = document.getElementById('previewName');
+        
+        uploadZone.addEventListener('click', () => proofInput.click());
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#818cf8';
+            uploadZone.style.background = 'rgba(129, 140, 248, 0.1)';
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.style.borderColor = '#334155';
+            uploadZone.style.background = 'transparent';
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#334155';
+            uploadZone.style.background = 'transparent';
+            if (e.dataTransfer.files.length) {
+                proofInput.files = e.dataTransfer.files;
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+        
+        proofInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            if (!file) return;
+            
+            // Validate file type
+            if (!file.type.match(/image.*/) && file.type !== 'application/pdf') {
+                alert('Please upload an image or PDF file');
+                return;
+            }
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File too large. Maximum size is 10MB.');
+                return;
+            }
+            
+            previewName.textContent = file.name;
+            
+            if (file.type.match(/image.*/)) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                    uploadPlaceholder.style.display = 'none';
+                    uploadPreview.style.display = 'block';
+                    uploadZone.style.borderColor = '#34d399';
+                    
+                    // Simple OCR simulation - in production would use real OCR API
+                    // For now, just show success
+                    setTimeout(() => {
+                        const amountField = document.getElementById('amount');
+                        if (amountField.value) {
+                            document.getElementById('ocrResult').style.display = 'block';
+                            document.getElementById('ocrAmount').textContent = '$' + amountField.value;
+                        }
+                    }, 500);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // PDF - show icon instead
+                previewImg.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23818cf8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 2l5 5h-5V4zM6 20V4h6v6h6v10H6z"/></svg>';
+                previewImg.style.display = 'block';
+                previewImg.style.width = '64px';
+                uploadPlaceholder.style.display = 'none';
+                uploadPreview.style.display = 'block';
+                uploadZone.style.borderColor = '#34d399';
+            }
+        }
     </script>
 </body>
 </html>

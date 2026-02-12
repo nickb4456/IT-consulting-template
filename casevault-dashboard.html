@@ -408,6 +408,16 @@
                     <input type="text" id="extAmount" placeholder="150,000" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
                 </div>
                 
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Proof of Settlement</label>
+                    <div id="extUploadZone" style="border: 2px dashed #334155; border-radius: 6px; padding: 16px; text-align: center; cursor: pointer;">
+                        <input type="file" id="extProofImage" accept="image/*,.pdf" style="display: none;" required>
+                        <div id="extUploadPlaceholder" style="color: #64748b; font-size: 13px;">📄 Click to upload proof</div>
+                        <div id="extUploadPreview" style="display: none; color: #34d399; font-size: 13px;">✓ <span id="extFileName"></span></div>
+                    </div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Redact names. Only amount needed.</div>
+                </div>
+                
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Case Type</label>
@@ -441,6 +451,19 @@
     </div>
 
     <script>
+        // Extend form file upload
+        const extUploadZone = document.getElementById('extUploadZone');
+        const extProofInput = document.getElementById('extProofImage');
+        extUploadZone.addEventListener('click', () => extProofInput.click());
+        extProofInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                document.getElementById('extUploadPlaceholder').style.display = 'none';
+                document.getElementById('extUploadPreview').style.display = 'block';
+                document.getElementById('extFileName').textContent = e.target.files[0].name;
+                extUploadZone.style.borderColor = '#34d399';
+            }
+        });
+
         // Extend time form
         document.getElementById('extendForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -448,6 +471,12 @@
             const amt = document.getElementById('extAmount').value.replace(/[,$]/g, '');
             if (isNaN(parseInt(amt)) || parseInt(amt) < 1000) {
                 alert('Please enter a valid settlement amount (minimum $1,000)');
+                return;
+            }
+            
+            // Check for proof image
+            if (!document.getElementById('extProofImage').files.length) {
+                alert('Please upload proof of settlement');
                 return;
             }
             

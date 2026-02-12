@@ -3,266 +3,363 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contribute Settlement Data | CaseVault by AIBridges</title>
+    <title>Contribute Settlement Data | CaseVault</title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="css/style.css">
     <style>
-        .casevault-hero {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: white;
-            padding: 60px 20px;
-            text-align: center;
-        }
-        .contribute-container {
-            max-width: 700px;
-            margin: -40px auto 60px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            padding: 40px;
-        }
-        .form-group {
-            margin-bottom: 24px;
-        }
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            color: #334155;
-            margin-bottom: 8px;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            box-sizing: border-box;
-        }
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb 0%, #06b6d4 100%);
-            color: white;
-            padding: 16px 32px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
-        }
-        .info-box {
-            background: #f0f9ff;
-            border-left: 4px solid #2563eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-        .info-box h3 {
-            margin: 0 0 12px 0;
-            color: #0f172a;
-            font-size: 18px;
-        }
-        .info-box p {
-            margin: 0;
-            color: #475569;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .radio-group {
-            display: flex;
-            gap: 20px;
-        }
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .radio-option input[type="radio"] {
-            width: auto;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: white; min-height: 100vh; }
+        
+        .nav { background: rgba(15, 23, 42, 0.95); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
+        .nav-logo { font-size: 20px; font-weight: 700; color: #818cf8; text-decoration: none; }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        .nav-links a:hover, .nav-links a.active { color: white; }
+        
+        .hero { text-align: center; padding: 60px 20px 40px; }
+        .hero h1 { font-size: 32px; margin-bottom: 12px; }
+        .hero p { color: #94a3b8; max-width: 500px; margin: 0 auto; }
+        
+        .form-container { max-width: 600px; margin: 0 auto 60px; padding: 0 20px; }
+        .form-card { background: #1e293b; border-radius: 16px; padding: 32px; border: 1px solid #334155; }
+        
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 8px; }
+        .form-group label .required { color: #f87171; }
+        .form-group input, .form-group select { width: 100%; padding: 14px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 16px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #818cf8; }
+        .form-group input.error, .form-group select.error { border-color: #f87171; }
+        .form-group .hint { font-size: 12px; color: #64748b; margin-top: 6px; }
+        .form-group .error-msg { font-size: 12px; color: #f87171; margin-top: 6px; display: none; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+        
+        .checkbox-group { display: flex; align-items: flex-start; gap: 12px; padding: 16px; background: #0f172a; border-radius: 8px; cursor: pointer; }
+        .checkbox-group input { width: 20px; height: 20px; margin-top: 2px; }
+        .checkbox-group span { font-size: 14px; color: #94a3b8; }
+        
+        .submit-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #818cf8, #a78bfa); border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4); }
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .info-box { background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+        .info-box h4 { font-size: 14px; margin-bottom: 8px; color: #a5b4fc; }
+        .info-box p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+        
+        .success-message { display: none; text-align: center; padding: 40px; }
+        .success-message h2 { color: #34d399; margin-bottom: 12px; }
+        .success-message p { color: #94a3b8; margin-bottom: 24px; }
+        .success-message a { color: #818cf8; }
+        
+        .validation-summary { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); border-radius: 8px; padding: 16px; margin-bottom: 24px; display: none; }
+        .validation-summary h4 { color: #f87171; font-size: 14px; margin-bottom: 8px; }
+        .validation-summary ul { color: #fca5a5; font-size: 13px; margin-left: 20px; }
+        
+        /* Honeypot - hidden from humans */
+        .hp-field { position: absolute; left: -9999px; }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0" style="background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <a href="/" class="navbar-brand p-0" style="font-size: 24px; font-weight: 700; color: #2563eb;">
-            <i class="fas fa-robot me-2"></i>AIBridges
-        </a>
-        <div style="margin-left: auto;">
-            <a href="/casevault-calculator.html" style="padding: 10px 20px; color: #334155; font-weight: 500;">Calculator</a>
-            <a href="/" style="padding: 10px 20px; color: #334155; font-weight: 500;">Home</a>
+    <nav class="nav">
+        <a href="/" class="nav-logo">⚖️ CaseVault</a>
+        <div class="nav-links">
+            <a href="casevault-calculator.html">Calculator</a>
+            <a href="casevault-dashboard.html">Dashboard</a>
+            <a href="casevault-contribute.html" class="active">Contribute</a>
+            <a href="/">AIBridges</a>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <div class="casevault-hero">
-        <h1 style="font-size: 42px; margin-bottom: 16px;">🤝 Contribute a Settlement</h1>
-        <p style="font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto;">
-            Share 1 real settlement case to unlock 10-minute dashboard access
-        </p>
+    <div class="hero">
+        <h1>📊 Contribute Settlement Data</h1>
+        <p>Help build the most comprehensive PI settlement database in New England. All data is anonymized.</p>
     </div>
 
-    <!-- Contribution Form -->
-    <div class="contribute-container">
-        <div class="info-box">
-            <h3>📊 Why Contribute?</h3>
-            <p>
-                Your data helps build a more comprehensive settlement database. In return, you get 10 minutes
-                of full dashboard access to explore benchmarks, trends, and insights from our growing database of+ cases.
-            </p>
-        </div>
-
-        <form id="contributeForm">
-            <div class="form-group">
-                <label for="state">State *</label>
-                <select id="state" name="state" required>
-                    <option value="">Select state...</option>
-                    <option value="CT">Connecticut</option>
-                    <option value="MA">Massachusetts</option>
-                    <option value="NH">New Hampshire</option>
-                    <option value="NY">New York</option>
-                    <option value="RI">Rhode Island</option>
-                </select>
+    <div class="form-container">
+        <div class="form-card" id="formCard">
+            <div class="info-box">
+                <h4>🔒 Privacy First</h4>
+                <p>We never collect client names, case numbers, or identifying details. Only aggregate data is used for benchmarking.</p>
             </div>
 
-            <div class="form-group">
-                <label for="injuryType">Injury Type *</label>
-                <select id="injuryType" name="injuryType" required>
-                    <option value="">Select injury type...</option>
-                    <option value="soft-tissue">Soft Tissue</option>
-                    <option value="fracture">Fracture/Broken Bone</option>
-                    <option value="head-injury">Head/Brain Injury</option>
-                    <option value="spinal">Spinal Cord Injury</option>
-                    <option value="burn">Burn Injury</option>
-                    <option value="amputation">Amputation</option>
-                    <option value="other">Other</option>
-                </select>
+            <div class="validation-summary" id="validationSummary">
+                <h4>Please fix the following:</h4>
+                <ul id="validationErrors"></ul>
             </div>
 
-            <div class="form-group">
-                <label for="settlementAmount">Settlement Amount ($) *</label>
-                <input
-                    type="number"
-                    id="settlementAmount"
-                    name="settlementAmount"
-                    required
-                    min="1000"
-                    step="1000"
-                    placeholder="50000"
-                >
-            </div>
-
-            <div class="form-group">
-                <label>Client Had Legal Representation? *</label>
-                <div class="radio-group">
-                    <div class="radio-option">
-                        <input type="radio" id="repYes" name="representation" value="yes" required>
-                        <label for="repYes" style="margin: 0; font-weight: normal;">Yes</label>
+            <form id="contributeForm">
+                <!-- Honeypot field - bots fill this, humans don't see it -->
+                <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>State <span class="required">*</span></label>
+                        <select name="state" id="state" required>
+                            <option value="">Select state...</option>
+                            <option value="MA">Massachusetts</option>
+                            <option value="CT">Connecticut</option>
+                            <option value="RI">Rhode Island</option>
+                            <option value="NH">New Hampshire</option>
+                        </select>
                     </div>
-                    <div class="radio-option">
-                        <input type="radio" id="repNo" name="representation" value="no" required>
-                        <label for="repNo" style="margin: 0; font-weight: normal;">No</label>
+                    <div class="form-group">
+                        <label>Settlement Year <span class="required">*</span></label>
+                        <select name="year" id="year" required>
+                            <option value="">Select year...</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
                     </div>
                 </div>
-            </div>
 
-            <button type="submit" class="btn-primary">Unlock Dashboard Access →</button>
-        </form>
+                <div class="form-group">
+                    <label>Settlement Amount <span class="required">*</span></label>
+                    <input type="text" name="amount" id="amount" placeholder="e.g., $150,000" required>
+                    <div class="hint">Enter the total settlement amount (not including attorney fees)</div>
+                    <div class="error-msg" id="amountError"></div>
+                </div>
 
-        <p style="text-align: center; color: #64748b; font-size: 14px; margin-top: 24px;">
-            🔒 All submissions are anonymized. We never share identifying information.
-        </p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Case Type <span class="required">*</span></label>
+                        <select name="caseType" id="caseType" required>
+                            <option value="">Select type...</option>
+                            <option value="rear_end">Rear-End Collision</option>
+                            <option value="t_bone">T-Bone / Intersection</option>
+                            <option value="truck">Truck Accident</option>
+                            <option value="motorcycle">Motorcycle Accident</option>
+                            <option value="pedestrian">Pedestrian Hit</option>
+                            <option value="slip_and_fall">Slip and Fall</option>
+                            <option value="medical_malpractice">Medical Malpractice</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Injury Severity <span class="required">*</span></label>
+                        <select name="injuryType" id="injuryType" required>
+                            <option value="">Select severity...</option>
+                            <option value="soft_tissue">Soft Tissue (whiplash, sprains)</option>
+                            <option value="fracture">Fracture</option>
+                            <option value="surgery_required">Surgery Required</option>
+                            <option value="tbi">Traumatic Brain Injury</option>
+                            <option value="spinal">Spinal Cord Injury</option>
+                            <option value="wrongful_death">Wrongful Death</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Medical Expenses</label>
+                        <input type="text" name="medicalCosts" id="medicalCosts" placeholder="e.g., $25,000">
+                        <div class="hint">Total medical bills related to injury</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Lost Wages</label>
+                        <input type="text" name="lostWages" id="lostWages" placeholder="e.g., $15,000">
+                        <div class="hint">Income lost due to injury</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" name="wentToLitigation" id="wentToLitigation">
+                        <span>Case went to litigation (lawsuit filed)</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-group">
+                        <input type="checkbox" name="hadExpertWitness" id="hadExpertWitness">
+                        <span>Expert witness was used</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Email (optional)</label>
+                    <input type="email" name="email" id="email" placeholder="For verification only - not shared">
+                    <div class="hint">We may reach out to verify data for quality control</div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">Submit Settlement Data</button>
+            </form>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h2>✅ Thank You!</h2>
+            <p>Your settlement data has been submitted for review. After verification, it will be added to our database.</p>
+            <p><a href="casevault-dashboard.html">View Dashboard →</a></p>
+        </div>
     </div>
 
-    <!-- Footer -->
-    <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; margin-top: 80px;">
-        <p style="opacity: 0.8;">© 2026 AIBridges. All rights reserved.</p>
-        <p style="margin-top: 12px; opacity: 0.6; font-size: 14px;">
-            ⚠️ For informational purposes only. Not legal advice. Consult with a licensed attorney.
-        </p>
-    </footer>
-
     <script>
-        // Check if user filled intake form
-        document.addEventListener('DOMContentLoaded', function() {
-            const userName = localStorage.getItem('casevault_user_name');
-            const intakeDone = localStorage.getItem('casevault_intake_done');
-            if (!userName || !intakeDone) {
-                window.location.href = '/casevault-intake.html';
-                return;
+        // Parse currency input
+        function parseCurrency(str) {
+            if (!str) return null;
+            const cleaned = str.replace(/[$,\s]/g, '');
+            const num = parseFloat(cleaned);
+            return isNaN(num) ? null : num;
+        }
+
+        // Format as currency
+        function formatCurrency(num) {
+            return '$' + num.toLocaleString();
+        }
+
+        // Validation rules
+        const VALIDATION_RULES = {
+            amount: {
+                min: 1000,        // Minimum $1,000
+                max: 50000000,    // Maximum $50M
+                // Suspicious patterns
+                suspicious: [
+                    { pattern: /^(\d)\1+$/, reason: 'Amount appears to be fake (repeated digits)' },
+                    { pattern: /^123|^111|^999/, reason: 'Amount appears to be a test value' }
+                ]
+            },
+            // Injury type vs amount sanity checks
+            injuryAmountRanges: {
+                soft_tissue: { min: 1000, max: 100000, warn: 'Soft tissue settlements rarely exceed $100K' },
+                fracture: { min: 5000, max: 500000, warn: 'Fracture settlements typically range $5K-$500K' },
+                surgery_required: { min: 20000, max: 2000000, warn: 'Surgery cases typically range $20K-$2M' },
+                tbi: { min: 100000, max: 20000000, warn: 'TBI settlements typically exceed $100K' },
+                spinal: { min: 200000, max: 50000000, warn: 'Spinal injury settlements typically exceed $200K' },
+                wrongful_death: { min: 100000, max: 50000000, warn: 'Wrongful death settlements typically exceed $100K' }
+            }
+        };
+
+        function validateForm(data) {
+            const errors = [];
+            
+            // Check honeypot (bot detection)
+            if (data.website) {
+                console.log('Bot detected');
+                return { valid: false, errors: ['Submission rejected'] };
             }
 
-            // If user already has valid access, redirect to dashboard
-            const token = localStorage.getItem('casevault_access_token');
-            const expires = localStorage.getItem('casevault_access_expires');
-            if (token && expires && Date.now() < parseInt(expires)) {
-                window.location.href = '/dashboard';
-            }
-        });
+            // Required fields
+            if (!data.state) errors.push('State is required');
+            if (!data.year) errors.push('Settlement year is required');
+            if (!data.caseType) errors.push('Case type is required');
+            if (!data.injuryType) errors.push('Injury severity is required');
 
-        // Handle contribution form submission
-        document.getElementById('contributeForm').addEventListener('submit', function(e) {
+            // Amount validation
+            const amount = parseCurrency(data.amount);
+            if (!amount) {
+                errors.push('Settlement amount is required');
+            } else {
+                if (amount < VALIDATION_RULES.amount.min) {
+                    errors.push('Settlement amount must be at least $1,000');
+                }
+                if (amount > VALIDATION_RULES.amount.max) {
+                    errors.push('Settlement amount exceeds maximum ($50M). Contact us for large verdicts.');
+                }
+                
+                // Check suspicious patterns
+                const amountStr = amount.toString();
+                for (const check of VALIDATION_RULES.amount.suspicious) {
+                    if (check.pattern.test(amountStr)) {
+                        errors.push(check.reason);
+                    }
+                }
+
+                // Injury type sanity check
+                if (data.injuryType && VALIDATION_RULES.injuryAmountRanges[data.injuryType]) {
+                    const range = VALIDATION_RULES.injuryAmountRanges[data.injuryType];
+                    if (amount < range.min * 0.5 || amount > range.max * 2) {
+                        errors.push(`${range.warn}. Please verify your entry.`);
+                    }
+                }
+            }
+
+            // Medical costs validation
+            const medical = parseCurrency(data.medicalCosts);
+            if (medical && amount) {
+                // Settlement should typically be more than medical costs
+                if (medical > amount * 0.9) {
+                    errors.push('Settlement amount seems low compared to medical costs');
+                }
+                // Medical costs shouldn't be absurdly high
+                if (medical > 5000000) {
+                    errors.push('Medical costs exceed $5M - please verify');
+                }
+            }
+
+            // Email format
+            if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+                errors.push('Please enter a valid email address');
+            }
+
+            return { valid: errors.length === 0, errors };
+        }
+
+        // Form submission
+        document.getElementById('contributeForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-
-            const state = document.getElementById('state').value;
-            const injuryType = document.getElementById('injuryType').value;
-            const settlementAmount = document.getElementById('settlementAmount').value;
-            const representation = document.querySelector('input[name="representation"]:checked').value;
-
-            // Validate inputs
-            if (!state || !injuryType || !settlementAmount || !representation) {
-                alert('Please fill out all required fields.');
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            // Validate
+            const validation = validateForm(data);
+            
+            if (!validation.valid) {
+                const summary = document.getElementById('validationSummary');
+                const errorList = document.getElementById('validationErrors');
+                errorList.innerHTML = validation.errors.map(e => `<li>${e}</li>`).join('');
+                summary.style.display = 'block';
+                summary.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
-            // Store contribution data
-            const contribution = {
-                state,
-                injuryType,
-                settlementAmount: parseInt(settlementAmount),
-                representation,
-                timestamp: new Date().toISOString(),
-                userEmail: localStorage.getItem('casevault_user_email')
+            // Hide validation errors
+            document.getElementById('validationSummary').style.display = 'none';
+            
+            // Disable button
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            // Prepare clean data
+            const submission = {
+                state: data.state,
+                year: parseInt(data.year),
+                amount: parseCurrency(data.amount),
+                caseType: data.caseType,
+                injuryType: data.injuryType,
+                medicalCosts: parseCurrency(data.medicalCosts) || null,
+                lostWages: parseCurrency(data.lostWages) || null,
+                wentToLitigation: data.wentToLitigation === 'on',
+                hadExpertWitness: data.hadExpertWitness === 'on',
+                email: data.email || null,
+                submittedAt: new Date().toISOString(),
+                userAgent: navigator.userAgent
             };
 
-            // Save contribution (in production, this would POST to backend)
-            localStorage.setItem('casevault_contribution', JSON.stringify(contribution));
+            console.log('Submission:', submission);
 
-            // Generate full access token with 10-minute expiry
-            const accessToken = generateToken();
-            const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes
+            // TODO: Send to API endpoint
+            // For now, simulate success
+            await new Promise(r => setTimeout(r, 1000));
 
-            localStorage.setItem('casevault_access_token', accessToken);
-            localStorage.setItem('casevault_access_expires', expiresAt.toString());
-
-            // Mark that user has contributed
-            localStorage.setItem('casevault_contributed', 'true');
-
-            // Track contribution
-            console.log('Contribution submitted:', contribution);
-
-            // Redirect to calculator (primary tool) with access unlocked
-            window.location.href = '/calculator';
+            // Show success
+            document.getElementById('formCard').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
         });
 
-        // Generate random token
-        function generateToken() {
-            const array = new Uint8Array(32);
-            crypto.getRandomValues(array);
-            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-        }
+        // Format currency fields on blur
+        ['amount', 'medicalCosts', 'lostWages'].forEach(id => {
+            const input = document.getElementById(id);
+            input.addEventListener('blur', function() {
+                const value = parseCurrency(this.value);
+                if (value) {
+                    this.value = formatCurrency(value);
+                }
+            });
+        });
     </script>
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>

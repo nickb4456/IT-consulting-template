@@ -96,8 +96,11 @@
                 <h1>Settlement Dashboard</h1>
                 <p>Real benchmark data from personal injury settlements across New England</p>
             </div>
-            <div id="timerBadge" style="background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 14px;">
-                ⏱️ Access expires in: <strong id="timeLeft">--:--</strong>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div id="timerBadge" style="background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 14px;">
+                    ⏱️ <strong id="timeLeft">--:--</strong>
+                </div>
+                <button onclick="document.getElementById('contributeModal').style.display='flex'" style="background: #818cf8; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 500;">+ Add Time</button>
             </div>
         </div>
 
@@ -365,6 +368,113 @@
             }
             updateTimer();
             setInterval(updateTimer, 1000);
+        });
+    </script>
+    <!-- Contribute Modal -->
+    <div id="contributeModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #1e293b; border-radius: 16px; padding: 32px; max-width: 450px; width: 100%; border: 1px solid #334155;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="margin: 0;">Add Another Settlement</h3>
+                <button onclick="document.getElementById('contributeModal').style.display='none'" style="background: none; border: none; color: #94a3b8; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            <p style="color: #94a3b8; font-size: 14px; margin-bottom: 20px;">Submit another case to add 10 more minutes.</p>
+            
+            <form id="extendForm">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">State</label>
+                        <select id="extState" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white;">
+                            <option value="">Select...</option>
+                            <option value="MA">Massachusetts</option>
+                            <option value="CT">Connecticut</option>
+                            <option value="RI">Rhode Island</option>
+                            <option value="NH">New Hampshire</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Year</label>
+                        <select id="extYear" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white;">
+                            <option value="">Select...</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Settlement Amount</label>
+                    <input type="text" id="extAmount" placeholder="150,000" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white; box-sizing: border-box;">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Case Type</label>
+                        <select id="extCaseType" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white;">
+                            <option value="">Select...</option>
+                            <option value="auto">Auto Accident</option>
+                            <option value="truck">Truck</option>
+                            <option value="motorcycle">Motorcycle</option>
+                            <option value="pedestrian">Pedestrian</option>
+                            <option value="slip_fall">Slip & Fall</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 13px; color: #94a3b8; margin-bottom: 6px;">Severity</label>
+                        <select id="extSeverity" required style="width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: white;">
+                            <option value="">Select...</option>
+                            <option value="soft_tissue">Soft Tissue</option>
+                            <option value="fracture">Fracture</option>
+                            <option value="surgery">Surgery</option>
+                            <option value="tbi">TBI</option>
+                            <option value="spinal">Spinal</option>
+                            <option value="fatal">Fatal</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #818cf8, #a78bfa); border: none; border-radius: 8px; color: white; font-size: 16px; font-weight: 600; cursor: pointer;">Submit & Add 10 Minutes</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Extend time form
+        document.getElementById('extendForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amt = document.getElementById('extAmount').value.replace(/[,$]/g, '');
+            if (isNaN(parseInt(amt)) || parseInt(amt) < 1000) {
+                alert('Please enter a valid settlement amount (minimum $1,000)');
+                return;
+            }
+            
+            // Log settlement (would send to API)
+            console.log('Extension settlement:', {
+                state: document.getElementById('extState').value,
+                year: document.getElementById('extYear').value,
+                amount: amt,
+                caseType: document.getElementById('extCaseType').value,
+                severity: document.getElementById('extSeverity').value
+            });
+            
+            // Add 10 minutes to timer
+            const currentExpires = parseInt(localStorage.getItem('casevault_expires') || Date.now().toString());
+            const newExpires = Math.max(currentExpires, Date.now()) + (10 * 60 * 1000);
+            localStorage.setItem('casevault_expires', newExpires.toString());
+            
+            // Reset timer badge color
+            document.getElementById('timerBadge').style.background = 'rgba(251, 191, 36, 0.15)';
+            document.getElementById('timerBadge').style.borderColor = 'rgba(251, 191, 36, 0.3)';
+            
+            // Close modal and reset form
+            document.getElementById('contributeModal').style.display = 'none';
+            this.reset();
+            
+            // Show confirmation
+            alert('✅ 10 minutes added! Thank you for contributing.');
         });
     </script>
 </body>

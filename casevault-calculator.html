@@ -4,15 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Injury Settlement Calculator | CaseVault by AIBridges</title>
-    <meta name="description" content="Free PI settlement calculator with access to 1,756 real settlement cases. Contribute your data to unlock the full dashboard.">
+    <meta name="description" content="Free PI settlement calculator using real settlement data from New England courts. Get instant estimates based on actual case outcomes.">
     <link rel="canonical" href="https://aibridges.org/casevault-calculator">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Load settlement data from S3 -->
+    <script src="https://engagement-hooks-site.s3.amazonaws.com/casevault/data/settlements.js"></script>
     <style>
         .casevault-hero {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             color: white;
             padding: 80px 20px;
             text-align: center;
+        }
+        .casevault-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .casevault-hero p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
         }
         .calculator-container {
             max-width: 800px;
@@ -59,6 +71,11 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
         }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .result-box {
             display: none;
             margin-top: 30px;
@@ -76,21 +93,20 @@
             color: #2563eb;
             margin: 10px 0;
         }
-        .unlock-box {
-            display: none;
-            margin-top: 30px;
-            padding: 30px;
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            border-radius: 8px;
-            text-align: center;
+        .confidence-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
         }
-        .unlock-box.show {
-            display: block;
-        }
+        .confidence-high { background: #dcfce7; color: #166534; }
+        .confidence-medium { background: #fef3c7; color: #92400e; }
+        .confidence-low { background: #fee2e2; color: #991b1b; }
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
             margin: 40px 0;
         }
@@ -98,91 +114,105 @@
             background: white;
             padding: 24px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-align: center;
         }
         .stat-value {
-            font-size: 36px;
+            font-size: 2rem;
             font-weight: 700;
             color: #2563eb;
         }
         .stat-label {
-            font-size: 14px;
             color: #64748b;
-            margin-top: 8px;
+            font-size: 0.9rem;
+            margin-top: 4px;
         }
-        .timer-banner {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: white;
-            padding: 12px;
-            text-align: center;
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .notice-banner {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
             font-size: 14px;
         }
-        .timer-banner a {
-            color: white;
-            text-decoration: underline;
-            margin-left: 12px;
+        .range-display {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .range-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .range-item-label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .range-item-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .range-item-value.highlight {
+            font-size: 2rem;
+            color: #2563eb;
         }
     </style>
 </head>
 <body>
-    <!-- Timer Banner (visible when authenticated) -->
-    <div class="timer-banner" id="timerBanner" style="display: none;">
-        ⏱️ Access expires in: <span id="timeRemaining">10:00</span> |
-        <a href="/casevault-contribute.html">Submit another case to extend</a>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light px-4 px-lg-5 py-3 py-lg-0" style="background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        <a href="/" class="navbar-brand p-0" style="font-size: 24px; font-weight: 700; color: #2563eb;">
-            <i class="fas fa-robot me-2"></i>AIBridges
-        </a>
-        <div style="margin-left: auto;">
-            <a href="/" style="padding: 10px 20px; color: #334155; font-weight: 500;">Home</a>
-            <a href="/contact.html" style="padding: 10px 20px; color: #334155; font-weight: 500;">Contact</a>
+    <!-- Include site header -->
+    <header class="header">
+        <div class="container">
+            <a href="/" class="logo">AIBridges</a>
+            <nav>
+                <a href="/">Home</a>
+                <a href="/blog.html">Blog</a>
+                <a href="/contact.html">Contact</a>
+            </nav>
         </div>
-    </nav>
+    </header>
 
-    <!-- Hero -->
-    <div class="casevault-hero">
-        <h1 style="font-size: 48px; margin-bottom: 20px;">⚖️ CaseVault Settlement Calculator</h1>
-        <p style="font-size: 20px; opacity: 0.9; max-width: 700px; margin: 0 auto;">
-            Estimate your personal injury settlement based on 1,756 real cases from MA, CT, RI & NH
+    <!-- Hero Section -->
+    <section class="casevault-hero">
+        <h1>🏛️ Settlement Calculator</h1>
+        <p>
+            Estimate your personal injury settlement based on real case data from MA, CT, RI & NH
         </p>
-    </div>
+    </section>
 
-    <!-- Stats -->
-    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <div class="stats-grid" style="margin-top: -40px;">
+    <!-- Stats Grid -->
+    <div style="max-width: 800px; margin: -30px auto 0; padding: 0 20px;">
+        <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-value">1,756</div>
-                <div class="stat-label">Settlement Cases</div>
+                <div class="stat-value" id="totalCasesDisplay">--</div>
+                <div class="stat-label">Total Cases</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">4</div>
                 <div class="stat-label">States Covered</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value">$50K+</div>
-                <div class="stat-label">Avg Settlement</div>
+                <div class="stat-value">2024-26</div>
+                <div class="stat-label">Data Range</div>
             </div>
         </div>
     </div>
 
-    <!-- Calculator -->
+    <!-- Calculator Form -->
     <div class="calculator-container">
-        <h2 style="margin-bottom: 30px; color: #0f172a;">Calculate Your Estimated Settlement</h2>
-
+        <div id="noticeBanner" class="notice-banner" style="display: none;">
+            ⚠️ We're currently collecting settlement data. Estimates may be limited until more cases are added.
+        </div>
+        
         <form id="calculatorForm">
             <div class="form-group">
-                <label for="state">State</label>
-                <select id="state" name="state" required>
-                    <option value="">Select State</option>
+                <label for="state">State *</label>
+                <select id="state" required>
                     <option value="MA">Massachusetts</option>
                     <option value="CT">Connecticut</option>
                     <option value="RI">Rhode Island</option>
@@ -191,221 +221,255 @@
             </div>
 
             <div class="form-group">
-                <label for="injuryType">Injury Type</label>
-                <select id="injuryType" name="injuryType" required>
-                    <option value="">Select Injury Type</option>
-                    <option value="car_accident">Car Accident</option>
-                    <option value="slip_fall">Slip & Fall</option>
-                    <option value="medical_malpractice">Medical Malpractice</option>
-                    <option value="workplace">Workplace Injury</option>
-                    <option value="other">Other</option>
+                <label for="caseType">Case Type *</label>
+                <select id="caseType" required>
+                    <option value="">Select case type...</option>
+                    <option value="rear_end">Rear-End Collision</option>
+                    <option value="t_bone">T-Bone / Intersection</option>
+                    <option value="truck">Truck Accident</option>
+                    <option value="motorcycle">Motorcycle Accident</option>
+                    <option value="pedestrian">Pedestrian Hit</option>
+                    <option value="slip_and_fall">Slip and Fall</option>
+                    <option value="auto_accident">Other Auto Accident</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="medicalCosts">Medical Costs ($)</label>
-                <input type="number" id="medicalCosts" name="medicalCosts" placeholder="e.g., 15000" required>
-            </div>
-
-            <div class="form-group">
-                <label for="lostWages">Lost Wages ($)</label>
-                <input type="number" id="lostWages" name="lostWages" placeholder="e.g., 5000">
-            </div>
-
-            <div class="form-group">
-                <label for="severity">Injury Severity</label>
-                <select id="severity" name="severity" required>
-                    <option value="">Select Severity</option>
-                    <option value="minor">Minor (bruises, sprains)</option>
-                    <option value="moderate">Moderate (fractures, soft tissue)</option>
-                    <option value="severe">Severe (permanent disability)</option>
-                    <option value="catastrophic">Catastrophic (life-changing)</option>
+                <label for="injuryType">Injury Severity *</label>
+                <select id="injuryType" required>
+                    <option value="">Select injury type...</option>
+                    <option value="soft_tissue">Soft Tissue (whiplash, sprains)</option>
+                    <option value="fracture">Fracture</option>
+                    <option value="surgery_required">Surgery Required</option>
+                    <option value="tbi">Traumatic Brain Injury</option>
+                    <option value="spinal">Spinal Cord Injury</option>
+                    <option value="wrongful_death">Wrongful Death</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn-primary">Calculate Settlement Range</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label for="medicalCosts">Medical Costs ($)</label>
+                    <input type="number" id="medicalCosts" placeholder="e.g., 25000">
+                </div>
+                <div class="form-group">
+                    <label for="lostWages">Lost Wages ($)</label>
+                    <input type="number" id="lostWages" placeholder="e.g., 15000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="wentToLitigation" style="width: auto;">
+                    Filed lawsuit (litigation) — typically increases value 40-60%
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                    <input type="checkbox" id="hadExpertWitness" style="width: auto;">
+                    Had expert witness — typically increases value 80-130%
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">
+                Get Settlement Estimate
+            </button>
         </form>
 
-        <!-- Result -->
+        <!-- Results -->
         <div id="resultBox" class="result-box">
-            <h3 style="margin-bottom: 16px; color: #0f172a;">Estimated Settlement Range</h3>
-            <div class="result-value" id="resultValue">$35,000 - $85,000</div>
-            <p style="color: #475569; margin-top: 12px;">
-                Based on <strong id="comparableCases">47</strong> comparable cases in <strong id="resultState">MA</strong>
-            </p>
-            <p style="color: #64748b; font-size: 14px; margin-top: 16px;">
-                ⚠️ This is an estimate only. Actual settlements vary based on many factors.
-            </p>
+            <span id="confidenceBadge" class="confidence-badge confidence-medium">MEDIUM Confidence</span>
+            <h3 style="margin: 0 0 10px; color: #1e293b;">Estimated Settlement Range</h3>
+            
+            <div class="range-display">
+                <div class="range-item">
+                    <div class="range-item-label">Conservative</div>
+                    <div class="range-item-value" id="lowEstimate">--</div>
+                </div>
+                <div class="range-item">
+                    <div class="range-item-label">Median</div>
+                    <div class="range-item-value highlight" id="midEstimate">--</div>
+                </div>
+                <div class="range-item">
+                    <div class="range-item-label">Aggressive</div>
+                    <div class="range-item-value" id="highEstimate">--</div>
+                </div>
+            </div>
+            
+            <p id="resultNote" style="color: #64748b; font-size: 14px; margin-top: 15px;"></p>
         </div>
 
-        <!-- Dashboard CTA -->
-        <div id="unlockBox" class="unlock-box">
-            <h3 style="margin-bottom: 16px; color: #92400e;">📊 Want the full picture?</h3>
-            <p style="color: #78350f; margin-bottom: 20px;">
-                Explore the full dashboard with benchmarks, trends, and data from 1,756+ settlements.
+        <!-- CTA -->
+        <div style="margin-top: 30px; padding: 20px; background: #f8fafc; border-radius: 8px; text-align: center;">
+            <h4 style="margin: 0 0 10px;">📊 Want a detailed case analysis?</h4>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 15px;">
+                Get personalized insights and comparable cases from your area.
             </p>
-            <a href="/casevault-dashboard.html" class="btn-primary" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); max-width: 400px; margin: 0 auto; display: inline-block; text-decoration: none;">
-                View Full Dashboard →
+            <a href="/contact.html" class="btn-primary" style="display: inline-block; width: auto; padding: 12px 24px; font-size: 16px; text-decoration: none;">
+                Request Free Consultation
             </a>
-        </div>
-    </div>
-
-    <!-- Features Section -->
-    <div style="max-width: 1200px; margin: 60px auto; padding: 0 20px;">
-        <h2 style="text-align: center; margin-bottom: 40px; color: #0f172a;">How CaseVault Works</h2>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <i class="fas fa-calculator" style="font-size: 48px; color: #2563eb; margin-bottom: 16px;"></i>
-                <h3 style="color: #0f172a; margin-bottom: 12px;">Calculate</h3>
-                <p style="color: #64748b;">Get instant settlement estimates based on real data</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-plus-circle" style="font-size: 48px; color: #10b981; margin-bottom: 16px;"></i>
-                <h3 style="color: #0f172a; margin-bottom: 12px;">Contribute</h3>
-                <p style="color: #64748b;">Submit your settlement data to help others</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-unlock" style="font-size: 48px; color: #f59e0b; margin-bottom: 16px;"></i>
-                <h3 style="color: #0f172a; margin-bottom: 12px;">Unlock</h3>
-                <p style="color: #64748b;">Get 10 minutes of full dashboard access</p>
-            </div>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer style="background: #0f172a; color: white; padding: 40px 20px; text-align: center; margin-top: 80px;">
-        <p style="opacity: 0.8;">© 2026 AIBridges. All rights reserved.</p>
-        <p style="margin-top: 12px; opacity: 0.6; font-size: 14px;">
-            ⚠️ For informational purposes only. Not legal advice. Consult with a licensed attorney.
-        </p>
+    <footer style="text-align: center; padding: 40px 20px; color: #64748b; font-size: 14px;">
+        <p>Estimates based on real settlement data. Not legal advice.</p>
+        <p>© 2026 <a href="/" style="color: #2563eb;">AIBridges</a> | Cranston, RI</p>
     </footer>
 
-    <!-- Paywall Overlay (shown if not authenticated) -->
-    <div id="paywallOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.92); z-index: 1000; align-items: center; justify-content: center;">
-        <div style="background: white; padding: 50px; border-radius: 16px; text-align: center; max-width: 520px; margin: 20px;">
-            <div style="font-size: 64px; margin-bottom: 20px;">🔒</div>
-            <h2 style="color: #0f172a; margin-bottom: 16px;" id="paywallTitle">Access Required</h2>
-            <p style="color: #64748b; margin-bottom: 28px; line-height: 1.6; font-size: 16px;" id="paywallMessage">
-                Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview.
-            </p>
-            <a href="/casevault-intake.html" id="paywallCTA" class="btn-primary" style="text-decoration: none; display: inline-block; margin-bottom: 16px;">
-                Get Started Free →
-            </a>
-            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                <p style="color: #64748b; font-size: 14px; margin-bottom: 8px;">Want unlimited access?</p>
-                <a href="/contact.html" style="color: #2563eb; font-weight: 600; text-decoration: none;">Subscribe to CaseVault Pro →</a>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Gate access - check for valid access token on page load
+        // Data loaded from S3 -> window.CASEVAULT_DATA
+        const DATA = window.CASEVAULT_DATA || null;
+
+        // Update stats display
         document.addEventListener('DOMContentLoaded', function() {
-            const accessToken = localStorage.getItem('casevault_access_token');
-            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
-            const userName = localStorage.getItem('casevault_user_name');
-            const contributed = localStorage.getItem('casevault_contributed');
-
-            // Check if user has valid access token from contribution
-            if (!accessToken || !expiresAt || Date.now() > expiresAt) {
-                const overlay = document.getElementById('paywallOverlay');
-                overlay.style.display = 'flex';
-
-                if (!userName) {
-                    // Never filled intake form
-                    document.getElementById('paywallTitle').textContent = 'Access Required';
-                    document.getElementById('paywallMessage').textContent = 'Complete the intake form and contribute 1 settlement case to unlock your free 10-minute preview of the calculator and dashboard.';
-                    document.getElementById('paywallCTA').textContent = 'Get Started Free →';
-                    document.getElementById('paywallCTA').href = '/casevault-intake.html';
-                } else if (contributed) {
-                    // Token expired after previous contribution
-                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
-                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
-                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
-                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
-                } else {
-                    // Filled intake but hasn't contributed yet
-                    document.getElementById('paywallTitle').textContent = 'One More Step';
-                    document.getElementById('paywallMessage').textContent = 'Contribute 1 settlement case to unlock your free 10-minute preview.';
-                    document.getElementById('paywallCTA').textContent = 'Contribute a Settlement →';
-                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
-                }
-                return;
+            if (DATA && DATA.totalSettlements > 0) {
+                document.getElementById('totalCasesDisplay').textContent = DATA.totalSettlements.toLocaleString();
+            } else {
+                document.getElementById('totalCasesDisplay').textContent = '0';
+                document.getElementById('noticeBanner').style.display = 'block';
             }
-
-            // User is authenticated - show timer banner
-            document.getElementById('timerBanner').style.display = 'block';
-            startTimer();
         });
 
-        // Timer countdown
-        function startTimer() {
-            const expiresAt = parseInt(localStorage.getItem('casevault_access_expires'));
-            const timerInterval = setInterval(function() {
-                const timeLeft = expiresAt - Date.now();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    localStorage.removeItem('casevault_access_token');
-                    localStorage.removeItem('casevault_access_expires');
-                    // Show paywall
-                    document.getElementById('paywallOverlay').style.display = 'flex';
-                    document.getElementById('paywallTitle').textContent = 'Subscribe to Continue';
-                    document.getElementById('paywallMessage').textContent = 'Your 10-minute preview has expired. Submit another case for 10 more minutes, or subscribe for unlimited access.';
-                    document.getElementById('paywallCTA').textContent = 'Contribute Another Case →';
-                    document.getElementById('paywallCTA').href = '/casevault-contribute.html';
-                    document.getElementById('timerBanner').style.display = 'none';
-                    return;
-                }
-                var minutes = Math.floor(timeLeft / 60000);
-                var seconds = Math.floor((timeLeft % 60000) / 1000);
-                document.getElementById('timeRemaining').textContent = minutes + ':' + seconds.toString().padStart(2, '0');
-                // Warning color when under 2 minutes
-                if (timeLeft < 120000) {
-                    document.getElementById('timerBanner').style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
-                }
-            }, 1000);
+        function formatCurrency(num) {
+            if (num >= 1000000) {
+                return '$' + (num / 1000000).toFixed(1) + 'M';
+            } else if (num >= 1000) {
+                return '$' + Math.round(num / 1000) + 'K';
+            }
+            return '$' + num.toLocaleString();
         }
 
-        // Calculator Logic
-        document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const state = document.getElementById('state').value;
-            const injuryType = document.getElementById('injuryType').value;
-            const medicalCosts = parseFloat(document.getElementById('medicalCosts').value) || 0;
-            const lostWages = parseFloat(document.getElementById('lostWages').value) || 0;
-            const severity = document.getElementById('severity').value;
-
-            // Calculate multiplier based on severity
+        function calculateEstimate(params) {
+            const { state, caseType, injuryType, medicalCosts, lostWages, wentToLitigation, hadExpertWitness } = params;
+            
+            // If we have real data, use it
+            if (DATA && DATA.totalSettlements > 0) {
+                const stateData = DATA.states[state];
+                
+                if (stateData && stateData.sampleSize > 0) {
+                    const injuryData = stateData.byInjuryType?.[injuryType];
+                    const caseTypeData = stateData.byCaseType?.[caseType];
+                    
+                    let lowEstimate, midEstimate, highEstimate;
+                    let confidence = 'MEDIUM';
+                    
+                    if (injuryData) {
+                        lowEstimate = injuryData.range?.[0] || injuryData.typical * 0.5;
+                        midEstimate = injuryData.typical;
+                        highEstimate = injuryData.range?.[1] || injuryData.typical * 2;
+                    } else {
+                        // Fall back to state stats
+                        lowEstimate = stateData.stats?.p25 || 15000;
+                        midEstimate = stateData.stats?.median || 50000;
+                        highEstimate = stateData.stats?.p75 || 150000;
+                        confidence = 'LOW';
+                    }
+                    
+                    // Adjust for case type
+                    if (caseTypeData?.avg && stateData.stats?.median) {
+                        const multiplier = caseTypeData.avg / stateData.stats.median;
+                        lowEstimate *= multiplier;
+                        midEstimate *= multiplier;
+                        highEstimate *= multiplier;
+                    }
+                    
+                    // Adjust for litigation
+                    if (wentToLitigation) {
+                        lowEstimate *= 1.3;
+                        midEstimate *= 1.5;
+                        highEstimate *= 1.6;
+                    }
+                    
+                    // Adjust for expert witness
+                    if (hadExpertWitness) {
+                        lowEstimate *= 1.4;
+                        midEstimate *= 1.8;
+                        highEstimate *= 2.3;
+                    }
+                    
+                    // Factor in economic damages if provided
+                    if (medicalCosts > 0 || lostWages > 0) {
+                        const economic = (medicalCosts || 0) + (lostWages || 0);
+                        // Weight the estimate with economic damages
+                        midEstimate = Math.max(midEstimate, economic * 2);
+                        lowEstimate = Math.max(lowEstimate, economic * 1.5);
+                        highEstimate = Math.max(highEstimate, economic * 4);
+                    }
+                    
+                    if (stateData.sampleSize >= 100) confidence = 'HIGH';
+                    else if (stateData.sampleSize >= 50) confidence = 'MEDIUM';
+                    else confidence = 'LOW';
+                    
+                    return {
+                        success: true,
+                        lowEstimate: Math.round(lowEstimate),
+                        midEstimate: Math.round(midEstimate),
+                        highEstimate: Math.round(highEstimate),
+                        confidence,
+                        note: `Based on ${stateData.sampleSize} ${state} settlements`
+                    };
+                }
+            }
+            
+            // Fallback: formula-based estimate
+            const economic = (medicalCosts || 0) + (lostWages || 0);
             let multiplier = 2;
-            if (severity === 'minor') multiplier = 1.5;
-            if (severity === 'moderate') multiplier = 2.5;
-            if (severity === 'severe') multiplier = 4;
-            if (severity === 'catastrophic') multiplier = 6;
+            
+            if (injuryType === 'soft_tissue') multiplier = 1.5;
+            else if (injuryType === 'fracture') multiplier = 2.5;
+            else if (injuryType === 'surgery_required') multiplier = 3.5;
+            else if (injuryType === 'tbi') multiplier = 5;
+            else if (injuryType === 'spinal') multiplier = 6;
+            else if (injuryType === 'wrongful_death') multiplier = 8;
+            
+            if (wentToLitigation) multiplier *= 1.5;
+            if (hadExpertWitness) multiplier *= 1.8;
+            
+            const base = economic > 0 ? economic : 25000; // Default base if no costs entered
+            
+            return {
+                success: true,
+                lowEstimate: Math.round(base * multiplier * 0.6),
+                midEstimate: Math.round(base * multiplier),
+                highEstimate: Math.round(base * multiplier * 1.8),
+                confidence: 'LOW',
+                note: 'Estimate based on industry formulas (limited case data available)'
+            };
+        }
 
-            const economicDamages = medicalCosts + lostWages;
-            const lowEstimate = Math.round(economicDamages * multiplier * 0.7);
-            const highEstimate = Math.round(economicDamages * multiplier * 1.5);
-
-            // Mock comparable cases count (in production, fetch from API)
-            const comparableCases = Math.floor(Math.random() * 100) + 30;
-
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const params = {
+                state: document.getElementById('state').value,
+                caseType: document.getElementById('caseType').value,
+                injuryType: document.getElementById('injuryType').value,
+                medicalCosts: parseFloat(document.getElementById('medicalCosts').value) || 0,
+                lostWages: parseFloat(document.getElementById('lostWages').value) || 0,
+                wentToLitigation: document.getElementById('wentToLitigation').checked,
+                hadExpertWitness: document.getElementById('hadExpertWitness').checked
+            };
+            
+            const result = calculateEstimate(params);
+            
             // Display results
-            document.getElementById('resultValue').textContent =
-                `$${lowEstimate.toLocaleString()} - $${highEstimate.toLocaleString()}`;
-            document.getElementById('comparableCases').textContent = comparableCases;
-            document.getElementById('resultState').textContent = state;
-
+            document.getElementById('lowEstimate').textContent = formatCurrency(result.lowEstimate);
+            document.getElementById('midEstimate').textContent = formatCurrency(result.midEstimate);
+            document.getElementById('highEstimate').textContent = formatCurrency(result.highEstimate);
+            document.getElementById('resultNote').textContent = result.note;
+            
+            // Confidence badge
+            const badge = document.getElementById('confidenceBadge');
+            badge.textContent = result.confidence + ' Confidence';
+            badge.className = 'confidence-badge confidence-' + result.confidence.toLowerCase();
+            
             document.getElementById('resultBox').classList.add('show');
-            document.getElementById('unlockBox').classList.add('show');
-
-            // Scroll to results
             document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         });
-
     </script>
 
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </body>
 </html>

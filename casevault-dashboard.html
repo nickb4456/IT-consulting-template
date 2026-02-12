@@ -69,8 +69,19 @@
     </style>
 </head>
 <body>
+    <script>
+        // Auth check - redirect to intake if not authenticated
+        (function() {
+            const token = localStorage.getItem('casevault_token');
+            const expires = localStorage.getItem('casevault_expires');
+            if (!token || !expires || Date.now() >= parseInt(expires)) {
+                window.location.href = 'casevault-intake.html';
+            }
+        })();
+    </script>
+    
     <nav class="nav">
-        <a href="/" class="nav-logo">⚖️ CaseVault</a>
+        <a href="casevault-intake.html" class="nav-logo">⚖️ CaseVault</a>
         <div class="nav-links">
             <a href="casevault-calculator.html">Calculator</a>
             <a href="casevault-dashboard.html" class="active">Dashboard</a>
@@ -80,9 +91,14 @@
     </nav>
 
     <div class="container">
-        <div class="header">
-            <h1>Settlement Dashboard</h1>
-            <p>Real benchmark data from personal injury settlements across New England</p>
+        <div class="header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h1>Settlement Dashboard</h1>
+                <p>Real benchmark data from personal injury settlements across New England</p>
+            </div>
+            <div id="timerBadge" style="background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); padding: 8px 16px; border-radius: 8px; font-size: 14px;">
+                ⏱️ Access expires in: <strong id="timeLeft">--:--</strong>
+            </div>
         </div>
 
         <!-- Stats Row -->
@@ -325,6 +341,30 @@
             document.getElementById('filterCase').addEventListener('change', function() {
                 renderDashboard(document.getElementById('filterState').value, document.getElementById('filterInjury').value, this.value);
             });
+
+            // Timer countdown
+            const expires = parseInt(localStorage.getItem('casevault_expires') || '0');
+            function updateTimer() {
+                const remaining = expires - Date.now();
+                if (remaining <= 0) {
+                    document.getElementById('timeLeft').textContent = 'EXPIRED';
+                    document.getElementById('timerBadge').style.background = 'rgba(239, 68, 68, 0.15)';
+                    document.getElementById('timerBadge').style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    setTimeout(() => window.location.href = 'casevault-intake.html', 2000);
+                    return;
+                }
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                document.getElementById('timeLeft').textContent = mins + ':' + secs.toString().padStart(2, '0');
+                
+                // Warning color when under 2 minutes
+                if (remaining < 120000) {
+                    document.getElementById('timerBadge').style.background = 'rgba(239, 68, 68, 0.15)';
+                    document.getElementById('timerBadge').style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                }
+            }
+            updateTimer();
+            setInterval(updateTimer, 1000);
         });
     </script>
 </body>

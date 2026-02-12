@@ -1,1186 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://engagement-hooks-site.s3.amazonaws.com/casevault/data/settlements.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CaseVault Insights — PI Settlement Benchmarks for Attorneys | AIBridges</title>
-    <meta name="description" content="Anonymous settlement benchmarking for personal injury attorneys. Compare your cases against 2,300+ real settlements across MA, CT, RI, and NH. Free calculator included.">
-    <meta name="keywords" content="personal injury settlement calculator, PI settlement data, settlement benchmarks, attorney tools, case valuation, New England settlements">
-    <link rel="canonical" href="https://aibridges.org/casevault-intake.html">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="CaseVault Insights — PI Settlement Benchmarks">
-    <meta property="og:description" content="Anonymous settlement benchmarking for personal injury attorneys. 2,300+ real cases across 4 states.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://aibridges.org/casevault-intake.html">
-    <meta property="og:site_name" content="AIBridges">
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="CaseVault Insights — PI Settlement Benchmarks">
-    <meta name="twitter:description" content="Anonymous settlement benchmarking for personal injury attorneys. 2,300+ real cases across 4 states.">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "CaseVault Insights",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Web",
-        "description": "Anonymous settlement benchmarking tool for personal injury attorneys. Compare settlements across MA, CT, RI, and NH.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD",
-            "description": "Free settlement calculator with benchmarking access"
-        },
-        "provider": {
-            "@type": "Organization",
-            "name": "AIBridges",
-            "url": "https://aibridges.org"
-        }
-    }
-    </script>
-
+    <title>CaseVault | PI Settlement Benchmarks for New England</title>
+    <meta name="description" content="Free settlement calculator and benchmark data for personal injury attorneys. Access real settlement data from MA, CT, RI & NH.">
+    <link rel="canonical" href="https://aibridges.org/casevault-intake">
+    <script src="https://engagement-hooks-site.s3.amazonaws.com/casevault/data/settlements.js"></script>
     <style>
-        /* ===== Design Tokens ===== */
-        :root {
-            --cv-bg-deep: #060911;
-            --cv-bg-base: #0a0e1a;
-            --cv-bg-raised: #0f1629;
-            --cv-bg-surface: #151d35;
-
-            --cv-blue-400: #60a5fa;
-            --cv-blue-500: #3b82f6;
-            --cv-blue-600: #2563eb;
-            --cv-blue-700: #1d4ed8;
-            --cv-blue-glow: rgba(59, 130, 246, 0.15);
-            --cv-blue-border: rgba(59, 130, 246, 0.25);
-
-            --cv-gold-400: #fbbf24;
-            --cv-gold-500: #f59e0b;
-            --cv-gold-glow: rgba(245, 158, 11, 0.15);
-
-            --cv-green-400: #34d399;
-            --cv-green-500: #10b981;
-            --cv-green-glow: rgba(16, 185, 129, 0.15);
-
-            --cv-text-primary: #f1f5f9;
-            --cv-text-secondary: #94a3b8;
-            --cv-text-tertiary: #64748b;
-            --cv-text-muted: #475569;
-
-            --cv-border: rgba(148, 163, 184, 0.08);
-            --cv-border-light: rgba(148, 163, 184, 0.12);
-
-            --cv-font-display: 'DM Serif Display', Georgia, serif;
-            --cv-font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --cv-font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
-
-            --cv-radius-sm: 6px;
-            --cv-radius-md: 10px;
-            --cv-radius-lg: 16px;
-            --cv-radius-xl: 24px;
-
-            --cv-ease: cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* ===== Reset ===== */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-
-        body {
-            font-family: var(--cv-font-body);
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--cv-text-primary);
-            background: var(--cv-bg-deep);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background:
-                radial-gradient(ellipse 80% 60% at 50% -20%, rgba(59, 130, 246, 0.06), transparent 70%),
-                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245, 158, 11, 0.03), transparent 60%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        body > * { position: relative; z-index: 1; }
-
-        a { color: var(--cv-blue-400); text-decoration: none; }
-        img { max-width: 100%; display: block; }
-        ::selection { background: rgba(59, 130, 246, 0.3); color: #fff; }
-
-        /* ===== Nav ===== */
-        .cv-nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            height: 72px;
-            display: flex;
-            align-items: center;
-            padding: 0 1.5rem;
-            background: rgba(6, 9, 17, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 1px solid var(--cv-border);
-        }
-
-        .cv-nav__inner {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .cv-nav__logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-family: var(--cv-font-display);
-            font-size: 1.25rem;
-            color: var(--cv-text-primary);
-            text-decoration: none;
-        }
-
-        .cv-nav__logo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--cv-blue-500), var(--cv-blue-700));
-            border-radius: var(--cv-radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: var(--cv-font-mono);
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-        }
-
-        .cv-nav__links {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .cv-nav__link {
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--cv-text-secondary);
-            transition: color 150ms var(--cv-ease);
-        }
-
-        .cv-nav__link:hover { color: var(--cv-text-primary); }
-
-        @media (max-width: 640px) {
-            .cv-nav__links { gap: 1rem; }
-            .cv-nav__link { font-size: 0.75rem; }
-        }
-
-        /* ===== Hero ===== */
-        .cv-hero {
-            position: relative;
-            padding: 6rem 1.5rem 4rem;
-            text-align: center;
-            overflow: hidden;
-        }
-
-        .cv-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150%;
-            height: 100%;
-            background: radial-gradient(ellipse 50% 80% at 50% 20%, rgba(59, 130, 246, 0.08), transparent);
-            pointer-events: none;
-        }
-
-        .cv-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 9999px;
-            letter-spacing: 0.02em;
-            background: var(--cv-blue-glow);
-            color: var(--cv-blue-400);
-            border: 1px solid var(--cv-blue-border);
-            margin-bottom: 1.5rem;
-        }
-
-        .cv-hero__title {
-            font-family: var(--cv-font-display);
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 400;
-            line-height: 1.08;
-            letter-spacing: -0.02em;
-            color: var(--cv-text-primary);
-            margin-bottom: 1.5rem;
-        }
-
-        .cv-gradient-text {
-            background: linear-gradient(135deg, var(--cv-blue-400) 0%, var(--cv-gold-400) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .cv-hero__subtitle {
-            font-size: 1.125rem;
-            color: var(--cv-text-secondary);
-            max-width: 560px;
-            margin: 0 auto 2rem;
-            line-height: 1.6;
-        }
-
-        /* ===== Animations ===== */
-        @keyframes cv-slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes cv-fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .cv-animate-in { animation: cv-slideUp 0.5s var(--cv-ease) both; }
-        .cv-stagger-1 { animation-delay: 0.05s; }
-        .cv-stagger-2 { animation-delay: 0.1s; }
-        .cv-stagger-3 { animation-delay: 0.15s; }
-        .cv-stagger-4 { animation-delay: 0.2s; }
-        .cv-stagger-5 { animation-delay: 0.25s; }
-        .cv-stagger-6 { animation-delay: 0.3s; }
-
-        @media (prefers-reduced-motion: reduce) {
-            .cv-animate-in { animation: none; opacity: 1; }
-        }
-
-        /* ===== Stats Bar ===== */
-        .cv-stats-bar {
-            margin-top: -2rem;
-            position: relative;
-            z-index: 2;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 0 1.5rem;
-        }
-
-        .cv-stats-glass {
-            background: rgba(15, 22, 41, 0.6);
-            backdrop-filter: blur(16px) saturate(150%);
-            -webkit-backdrop-filter: blur(16px) saturate(150%);
-            border: 1px solid rgba(148, 163, 184, 0.06);
-            border-radius: var(--cv-radius-lg);
-            overflow: hidden;
-        }
-
-        .cv-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0;
-        }
-
-        .cv-stat {
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .cv-stat + .cv-stat { border-left: 1px solid var(--cv-border); }
-
-        .cv-stat__value {
-            font-family: var(--cv-font-mono);
-            font-size: 1.875rem;
-            font-weight: 700;
-            color: var(--cv-blue-400);
-            line-height: 1;
-            margin-bottom: 0.25rem;
-        }
-
-        .cv-stat__label {
-            font-size: 0.75rem;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--cv-text-tertiary);
-        }
-
-        @media (max-width: 768px) {
-            .cv-stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .cv-stat:nth-child(1), .cv-stat:nth-child(2) { border-bottom: 1px solid var(--cv-border); }
-            .cv-stat:nth-child(2n+1) { border-left: none; }
-        }
-
-        /* ===== Section Styles ===== */
-        .cv-section {
-            padding: clamp(4rem, 8vw, 7rem) 0;
-        }
-
-        .cv-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        .cv-container--narrow { max-width: 720px; }
-        .cv-container--mid { max-width: 960px; }
-
-        .cv-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: var(--cv-blue-400);
-            margin-bottom: 1rem;
-        }
-
-        .cv-section-title {
-            font-family: var(--cv-font-display);
-            font-size: 1.875rem;
-            font-weight: 400;
-            line-height: 1.2;
-            color: var(--cv-text-primary);
-            margin-bottom: 3rem;
-        }
-
-        /* ===== How It Works (Steps) ===== */
-        .cv-steps {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3rem;
-            counter-reset: step;
-        }
-
-        .cv-step { text-align: center; position: relative; }
-
-        .cv-step__number {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--cv-blue-600), var(--cv-blue-500));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-family: var(--cv-font-mono);
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .cv-step__title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--cv-text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .cv-step__desc {
-            font-size: 0.875rem;
-            color: var(--cv-text-tertiary);
-            line-height: 1.5;
-        }
-
-        .cv-step:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 24px;
-            left: calc(50% + 32px);
-            width: calc(100% - 64px);
-            height: 1px;
-            background: linear-gradient(90deg, var(--cv-blue-border), transparent);
-        }
-
-        @media (max-width: 768px) {
-            .cv-steps { grid-template-columns: 1fr; gap: 2rem; }
-            .cv-step:not(:last-child)::after { display: none; }
-        }
-
-        /* ===== Comparison Section ===== */
-        .cv-compare {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            border-radius: var(--cv-radius-lg);
-            overflow: hidden;
-            border: 1px solid var(--cv-border-light);
-            background: var(--cv-bg-raised);
-        }
-
-        .cv-compare__panel {
-            padding: 2.5rem 2rem;
-        }
-
-        .cv-compare__panel--old {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.03) 0%, transparent 70%);
-            border-right: 1px solid var(--cv-border-light);
-        }
-
-        .cv-compare__panel--new {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.04) 0%, transparent 70%);
-        }
-
-        .cv-compare__badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.6875rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            margin-bottom: 1rem;
-            padding: 4px 10px;
-            border-radius: 4px;
-        }
-
-        .cv-compare__badge--old {
-            color: #f87171;
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.15);
-        }
-
-        .cv-compare__badge--new {
-            color: var(--cv-green-400);
-            background: var(--cv-green-glow);
-            border: 1px solid rgba(16, 185, 129, 0.15);
-        }
-
-        .cv-compare__stat {
-            font-family: var(--cv-font-display);
-            font-size: clamp(1.5rem, 3vw, 2.25rem);
-            color: var(--cv-text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .cv-compare__desc {
-            font-size: 0.875rem;
-            color: var(--cv-text-muted);
-            line-height: 1.5;
-        }
-
-        @media (max-width: 768px) {
-            .cv-compare { grid-template-columns: 1fr; }
-            .cv-compare__panel--old {
-                border-right: none;
-                border-bottom: 1px solid var(--cv-border-light);
-            }
-        }
-
-        /* ===== Trust Section ===== */
-        .cv-trust-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-
-        .cv-trust-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            padding: 1.5rem;
-            border-radius: var(--cv-radius-lg);
-            background: var(--cv-bg-raised);
-            border: 1px solid var(--cv-border);
-            transition: all 250ms var(--cv-ease);
-        }
-
-        .cv-trust-item:hover {
-            border-color: var(--cv-blue-border);
-            background: rgba(59, 130, 246, 0.04);
-        }
-
-        .cv-trust-icon {
-            flex-shrink: 0;
-            width: 40px;
-            height: 40px;
-            border-radius: var(--cv-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .cv-trust-icon--green {
-            background: var(--cv-green-glow);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-
-        .cv-trust-icon--blue {
-            background: var(--cv-blue-glow);
-            border: 1px solid var(--cv-blue-border);
-        }
-
-        .cv-trust-icon--gold {
-            background: var(--cv-gold-glow);
-            border: 1px solid rgba(245, 158, 11, 0.25);
-        }
-
-        .cv-trust-item__title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--cv-text-primary);
-            margin-bottom: 4px;
-        }
-
-        .cv-trust-item__desc {
-            font-size: 0.75rem;
-            color: var(--cv-text-tertiary);
-            line-height: 1.5;
-        }
-
-        @media (max-width: 768px) {
-            .cv-trust-grid { grid-template-columns: 1fr; }
-        }
-
-        /* ===== Intake Form ===== */
-        .cv-form-section {
-            background: var(--cv-bg-raised);
-            border-top: 1px solid var(--cv-border);
-            border-bottom: 1px solid var(--cv-border);
-        }
-
-        .cv-card {
-            background: var(--cv-bg-surface);
-            border: 1px solid var(--cv-blue-border);
-            border-radius: var(--cv-radius-xl);
-            padding: 3rem;
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.08);
-        }
-
-        .cv-form-group { margin-bottom: 1.5rem; }
-
-        .cv-form-label {
-            display: block;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--cv-text-secondary);
-            margin-bottom: 0.5rem;
-        }
-
-        .cv-form-label .required {
-            color: var(--cv-blue-400);
-            margin-left: 2px;
-        }
-
-        .cv-input {
-            width: 100%;
-            padding: 12px 16px;
-            font-family: var(--cv-font-body);
-            font-size: 1rem;
-            color: var(--cv-text-primary);
-            background: var(--cv-bg-base);
-            border: 1px solid var(--cv-border-light);
-            border-radius: var(--cv-radius-md);
-            transition: all 150ms var(--cv-ease);
-            appearance: none;
-        }
-
-        .cv-input:hover { border-color: rgba(148, 163, 184, 0.2); }
-
-        .cv-input:focus {
-            outline: none;
-            border-color: var(--cv-blue-500);
-            box-shadow: 0 0 0 3px var(--cv-blue-glow);
-        }
-
-        .cv-input::placeholder { color: var(--cv-text-muted); }
-
-        /* ===== Buttons ===== */
-        .cv-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            font-family: var(--cv-font-body);
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 12px 24px;
-            border-radius: var(--cv-radius-md);
-            border: none;
-            cursor: pointer;
-            transition: all 250ms var(--cv-ease);
-            text-decoration: none;
-            white-space: nowrap;
-            line-height: 1.4;
-        }
-
-        .cv-btn--primary {
-            background: linear-gradient(135deg, var(--cv-blue-600) 0%, var(--cv-blue-500) 100%);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-        }
-
-        .cv-btn--primary:hover {
-            background: linear-gradient(135deg, var(--cv-blue-500) 0%, var(--cv-blue-400) 100%);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.35);
-            transform: translateY(-1px);
-            color: #fff;
-        }
-
-        .cv-btn--secondary {
-            background: transparent;
-            color: var(--cv-text-secondary);
-            border: 1px solid var(--cv-border-light);
-        }
-
-        .cv-btn--secondary:hover {
-            color: var(--cv-text-primary);
-            border-color: var(--cv-blue-border);
-            background: var(--cv-blue-glow);
-        }
-
-        .cv-btn--lg {
-            font-size: 1rem;
-            padding: 16px 32px;
-        }
-
-        .cv-btn--full { width: 100%; }
-
-        .cv-btn--gold {
-            background: linear-gradient(135deg, var(--cv-gold-500) 0%, #d97706 100%);
-            color: #0a0e1a;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
-        }
-
-        .cv-btn--gold:hover {
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.35);
-            transform: translateY(-1px);
-            color: #0a0e1a;
-        }
-
-        /* ===== CTA Actions ===== */
-        .cv-hero__actions {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        /* ===== What You Get Grid ===== */
-        .cv-features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-
-        .cv-feature {
-            padding: 1.5rem;
-            background: var(--cv-bg-raised);
-            border: 1px solid var(--cv-border);
-            border-radius: var(--cv-radius-lg);
-            transition: all 250ms var(--cv-ease);
-        }
-
-        .cv-feature:hover {
-            border-color: var(--cv-blue-border);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-        }
-
-        .cv-feature__icon {
-            width: 44px;
-            height: 44px;
-            background: var(--cv-blue-glow);
-            border: 1px solid var(--cv-blue-border);
-            border-radius: var(--cv-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1rem;
-        }
-
-        .cv-feature__title {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: var(--cv-text-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .cv-feature__desc {
-            font-size: 0.8125rem;
-            color: var(--cv-text-tertiary);
-            line-height: 1.5;
-        }
-
-        @media (max-width: 768px) {
-            .cv-features { grid-template-columns: 1fr; }
-        }
-
-        /* ===== Footer ===== */
-        .cv-footer {
-            border-top: 1px solid var(--cv-border);
-            padding: 3rem 0;
-        }
-
-        .cv-footer__inner {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .cv-footer__copy {
-            font-size: 0.875rem;
-            color: var(--cv-text-muted);
-        }
-
-        .cv-footer__links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .cv-footer__link {
-            font-size: 0.875rem;
-            color: var(--cv-text-tertiary);
-            transition: color 150ms var(--cv-ease);
-        }
-
-        .cv-footer__link:hover { color: var(--cv-text-primary); }
-
-        .cv-footer__disclaimer {
-            width: 100%;
-            font-size: 0.75rem;
-            color: var(--cv-text-muted);
-            margin-top: 1rem;
-            line-height: 1.5;
-            padding-top: 1rem;
-            border-top: 1px solid var(--cv-border);
-        }
-
-        @media (max-width: 600px) {
-            .cv-footer__inner { flex-direction: column; text-align: center; }
-        }
-
-        /* ===== Misc ===== */
-        .text-center { text-align: center; }
-
-        .cv-mono { font-family: var(--cv-font-mono); }
-
-        .cv-divider {
-            height: 1px;
-            background: var(--cv-border);
-            border: none;
-            margin: 2rem 0;
-        }
-
-        .cv-privacy-note {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
-            margin-top: 1.5rem;
-            font-size: 0.8125rem;
-            color: var(--cv-text-muted);
-        }
-
-        .cv-privacy-note svg {
-            flex-shrink: 0;
-            opacity: 0.6;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: white; min-height: 100vh; }
+        
+        .nav { background: rgba(15, 23, 42, 0.95); padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; left: 0; right: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid #334155; }
+        .nav-logo { font-size: 20px; font-weight: 700; color: #818cf8; text-decoration: none; }
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a { color: #94a3b8; text-decoration: none; font-size: 14px; }
+        .nav-links a:hover { color: white; }
+        @media (max-width: 600px) { .nav-links { display: none; } }
+        
+        .container { max-width: 500px; margin: 0 auto; padding: 100px 24px 60px; }
+        
+        .header { text-align: center; margin-bottom: 40px; }
+        .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); padding: 8px 16px; border-radius: 30px; font-size: 13px; color: #a5b4fc; margin-bottom: 20px; }
+        .badge-dot { width: 8px; height: 8px; background: #34d399; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .header h1 { font-size: 32px; margin-bottom: 12px; }
+        .header h1 span { background: linear-gradient(135deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header p { color: #94a3b8; line-height: 1.6; }
+        
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 32px; }
+        .stat { background: #1e293b; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #334155; }
+        .stat-value { font-size: 24px; font-weight: 700; color: #818cf8; }
+        .stat-label { font-size: 11px; color: #64748b; margin-top: 4px; text-transform: uppercase; }
+        @media (max-width: 500px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+        
+        .card { background: #1e293b; border-radius: 16px; padding: 32px; border: 1px solid #334155; }
+        .card h2 { font-size: 20px; margin-bottom: 8px; }
+        .card > p { color: #94a3b8; font-size: 14px; margin-bottom: 24px; }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 14px; font-weight: 500; color: #e2e8f0; margin-bottom: 8px; }
+        .form-group input, .form-group select { width: 100%; padding: 14px 16px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: white; font-size: 16px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #818cf8; }
+        .form-group input::placeholder { color: #64748b; }
+        .form-group .hint { font-size: 12px; color: #64748b; margin-top: 6px; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+        
+        .btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #818cf8, #a78bfa); border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(129, 140, 248, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: #64748b; font-size: 13px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #334155; }
+        
+        .info-box { background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+        .info-box h4 { font-size: 14px; color: #a5b4fc; margin-bottom: 6px; }
+        .info-box p { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+        
+        .steps { display: flex; gap: 8px; margin-bottom: 24px; }
+        .step { flex: 1; text-align: center; padding: 12px 8px; background: #0f172a; border-radius: 8px; border: 1px solid #334155; }
+        .step.active { border-color: #818cf8; background: rgba(129, 140, 248, 0.1); }
+        .step-num { font-size: 18px; font-weight: 700; color: #818cf8; }
+        .step-label { font-size: 11px; color: #64748b; margin-top: 4px; }
+        
+        .success { display: none; text-align: center; padding: 40px 0; }
+        .success h2 { color: #34d399; margin-bottom: 12px; }
+        .success p { color: #94a3b8; margin-bottom: 24px; }
+        
+        .footer { text-align: center; padding: 40px 24px; color: #64748b; font-size: 13px; }
+        .footer a { color: #818cf8; text-decoration: none; }
+        
+        /* Settlement form (step 2) */
+        #step2 { display: none; }
+        .amount-input { position: relative; }
+        .amount-input span { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        .amount-input input { padding-left: 32px; }
     </style>
 </head>
 <body>
-
-<!-- ===== Navigation ===== -->
-<nav class="cv-nav" role="navigation" aria-label="Main navigation">
-    <div class="cv-nav__inner">
-        <a href="/" class="cv-nav__logo" aria-label="AIBridges Home">
-            <span class="cv-nav__logo-icon" aria-hidden="true">CV</span>
-            CaseVault
-        </a>
-        <ul class="cv-nav__links">
-            <li><a href="/" class="cv-nav__link">AIBridges Home</a></li>
-            <li><a href="#how-it-works" class="cv-nav__link">How It Works</a></li>
-            <li><a href="#access" class="cv-nav__link">Get Access</a></li>
-            <li><a href="/contact.html" class="cv-nav__link">Contact</a></li>
-        </ul>
-    </div>
-</nav>
-
-<!-- ===== Hero ===== -->
-<header class="cv-hero">
-    <div style="max-width: 840px; margin: 0 auto;">
-        <div class="cv-animate-in">
-            <span class="cv-badge">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                Anonymous &amp; Encrypted
-            </span>
+    <nav class="nav">
+        <a href="casevault-intake.html" class="nav-logo">⚖️ CaseVault</a>
+        <div class="nav-links">
+            <a href="casevault-calculator.html">Calculator</a>
+            <a href="casevault-dashboard.html">Dashboard</a>
+            <a href="/">AIBridges</a>
         </div>
-        <h1 class="cv-hero__title cv-animate-in cv-stagger-1">
-            Stop Guessing.<br>
-            <span class="cv-gradient-text">Start Benchmarking.</span>
-        </h1>
-        <p class="cv-hero__subtitle cv-animate-in cv-stagger-2">
-            Compare your PI settlements against real market data from 2,300+ anonymized cases across Massachusetts, Connecticut, Rhode Island, and New Hampshire.
-        </p>
-        <div class="cv-hero__actions cv-animate-in cv-stagger-3">
-            <a href="#access" class="cv-btn cv-btn--primary cv-btn--lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/><line x1="12" y1="14" x2="14" y2="14"/><line x1="8" y1="18" x2="10" y2="18"/><line x1="12" y1="18" x2="16" y2="18"/></svg>
-                Free Settlement Calculator
-            </a>
-            <a href="#comparison" class="cv-btn cv-btn--secondary cv-btn--lg">See How It Compares</a>
-        </div>
-    </div>
-</header>
+    </nav>
 
-<!-- ===== Stats Bar ===== -->
-<section class="cv-stats-bar cv-animate-in cv-stagger-4" aria-label="Key statistics">
-    <div class="cv-stats-glass">
-        <div class="cv-stats-grid" id="statsGrid">
-            <div class="cv-stat">
-                <div class="cv-stat__value" data-target="2366">0</div>
-                <div class="cv-stat__label">Total Settlements</div>
+    <div class="container">
+        <div class="header">
+            <div class="badge">
+                <span class="badge-dot"></span>
+                Settlement Intelligence
             </div>
-            <div class="cv-stat">
-                <div class="cv-stat__value" data-target="4">0</div>
-                <div class="cv-stat__label">States Covered</div>
+            <h1>Access <span>Real Data</span></h1>
+            <p>Get instant access to settlement benchmarks from New England PI cases. Register and contribute one case to unlock.</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat">
+                <div class="stat-value" id="totalCases">--</div>
+                <div class="stat-label">Settlements</div>
             </div>
-            <div class="cv-stat">
-                <div class="cv-stat__value" data-target="12">0</div>
-                <div class="cv-stat__label">Case Types</div>
+            <div class="stat">
+                <div class="stat-value">4</div>
+                <div class="stat-label">States</div>
             </div>
-            <div class="cv-stat">
-                <div class="cv-stat__value cv-mono">2019&ndash;26</div>
-                <div class="cv-stat__label">Data Range</div>
+            <div class="stat">
+                <div class="stat-value">10</div>
+                <div class="stat-label">Min Access</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">Free</div>
+                <div class="stat-label">Always</div>
             </div>
         </div>
-    </div>
-</section>
 
-<!-- ===== What You Get ===== -->
-<section class="cv-section" aria-labelledby="features-heading">
-    <div class="cv-container cv-container--mid">
-        <div class="text-center">
-            <p class="cv-label">What You Get</p>
-            <h2 id="features-heading" class="cv-section-title">Data-driven case valuations in minutes</h2>
-        </div>
-        <div class="cv-features">
-            <article class="cv-feature">
-                <div class="cv-feature__icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cv-blue-400)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="10" y2="10"/><line x1="12" y1="10" x2="14" y2="10"/><line x1="8" y1="14" x2="10" y2="14"/></svg>
+        <div class="card">
+            <div class="steps">
+                <div class="step active" id="step1indicator">
+                    <div class="step-num">1</div>
+                    <div class="step-label">Register</div>
                 </div>
-                <h3 class="cv-feature__title">Settlement Calculator</h3>
-                <p class="cv-feature__desc">Estimate case value based on real settlement data. Filter by state, case type, and severity.</p>
-            </article>
-            <article class="cv-feature">
-                <div class="cv-feature__icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cv-blue-400)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                <div class="step" id="step2indicator">
+                    <div class="step-num">2</div>
+                    <div class="step-label">Contribute</div>
                 </div>
-                <h3 class="cv-feature__title">Benchmark Dashboard</h3>
-                <p class="cv-feature__desc">Compare your settlements against market averages. Drill into trends by state and case category.</p>
-            </article>
-            <article class="cv-feature">
-                <div class="cv-feature__icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cv-blue-400)" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <div class="step" id="step3indicator">
+                    <div class="step-num">3</div>
+                    <div class="step-label">Access</div>
                 </div>
-                <h3 class="cv-feature__title">100% Anonymous</h3>
-                <p class="cv-feature__desc">No client names, case numbers, or firm identifiers. Data is anonymized before it leaves your browser.</p>
-            </article>
-        </div>
-    </div>
-</section>
+            </div>
 
-<!-- ===== How It Works ===== -->
-<section class="cv-section" id="how-it-works" aria-labelledby="steps-heading">
-    <div class="cv-container cv-container--mid">
-        <div class="text-center">
-            <p class="cv-label">How It Works</p>
-            <h2 id="steps-heading" class="cv-section-title">Three steps to better case valuations</h2>
-        </div>
-        <div class="cv-steps">
-            <div class="cv-step">
-                <div class="cv-step__number" aria-hidden="true">1</div>
-                <h3 class="cv-step__title">Register</h3>
-                <p class="cv-step__desc">Enter your name, email, and firm. Takes 30 seconds. No credit card required.</p>
+            <!-- Step 1: Register -->
+            <div id="step1">
+                <h2>Create Your Account</h2>
+                <p>Quick registration — no credit card required.</p>
+                
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="name" placeholder="John Smith" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email" placeholder="john@lawfirm.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Firm Name (optional)</label>
+                        <input type="text" id="firm" placeholder="Smith & Associates">
+                    </div>
+                    <button type="submit" class="btn">Continue →</button>
+                </form>
             </div>
-            <div class="cv-step">
-                <div class="cv-step__number" aria-hidden="true">2</div>
-                <h3 class="cv-step__title">Contribute 1 Case</h3>
-                <p class="cv-step__desc">Submit one anonymized settlement. Data is bucketed and stripped of identifying details before transmission.</p>
-            </div>
-            <div class="cv-step">
-                <div class="cv-step__number" aria-hidden="true">3</div>
-                <h3 class="cv-step__title">Access Benchmarks</h3>
-                <p class="cv-step__desc">Unlock the calculator and dashboard. Compare your cases against the full settlement database.</p>
-            </div>
-        </div>
-    </div>
-</section>
 
-<!-- ===== Comparison ===== -->
-<section class="cv-section" id="comparison" aria-labelledby="compare-heading" style="background: var(--cv-bg-raised); border-top: 1px solid var(--cv-border); border-bottom: 1px solid var(--cv-border);">
-    <div class="cv-container cv-container--mid">
-        <div class="text-center">
-            <p class="cv-label">Side by Side</p>
-            <h2 id="compare-heading" class="cv-section-title">Manual research vs. CaseVault</h2>
-        </div>
+            <!-- Step 2: Contribute Settlement -->
+            <div id="step2">
+                <h2>Contribute One Settlement</h2>
+                <p>Submit one anonymized settlement to unlock access.</p>
+                
+                <div class="info-box">
+                    <h4>🔒 100% Anonymous</h4>
+                    <p>No client names or case numbers. Data is bucketed and anonymized before storage.</p>
+                </div>
+                
+                <form id="settlementForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>State</label>
+                            <select id="state" required>
+                                <option value="">Select...</option>
+                                <option value="MA">Massachusetts</option>
+                                <option value="CT">Connecticut</option>
+                                <option value="RI">Rhode Island</option>
+                                <option value="NH">New Hampshire</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <select id="year" required>
+                                <option value="">Select...</option>
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Settlement Amount</label>
+                        <div class="amount-input">
+                            <span>$</span>
+                            <input type="text" id="amount" placeholder="150,000" required>
+                        </div>
+                        <div class="hint">Total settlement (not including attorney fees)</div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Case Type</label>
+                            <select id="caseType" required>
+                                <option value="">Select...</option>
+                                <option value="auto">Auto Accident</option>
+                                <option value="truck">Truck Accident</option>
+                                <option value="motorcycle">Motorcycle</option>
+                                <option value="pedestrian">Pedestrian</option>
+                                <option value="slip_fall">Slip & Fall</option>
+                                <option value="med_mal">Medical Malpractice</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Injury Severity</label>
+                            <select id="severity" required>
+                                <option value="">Select...</option>
+                                <option value="soft_tissue">Soft Tissue</option>
+                                <option value="fracture">Fracture</option>
+                                <option value="surgery">Surgery Required</option>
+                                <option value="tbi">TBI</option>
+                                <option value="spinal">Spinal</option>
+                                <option value="fatal">Fatal</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">Submit & Get Access →</button>
+                </form>
+            </div>
 
-        <!-- Time -->
-        <div class="cv-compare" style="margin-bottom: 1.5rem;">
-            <div class="cv-compare__panel cv-compare__panel--old">
-                <div class="cv-compare__badge cv-compare__badge--old">Manual Process</div>
-                <div class="cv-compare__stat">Hours of research</div>
-                <p class="cv-compare__desc">Digging through spreadsheets, old case files, and databases to find comparable settlements.</p>
-            </div>
-            <div class="cv-compare__panel cv-compare__panel--new">
-                <div class="cv-compare__badge cv-compare__badge--new">CaseVault</div>
-                <div class="cv-compare__stat">Minutes, not hours</div>
-                <p class="cv-compare__desc">Select your filters. Browse comparable settlement data from 2,300+ anonymized cases.</p>
-            </div>
-        </div>
-
-        <!-- Accuracy -->
-        <div class="cv-compare" style="margin-bottom: 1.5rem;">
-            <div class="cv-compare__panel cv-compare__panel--old">
-                <div class="cv-compare__badge cv-compare__badge--old">Manual Process</div>
-                <div class="cv-compare__stat">Limited sample size</div>
-                <p class="cv-compare__desc">Relying on a handful of cases you remember or can find. Easy to miss patterns.</p>
-            </div>
-            <div class="cv-compare__panel cv-compare__panel--new">
-                <div class="cv-compare__badge cv-compare__badge--new">CaseVault</div>
-                <div class="cv-compare__stat">2,300+ data points</div>
-                <p class="cv-compare__desc">Every settlement is categorized by state, case type, severity, and outcome.</p>
-            </div>
-        </div>
-
-        <!-- Confidence -->
-        <div class="cv-compare">
-            <div class="cv-compare__panel cv-compare__panel--old">
-                <div class="cv-compare__badge cv-compare__badge--old">Manual Process</div>
-                <div class="cv-compare__stat">Gut feeling</div>
-                <p class="cv-compare__desc">Second-guessing your valuation because you have no way to validate it.</p>
-            </div>
-            <div class="cv-compare__panel cv-compare__panel--new">
-                <div class="cv-compare__badge cv-compare__badge--new">CaseVault</div>
-                <div class="cv-compare__stat">Data-backed clarity</div>
-                <p class="cv-compare__desc">Show clients and opposing counsel real benchmarks. Negotiate from a position of knowledge.</p>
+            <!-- Success -->
+            <div id="successMessage" class="success">
+                <h2>✅ Access Granted!</h2>
+                <p>You have 10 minutes of full access to the dashboard and calculator.</p>
+                <a href="casevault-dashboard.html" class="btn">Open Dashboard →</a>
             </div>
         </div>
     </div>
-</section>
 
-<!-- ===== Trust ===== -->
-<section class="cv-section" aria-labelledby="trust-heading">
-    <div class="cv-container cv-container--mid">
-        <div class="text-center">
-            <p class="cv-label">Built for Attorney Confidence</p>
-            <h2 id="trust-heading" class="cv-section-title">Your data, your terms</h2>
-        </div>
-        <div class="cv-trust-grid">
-            <div class="cv-trust-item">
-                <div class="cv-trust-icon cv-trust-icon--green" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cv-green-400)" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                </div>
-                <div>
-                    <h3 class="cv-trust-item__title">Browser-Side Anonymization</h3>
-                    <p class="cv-trust-item__desc">Settlement amounts are bucketed and anonymized before they leave your device. We never see raw case data.</p>
-                </div>
-            </div>
-            <div class="cv-trust-item">
-                <div class="cv-trust-icon cv-trust-icon--blue" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cv-blue-400)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
-                </div>
-                <div>
-                    <h3 class="cv-trust-item__title">No Identifying Information</h3>
-                    <p class="cv-trust-item__desc">No client names, case numbers, or firm identifiers are ever collected or stored. Fully anonymized.</p>
-                </div>
-            </div>
-            <div class="cv-trust-item">
-                <div class="cv-trust-icon cv-trust-icon--gold" aria-hidden="true">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--cv-gold-400)" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                </div>
-                <div>
-                    <h3 class="cv-trust-item__title">Real Settlement Data</h3>
-                    <p class="cv-trust-item__desc">Settlement data sourced from practicing PI attorneys and public court records across New England.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    <footer class="footer">
+        <p>© 2026 CaseVault by <a href="/">AIBridges</a> | Cranston, RI</p>
+        <p style="margin-top: 8px;">Settlement data is anonymized. Not legal advice.</p>
+    </footer>
 
-<!-- ===== Intake Form ===== -->
-<section class="cv-section cv-form-section" id="access" aria-labelledby="form-heading">
-    <div class="cv-container cv-container--narrow">
-        <div class="cv-card">
-            <div style="margin-bottom: 2rem;">
-                <p class="cv-label">Get Started</p>
-                <h2 id="form-heading" style="font-family: var(--cv-font-display); font-size: 1.5rem; color: var(--cv-text-primary); margin-bottom: 0.5rem;">Access CaseVault</h2>
-                <p style="font-size: 0.875rem; color: var(--cv-text-secondary);">Register below, then contribute one anonymized settlement to unlock the calculator and dashboard.</p>
-            </div>
+    <script>
+        const DATA = window.CASEVAULT_DATA || null;
+        
+        // Update stats
+        if (DATA && DATA.totalSettlements) {
+            document.getElementById('totalCases').textContent = DATA.totalSettlements.toLocaleString();
+        }
 
-            <form id="intakeForm" novalidate>
-                <div class="cv-form-group">
-                    <label class="cv-form-label" for="name">Full Name <span class="required">*</span></label>
-                    <input type="text" id="name" name="name" required placeholder="Jane Doe" class="cv-input" autocomplete="name">
-                </div>
-
-                <div class="cv-form-group">
-                    <label class="cv-form-label" for="email">Email Address <span class="required">*</span></label>
-                    <input type="email" id="email" name="email" required placeholder="you@lawfirm.com" class="cv-input" autocomplete="email">
-                </div>
-
-                <div class="cv-form-group">
-                    <label class="cv-form-label" for="lawFirm">Law Firm / Organization <span class="required">*</span></label>
-                    <input type="text" id="lawFirm" name="lawFirm" required placeholder="Smith & Associates" class="cv-input" autocomplete="organization">
-                </div>
-
-                <button type="submit" class="cv-btn cv-btn--primary cv-btn--lg cv-btn--full" id="submitBtn">
-                    Access Calculator
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14m0 0l-6-6m6 6l-6 6"/></svg>
-                </button>
-            </form>
-
-            <div class="cv-privacy-note">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                <span>Your info is stored locally on your device only. We don't sell or share data.</span>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- ===== Final CTA ===== -->
-<section class="cv-section" aria-label="Call to action">
-    <div class="cv-container text-center" style="max-width: 600px;">
-        <p class="cv-label">Explore the Data</p>
-        <h2 class="cv-section-title">See the full picture</h2>
-        <p style="font-size: 0.9375rem; color: var(--cv-text-secondary); margin-bottom: 2rem;">Aggregated settlement data across Massachusetts, Connecticut, Rhode Island, and New Hampshire.</p>
-        <div class="cv-hero__actions">
-            <a href="#access" class="cv-btn cv-btn--gold cv-btn--lg">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                Get Started Free
-            </a>
-            <a href="/" class="cv-btn cv-btn--secondary cv-btn--lg">Back to AIBridges</a>
-        </div>
-    </div>
-</section>
-
-<!-- ===== Footer ===== -->
-<footer class="cv-footer" role="contentinfo">
-    <div class="cv-container">
-        <div class="cv-footer__inner">
-            <div class="cv-footer__copy">&copy; 2026 CaseVault Insights by AIBridges</div>
-            <div class="cv-footer__links">
-                <a href="/" class="cv-footer__link">AIBridges Home</a>
-                <a href="/contact.html" class="cv-footer__link">Contact</a>
-            </div>
-            <p class="cv-footer__disclaimer">
-                CaseVault Insights provides settlement data for informational and benchmarking purposes only. This is not legal advice. Settlement values vary based on individual case factors. Consult with a licensed attorney for case-specific guidance. All contributed data is anonymized and aggregated to protect attorney-client privilege. Registration information is stored locally on your device and is not transmitted to our servers.
-            </p>
-        </div>
-    </div>
-</footer>
-
-<script>
-    // ===== Load S3 Data =====
-    var DATA = window.CASEVAULT_DATA || null;
-    if (DATA && DATA.totalSettlements) {
-        // Update the data-target for total settlements
-        var totalEl = document.querySelector('[data-target="2366"]');
-        if (totalEl) totalEl.dataset.target = DATA.totalSettlements;
-    }
-
-    // ===== Counter Animation =====
-    function animateCounters() {
-        document.querySelectorAll('[data-target]').forEach(function(el) {
-            var target = parseInt(el.dataset.target);
-            var duration = 1200;
-            var startTime = performance.now();
-            function update(now) {
-                var elapsed = now - startTime;
-                var progress = Math.min(elapsed / duration, 1);
-                var eased = 1 - Math.pow(1 - progress, 3);
-                el.textContent = Math.round(target * eased).toLocaleString();
-                if (progress < 1) requestAnimationFrame(update);
-            }
-            requestAnimationFrame(update);
-        });
-    }
-
-    // Trigger counters when stats section enters viewport
-    var statsObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-            if (entry.isIntersecting) {
-                animateCounters();
-                statsObserver.disconnect();
-            }
-        });
-    }, { threshold: 0.3 });
-
-    var statsGrid = document.getElementById('statsGrid');
-    if (statsGrid) statsObserver.observe(statsGrid);
-
-    // ===== Auth Check =====
-    document.addEventListener('DOMContentLoaded', function() {
-        var token = localStorage.getItem('casevault_access_token');
-        var expires = localStorage.getItem('casevault_access_expires');
-
+        // Check if already authenticated
+        const token = localStorage.getItem('casevault_token');
+        const expires = localStorage.getItem('casevault_expires');
         if (token && expires && Date.now() < parseInt(expires)) {
-            window.location.href = '/casevault-dashboard.html';
-        }
-    });
-
-    // ===== Form Submission =====
-    document.getElementById('intakeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        var name = document.getElementById('name').value.trim();
-        var email = document.getElementById('email').value.trim();
-        var lawFirm = document.getElementById('lawFirm').value.trim();
-
-        if (!name || !email || !lawFirm) {
-            alert('Please fill out all required fields.');
-            return;
+            window.location.href = 'casevault-dashboard.html';
         }
 
-        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            alert('Please enter a valid email address.');
-            return;
-        }
+        // Step 1: Register
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const firm = document.getElementById('firm').value;
+            
+            // Store registration locally
+            localStorage.setItem('casevault_user', JSON.stringify({ name, email, firm }));
+            
+            // Move to step 2
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+            document.getElementById('step1indicator').classList.remove('active');
+            document.getElementById('step2indicator').classList.add('active');
+        });
 
-        // Store locally only — never transmitted
-        localStorage.setItem('casevault_user_name', name);
-        localStorage.setItem('casevault_user_email', email);
-        localStorage.setItem('casevault_user_firm', lawFirm);
-        localStorage.setItem('casevault_intake_done', 'true');
+        // Step 2: Submit settlement
+        document.getElementById('settlementForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const settlement = {
+                state: document.getElementById('state').value,
+                year: document.getElementById('year').value,
+                amount: document.getElementById('amount').value.replace(/[,$]/g, ''),
+                caseType: document.getElementById('caseType').value,
+                severity: document.getElementById('severity').value,
+                submittedAt: new Date().toISOString()
+            };
+            
+            // Validate amount
+            const amt = parseInt(settlement.amount);
+            if (isNaN(amt) || amt < 1000 || amt > 50000000) {
+                alert('Please enter a valid settlement amount between $1,000 and $50,000,000');
+                return;
+            }
+            
+            // Store settlement (would send to API in production)
+            console.log('Settlement submitted:', settlement);
+            
+            // Grant 10 min access
+            const expiresAt = Date.now() + (10 * 60 * 1000); // 10 minutes
+            localStorage.setItem('casevault_token', 'access_' + Date.now());
+            localStorage.setItem('casevault_expires', expiresAt.toString());
+            
+            // Show success
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('step2indicator').classList.remove('active');
+            document.getElementById('step3indicator').classList.add('active');
+        });
 
-        window.location.href = '/casevault-contribute.html';
-    });
-
-    // ===== Token Generator =====
-    function generateToken() {
-        var array = new Uint8Array(32);
-        crypto.getRandomValues(array);
-        return Array.from(array, function(byte) {
-            return byte.toString(16).padStart(2, '0');
-        }).join('');
-    }
-</script>
-
+        // Format amount on blur
+        document.getElementById('amount').addEventListener('blur', function() {
+            const val = this.value.replace(/[,$]/g, '');
+            const num = parseInt(val);
+            if (!isNaN(num)) {
+                this.value = num.toLocaleString();
+            }
+        });
+    </script>
 </body>
 </html>

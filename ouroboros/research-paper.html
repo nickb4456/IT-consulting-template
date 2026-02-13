@@ -555,6 +555,198 @@ function selectiveDecay(pheromone, novelty) {
             <p>This research suggests "Human-Generated Data" will become increasingly valuable. We may see a future where companies pay a premium for "certified organic" human data to prevent model degradation. The colony's requirement for human-grounded breakthroughs anticipates this shift.</p>
         </section>
 
+        <!-- Section 20 -->
+        <section id="s20">
+            <h2>20. Agent RL Architecture: Translating to Stigmergic Energy</h2>
+            
+            <p>Recent advances in Agent Reinforcement Learning systems—particularly MiniMax's 2025 work on high-throughput agent training—provide architectural patterns that translate elegantly into stigmergic frameworks. This section demonstrates how cutting-edge RL infrastructure concepts can be absorbed into pheromone-based coordination.</p>
+            
+            <h3>20.1 The Agent RL Objective Function</h3>
+            <p>MiniMax defines the Effective Agent Training Yield as:</p>
+            
+            <div class="formula">
+max J(θ) = Throughput(A) × Sample Efficiency(A)
+
+s.t.  ∀A ∈ Ω_agent              (Arbitrary Agent)
+      E[Update Variance] < δ     (Stability)
+      E[||J^(T) - J*||] < ε      (Convergence)
+            </div>
+            
+            <p>In stigmergic terms, this maps to:</p>
+            
+            <div class="formula">
+max S(colony) = Findings/Hour × Quality/Finding
+
+s.t.  Pheromone Variance < δ     (Signal Stability)
+      Breakthrough Rate > ε      (Knowledge Convergence)
+            </div>
+            
+            <h3>20.2 Three-Layer Architecture Mapping</h3>
+            
+            <table>
+                <tr><th>Agent RL Layer</th><th>Component</th><th>Stigmergic Equivalent</th></tr>
+                <tr><td rowspan="2">AGENT</td><td>Black Box (API)</td><td>Research scouts (external API calls)</td></tr>
+                <tr><td>White Box (Full Access)</td><td>Analyzer/Validator (LLM reasoning)</td></tr>
+                <tr><td rowspan="2">MIDDLEWARE</td><td>Gateway Server</td><td>Pheromone-DB (signal routing)</td></tr>
+                <tr><td>Data Pool</td><td>Findings + Pheromones tables</td></tr>
+                <tr><td rowspan="2">ENGINES</td><td>Rollout Engine</td><td>Scouts (generate experiences)</td></tr>
+                <tr><td>Train Engine</td><td>Belief Cluster + Implementer (learn & apply)</td></tr>
+            </table>
+            
+            <h3>20.3 Sliding Window Scheduling as Pheromone Windows</h3>
+            
+            <p>The sliding window mechanism (W = 0.3N) prevents training distribution drift by anchoring to the oldest incomplete task. Translated to stigmergy:</p>
+            
+            <div class="formula">
+// Traditional: Process all findings in window
+findings.forEach(f => analyze(f))
+
+// Windowed: Anchor to oldest unvalidated finding
+const window = getFindings(oldestUnvalidated, windowSize)
+while (window.head.validated) {
+    processAnyInWindow(window)  // Local greedy
+    if (headConsumed) slideWindow()  // Global strict
+}
+            </div>
+            
+            <p><strong>Key Insight:</strong> The window forces processing of "straggler" findings—complex, multi-hop connections that would otherwise be skipped in favor of easy high-scoring findings. This prevents the colony from collapsing to trivial knowledge.</p>
+            
+            <h4>Bounded Disorder Principle</h4>
+            <ul>
+                <li><strong>Local Flexibility:</strong> Within the window, grab any completed analysis (no head-of-line blocking)</li>
+                <li><strong>Global Constraint:</strong> Cannot process findings beyond window until stragglers complete</li>
+                <li><strong>Backpressure:</strong> Fast findings queue, waiting for complex ones—natural load balancing</li>
+            </ul>
+            
+            <h3>20.4 Prefix Tree Merging as Batch Context Sharing</h3>
+            
+            <p>MiniMax achieves <strong>40x training speedup</strong> by merging samples with shared prefixes into a tree structure. For stigmergic systems:</p>
+            
+            <div class="formula">
+// Wasteful: Separate LLM calls per finding
+analyze(finding1)  // "Ring Attention paper..."
+analyze(finding2)  // "Ring Attention code..."
+analyze(finding3)  // "Ring Attention benchmark..."
+
+// Efficient: Shared prefix, branched analysis
+analyzeBatch({
+    sharedContext: "Ring Attention research",
+    findings: [finding1, finding2, finding3]
+})  // 3x fewer tokens
+            </div>
+            
+            <p>Implementation: Cluster findings by embedding similarity before analysis. Findings within ε distance share a context prefix, with only the divergent suffixes processed independently.</p>
+            
+            <h3>20.5 Dense Rewards as Multi-Signal Pheromone Strength</h3>
+            
+            <p>Traditional stigmergic systems use sparse rewards (breakthrough or not). Agent RL proposes three dense reward signals:</p>
+            
+            <table>
+                <tr><th>RL Reward Type</th><th>Pheromone Signal</th><th>Measurement</th></tr>
+                <tr><td>Process Reward</td><td>Query Quality</td><td>Source diversity, freshness, structure</td></tr>
+                <tr><td>Task Completion Time</td><td>Finding→Breakthrough Latency</td><td>Hours from discovery to validation</td></tr>
+                <tr><td>Reward-to-go</td><td>Cluster Expected Value</td><td>Breakthrough probability given cluster membership</td></tr>
+            </table>
+            
+            <p>The composite pheromone strength becomes:</p>
+            
+            <div class="formula">
+strength(finding) = α₁ × queryQuality
+                  + α₂ × sourceReliability  
+                  + α₃ × completionSpeed
+                  + α₄ × connectionPotential
+                  + α₅ × breakthroughOutcome
+
+where Σαᵢ = 1 and αᵢ tuned per colony mode (explore vs exploit)
+            </div>
+            
+            <h3>20.6 Context Management as Learnable Decay</h3>
+            
+            <p>MiniMax treats Context Management (CM) as an <strong>explicit, learnable action</strong>—the agent decides what context to keep or prune. Current stigmergic decay is hardcoded:</p>
+            
+            <div class="formula">
+// Fixed decay rates
+DECAY_RATES = { breakthrough: 0.04, candidate: 0.25, noise: 0.40 }
+
+// Learned decay (future)
+decay_rate = predictDecay(finding, colonyState, recentBreakthroughs)
+            </div>
+            
+            <p><strong>Adaptive Context Management:</strong> When colony is exploring new territory, reduce decay to keep more candidates alive. When consolidating, increase decay to prune noise faster. The colony learns its own attention allocation.</p>
+            
+            <h3>20.7 Heterogeneous Phase Disaggregation</h3>
+            
+            <p>Decoupling Prefill and Decode phases allows independent parallelism strategies. For colonies:</p>
+            
+            <ul>
+                <li><strong>Scout Phase (Prefill):</strong> High parallelism, maximize throughput, low latency tolerance</li>
+                <li><strong>Analyzer Phase (Decode):</strong> Sequential reasoning, quality over speed, deep context</li>
+            </ul>
+            
+            <p>Each phase can scale independently. Double the scouts without touching analyzers. Add GPU-backed analyzers without changing scout cron frequency.</p>
+            
+            <h3>20.8 Global L3 Cache as Cross-Colony Embedding Pool</h3>
+            
+            <p>MiniMax's DFS-backed Global L3 KV Cache maximizes prefix cache hits across a cluster. Stigmergic equivalent:</p>
+            
+            <div class="formula">
+// Cost-aware query routing
+function selectQuery(queries, recentEmbeddings) {
+    return queries.sort((a, b) => {
+        const cacheHitA = embeddingSimilarity(a, recentEmbeddings)
+        const cacheHitB = embeddingSimilarity(b, recentEmbeddings)
+        return cacheHitB - cacheHitA  // Prefer cache-warm queries
+    })[0]
+}
+            </div>
+            
+            <p><strong>Cache Locality Principle:</strong> If Alpha just processed "Ring Attention" findings, route similar topics to Alpha—embeddings are warm, context is primed. Don't randomly distribute; optimize for locality.</p>
+            
+            <h3>20.9 Unified Mixed-Domain Training</h3>
+            
+            <p>MiniMax shows that mixing Reasoning, QA, and Agent domains simultaneously outperforms sequential specialization. Current Ouroboros colonies are specialized:</p>
+            
+            <ul>
+                <li><strong>Alpha:</strong> General AI research</li>
+                <li><strong>Beta:</strong> SQL/Networking</li>
+                <li><strong>Gamma:</strong> Evolutionary algorithms</li>
+                <li><strong>Delta:</strong> Python/Logic</li>
+                <li><strong>Epsilon:</strong> Mathematical foundations</li>
+            </ul>
+            
+            <p><strong>Cross-Training Proposal:</strong> Federation should include <em>analysis cross-pollination</em>—Alpha analyzes a Beta finding, Beta analyzes an Epsilon finding. This prevents domain collapse and improves generalization, exactly as MiniMax demonstrates.</p>
+            
+            <h3>20.10 Implementation Roadmap</h3>
+            
+            <table>
+                <tr><th>Feature</th><th>Complexity</th><th>Impact</th><th>Priority</th></tr>
+                <tr><td>Batch Context Sharing</td><td>Medium</td><td>3x token reduction</td><td>High</td></tr>
+                <tr><td>Dense Pheromone Rewards</td><td>Low</td><td>Better signal quality</td><td>High</td></tr>
+                <tr><td>Sliding Window Processing</td><td>Medium</td><td>Prevents trivial collapse</td><td>Medium</td></tr>
+                <tr><td>Cross-Colony Analysis</td><td>Medium</td><td>Domain generalization</td><td>Medium</td></tr>
+                <tr><td>Learnable Decay Rates</td><td>High</td><td>Adaptive attention</td><td>Low (research)</td></tr>
+                <tr><td>Cache-Aware Routing</td><td>Medium</td><td>30% latency reduction</td><td>Medium</td></tr>
+            </table>
+            
+            <h3>20.11 Theoretical Unification</h3>
+            
+            <p>Agent RL and stigmergic systems share a deep structure: both are <strong>decoupled asynchronous learning systems</strong> that separate experience generation from policy updates. The key isomorphisms:</p>
+            
+            <ul>
+                <li>Rollout trajectories ↔ Pheromone trails</li>
+                <li>Policy gradients ↔ Pheromone reinforcement</li>
+                <li>Experience replay buffer ↔ Decay-weighted finding database</li>
+                <li>Off-policy correction ↔ Freshness weighting</li>
+                <li>Multi-agent coordination ↔ Stigmergic communication</li>
+            </ul>
+            
+            <p>This suggests a <strong>unified theory of distributed learning</strong> where both neural and stigmergic approaches are instances of the same underlying framework: asynchronous policy optimization through indirect environmental modification.</p>
+            
+            <div class="highlight">
+                <strong>Key Insight:</strong> Ant colonies and GPU clusters solve the same problem—coordinating distributed agents through shared state modification rather than direct communication. The mathematics of backpressure, windowing, and cache locality apply equally to both.
+            </div>
+        </section>
+
         <!-- Works Cited -->
         <section>
             <h2>Works Cited</h2>
@@ -564,6 +756,7 @@ function selectiveDecay(pheromone, novelty) {
             <p style="margin-left: 40px; text-indent: -40px;">Shumaylov, Ilia, et al. "The Curse of Recursion: Training on Generated Data Makes Models Forget." <em>arXiv preprint</em> arXiv:2305.17493, 2023.</p>
             <p style="margin-left: 40px; text-indent: -40px;">Gerstgrasser, Matthias, et al. "Is Model Collapse Inevitable? Breaking the Curse of Recursion by Accumulating Real and Synthetic Data." <em>arXiv preprint</em> arXiv:2404.01413, 2024.</p>
             <p style="margin-left: 40px; text-indent: -40px;">Dohmatob, Elvis, Yunzhen Feng, and Julia Kempe. "Model Collapse Demystified: The Case of Regression." <em>Advances in Neural Information Processing Systems</em>, 2024.</p>
+            <p style="margin-left: 40px; text-indent: -40px;">MiniMax AI. "Effective Agent Training Yield: High-Throughput Agent RL with Sliding Window Scheduling and Prefix Tree Merging." <em>Technical Report</em>, Feb. 2025.</p>
         </section>
 
         <div class="citation">

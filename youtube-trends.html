@@ -331,15 +331,6 @@
     </header>
     
     <div class="container">
-        <!-- Quota Tracker -->
-        <div class="quota-banner">
-            <span>📊 API Quota: <span id="quotaUsed">-</span> / 10,000 units/day</span>
-            <div class="quota-bar">
-                <div class="quota-fill" id="quotaFill" style="width: 0%"></div>
-            </div>
-            <span id="quotaStatus">Loading...</span>
-        </div>
-        
         <div class="stats-row" id="statsRow">
             <div class="stat-card">
                 <div class="value" id="totalVideos">-</div>
@@ -364,6 +355,24 @@
             <h2>🎯 Actionable Insights (Based on Real Data)</h2>
             <div id="actionableInsights">
                 <div class="loading">Calculating insights from data...</div>
+            </div>
+        </div>
+        
+        <!-- Hook Patterns -->
+        <div class="section">
+            <h2>🎣 Opening Hook Patterns</h2>
+            <p style="color: var(--muted); margin-bottom: 15px;">What successful videos use in their first lines</p>
+            <div id="hookPatterns">
+                <div class="loading">Analyzing hooks...</div>
+            </div>
+        </div>
+        
+        <!-- Common Talking Points -->
+        <div class="section">
+            <h2>💬 Common Talking Points</h2>
+            <p style="color: var(--muted); margin-bottom: 15px;">Phrases and topics that appear in top-performing descriptions</p>
+            <div id="talkingPoints">
+                <div class="loading">Extracting talking points...</div>
             </div>
         </div>
         
@@ -534,6 +543,122 @@
             `).join('');
         }
         
+        function renderHookPatterns() {
+            const container = document.getElementById('hookPatterns');
+            const niches = Object.values(trendsData.niches || {});
+            const allVideos = niches.flatMap(n => n.videos || []);
+            
+            // Analyze title hooks (first part of title)
+            const hookTypes = {
+                'Question Hook': { pattern: /^(why|what|how|is|are|can|do|does|should|would|will|did)/i, count: 0, examples: [], avgViews: 0 },
+                'Number/List Hook': { pattern: /^(\d+|top \d+|the \d+)/i, count: 0, examples: [], avgViews: 0 },
+                'Challenge Hook': { pattern: /(challenge|impossible|bet you|try this|can you)/i, count: 0, examples: [], avgViews: 0 },
+                'Story Hook': { pattern: /^(i |my |we |this is how|the story|what happened)/i, count: 0, examples: [], avgViews: 0 },
+                'Urgency Hook': { pattern: /(now|today|2025|2024|new|just|finally|breaking)/i, count: 0, examples: [], avgViews: 0 },
+                'Curiosity Gap': { pattern: /(secret|truth|nobody|don't want you|won't believe|shocking)/i, count: 0, examples: [], avgViews: 0 },
+                'How-To Hook': { pattern: /^(how to|how i|the way to|step by step)/i, count: 0, examples: [], avgViews: 0 },
+                'Comparison Hook': { pattern: /(vs\.?|versus|compared|better than|or )/i, count: 0, examples: [], avgViews: 0 },
+            };
+            
+            allVideos.forEach(v => {
+                const title = (v.title || '').toLowerCase();
+                Object.entries(hookTypes).forEach(([name, data]) => {
+                    if (data.pattern.test(title)) {
+                        data.count++;
+                        data.avgViews += v.views || 0;
+                        if (data.examples.length < 2) {
+                            data.examples.push({ title: v.title, views: v.views });
+                        }
+                    }
+                });
+            });
+            
+            // Calculate averages and sort
+            const hooks = Object.entries(hookTypes)
+                .map(([name, data]) => ({
+                    name,
+                    count: data.count,
+                    avgViews: data.count > 0 ? Math.round(data.avgViews / data.count) : 0,
+                    examples: data.examples,
+                }))
+                .filter(h => h.count > 0)
+                .sort((a, b) => b.avgViews - a.avgViews);
+            
+            if (!hooks.length) {
+                container.innerHTML = '<p style="color: var(--muted)">Not enough data</p>';
+                return;
+            }
+            
+            container.innerHTML = hooks.map(h => `
+                <div class="insight-card" style="background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(255, 107, 107, 0.05)); border-color: rgba(255, 0, 0, 0.2);">
+                    <div class="insight-title" style="color: var(--accent);">🎣 ${escapeHtml(h.name)}</div>
+                    <div class="insight-data">
+                        <strong>${formatViews(h.avgViews)}</strong> avg views · Used in <strong>${h.count}</strong> top videos
+                    </div>
+                    ${h.examples.length ? `
+                        <div style="font-size: 0.85rem; color: var(--muted); margin-top: 8px;">
+                            Example: "${escapeHtml(h.examples[0].title.slice(0, 60))}..."
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+        
+        function renderTalkingPoints() {
+            const container = document.getElementById('talkingPoints');
+            const niches = Object.values(trendsData.niches || {});
+            const allVideos = niches.flatMap(n => n.videos || []);
+            
+            // Extract common words/phrases from descriptions
+            const wordCounts = {};
+            const stopWords = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must', 'shall', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'we', 'they', 'he', 'she', 'it', 'my', 'your', 'our', 'their', 'his', 'her', 'its', 'more', 'most', 'some', 'any', 'no', 'not', 'only', 'same', 'so', 'than', 'too', 'very', 'just', 'also', 'now', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'each', 'every', 'both', 'few', 'from', 'into', 'out', 'up', 'down', 'about', 'after', 'before', 'over', 'under', 'again', 'further', 'then', 'once']);
+            
+            allVideos.forEach(v => {
+                const text = ((v.title || '') + ' ' + (v.description || '')).toLowerCase();
+                const words = text.match(/\b[a-z]{4,}\b/g) || [];
+                words.forEach(word => {
+                    if (!stopWords.has(word)) {
+                        if (!wordCounts[word]) wordCounts[word] = { count: 0, totalViews: 0 };
+                        wordCounts[word].count++;
+                        wordCounts[word].totalViews += v.views || 0;
+                    }
+                });
+            });
+            
+            // Get top topics by frequency and views
+            const topics = Object.entries(wordCounts)
+                .map(([word, data]) => ({
+                    word,
+                    count: data.count,
+                    avgViews: Math.round(data.totalViews / data.count),
+                }))
+                .filter(t => t.count >= 3) // At least 3 occurrences
+                .sort((a, b) => b.avgViews - a.avgViews)
+                .slice(0, 15);
+            
+            if (!topics.length) {
+                container.innerHTML = '<p style="color: var(--muted)">Not enough data</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    ${topics.map(t => `
+                        <span style="
+                            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(99, 102, 241, 0.2));
+                            border: 1px solid rgba(59, 130, 246, 0.3);
+                            padding: 8px 16px;
+                            border-radius: 20px;
+                            font-size: 0.9rem;
+                        ">
+                            <strong>${escapeHtml(t.word)}</strong>
+                            <span style="color: var(--muted); margin-left: 5px;">${t.count}× · ${formatViews(t.avgViews)} avg</span>
+                        </span>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
         function renderConnections() {
             const container = document.getElementById('connectionsGrid');
             const niches = Object.entries(trendsData.niches || {});
@@ -655,9 +780,10 @@
                 if (!res.ok) throw new Error('Data not found');
                 trendsData = await res.json();
                 
-                renderQuota();
                 renderStats();
                 renderActionableInsights();
+                renderHookPatterns();
+                renderTalkingPoints();
                 renderPatterns();
                 renderConnections();
                 renderNicheTabs();

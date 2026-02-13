@@ -28,7 +28,6 @@
         .chart-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); }
         .chart-card.full { grid-column: span 2; }
         .chart-card.third { grid-column: span 1; }
-        canvas { cursor: pointer; }
         .chart-title { font-size: 1rem; color: #94a3b8; margin-bottom: 1rem; }
         
         .insight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
@@ -71,7 +70,6 @@
 </head>
 <body>
     <div class="container">
-        <div style="position:absolute;top:1rem;left:1rem"><a href="/" style="background:rgba(255,255,255,0.1);padding:0.5rem 1rem;border-radius:8px;color:#e2e8f0;text-decoration:none;font-weight:500">← Home</a></div>
         <div class="hero">
             <h1>🏠 Rhode Island Real Estate Analysis</h1>
             <p class="subtitle">Deep Market Intelligence • 6,870 Properties • 46 Cities • 2024-2026</p>
@@ -111,7 +109,7 @@
                 <canvas id="trendChart" height="100"></canvas>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Sales by City (Top 15) <span style="font-size:0.7rem;color:#6366f1">👆 Click any bar</span></div>
+                <div class="chart-title">Sales by City (Top 15)</div>
                 <canvas id="cityChart" height="300"></canvas>
             </div>
             <div class="chart-card">
@@ -292,85 +290,8 @@ const rawData =
         
         // City charts
         const cityData = rawData.summary.cities.slice(0, 15);
-        new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(cityData[elements[0].index].city, 'city'); } } } });
-        new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.median/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { color: '#94a3b8', callback: v => '
-        
-        // Price histogram
-        const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];
-        const priceBuckets = [0,0,0,0,0,0,0];
-        rawData.properties.forEach(p => {
-            if (p.price < 300000) priceBuckets[0]++;
-            else if (p.price < 400000) priceBuckets[1]++;
-            else if (p.price < 500000) priceBuckets[2]++;
-            else if (p.price < 600000) priceBuckets[3]++;
-            else if (p.price < 750000) priceBuckets[4]++;
-            else if (p.price < 1000000) priceBuckets[5]++;
-            else priceBuckets[6]++;
-        });
-        new Chart(document.getElementById('histogramChart'), { type: 'bar', data: { labels: priceRanges, datasets: [{ data: priceBuckets, backgroundColor: [chartColors.cyan, chartColors.green, chartColors.green, chartColors.amber, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(priceRanges[elements[0].index], 'priceRange'); } } } });
-        
-        // Price per sqft by city
-        const ppsqft = {};
-        rawData.properties.filter(p => p.sqft > 0).forEach(p => { if (!ppsqft[p.city]) ppsqft[p.city] = []; ppsqft[p.city].push(p.price / p.sqft); });
-        const ppsqftData = Object.entries(ppsqft).map(([city, vals]) => ({ city, avg: vals.reduce((a,b)=>a+b,0)/vals.length })).sort((a,b) => b.avg - a.avg).slice(0, 12);
-        new Chart(document.getElementById('ppsqftChart'), { type: 'bar', data: { labels: ppsqftData.map(d => d.city), datasets: [{ data: ppsqftData.map(d => Math.round(d.avg)), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '$'+v } } } } });
-        
-        // Property type
-        const types = {};
-        rawData.properties.forEach(p => { const t = p.propertyType.split(' ')[0]; types[t] = (types[t]||0) + 1; });
-        const typeData = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0, 6);
-        new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: [chartColors.purple, chartColors.pink, chartColors.green, chartColors.amber, chartColors.cyan, '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } } });
-        
-        // DOM by price range
-        const domByPrice = { '<$300K': [], '$300-500K': [], '$500-750K': [], '$750K-1M': [], '$1M+': [] };
-        rawData.properties.filter(p => p.dom > 0).forEach(p => {
-            if (p.price < 300000) domByPrice['<$300K'].push(p.dom);
-            else if (p.price < 500000) domByPrice['$300-500K'].push(p.dom);
-            else if (p.price < 750000) domByPrice['$500-750K'].push(p.dom);
-            else if (p.price < 1000000) domByPrice['$750K-1M'].push(p.dom);
-            else domByPrice['$1M+'].push(p.dom);
-        });
-        const domAvg = Object.entries(domByPrice).map(([k,v]) => ({ range: k, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0 }));
-        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: domAvg.map(d => d.range), datasets: [{ data: domAvg.map(d => d.avg), backgroundColor: [chartColors.cyan, chartColors.green, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
-        
-        // Bedrooms
-        const beds = {};
-        rawData.properties.forEach(p => { const b = p.beds > 5 ? '6+' : p.beds.toString(); beds[b] = (beds[b]||0) + 1; });
-        const bedsLabels = ['0','1','2','3','4','5','6+'];
-        new Chart(document.getElementById('bedsChart'), { type: 'bar', data: { labels: bedsLabels, datasets: [{ data: bedsLabels.map(b => beds[b]||0), backgroundColor: chartColors.purple, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(bedsLabels[elements[0].index], 'beds'); } } } });
-        
-        // Year built
-        const decades = { 'Pre-1900': 0, '1900-1950': 0, '1950-1980': 0, '1980-2000': 0, '2000-2010': 0, '2010-2020': 0, '2020+': 0 };
-        rawData.properties.filter(p => p.yearBuilt > 0).forEach(p => {
-            if (p.yearBuilt < 1900) decades['Pre-1900']++;
-            else if (p.yearBuilt < 1950) decades['1900-1950']++;
-            else if (p.yearBuilt < 1980) decades['1950-1980']++;
-            else if (p.yearBuilt < 2000) decades['1980-2000']++;
-            else if (p.yearBuilt < 2010) decades['2000-2010']++;
-            else if (p.yearBuilt < 2020) decades['2010-2020']++;
-            else decades['2020+']++;
-        });
-        new Chart(document.getElementById('yearBuiltChart'), { type: 'bar', data: { labels: Object.keys(decades), datasets: [{ data: Object.values(decades), backgroundColor: chartColors.amber, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
-        
-        // Sqft distribution
-        const sqftRanges = { '<1000': 0, '1000-1500': 0, '1500-2000': 0, '2000-2500': 0, '2500-3000': 0, '3000+': 0 };
-        rawData.properties.filter(p => p.sqft > 0).forEach(p => {
-            if (p.sqft < 1000) sqftRanges['<1000']++;
-            else if (p.sqft < 1500) sqftRanges['1000-1500']++;
-            else if (p.sqft < 2000) sqftRanges['1500-2000']++;
-            else if (p.sqft < 2500) sqftRanges['2000-2500']++;
-            else if (p.sqft < 3000) sqftRanges['2500-3000']++;
-            else sqftRanges['3000+']++;
-        });
-        new Chart(document.getElementById('sqftChart'), { type: 'bar', data: { labels: Object.keys(sqftRanges), datasets: [{ data: Object.values(sqftRanges), backgroundColor: chartColors.pink, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
-        
-        // Land by city
-        const landCities = rawData.summary.cities.filter(c => c.landCount > 0).sort((a,b) => b.landCount - a.landCount).slice(0, 10);
-        new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(landCities[elements[0].index].city, 'land'); } } } });
-    </script>
-</body>
-</html>
-+v+'K' } } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(cityData[elements[0].index].city, 'city'); } } } });
+        new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } } } });
+        new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.median/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '$'+v+'K' } } } } });
         
         // Price histogram
         const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];

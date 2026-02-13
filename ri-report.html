@@ -111,7 +111,7 @@
                 <canvas id="trendChart" height="100"></canvas>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Sales by City (Top 15) <span style="font-size:0.75rem;color:#6366f1">Click bar to see all sales →</span></div>
+                <div class="chart-title">Sales by City (Top 15) <span style="font-size:0.7rem;color:#6366f1">👆 Click any bar</span></div>
                 <canvas id="cityChart" height="300"></canvas>
             </div>
             <div class="chart-card">
@@ -135,7 +135,7 @@
                 <canvas id="typeChart" height="250"></canvas>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Sales by Year</div>
+                <div class="chart-title">Days on Market by Price Range</div>
                 <canvas id="domChart" height="250"></canvas>
             </div>
         </div>
@@ -275,38 +275,6 @@ const rawData =
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'ri-real-estate.csv'; a.click();
         }
         
-        
-        // Click handler for charts - runs SQL query
-        function chartClick(chart, cityOrLabel, type) {
-            let sql = '';
-            if (type === 'city') {
-                sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE city = '${cityOrLabel}' ORDER BY price DESC LIMIT 100`;
-            } else if (type === 'priceRange') {
-                const ranges = {
-                    '<$300K': 'price < 300000',
-                    '$300-400K': 'price >= 300000 AND price < 400000',
-                    '$400-500K': 'price >= 400000 AND price < 500000',
-                    '$500-600K': 'price >= 500000 AND price < 600000',
-                    '$600-750K': 'price >= 600000 AND price < 750000',
-                    '$750K-1M': 'price >= 750000 AND price < 1000000',
-                    '$1M+': 'price >= 1000000'
-                };
-                sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE ${ranges[cityOrLabel]} ORDER BY price DESC LIMIT 100`;
-            } else if (type === 'beds') {
-                const bed = cityOrLabel === '6+' ? 6 : parseInt(cityOrLabel);
-                sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE beds ${bed >= 6 ? '>= 6' : '= ' + bed} ORDER BY price DESC LIMIT 100`;
-            } else if (type === 'propType') {
-                sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE propertyType LIKE '%${cityOrLabel}%' ORDER BY price DESC LIMIT 100`;
-            } else if (type === 'year') {
-                sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, soldDate, url FROM properties WHERE soldDate LIKE '%${cityOrLabel}' ORDER BY price DESC LIMIT 100`;
-            } else if (type === 'land') {
-                sql = `SELECT address, city, printf("$%,d", price) as price, lotSize, url FROM properties WHERE propertyType LIKE '%Land%' AND city = '${cityOrLabel}' ORDER BY price DESC`;
-            }
-            document.getElementById('sqlInput').value = sql;
-            runQuery();
-            document.querySelector('.sql-section').scrollIntoView({ behavior: 'smooth' });
-        }
-
         // CHARTS
         const chartColors = { purple: '#6366f1', pink: '#ec4899', green: '#10b981', amber: '#f59e0b', cyan: '#06b6d4' };
         const chartOpts = { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } };
@@ -324,8 +292,8 @@ const rawData =
         
         // City charts
         const cityData = rawData.summary.cities.slice(0, 15);
-        const cityChart = new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, el) => { if (el.length) chartClick(cityChart, cityData[el[0].index].city, 'city'); } } });
-        const priceChart = new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.median/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '
+        new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(cityData[elements[0].index].city, 'city'); } } } });
+        new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.median/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { color: '#94a3b8', callback: v => '
         
         // Price histogram
         const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];
@@ -339,7 +307,7 @@ const rawData =
             else if (p.price < 1000000) priceBuckets[5]++;
             else priceBuckets[6]++;
         });
-        const histChart = new Chart(document.getElementById('histogramChart'), { type: 'bar', data: { labels: priceRanges, datasets: [{ data: priceBuckets, backgroundColor: [chartColors.cyan, chartColors.green, chartColors.green, chartColors.amber, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, el) => { if (el.length) chartClick(histChart, priceRanges[el[0].index], 'priceRange'); } } });
+        new Chart(document.getElementById('histogramChart'), { type: 'bar', data: { labels: priceRanges, datasets: [{ data: priceBuckets, backgroundColor: [chartColors.cyan, chartColors.green, chartColors.green, chartColors.amber, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(priceRanges[elements[0].index], 'priceRange'); } } } });
         
         // Price per sqft by city
         const ppsqft = {};
@@ -353,20 +321,23 @@ const rawData =
         const typeData = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0, 6);
         new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: [chartColors.purple, chartColors.pink, chartColors.green, chartColors.amber, chartColors.cyan, '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } } });
         
-        // Sales by year
-        const salesByYear = { '2024': 0, '2025': 0, '2026': 0 };
-        rawData.properties.forEach(p => {
-            if (p.soldDate?.includes('2024')) salesByYear['2024']++;
-            else if (p.soldDate?.includes('2025')) salesByYear['2025']++;
-            else if (p.soldDate?.includes('2026')) salesByYear['2026']++;
+        // DOM by price range
+        const domByPrice = { '<$300K': [], '$300-500K': [], '$500-750K': [], '$750K-1M': [], '$1M+': [] };
+        rawData.properties.filter(p => p.dom > 0).forEach(p => {
+            if (p.price < 300000) domByPrice['<$300K'].push(p.dom);
+            else if (p.price < 500000) domByPrice['$300-500K'].push(p.dom);
+            else if (p.price < 750000) domByPrice['$500-750K'].push(p.dom);
+            else if (p.price < 1000000) domByPrice['$750K-1M'].push(p.dom);
+            else domByPrice['$1M+'].push(p.dom);
         });
-        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: Object.keys(salesByYear), datasets: [{ data: Object.values(salesByYear), backgroundColor: [chartColors.cyan, chartColors.amber, chartColors.pink], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
+        const domAvg = Object.entries(domByPrice).map(([k,v]) => ({ range: k, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0 }));
+        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: domAvg.map(d => d.range), datasets: [{ data: domAvg.map(d => d.avg), backgroundColor: [chartColors.cyan, chartColors.green, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
         
         // Bedrooms
         const beds = {};
         rawData.properties.forEach(p => { const b = p.beds > 5 ? '6+' : p.beds.toString(); beds[b] = (beds[b]||0) + 1; });
         const bedsLabels = ['0','1','2','3','4','5','6+'];
-        const bedsChart = new Chart(document.getElementById('bedsChart'), { type: 'bar', data: { labels: bedsLabels, datasets: [{ data: bedsLabels.map(b => beds[b]||0), backgroundColor: chartColors.purple, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, el) => { if (el.length) chartClick(bedsChart, bedsLabels[el[0].index], 'beds'); } } });
+        new Chart(document.getElementById('bedsChart'), { type: 'bar', data: { labels: bedsLabels, datasets: [{ data: bedsLabels.map(b => beds[b]||0), backgroundColor: chartColors.purple, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(bedsLabels[elements[0].index], 'beds'); } } } });
         
         // Year built
         const decades = { 'Pre-1900': 0, '1900-1950': 0, '1950-1980': 0, '1980-2000': 0, '2000-2010': 0, '2010-2020': 0, '2020+': 0 };
@@ -395,11 +366,11 @@ const rawData =
         
         // Land by city
         const landCities = rawData.summary.cities.filter(c => c.landCount > 0).sort((a,b) => b.landCount - a.landCount).slice(0, 10);
-        const landChart = new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, el) => { if (el.length) chartClick(landChart, landCities[el[0].index].city, 'land'); } } });
+        new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(landCities[elements[0].index].city, 'land'); } } } });
     </script>
 </body>
 </html>
-+v+'K' } } }, onClick: (e, el) => { if (el.length) chartClick(priceChart, cityData[el[0].index].city, 'city'); } } });
++v+'K' } } }, onClick: (e, elements) => { if (elements.length > 0) { chartClick(cityData[elements[0].index].city, 'city'); } } } });
         
         // Price histogram
         const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];
@@ -427,14 +398,17 @@ const rawData =
         const typeData = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0, 6);
         new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: [chartColors.purple, chartColors.pink, chartColors.green, chartColors.amber, chartColors.cyan, '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } } });
         
-        // Sales by year
-        const salesByYear = { '2024': 0, '2025': 0, '2026': 0 };
-        rawData.properties.forEach(p => {
-            if (p.soldDate?.includes('2024')) salesByYear['2024']++;
-            else if (p.soldDate?.includes('2025')) salesByYear['2025']++;
-            else if (p.soldDate?.includes('2026')) salesByYear['2026']++;
+        // DOM by price range
+        const domByPrice = { '<$300K': [], '$300-500K': [], '$500-750K': [], '$750K-1M': [], '$1M+': [] };
+        rawData.properties.filter(p => p.dom > 0).forEach(p => {
+            if (p.price < 300000) domByPrice['<$300K'].push(p.dom);
+            else if (p.price < 500000) domByPrice['$300-500K'].push(p.dom);
+            else if (p.price < 750000) domByPrice['$500-750K'].push(p.dom);
+            else if (p.price < 1000000) domByPrice['$750K-1M'].push(p.dom);
+            else domByPrice['$1M+'].push(p.dom);
         });
-        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: Object.keys(salesByYear), datasets: [{ data: Object.values(salesByYear), backgroundColor: [chartColors.cyan, chartColors.amber, chartColors.pink], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
+        const domAvg = Object.entries(domByPrice).map(([k,v]) => ({ range: k, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0 }));
+        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: domAvg.map(d => d.range), datasets: [{ data: domAvg.map(d => d.avg), backgroundColor: [chartColors.cyan, chartColors.green, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
         
         // Bedrooms
         const beds = {};

@@ -365,5 +365,52 @@ const rawData =
         const landCities = rawData.summary.cities.filter(c => c.landCount > 0).sort((a,b) => b.landCount - a.landCount).slice(0, 10);
         new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
     </script>
-</body>
-</html>
+    <script>
+    // Add click handlers to existing charts after page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            // Get chart instances
+            const charts = Chart.instances;
+            
+            Object.values(charts).forEach(chart => {
+                const canvas = chart.canvas;
+                const chartId = canvas.id;
+                
+                canvas.style.cursor = 'pointer';
+                
+                canvas.addEventListener('click', function(evt) {
+                    const points = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+                    if (points.length === 0) return;
+                    
+                    const idx = points[0].index;
+                    const label = chart.data.labels[idx];
+                    
+                    let sql = '';
+                    
+                    if (chartId === 'cityChart' || chartId === 'priceChart' || chartId === 'ppsqftChart') {
+                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE city = '${label}' ORDER BY price DESC LIMIT 100`;
+                    } else if (chartId === 'histogramChart') {
+                        const ranges = {'<$300K':'price < 300000', '$300-400K':'price >= 300000 AND price < 400000', '$400-500K':'price >= 400000 AND price < 500000', '$500-600K':'price >= 500000 AND price < 600000', '$600-750K':'price >= 600000 AND price < 750000', '$750K-1M':'price >= 750000 AND price < 1000000', '$1M+':'price >= 1000000'};
+                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE ${ranges[label] || 'price > 0'} ORDER BY price DESC LIMIT 100`;
+                    } else if (chartId === 'bedsChart') {
+                        const b = label === '6+' ? 6 : parseInt(label);
+                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE beds ${b >= 6 ? '>=' : '='} ${b} ORDER BY price DESC LIMIT 100`;
+                    } else if (chartId === 'landChart') {
+                        sql = `SELECT address, city, printf("$%,d", price) as price, lotSize, url FROM properties WHERE propertyType LIKE '%Land%' AND city = '${label}' ORDER BY price DESC`;
+                    } else if (chartId === 'domChart') {
+                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, soldDate, url FROM properties WHERE soldDate LIKE '%${label}' ORDER BY price DESC LIMIT 100`;
+                    }
+                    
+                    if (sql && typeof runQuery === 'function') {
+                        document.getElementById('sqlInput').value = sql;
+                        runQuery();
+                        document.querySelector('.sql-section').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            console.log('✅ Click handlers added to charts');
+        }, 1000); // Wait for charts to initialize
+    });
+    </script>
+</body></html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colony Dashboard | Ouroboros | AIBridges</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+            padding: 20px;
+        }
+        .container { max-width: 1100px; margin: 0 auto; }
+        
+        header { text-align: center; padding: 30px 20px; margin-bottom: 20px; }
+        .logo { font-size: 3.5rem; margin-bottom: 12px; }
+        h1 { font-size: 2rem; margin-bottom: 8px; color: #fff; }
+        .subtitle { color: rgba(255,255,255,0.5); font-size: 0.95rem; }
+        .generated { color: rgba(255,255,255,0.3); font-size: 0.8rem; margin-top: 8px; }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #00d4aa;
+        }
+        .stat-value.orange { color: #ff9f43; }
+        .stat-value.blue { color: #54a0ff; }
+        .stat-value.purple { color: #a55eea; }
+        .stat-label { color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-top: 4px; }
+        
+        .section-title {
+            font-size: 1.1rem;
+            color: #00d4aa;
+            margin: 24px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0,212,170,0.3);
+        }
+        
+        .chart-container {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            height: 280px;
+        }
+        
+        .colony-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .colony-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .colony-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .colony-name { font-weight: 600; font-size: 1rem; }
+        .colony-status {
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: rgba(0,212,170,0.2);
+            color: #00d4aa;
+        }
+        .colony-status.warning { background: rgba(255,159,67,0.2); color: #ff9f43; }
+        .colony-focus { color: rgba(255,255,255,0.4); font-size: 0.75rem; margin-bottom: 10px; }
+        .colony-stats { font-size: 0.85rem; }
+        .colony-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .colony-stat span:first-child { color: rgba(255,255,255,0.4); }
+        .colony-stat span:last-child { color: #fff; }
+        
+        .info-box {
+            background: rgba(0,212,170,0.1);
+            border: 1px solid rgba(0,212,170,0.3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+        .info-box a { color: #54a0ff; text-decoration: none; }
+        .info-box a:hover { text-decoration: underline; }
+        
+        footer {
+            text-align: center;
+            padding: 24px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.85rem;
+        }
+        footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+        
+        .back-link {
+            display: inline-block;
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to Ouroboros</a>
+        
+        <header>
+            <div class="logo">🐍</div>
+            <h1>Colony Dashboard</h1>
+            <p class="subtitle">Live metrics from 5 federated research colonies</p>
+            <p class="generated">Last updated: Friday, February 13, 2026 at 03:53 AM UTC</p>
+        </header>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value">3,201</div>
+                <div class="stat-label">Research Findings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value orange">0</div>
+                <div class="stat-label">Breakthroughs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value blue">44</div>
+                <div class="stat-label">Self-Modifications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value purple">10,912</div>
+                <div class="stat-label">Pheromone Signals</div>
+            </div>
+        </div>
+        
+        <div class="section-title">📈 Findings (Last 14 Days)</div>
+        <div class="chart-container">
+            <canvas id="findingsChart"></canvas>
+        </div>
+        
+        <div class="section-title">🐜 Colony Status</div>
+        <div class="colony-grid">
+            
+            <div class="colony-card">
+                <div class="colony-header">
+                    <span class="colony-name">🔬 Alpha</span>
+                    <span class="colony-status warning">⚠ Check</span>
+                </div>
+                <div class="colony-focus">General AI Research • Self-Modifying</div>
+                <div class="colony-stats">
+                    <div class="colony-stat"><span>Findings</span><span>967</span></div>
+                    <div class="colony-stat"><span>Pheromones</span><span>4,398</span></div>
+                    <div class="colony-stat"><span>Breakthroughs</span><span>0</span></div>
+                    <div class="colony-stat"><span>Last Active</span><span>Unknown</span></div>
+                </div>
+            </div>
+            
+            <div class="colony-card">
+                <div class="colony-header">
+                    <span class="colony-name">⚡ Beta</span>
+                    <span class="colony-status warning">⚠ Check</span>
+                </div>
+                <div class="colony-focus">SQL, Networking, Speed</div>
+                <div class="colony-stats">
+                    <div class="colony-stat"><span>Findings</span><span>648</span></div>
+                    <div class="colony-stat"><span>Pheromones</span><span>3,877</span></div>
+                    <div class="colony-stat"><span>Breakthroughs</span><span>0</span></div>
+                    <div class="colony-stat"><span>Last Active</span><span>Unknown</span></div>
+                </div>
+            </div>
+            
+            <div class="colony-card">
+                <div class="colony-header">
+                    <span class="colony-name">🧬 Gamma</span>
+                    <span class="colony-status warning">⚠ Check</span>
+                </div>
+                <div class="colony-focus">Evolutionary Algorithms</div>
+                <div class="colony-stats">
+                    <div class="colony-stat"><span>Findings</span><span>549</span></div>
+                    <div class="colony-stat"><span>Pheromones</span><span>1,569</span></div>
+                    <div class="colony-stat"><span>Breakthroughs</span><span>0</span></div>
+                    <div class="colony-stat"><span>Last Active</span><span>Unknown</span></div>
+                </div>
+            </div>
+            
+            <div class="colony-card">
+                <div class="colony-header">
+                    <span class="colony-name">🐍 Delta</span>
+                    <span class="colony-status warning">⚠ Check</span>
+                </div>
+                <div class="colony-focus">Python, Logic, Relativity</div>
+                <div class="colony-stats">
+                    <div class="colony-stat"><span>Findings</span><span>510</span></div>
+                    <div class="colony-stat"><span>Pheromones</span><span>1,039</span></div>
+                    <div class="colony-stat"><span>Breakthroughs</span><span>0</span></div>
+                    <div class="colony-stat"><span>Last Active</span><span>Unknown</span></div>
+                </div>
+            </div>
+            
+            <div class="colony-card">
+                <div class="colony-header">
+                    <span class="colony-name">∑ Epsilon</span>
+                    <span class="colony-status warning">⚠ Check</span>
+                </div>
+                <div class="colony-focus">Math & Theory (arXiv)</div>
+                <div class="colony-stats">
+                    <div class="colony-stat"><span>Findings</span><span>527</span></div>
+                    <div class="colony-stat"><span>Pheromones</span><span>29</span></div>
+                    <div class="colony-stat"><span>Breakthroughs</span><span>0</span></div>
+                    <div class="colony-stat"><span>Last Active</span><span>Unknown</span></div>
+                </div>
+            </div>
+            
+        </div>
+        
+        <div class="info-box">
+            🔥 <strong>Anti-Ouroboros Effect:</strong> This colony demonstrates that recursive AI systems can improve rather than collapse through stigmergic validation.
+            <a href="model-collapse-myth.html">Learn more →</a>
+        </div>
+        
+        <footer>
+            <a href="index.html">Ouroboros</a> • <a href="/">AIBridges.org</a>
+            <p style="margin-top: 8px;">🐍 Auto-generated daily at 8:00 AM UTC</p>
+        </footer>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('findingsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ["Jan 31","Feb 1","Feb 2","Feb 3","Feb 4","Feb 5","Feb 6","Feb 7","Feb 8","Feb 9","Feb 10","Feb 11","Feb 12","Feb 13"],
+                datasets: [{
+                    label: 'New Findings',
+                    data: [0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    backgroundColor: 'rgba(0, 212, 170, 0.6)',
+                    borderColor: 'rgba(0, 212, 170, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.05)' },
+                        ticks: { color: 'rgba(255,255,255,0.5)' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: 'rgba(255,255,255,0.5)', maxRotation: 45 }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

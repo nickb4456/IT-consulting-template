@@ -114,6 +114,9 @@
         .connection-papers { display: flex; flex-direction: column; gap: 0.5rem; }
         .paper-link { color: #c4b5fd; font-size: 0.9rem; }
         .connection-arrow { color: #22c55e; font-weight: 600; font-size: 0.85rem; padding-left: 1.5rem; }
+        /* Deep insight cards */
+        .deep-insight-card { border-left: 3px solid #8b5cf6; }
+        .deep-insight-card .finding-content { color: #e2e8f0; line-height: 1.6; white-space: pre-line; }
     </style>
 </head>
 <body>
@@ -142,6 +145,12 @@
         <div class="section">
             <div class="section-title">🔗 Novel Connections</div>
             <div id="connections"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🧠 Deep Insights</div>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">LLM-synthesized explanations of why research is connected</p>
+            <div id="deep-insights"><div class="loading">Loading...</div></div>
         </div>
 
         <div class="section">
@@ -198,6 +207,26 @@
                         </div>
                     </div>
                 `).join('');
+
+                // Deep Insights (LLM-synthesized)
+                if (data.deepInsights && data.deepInsights.length > 0) {
+                    document.getElementById('deep-insights').innerHTML = data.deepInsights.slice(0, 6).map(i => {
+                        // Parse the content to extract the explanation
+                        const whyMatch = (i.content || '').match(/WHY THEY'RE RELATED:\n([\s\S]*?)(?:\n\nSimilarity:|$)/);
+                        const explanation = whyMatch ? whyMatch[1].trim() : (i.content || '').substring(0, 300);
+                        return `
+                        <div class="finding deep-insight-card">
+                            <div class="finding-title">${(i.title || '').replace('[INSIGHT] ', '')}</div>
+                            <div class="finding-content">${explanation.substring(0, 350)}${explanation.length > 350 ? '...' : ''}</div>
+                            <div class="finding-meta">
+                                <span class="score">${i.score}</span>
+                                <span class="date">${i.created_at ? new Date(i.created_at).toLocaleDateString() : ''}</span>
+                            </div>
+                        </div>
+                    `}).join('');
+                } else {
+                    document.getElementById('deep-insights').innerHTML = '<div class="loading">No deep insights yet — check back later!</div>';
+                }
 
                 // Papers
                 document.getElementById('papers').innerHTML = data.topPapers.slice(0, 15).map(p => `

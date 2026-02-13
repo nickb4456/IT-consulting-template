@@ -598,34 +598,62 @@
             overflow: hidden;
         }
 
-        /* Hero overlays removed for clean background */
-        .hero::before,
+        /* Animated nebula gradient mesh — CSS-only replacement for video */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 40%, rgba(99, 102, 241, 0.18), transparent 60%),
+                radial-gradient(ellipse 60% 80% at 75% 25%, rgba(34, 211, 238, 0.12), transparent 55%),
+                radial-gradient(ellipse 50% 50% at 50% 80%, rgba(129, 140, 248, 0.1), transparent 50%),
+                radial-gradient(ellipse 90% 40% at 60% 10%, rgba(99, 102, 241, 0.06), transparent 70%);
+            background-size: 200% 200%, 180% 180%, 160% 160%, 220% 220%;
+            animation: gradientShiftHero 18s ease infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Vignette + bottom fade into dark */
         .hero::after {
-            display: none;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 120% 80% at 50% 45%, transparent 30%, rgba(10, 10, 15, 0.55) 100%),
+                linear-gradient(to bottom, transparent 60%, var(--bg-dark) 100%);
+            pointer-events: none;
+            z-index: 2;
         }
 
         @keyframes gradientShiftHero {
-            0%, 100% { 
-                opacity: 0.7;
-                background-position: 0% 0%, 100% 100%, 50% 50%;
+            0%, 100% {
+                background-position: 0% 0%, 100% 100%, 50% 80%, 40% 10%;
             }
-            33% {
-                opacity: 1;
-                background-position: 30% 20%, 70% 80%, 50% 50%;
+            25% {
+                background-position: 30% 20%, 70% 60%, 20% 50%, 80% 30%;
             }
-            66% {
-                opacity: 0.8;
-                background-position: 10% 60%, 90% 40%, 50% 50%;
+            50% {
+                background-position: 60% 50%, 40% 30%, 70% 20%, 20% 60%;
+            }
+            75% {
+                background-position: 10% 70%, 90% 50%, 40% 60%, 60% 40%;
             }
         }
 
         @keyframes gradientPulse {
-            0%, 100% { 
-                opacity: 0.5; 
+            0%, 100% {
+                opacity: 0.5;
                 transform: scale(1);
             }
-            50% { 
-                opacity: 0.8; 
+            50% {
+                opacity: 0.8;
                 transform: scale(1.15);
             }
         }
@@ -964,45 +992,54 @@
             transform: translateY(0);
         }
 
-        /* Floating shapes hidden for clean hero */
+        /* Floating orbs — atmospheric depth */
         .floating-shapes {
-            display: none;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 2;
         }
 
         .shape {
             position: absolute;
             border-radius: 50%;
-            filter: blur(60px);
-            opacity: 0.3;
+            filter: blur(70px);
+            opacity: 0.35;
             animation: float 20s infinite ease-in-out;
             transition: transform 0.3s ease-out;
         }
 
         .shape-1 {
-            width: 400px;
-            height: 400px;
-            background: var(--primary);
-            top: 10%;
-            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            top: 5%;
+            left: -12%;
             animation-delay: 0s;
+            animation-duration: 22s;
         }
 
         .shape-2 {
-            width: 300px;
-            height: 300px;
-            background: var(--accent);
-            top: 50%;
-            right: -5%;
-            animation-delay: -5s;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            top: 40%;
+            right: -8%;
+            animation-delay: -6s;
+            animation-duration: 26s;
         }
 
         .shape-3 {
-            width: 200px;
-            height: 200px;
-            background: var(--primary-light);
-            bottom: 10%;
-            left: 30%;
-            animation-delay: -10s;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+            bottom: 5%;
+            left: 25%;
+            animation-delay: -12s;
+            animation-duration: 19s;
         }
 
         @keyframes float {

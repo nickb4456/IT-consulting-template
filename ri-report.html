@@ -199,57 +199,42 @@
             <div id="results"></div>
         </div>
 
-        <h2 id="price-comp">🔍 Price Comparator Tool</h2>
+        <h2 id="price-comp">🏠 Address Comp Report</h2>
         <div class="sql-section">
-            <p style="color:#94a3b8;margin-bottom:1.5rem">Find comparable properties based on your criteria. Filter by sold data, active listings, or both.</p>
-            <div class="filters">
-                <div class="filter-group">
-                    <label>Data Source</label>
-                    <select id="compSource">
-                        <option value="sold">Sold Only</option>
-                        <option value="active">Active Only</option>
-                        <option value="both" selected>Both</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label>City</label>
-                    <select id="compCity"><option value="">All Cities</option></select>
-                </div>
-                <div class="filter-group">
-                    <label>Type</label>
-                    <select id="compType">
-                        <option value="">All</option>
-                        <option value="Single Family">Single Family</option>
-                        <option value="Condo">Condo</option>
-                        <option value="Multi">Multi-Family</option>
-                        <option value="Land">Land</option>
-                    </select>
-                </div>
-                <div class="filter-group"><label>Beds</label><select id="compBeds"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></div>
-                <div class="filter-group"><label>Baths</label><select id="compBaths"><option value="">Any</option><option value="1">1+</option><option value="1.5">1.5+</option><option value="2">2+</option><option value="3">3+</option></select></div>
-                <div class="filter-group"><label>Min SqFt</label><input type="number" id="compSqftMin" placeholder="0"></div>
-                <div class="filter-group"><label>Max SqFt</label><input type="number" id="compSqftMax" placeholder="Any"></div>
-                <div class="filter-group"><label>Year Built (Min)</label><input type="number" id="compYearMin" placeholder="1900"></div>
-                <div class="filter-group"><label>Year Built (Max)</label><input type="number" id="compYearMax" placeholder="2026"></div>
-                <div class="filter-group"><label>Min Price</label><input type="number" id="compPriceMin" placeholder="0"></div>
-                <div class="filter-group"><label>Max Price</label><input type="number" id="compPriceMax" placeholder="Any"></div>
+            <p style="color:#94a3b8;margin-bottom:1.5rem">Enter an address to get a full comparable sales report based on 2 years of sales data.</p>
+            
+            <!-- Address Search -->
+            <div style="position:relative;margin-bottom:1.5rem">
+                <label style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:0.5rem">Search Address</label>
+                <input type="text" id="addressSearch" placeholder="Start typing an address... (e.g., 123 Main St)" 
+                    style="width:100%;padding:1rem;font-size:1.1rem;background:rgba(0,0,0,0.4);border:2px solid rgba(99,102,241,0.5);border-radius:12px;color:#e2e8f0"
+                    oninput="searchAddress(this.value)" autocomplete="off">
+                <div id="addressResults" style="position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;max-height:300px;overflow-y:auto;display:none;z-index:100"></div>
             </div>
-            <div class="btn-row">
-                <button onclick="runComparison()">🔎 Find Comparables</button>
-                <button class="btn-secondary" onclick="clearCompFilters()">🔄 Clear</button>
-                <button class="btn-accent" onclick="exportCompCSV()">📥 Export CSV</button>
-                <button class="btn-accent" onclick="exportCompHTML()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">📄 Export HTML</button>
+            
+            <!-- Subject Property Card (hidden until address selected) -->
+            <div id="subjectProperty" style="display:none;background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(16,185,129,0.2));padding:1.5rem;border-radius:16px;margin-bottom:1.5rem;border:2px solid rgba(99,102,241,0.5)">
+                <h3 style="color:#a5b4fc;margin-bottom:1rem;font-size:1.2rem">📍 Subject Property</h3>
+                <div id="subjectDetails" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem"></div>
             </div>
-            <div id="compStats" style="display:none;margin:1.5rem 0">
-                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
-                    <div class="stat-card"><div class="stat-value" id="compCount">0</div><div class="stat-label">Matches</div></div>
+            
+            <!-- Comp Results -->
+            <div id="compReport" style="display:none">
+                <h3 style="color:#a5b4fc;margin-bottom:1rem">📊 Comparable Sales (Last 2 Years)</h3>
+                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:1.5rem">
+                    <div class="stat-card"><div class="stat-value" id="compCount">0</div><div class="stat-label">Comps Found</div></div>
                     <div class="stat-card"><div class="stat-value" id="compMedian">$0</div><div class="stat-label">Median</div></div>
                     <div class="stat-card"><div class="stat-value" id="compAvg">$0</div><div class="stat-label">Average</div></div>
                     <div class="stat-card"><div class="stat-value" id="compPsf">$0</div><div class="stat-label">Avg $/SqFt</div></div>
-                    <div class="stat-card"><div class="stat-value" id="compRange">-</div><div class="stat-label">Range</div></div>
+                    <div class="stat-card" style="background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(16,185,129,0.1))"><div class="stat-value" id="compEstimate" style="color:#10b981">$0</div><div class="stat-label">Est. Value</div></div>
                 </div>
+                <div class="btn-row" style="margin-bottom:1rem">
+                    <button class="btn-accent" onclick="exportCompCSV()">📥 Export CSV</button>
+                    <button class="btn-accent" onclick="exportCompHTML()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">📄 Export HTML</button>
+                    <button class="btn-secondary" onclick="clearComp()">🔄 New Search</button>
+                </div>
+                <div id="compResults"></div>
             </div>
-            <div id="compResults"></div>
         </div>
     </div>
 
@@ -377,17 +362,11 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
             a.click();
         }
         
-        // ============ PRICE COMPARATOR ============
+        // ============ ADDRESS-BASED COMP REPORT ============
         let compResults = [];
+        let subjectProperty = null;
         let compPage = 1;
-        const compPageSize = 25;
-        
-        // Populate comparator city dropdown when db loads
-        function initComparator() {
-            const cities = [...new Set(rawData.properties.map(p => p.city))].sort();
-            const sel = document.getElementById('compCity');
-            cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
-        }
+        const compPageSize = 15;
         
         function median(arr) {
             if (!arr.length) return 0;
@@ -398,47 +377,114 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
         
         function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
         
-        function runComparison() {
-            const source = document.getElementById('compSource').value;
-            const city = document.getElementById('compCity').value;
-            const ptype = document.getElementById('compType').value;
-            const beds = parseFloat(document.getElementById('compBeds').value) || 0;
-            const baths = parseFloat(document.getElementById('compBaths').value) || 0;
-            const sqftMin = parseInt(document.getElementById('compSqftMin').value) || 0;
-            const sqftMax = parseInt(document.getElementById('compSqftMax').value) || Infinity;
-            const yearMin = parseInt(document.getElementById('compYearMin').value) || 0;
-            const yearMax = parseInt(document.getElementById('compYearMax').value) || 9999;
-            const priceMin = parseInt(document.getElementById('compPriceMin').value) || 0;
-            const priceMax = parseInt(document.getElementById('compPriceMax').value) || Infinity;
+        // Address search with autocomplete
+        function searchAddress(query) {
+            const resultsDiv = document.getElementById('addressResults');
+            if (query.length < 3) { resultsDiv.style.display = 'none'; return; }
             
-            // Filter properties
+            const q = query.toLowerCase();
+            const matches = rawData.properties.filter(p => 
+                p.address.toLowerCase().includes(q) || 
+                (p.city + ' ' + p.address).toLowerCase().includes(q)
+            ).slice(0, 10);
+            
+            if (!matches.length) {
+                resultsDiv.innerHTML = '<div style="padding:1rem;color:#94a3b8">No matching addresses found</div>';
+            } else {
+                resultsDiv.innerHTML = matches.map(p => `
+                    <div onclick="selectProperty('${p.address.replace(/'/g, "\\'")}', '${p.city}')" 
+                         style="padding:0.75rem 1rem;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.05);transition:background 0.2s"
+                         onmouseover="this.style.background='rgba(99,102,241,0.2)'" 
+                         onmouseout="this.style.background='transparent'">
+                        <div style="color:#e2e8f0">${p.address}</div>
+                        <div style="color:#94a3b8;font-size:0.85rem">${p.city} • ${p.beds || '?'}bd/${p.baths || '?'}ba • ${p.sqft ? p.sqft.toLocaleString() + ' sqft' : ''} • ${fmt(p.price)}</div>
+                    </div>
+                `).join('');
+            }
+            resultsDiv.style.display = 'block';
+        }
+        
+        // Select a property and run comp analysis
+        function selectProperty(address, city) {
+            document.getElementById('addressResults').style.display = 'none';
+            document.getElementById('addressSearch').value = address + ', ' + city;
+            
+            // Find the subject property
+            subjectProperty = rawData.properties.find(p => p.address === address && p.city === city);
+            if (!subjectProperty) return;
+            
+            // Show subject property details
+            const details = document.getElementById('subjectDetails');
+            details.innerHTML = `
+                <div><strong style="color:#94a3b8">Address:</strong><br>${subjectProperty.address}, ${subjectProperty.city}</div>
+                <div><strong style="color:#94a3b8">Type:</strong><br>${subjectProperty.propertyType || 'N/A'}</div>
+                <div><strong style="color:#94a3b8">Beds/Baths:</strong><br>${subjectProperty.beds || '?'} bd / ${subjectProperty.baths || '?'} ba</div>
+                <div><strong style="color:#94a3b8">Sq Ft:</strong><br>${subjectProperty.sqft ? subjectProperty.sqft.toLocaleString() : 'N/A'}</div>
+                <div><strong style="color:#94a3b8">Year Built:</strong><br>${subjectProperty.yearBuilt || 'N/A'}</div>
+                <div><strong style="color:#94a3b8">List/Sale Price:</strong><br><span style="color:#10b981;font-size:1.2rem">${fmt(subjectProperty.price)}</span></div>
+            `;
+            document.getElementById('subjectProperty').style.display = 'block';
+            
+            // Find comparable properties (sold in last 2 years, same city, similar beds/sqft)
+            findComps();
+        }
+        
+        function findComps() {
+            if (!subjectProperty) return;
+            
+            const s = subjectProperty;
+            const bedRange = 1;  // +/- 1 bedroom
+            const sqftRange = 0.25;  // +/- 25% sqft
+            const minSqft = s.sqft ? s.sqft * (1 - sqftRange) : 0;
+            const maxSqft = s.sqft ? s.sqft * (1 + sqftRange) : Infinity;
+            
+            // Find comps: same city, similar size, sold properties only
             compResults = rawData.properties.filter(p => {
-                // Source filter
-                const status = p.status || 'Sold';
-                if (source === 'sold' && status !== 'Sold') return false;
-                if (source === 'active' && status === 'Sold') return false;
+                if (p.address === s.address && p.city === s.city) return false; // Exclude subject
+                if ((p.status || 'Sold') !== 'Sold') return false;  // Only sold
+                if (p.city !== s.city) return false;  // Same city
                 
-                if (city && p.city !== city) return false;
-                if (ptype && !p.propertyType.includes(ptype)) return false;
-                if ((p.beds || 0) < beds) return false;
-                if ((p.baths || 0) < baths) return false;
-                if (p.sqft && (p.sqft < sqftMin || p.sqft > sqftMax)) return false;
-                if (p.yearBuilt && (p.yearBuilt < yearMin || p.yearBuilt > yearMax)) return false;
-                if (p.price < priceMin || p.price > priceMax) return false;
+                // Similar beds (+/- 1)
+                if (s.beds && p.beds && Math.abs(p.beds - s.beds) > bedRange) return false;
+                
+                // Similar sqft (+/- 25%)
+                if (s.sqft && p.sqft && (p.sqft < minSqft || p.sqft > maxSqft)) return false;
+                
+                // Similar property type (if available)
+                if (s.propertyType && p.propertyType) {
+                    const sType = s.propertyType.split(' ')[0];
+                    const pType = p.propertyType.split(' ')[0];
+                    if (sType !== pType) return false;
+                }
+                
                 return true;
-            }).sort((a,b) => b.price - a.price);
+            }).sort((a, b) => {
+                // Sort by similarity score (closer sqft = better)
+                const aDiff = s.sqft ? Math.abs(a.sqft - s.sqft) : 0;
+                const bDiff = s.sqft ? Math.abs(b.sqft - s.sqft) : 0;
+                return aDiff - bDiff;
+            }).slice(0, 25);  // Top 25 comps
             
-            // Update stats
+            // Calculate stats
             const prices = compResults.map(p => p.price);
             const psfs = compResults.filter(p => p.sqft > 0).map(p => p.price / p.sqft);
+            const avgPsf = psfs.length ? psfs.reduce((a,b)=>a+b,0)/psfs.length : 0;
             
-            document.getElementById('compCount').textContent = compResults.length.toLocaleString();
+            // Estimate value based on comps' $/sqft if subject has sqft
+            let estimate = 0;
+            if (s.sqft && avgPsf > 0) {
+                estimate = s.sqft * avgPsf;
+            } else if (prices.length) {
+                estimate = median(prices);
+            }
+            
+            document.getElementById('compCount').textContent = compResults.length;
             document.getElementById('compMedian').textContent = prices.length ? fmt(median(prices)) : '$0';
             document.getElementById('compAvg').textContent = prices.length ? fmt(prices.reduce((a,b)=>a+b,0)/prices.length) : '$0';
-            document.getElementById('compPsf').textContent = psfs.length ? '$' + Math.round(psfs.reduce((a,b)=>a+b,0)/psfs.length) : '$0';
-            document.getElementById('compRange').textContent = prices.length ? fmt(Math.min(...prices)) + '-' + fmt(Math.max(...prices)) : '-';
+            document.getElementById('compPsf').textContent = avgPsf ? '$' + Math.round(avgPsf) : '$0';
+            document.getElementById('compEstimate').textContent = estimate ? fmt(estimate) : 'N/A';
             
-            document.getElementById('compStats').style.display = 'block';
+            document.getElementById('compReport').style.display = 'block';
             compPage = 1;
             renderCompTable();
         }
@@ -449,31 +495,26 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
             const pageData = compResults.slice(start, end);
             const totalPages = Math.ceil(compResults.length / compPageSize);
             
-            let html = `<table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:1rem">
+            let html = `<table style="width:100%;border-collapse:collapse;font-size:0.8rem">
                 <thead><tr style="background:rgba(99,102,241,0.3)">
-                <th style="padding:0.6rem">Address</th><th>City</th><th>Type</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Price</th><th>$/SqFt</th><th>Status</th></tr></thead><tbody>`;
+                <th style="padding:0.6rem">Address</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Sold Price</th><th>$/SqFt</th><th>Sold Date</th></tr></thead><tbody>`;
             
             pageData.forEach(p => {
                 const psf = p.sqft ? '$' + Math.round(p.price / p.sqft) : '-';
-                const status = p.status || 'Sold';
-                const statusColor = status === 'For Sale' ? '#10b981' : '#94a3b8';
                 html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
                     <td style="padding:0.5rem"><a href="${p.url}" target="_blank" style="color:#10b981">${p.address}</a></td>
-                    <td>${p.city}</td>
-                    <td>${(p.propertyType || '').split(' ')[0]}</td>
                     <td>${p.beds || '-'}</td>
                     <td>${p.baths || '-'}</td>
                     <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
                     <td>${p.yearBuilt || '-'}</td>
                     <td><strong>${fmt(p.price)}</strong></td>
                     <td>${psf}</td>
-                    <td style="color:${statusColor}">${status}</td>
+                    <td>${p.soldDate || '-'}</td>
                 </tr>`;
             });
             
             html += '</tbody></table>';
             
-            // Pagination
             if (totalPages > 1) {
                 html += `<div style="margin-top:1rem;display:flex;gap:0.5rem;align-items:center;justify-content:center">
                     <button class="btn-secondary" onclick="compGoPage(1)" ${compPage===1?'disabled':''}>«</button>
@@ -487,54 +528,87 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
             document.getElementById('compResults').innerHTML = html;
         }
         
-        function compGoPage(n) {
-            compPage = n;
-            renderCompTable();
-            document.getElementById('price-comp').scrollIntoView({ behavior: 'smooth' });
-        }
+        function compGoPage(n) { compPage = n; renderCompTable(); }
         
-        function clearCompFilters() {
-            ['compCity','compType','compBeds','compBaths'].forEach(id => document.getElementById(id).value = '');
-            ['compSqftMin','compSqftMax','compYearMin','compYearMax','compPriceMin','compPriceMax'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('compSource').value = 'both';
-            document.getElementById('compStats').style.display = 'none';
-            document.getElementById('compResults').innerHTML = '';
+        function clearComp() {
+            document.getElementById('addressSearch').value = '';
+            document.getElementById('subjectProperty').style.display = 'none';
+            document.getElementById('compReport').style.display = 'none';
             compResults = [];
+            subjectProperty = null;
         }
         
         function exportCompCSV() {
-            if (!compResults.length) return alert('Run comparison first');
-            let csv = 'Address,City,Type,Beds,Baths,SqFt,Year,Price,$/SqFt,Status,URL\n';
+            if (!compResults.length) return alert('Search for an address first');
+            let csv = 'Address,City,Beds,Baths,SqFt,Year,Price,$/SqFt,Sold Date,URL\n';
             compResults.forEach(p => {
                 const psf = p.sqft ? Math.round(p.price / p.sqft) : '';
-                csv += `"${p.address}","${p.city}","${p.propertyType}",${p.beds||''},${p.baths||''},${p.sqft||''},${p.yearBuilt||''},${p.price},${psf},"${p.status||'Sold'}","${p.url}"\n`;
+                csv += `"${p.address}","${p.city}",${p.beds||''},${p.baths||''},${p.sqft||''},${p.yearBuilt||''},${p.price},${psf},"${p.soldDate||''}","${p.url}"\n`;
             });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'ri-comparables.csv'; a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); 
+            a.download = 'comp-report-' + (subjectProperty?.address || 'export').replace(/[^a-z0-9]/gi, '-') + '.csv'; 
+            a.click();
         }
         
         function exportCompHTML() {
-            if (!compResults.length) return alert('Run comparison first');
+            if (!compResults.length || !subjectProperty) return alert('Search for an address first');
+            const s = subjectProperty;
             const prices = compResults.map(p => p.price);
+            const psfs = compResults.filter(p => p.sqft > 0).map(p => p.price / p.sqft);
+            const avgPsf = psfs.length ? psfs.reduce((a,b)=>a+b,0)/psfs.length : 0;
+            const estimate = s.sqft && avgPsf ? s.sqft * avgPsf : median(prices);
+            
             const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>RI Price Comparables</title>
-<style>body{font-family:system-ui;background:#1a1a2e;color:#eee;padding:2rem}table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:8px;text-align:left}th{background:#6366f1}tr:hover{background:rgba(255,255,255,0.05)}a{color:#10b981}.stat{display:inline-block;background:#2a2a4a;padding:1rem 1.5rem;border-radius:8px;margin:0.5rem;text-align:center}.stat-val{font-size:1.5rem;font-weight:bold;color:#6366f1}.stat-lbl{font-size:0.8rem;color:#888}</style>
+<html><head><meta charset="UTF-8"><title>Comp Report - ${s.address}</title>
+<style>body{font-family:system-ui;background:#1a1a2e;color:#eee;padding:2rem;max-width:1200px;margin:0 auto}
+table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:10px;text-align:left}
+th{background:#6366f1}tr:hover{background:rgba(255,255,255,0.05)}a{color:#10b981}
+.subject{background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(16,185,129,0.2));padding:1.5rem;border-radius:12px;margin-bottom:2rem;border:2px solid rgba(99,102,241,0.5)}
+.stats{display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0}
+.stat{background:#2a2a4a;padding:1rem 1.5rem;border-radius:8px;text-align:center;min-width:120px}
+.stat-val{font-size:1.5rem;font-weight:bold;color:#6366f1}
+.stat-lbl{font-size:0.8rem;color:#888}
+.estimate{background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(16,185,129,0.1));border-color:rgba(16,185,129,0.5)}
+.estimate .stat-val{color:#10b981}</style>
 </head><body>
-<h1>Rhode Island Price Comparables</h1>
-<p>Exported: ${new Date().toLocaleString()}</p>
-<div style="margin:1.5rem 0">
-<div class="stat"><div class="stat-val">${compResults.length}</div><div class="stat-lbl">Properties</div></div>
+<h1>🏠 Comparable Sales Report</h1>
+<p style="color:#888">Generated: ${new Date().toLocaleString()}</p>
+
+<div class="subject">
+<h2>📍 Subject Property</h2>
+<p><strong>${s.address}, ${s.city}</strong></p>
+<p>${s.beds || '?'} bed / ${s.baths || '?'} bath • ${s.sqft ? s.sqft.toLocaleString() + ' sqft' : 'N/A'} • Built ${s.yearBuilt || 'N/A'}</p>
+<p>List/Sale Price: <strong style="color:#10b981;font-size:1.3rem">${fmt(s.price)}</strong></p>
+</div>
+
+<h2>📊 Market Analysis (${compResults.length} Comparable Sales)</h2>
+<div class="stats">
+<div class="stat"><div class="stat-val">${compResults.length}</div><div class="stat-lbl">Comps</div></div>
 <div class="stat"><div class="stat-val">${fmt(median(prices))}</div><div class="stat-lbl">Median</div></div>
 <div class="stat"><div class="stat-val">${fmt(prices.reduce((a,b)=>a+b,0)/prices.length)}</div><div class="stat-lbl">Average</div></div>
-<div class="stat"><div class="stat-val">${fmt(Math.min(...prices))} - ${fmt(Math.max(...prices))}</div><div class="stat-lbl">Range</div></div>
+<div class="stat"><div class="stat-val">$${Math.round(avgPsf)}</div><div class="stat-lbl">Avg $/SqFt</div></div>
+<div class="stat estimate"><div class="stat-val">${fmt(estimate)}</div><div class="stat-lbl">Est. Value</div></div>
 </div>
-<table><thead><tr><th>Address</th><th>City</th><th>Type</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Price</th><th>$/SqFt</th><th>Status</th></tr></thead><tbody>
-${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}</a></td><td>${p.city}</td><td>${(p.propertyType||'').split(' ')[0]}</td><td>${p.beds||'-'}</td><td>${p.baths||'-'}</td><td>${p.sqft?p.sqft.toLocaleString():'-'}</td><td>${p.yearBuilt||'-'}</td><td><strong>${fmt(p.price)}</strong></td><td>${p.sqft?'$'+Math.round(p.price/p.sqft):'-'}</td><td>${p.status||'Sold'}</td></tr>`).join('')}
-</tbody></table></body></html>`;
-            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], {type:'text/html'})); a.download = 'ri-comparables.html'; a.click();
+
+<h3>Comparable Properties</h3>
+<table>
+<thead><tr><th>Address</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Sold Price</th><th>$/SqFt</th><th>Sold Date</th></tr></thead>
+<tbody>
+${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}</a></td><td>${p.beds||'-'}</td><td>${p.baths||'-'}</td><td>${p.sqft?p.sqft.toLocaleString():'-'}</td><td>${p.yearBuilt||'-'}</td><td><strong>${fmt(p.price)}</strong></td><td>${p.sqft?'$'+Math.round(p.price/p.sqft):'-'}</td><td>${p.soldDate||'-'}</td></tr>`).join('')}
+</tbody></table>
+<p style="margin-top:2rem;color:#666;font-size:0.9rem">Data source: Redfin MLS • Analysis by AIBridges.org</p>
+</body></html>`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], {type:'text/html'})); 
+            a.download = 'comp-report-' + s.address.replace(/[^a-z0-9]/gi, '-') + '.html'; 
+            a.click();
         }
         
-        // Initialize comparator when DOM is ready
-        document.addEventListener('DOMContentLoaded', initComparator);
+        // Close dropdown when clicking outside
+        document.addEventListener('click', e => {
+            if (!e.target.closest('#addressSearch') && !e.target.closest('#addressResults')) {
+                document.getElementById('addressResults').style.display = 'none';
+            }
+        });
         
         // CHARTS
         const chartColors = { purple: '#6366f1', pink: '#ec4899', green: '#10b981', amber: '#f59e0b', cyan: '#06b6d4' };

@@ -78,15 +78,15 @@
         <a href="https://aibridges.org" class="home-btn">← Home</a>
         <div class="hero">
             <h1>🏠 Rhode Island Real Estate Analysis</h1>
-            <p class="subtitle">Deep Market Intelligence • 6,870 Properties • 46 Cities • 2024-2026</p>
+            <p class="subtitle">Deep Market Intelligence • 7,915 Properties • 1,045 For Sale • 46 Cities</p>
             <p class="click-hint">💡 Click any chart bar to see full property list with Redfin links</p>
         </div>
         
         <div class="stats-grid">
-            <div class="stat-card"><div class="stat-value">6,870</div><div class="stat-label">Properties</div></div>
+            <div class="stat-card"><div class="stat-value">7,915</div><div class="stat-label">Properties</div></div>
+            <div class="stat-card"><div class="stat-value" style="color:#10b981">1,045</div><div class="stat-label">🏠 For Sale</div></div>
             <div class="stat-card"><div class="stat-value">$534K</div><div class="stat-label">Median Price</div></div>
             <div class="stat-card"><div class="stat-value">$285</div><div class="stat-label">Median $/sqft</div></div>
-            <div class="stat-card"><div class="stat-value">32</div><div class="stat-label">Avg Days on Market</div></div>
             <div class="stat-card"><div class="stat-value">152</div><div class="stat-label">Land Sales</div></div>
         </div>
 
@@ -170,6 +170,7 @@
             <div class="filters">
                 <div class="filter-group"><label>City</label><select id="filterCity" onchange="buildQuery()"><option value="">All Cities</option></select></div>
                 <div class="filter-group"><label>Type</label><select id="filterType" onchange="buildQuery()"><option value="">All</option><option value="Single Family">Single Family</option><option value="Condo">Condo</option><option value="Multi">Multi-Family</option><option value="Land">Land</option></select></div>
+                <div class="filter-group"><label>Status</label><select id="filterStatus" onchange="buildQuery()"><option value="">All</option><option value="For Sale">🏠 For Sale</option><option value="Sold">✅ Sold</option></select></div>
                 <div class="filter-group"><label>Min $</label><input type="number" id="filterMinPrice" placeholder="0" onchange="buildQuery()"></div>
                 <div class="filter-group"><label>Max $</label><input type="number" id="filterMaxPrice" placeholder="Any" onchange="buildQuery()"></div>
                 <div class="filter-group"><label>Beds</label><select id="filterBeds" onchange="buildQuery()"><option value="">Any</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></div>
@@ -178,6 +179,7 @@
                 <div class="filter-group"><label>Limit</label><select id="filterLimit" onchange="buildQuery()"><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></div>
             </div>
             <div class="quick-queries">
+                <button class="quick-btn" onclick="setQuery('forSale')" style="background:rgba(16,185,129,0.3);border-color:rgba(16,185,129,0.5);color:#6ee7b7">🏠 For Sale</button>
                 <button class="quick-btn" onclick="setQuery('top')">🏆 Top Sales</button>
                 <button class="quick-btn" onclick="setQuery('land')">🌿 Land</button>
                 <button class="quick-btn" onclick="setQuery('under300')">💵 Under $300K</button>
@@ -218,6 +220,7 @@ const rawData =
         function buildQuery() {
             const city = document.getElementById('filterCity').value;
             const type = document.getElementById('filterType').value;
+            const status = document.getElementById('filterStatus').value;
             const minP = document.getElementById('filterMinPrice').value;
             const maxP = document.getElementById('filterMaxPrice').value;
             const beds = document.getElementById('filterBeds').value;
@@ -227,11 +230,12 @@ const rawData =
             let w = [];
             if (city) w.push(`city = '${city}'`);
             if (type) w.push(`propertyType LIKE '%${type}%'`);
+            if (status) w.push(`status = '${status}'`);
             if (minP) w.push(`price >= ${minP}`);
             if (maxP) w.push(`price <= ${maxP}`);
             if (beds) w.push(`beds >= ${beds}`);
             if (year) w.push(`soldDate LIKE '%${year}'`);
-            let sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, dom as days, url\nFROM properties`;
+            let sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, status, dom as days, url\nFROM properties`;
             if (w.length) sql += `\nWHERE ${w.join(' AND ')}`;
             sql += `\nORDER BY ${sort}\nLIMIT ${limit}`;
             document.getElementById('sqlInput').value = sql;
@@ -239,20 +243,21 @@ const rawData =
         
         function setQuery(p) {
             const q = {
-                top: `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties ORDER BY price DESC LIMIT 20`,
-                land: `SELECT address, city, printf("$%,d", price) as price, printf("%,d", lotSize) as lot_sqft, printf("$%.2f", price*1.0/lotSize) as price_per_sqft, url FROM properties WHERE propertyType LIKE '%Land%' AND lotSize > 0 ORDER BY price DESC LIMIT 25`,
-                under300: `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE price < 300000 ORDER BY price DESC LIMIT 30`,
-                newport: `SELECT address, printf("$%,d", price) as price, beds, baths, sqft, yearBuilt, dom as days, url FROM properties WHERE city = 'Newport' ORDER BY price DESC LIMIT 25`,
-                ppsqft: `SELECT city, COUNT(*) as sales, printf("$%.0f", AVG(price*1.0/sqft)) as avg_price_sqft, printf("$%,d", AVG(price)) as avg_price FROM properties WHERE sqft > 0 GROUP BY city ORDER BY AVG(price*1.0/sqft) DESC LIMIT 20`,
+                top: `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, status, url FROM properties ORDER BY price DESC LIMIT 20`,
+                forSale: `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, dom as days, url FROM properties WHERE status = 'For Sale' ORDER BY price DESC LIMIT 50`,
+                land: `SELECT address, city, printf("$%,d", price) as price, printf("%,d", lotSize) as lot_sqft, printf("$%.2f", price*1.0/lotSize) as price_per_sqft, status, url FROM properties WHERE propertyType LIKE '%Land%' AND lotSize > 0 ORDER BY price DESC LIMIT 25`,
+                under300: `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, status, url FROM properties WHERE price < 300000 ORDER BY price DESC LIMIT 30`,
+                newport: `SELECT address, printf("$%,d", price) as price, beds, baths, sqft, yearBuilt, status, dom as days, url FROM properties WHERE city = 'Newport' ORDER BY price DESC LIMIT 25`,
+                ppsqft: `SELECT city, COUNT(*) as count, printf("$%.0f", AVG(price*1.0/sqft)) as avg_price_sqft, printf("$%,d", AVG(price)) as avg_price FROM properties WHERE sqft > 0 GROUP BY city ORDER BY AVG(price*1.0/sqft) DESC LIMIT 20`,
                 fastSales: `SELECT address, city, printf("$%,d", price) as price, dom as days_on_market, beds, baths, url FROM properties WHERE dom > 0 AND dom < 10 ORDER BY dom ASC LIMIT 25`,
-                newConstruction: `SELECT address, city, printf("$%,d", price) as price, yearBuilt, beds, baths, sqft, url FROM properties WHERE yearBuilt >= 2020 ORDER BY yearBuilt DESC, price DESC LIMIT 25`
+                newConstruction: `SELECT address, city, printf("$%,d", price) as price, yearBuilt, beds, baths, sqft, status, url FROM properties WHERE yearBuilt >= 2020 ORDER BY yearBuilt DESC, price DESC LIMIT 25`
             };
             document.getElementById('sqlInput').value = q[p];
             runQuery();
         }
         
         function resetFilters() {
-            ['filterCity','filterType','filterBeds','filterYear'].forEach(id => document.getElementById(id).value = '');
+            ['filterCity','filterType','filterStatus','filterBeds','filterYear'].forEach(id => document.getElementById(id).value = '');
             ['filterMinPrice','filterMaxPrice'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('filterSort').value = 'price DESC';
             document.getElementById('filterLimit').value = '25';

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RI Real Estate Results</title>
+    <style>
+        :root { --primary: #6366f1; --secondary: #ec4899; --accent: #10b981; --dark: #0f172a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .home-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
+        .home-btn:hover { background: rgba(99,102,241,0.4); transform: scale(1.02); }
+        .back-btn { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
+        .back-btn:hover { background: rgba(16,185,129,0.4); }
+        
+        h1 { font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #94a3b8; font-size: 0.95rem; margin-top: 0.25rem; }
+        
+        .stats { display: flex; gap: 2rem; margin: 1.5rem 0; }
+        .stat { text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: #10b981; }
+        .stat-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+        
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.02); border-radius: 12px; overflow: hidden; }
+        .results-table th { background: rgba(99,102,241,0.3); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+        .results-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .results-table tr:hover { background: rgba(255,255,255,0.05); }
+        .results-table a { color: #10b981; text-decoration: none; }
+        .results-table a:hover { text-decoration: underline; }
+        
+        .view-btn { display: inline-flex; align-items: center; gap: 0.3rem; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.35rem 0.7rem; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+        .view-btn:hover { transform: scale(1.05); text-decoration: none; }
+        
+        .price { font-weight: 700; color: #6366f1; }
+        .address { max-width: 300px; }
+        
+        .loading { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
+        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .empty { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+        
+        .nav-buttons { display: flex; gap: 1rem; }
+        
+        @media (max-width: 768px) {
+            .header { flex-direction: column; gap: 1rem; align-items: flex-start; }
+            .stats { flex-wrap: wrap; gap: 1rem; }
+            .results-table { font-size: 0.8rem; display: block; overflow-x: auto; }
+            .results-table th, .results-table td { padding: 0.5rem; }
+            .nav-buttons { width: 100%; justify-content: space-between; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 id="title">Loading Results...</h1>
+                <p class="subtitle" id="subtitle"></p>
+            </div>
+            <div class="nav-buttons">
+                <a href="ri-report.html" class="home-btn back-btn">← Back to Report</a>
+                <a href="https://aibridges.org" class="home-btn">🏠 Home</a>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats" style="display: none;">
+            <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Properties</div></div>
+            <div class="stat"><div class="stat-value" id="medianPrice">$0</div><div class="stat-label">Median Price</div></div>
+            <div class="stat"><div class="stat-value" id="avgPrice">$0</div><div class="stat-label">Average Price</div></div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading property data...</p>
+        </div>
+        
+        <div id="empty" class="empty" style="display: none;">
+            <div class="empty-icon">🏠</div>
+            <p>No properties found matching your criteria</p>
+        </div>
+        
+        <table class="results-table" id="resultsTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Price</th>
+                    <th>Beds</th>
+                    <th>Baths</th>
+                    <th>Sq Ft</th>
+                    <th>Type</th>
+                    <th>Sold</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        const DATA_URL = 'https://engagement-hooks-site.s3.amazonaws.com/ri-sql-full.json';
+        
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const filterType = params.get('type'); // city, price, beds, land, year, type
+        const filterValue = params.get('value');
+        
+        // Title mapping
+        const titles = {
+            city: (v) => `Properties in ${v}`,
+            price: (v) => `Properties: ${v}`,
+            beds: (v) => `${v} Bedroom Properties`,
+            land: (v) => `Land Sales in ${v}`,
+            year: (v) => `Sales in ${v}`,
+            type: (v) => `${v} Properties`,
+            all: () => 'All Properties'
+        };
+        
+        async function loadData() {
+            try {
+                const res = await fetch(DATA_URL);
+                const data = await res.json();
+                
+                let filtered = data.properties;
+                let titleText = 'All Properties';
+                let subtitleText = '';
+                
+                if (filterType && filterValue) {
+                    titleText = titles[filterType] ? titles[filterType](filterValue) : filterValue;
+                    
+                    switch (filterType) {
+                        case 'city':
+                            filtered = filtered.filter(p => p.city === filterValue);
+                            subtitleText = `All properties sold in ${filterValue}, RI`;
+                            break;
+                        case 'price':
+                            const priceRanges = {
+                                '<$300K': p => p.price < 300000,
+                                '$300-400K': p => p.price >= 300000 && p.price < 400000,
+                                '$400-500K': p => p.price >= 400000 && p.price < 500000,
+                                '$500-600K': p => p.price >= 500000 && p.price < 600000,
+                                '$600-750K': p => p.price >= 600000 && p.price < 750000,
+                                '$750K-1M': p => p.price >= 750000 && p.price < 1000000,
+                                '$1M+': p => p.price >= 1000000
+                            };
+                            filtered = filtered.filter(priceRanges[filterValue] || (() => true));
+                            subtitleText = `Properties in the ${filterValue} price range`;
+                            break;
+                        case 'beds':
+                            const beds = filterValue === '6+' ? 6 : parseInt(filterValue);
+                            filtered = filtered.filter(p => beds >= 6 ? p.beds >= beds : p.beds === beds);
+                            subtitleText = beds >= 6 ? '6+ bedroom properties' : `Properties with ${beds} bedrooms`;
+                            break;
+                        case 'land':
+                            filtered = filtered.filter(p => 
+                                (p.propertyType?.toLowerCase().includes('land') || 
+                                 p.propertyType?.toLowerCase().includes('vacant')) &&
+                                (filterValue === 'all' || p.city === filterValue)
+                            );
+                            subtitleText = filterValue === 'all' ? 'All land sales in Rhode Island' : `Land sales in ${filterValue}`;
+                            break;
+                        case 'year':
+                            filtered = filtered.filter(p => p.soldDate?.includes(filterValue));
+                            subtitleText = `Properties sold in ${filterValue}`;
+                            break;
+                        case 'type':
+                            filtered = filtered.filter(p => p.propertyType?.includes(filterValue));
+                            subtitleText = `${filterValue} type properties`;
+                            break;
+                    }
+                }
+                
+                // Sort by price descending
+                filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
+                
+                document.getElementById('title').textContent = titleText;
+                document.getElementById('subtitle').textContent = subtitleText;
+                document.getElementById('loading').style.display = 'none';
+                
+                if (filtered.length === 0) {
+                    document.getElementById('empty').style.display = 'block';
+                    return;
+                }
+                
+                // Calculate stats
+                const prices = filtered.map(p => p.price).filter(p => p > 0).sort((a, b) => a - b);
+                const median = prices[Math.floor(prices.length / 2)] || 0;
+                const avg = prices.reduce((a, b) => a + b, 0) / prices.length || 0;
+                
+                document.getElementById('stats').style.display = 'flex';
+                document.getElementById('totalCount').textContent = filtered.length.toLocaleString();
+                document.getElementById('medianPrice').textContent = '$' + Math.round(median / 1000) + 'K';
+                document.getElementById('avgPrice').textContent = '$' + Math.round(avg / 1000) + 'K';
+                
+                // Render table
+                const tbody = document.getElementById('resultsBody');
+                tbody.innerHTML = filtered.map(p => `
+                    <tr>
+                        <td class="address">${p.address || 'N/A'}</td>
+                        <td>${p.city || 'N/A'}</td>
+                        <td class="price">$${(p.price || 0).toLocaleString()}</td>
+                        <td>${p.beds || '-'}</td>
+                        <td>${p.baths || '-'}</td>
+                        <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
+                        <td>${(p.propertyType || 'N/A').replace('Residential', '').trim()}</td>
+                        <td>${p.soldDate || '-'}</td>
+                        <td>${p.url ? `<a href="${p.url}" target="_blank" class="view-btn">View 🔗</a>` : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('resultsTable').style.display = 'table';
+                
+            } catch (err) {
+                console.error('Error loading data:', err);
+                document.getElementById('loading').innerHTML = `
+                    <div class="empty-icon">⚠️</div>
+                    <p>Error loading data. Please try again.</p>
+                `;
+            }
+        }
+        
+        loadData();
+    </script>
+</body>
+</html>

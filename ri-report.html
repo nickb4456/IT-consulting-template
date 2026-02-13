@@ -59,21 +59,27 @@
         #results a { color: #10b981; }
         .result-count { color: #10b981; margin-bottom: 0.5rem; font-weight: 600; }
         
+        .home-btn { position: fixed; top: 1rem; left: 1rem; z-index: 100; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(99,102,241,0.9); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
+        .home-btn:hover { background: rgba(99,102,241,1); transform: scale(1.05); }
+        .click-hint { margin-top: 1rem; color: #94a3b8; font-size: 0.9rem; background: rgba(99,102,241,0.15); padding: 0.5rem 1rem; border-radius: 20px; display: inline-block; }
+        
         @media (max-width: 1024px) {
             .stats-grid { grid-template-columns: repeat(3, 1fr); }
             .chart-grid { grid-template-columns: 1fr; }
             .chart-card.full, .chart-card.third { grid-column: span 1; }
             .insight-grid { grid-template-columns: 1fr; }
             h1 { font-size: 2rem; }
+            .home-btn { top: 0.5rem; left: 0.5rem; padding: 0.5rem 1rem; font-size: 0.8rem; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div style="position:absolute;top:1rem;left:1rem;z-index:100"><a href="/" style="background:rgba(255,255,255,0.1);padding:0.5rem 1rem;border-radius:8px;color:#e2e8f0;text-decoration:none;font-weight:500">← Home</a></div>
+        <a href="https://aibridges.org" class="home-btn">← Home</a>
         <div class="hero">
             <h1>🏠 Rhode Island Real Estate Analysis</h1>
             <p class="subtitle">Deep Market Intelligence • 6,870 Properties • 46 Cities • 2024-2026</p>
+            <p class="click-hint">💡 Click any chart bar to see full property list with Redfin links</p>
         </div>
         
         <div class="stats-grid">
@@ -386,26 +392,25 @@ const rawData =
                     const idx = points[0].index;
                     const label = chart.data.labels[idx];
                     
-                    let sql = '';
+                    let filterType = '';
+                    let filterValue = label;
                     
                     if (chartId === 'cityChart' || chartId === 'priceChart' || chartId === 'ppsqftChart') {
-                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE city = '${label}' ORDER BY price DESC LIMIT 100`;
+                        filterType = 'city';
                     } else if (chartId === 'histogramChart') {
-                        const ranges = {'<$300K':'price < 300000', '$300-400K':'price >= 300000 AND price < 400000', '$400-500K':'price >= 400000 AND price < 500000', '$500-600K':'price >= 500000 AND price < 600000', '$600-750K':'price >= 600000 AND price < 750000', '$750K-1M':'price >= 750000 AND price < 1000000', '$1M+':'price >= 1000000'};
-                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE ${ranges[label] || 'price > 0'} ORDER BY price DESC LIMIT 100`;
+                        filterType = 'price';
                     } else if (chartId === 'bedsChart') {
-                        const b = label === '6+' ? 6 : parseInt(label);
-                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, sqft, url FROM properties WHERE beds ${b >= 6 ? '>=' : '='} ${b} ORDER BY price DESC LIMIT 100`;
+                        filterType = 'beds';
                     } else if (chartId === 'landChart') {
-                        sql = `SELECT address, city, printf("$%,d", price) as price, lotSize, url FROM properties WHERE propertyType LIKE '%Land%' AND city = '${label}' ORDER BY price DESC`;
-                    } else if (chartId === 'domChart') {
-                        sql = `SELECT address, city, printf("$%,d", price) as price, beds, baths, soldDate, url FROM properties WHERE soldDate LIKE '%${label}' ORDER BY price DESC LIMIT 100`;
+                        filterType = 'land';
+                    } else if (chartId === 'domChart' || chartId === 'yearBuiltChart') {
+                        filterType = 'year';
+                    } else if (chartId === 'typeChart') {
+                        filterType = 'type';
                     }
                     
-                    if (sql && typeof runQuery === 'function') {
-                        document.getElementById('sqlInput').value = sql;
-                        runQuery();
-                        document.querySelector('.sql-section').scrollIntoView({ behavior: 'smooth' });
+                    if (filterType) {
+                        window.open(`ri-results.html?type=${encodeURIComponent(filterType)}&value=${encodeURIComponent(filterValue)}`, '_blank');
                     }
                 });
             });

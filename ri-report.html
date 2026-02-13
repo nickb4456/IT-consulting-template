@@ -134,7 +134,7 @@
                 <canvas id="typeChart" height="250"></canvas>
             </div>
             <div class="chart-card">
-                <div class="chart-title">Days on Market by Price Range</div>
+                <div class="chart-title">Sales by Year</div>
                 <canvas id="domChart" height="250"></canvas>
             </div>
         </div>
@@ -320,17 +320,14 @@ const rawData =
         const typeData = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0, 6);
         new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: [chartColors.purple, chartColors.pink, chartColors.green, chartColors.amber, chartColors.cyan, '#8b5cf6'], borderWidth: 0 }] }, options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } } });
         
-        // DOM by price range
-        const domByPrice = { '<$300K': [], '$300-500K': [], '$500-750K': [], '$750K-1M': [], '$1M+': [] };
-        rawData.properties.filter(p => p.dom > 0).forEach(p => {
-            if (p.price < 300000) domByPrice['<$300K'].push(p.dom);
-            else if (p.price < 500000) domByPrice['$300-500K'].push(p.dom);
-            else if (p.price < 750000) domByPrice['$500-750K'].push(p.dom);
-            else if (p.price < 1000000) domByPrice['$750K-1M'].push(p.dom);
-            else domByPrice['$1M+'].push(p.dom);
+        // Sales by year
+        const salesByYear = { '2024': 0, '2025': 0, '2026': 0 };
+        rawData.properties.forEach(p => {
+            if (p.soldDate?.includes('2024')) salesByYear['2024']++;
+            else if (p.soldDate?.includes('2025')) salesByYear['2025']++;
+            else if (p.soldDate?.includes('2026')) salesByYear['2026']++;
         });
-        const domAvg = Object.entries(domByPrice).map(([k,v]) => ({ range: k, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0 }));
-        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: domAvg.map(d => d.range), datasets: [{ data: domAvg.map(d => d.avg), backgroundColor: [chartColors.cyan, chartColors.green, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
+        new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: Object.keys(salesByYear), datasets: [{ data: Object.values(salesByYear), backgroundColor: [chartColors.cyan, chartColors.amber, chartColors.pink], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
         
         // Bedrooms
         const beds = {};

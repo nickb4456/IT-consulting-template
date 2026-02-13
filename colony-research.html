@@ -333,6 +333,28 @@
             .catch(e => {
                 document.querySelectorAll('.loading').forEach(el => el.textContent = 'Error loading data');
             });
+        
+        // Also load rich connections from colony-connections.json
+        fetch('colony-connections.json')
+            .then(r => r.json())
+            .then(connData => {
+                if (connData.topConnections && connData.topConnections.length > 0) {
+                    document.getElementById('connections').innerHTML = connData.topConnections.slice(0, 12).map(c => `
+                        <div class="finding connection-card">
+                            <div class="connection-papers">
+                                <div class="paper-link">📄 ${(c.from || '').substring(0, 80)}</div>
+                                <div class="connection-arrow">↔ ${c.type} (${(c.weight * 100).toFixed(0)}%)</div>
+                                <div class="paper-link">📄 ${(c.to || '').substring(0, 80)}</div>
+                            </div>
+                            <div class="finding-meta">
+                                <span class="score">${c.colony}</span>
+                                <span class="date">${c.date ? new Date(c.date).toLocaleDateString() : ''}</span>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            })
+            .catch(e => console.log('Connections data not available'));
     </script>
 </body>
 </html>

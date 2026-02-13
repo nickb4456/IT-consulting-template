@@ -12,6 +12,8 @@
             --text: #e5e5e5;
             --muted: #888;
             --accent: #ff0000;
+            --green: #22c55e;
+            --blue: #3b82f6;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,10 +44,42 @@
         
         header p { color: var(--muted); font-size: 1.1rem; }
         
+        .quota-banner {
+            background: linear-gradient(90deg, var(--card), var(--border));
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .quota-banner .quota-bar {
+            flex: 1;
+            min-width: 200px;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .quota-banner .quota-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .quota-banner .quota-fill.warning { background: #f59e0b; }
+        .quota-banner .quota-fill.danger { background: var(--accent); }
+        
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
             margin-bottom: 30px;
         }
         
@@ -58,23 +92,55 @@
         }
         
         .stat-card .value {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: bold;
             color: var(--accent);
         }
         
-        .stat-card .label { color: var(--muted); font-size: 0.9rem; }
+        .stat-card .label { color: var(--muted); font-size: 0.85rem; }
         
-        .patterns-section {
+        .section {
             background: var(--card);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         
-        .patterns-section h2 { margin-bottom: 20px; font-size: 1.5rem; }
+        .section h2 { margin-bottom: 20px; font-size: 1.4rem; }
         
+        /* Actionable Insights */
+        .insight-card {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(59, 130, 246, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .insight-card .insight-title {
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .insight-card .insight-data {
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+        
+        .insight-card .insight-action {
+            background: var(--green);
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 6px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        /* Pattern bars */
         .pattern-bars { display: flex; flex-direction: column; gap: 12px; }
         
         .pattern-bar {
@@ -84,14 +150,15 @@
         }
         
         .pattern-bar .name {
-            width: 120px;
+            width: 110px;
             font-weight: 500;
             text-transform: capitalize;
+            font-size: 0.9rem;
         }
         
         .pattern-bar .bar-container {
             flex: 1;
-            height: 24px;
+            height: 28px;
             background: var(--border);
             border-radius: 4px;
             overflow: hidden;
@@ -107,9 +174,47 @@
             padding-right: 10px;
             font-size: 0.8rem;
             font-weight: bold;
-            min-width: 80px;
+            min-width: 90px;
         }
         
+        /* Connections Section */
+        .connections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .connection-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .connection-card .conn-from,
+        .connection-card .conn-to {
+            font-size: 0.9rem;
+            padding: 8px;
+            background: var(--card);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .connection-card .conn-arrow {
+            text-align: center;
+            color: var(--blue);
+            font-weight: bold;
+            padding: 5px;
+        }
+        
+        .connection-card .conn-reason {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 10px;
+            font-style: italic;
+        }
+        
+        /* Niche tabs */
         .niche-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -131,9 +236,10 @@
         .niche-tab:hover { border-color: var(--muted); }
         .niche-tab.active { border-color: var(--accent); background: rgba(255, 0, 0, 0.1); }
         
+        /* Videos grid */
         .videos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
         }
         
@@ -196,24 +302,9 @@
         
         .loading {
             text-align: center;
-            padding: 60px;
+            padding: 40px;
             color: var(--muted);
         }
-        
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--muted);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 10px;
-            vertical-align: middle;
-        }
-        
-        @keyframes spin { to { transform: rotate(360deg); } }
         
         footer {
             text-align: center;
@@ -227,7 +318,7 @@
         
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
-            .pattern-bar .name { width: 80px; font-size: 0.85rem; }
+            .pattern-bar .name { width: 80px; font-size: 0.8rem; }
             .niche-tab { padding: 8px 15px; font-size: 0.85rem; }
         }
     </style>
@@ -235,11 +326,20 @@
 <body>
     <header>
         <h1>📈 YouTube Trends Dashboard</h1>
-        <p>Real-time analysis of what's working on YouTube across different niches</p>
+        <p>Real data analysis of what's working on YouTube — updated daily</p>
         <p style="margin-top: 10px; font-size: 0.9rem;" id="lastUpdated">Loading...</p>
     </header>
     
     <div class="container">
+        <!-- Quota Tracker -->
+        <div class="quota-banner">
+            <span>📊 API Quota: <span id="quotaUsed">-</span> / 10,000 units/day</span>
+            <div class="quota-bar">
+                <div class="quota-fill" id="quotaFill" style="width: 0%"></div>
+            </div>
+            <span id="quotaStatus">Loading...</span>
+        </div>
+        
         <div class="stats-row" id="statsRow">
             <div class="stat-card">
                 <div class="value" id="totalVideos">-</div>
@@ -259,22 +359,43 @@
             </div>
         </div>
         
-        <div class="patterns-section">
-            <h2>🎯 Title Patterns That Work</h2>
-            <div class="pattern-bars" id="patternBars">
-                <div class="loading">Loading pattern data</div>
+        <!-- Actionable Insights - Data-driven, not AI -->
+        <div class="section">
+            <h2>🎯 Actionable Insights (Based on Real Data)</h2>
+            <div id="actionableInsights">
+                <div class="loading">Calculating insights from data...</div>
             </div>
         </div>
         
-        <h2 style="margin-bottom: 20px;">🔥 Trending Videos by Niche</h2>
-        <div class="niche-tabs" id="nicheTabs"></div>
-        <div class="videos-grid" id="videosGrid">
-            <div class="loading">Loading videos</div>
+        <!-- Pattern Performance -->
+        <div class="section">
+            <h2>📊 Title Patterns That Work</h2>
+            <div class="pattern-bars" id="patternBars">
+                <div class="loading">Loading pattern data...</div>
+            </div>
+        </div>
+        
+        <!-- Video Connections -->
+        <div class="section">
+            <h2>🔗 Content Connections</h2>
+            <p style="color: var(--muted); margin-bottom: 15px;">Videos with similar successful patterns across niches</p>
+            <div class="connections-grid" id="connectionsGrid">
+                <div class="loading">Building connections...</div>
+            </div>
+        </div>
+        
+        <!-- Videos by Niche -->
+        <div class="section">
+            <h2>🔥 Trending Videos by Niche</h2>
+            <div class="niche-tabs" id="nicheTabs"></div>
+            <div class="videos-grid" id="videosGrid">
+                <div class="loading">Loading videos...</div>
+            </div>
         </div>
     </div>
     
     <footer>
-        <p>Data updated daily • Powered by <a href="https://aibridges.org">AIBridges</a></p>
+        <p>Data updated daily at 8 AM EST • Powered by <a href="https://aibridges.org">AIBridges</a></p>
         <p style="margin-top: 10px; font-size: 0.85rem;">YouTube™ is a trademark of Google LLC</p>
     </footer>
     
@@ -293,44 +414,191 @@
             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
         
+        function escapeHtml(str) {
+            return (str||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
+        }
+        
+        function renderQuota() {
+            const used = trendsData.quotaUsed || 0;
+            const pct = Math.min(100, (used / 10000) * 100);
+            document.getElementById('quotaUsed').textContent = used.toLocaleString();
+            const fill = document.getElementById('quotaFill');
+            fill.style.width = pct + '%';
+            fill.className = 'quota-fill' + (pct > 80 ? ' danger' : pct > 50 ? ' warning' : '');
+            document.getElementById('quotaStatus').textContent = pct < 50 ? '✅ Healthy' : pct < 80 ? '⚠️ Moderate' : '🚨 High';
+        }
+        
         function renderStats() {
-            const niches = Object.values(trendsData.niches);
-            const allVideos = niches.flatMap(n => n.videos);
+            const niches = Object.values(trendsData.niches || {});
+            const allVideos = niches.flatMap(n => n.videos || []);
             
             document.getElementById('totalVideos').textContent = allVideos.length;
             document.getElementById('totalNiches').textContent = niches.length;
-            document.getElementById('topPattern').textContent = trendsData.patterns[0]?.name || '-';
+            document.getElementById('topPattern').textContent = trendsData.patterns?.[0]?.name || '-';
             
             const avgViews = allVideos.length 
-                ? Math.round(allVideos.reduce((s, v) => s + v.views, 0) / allVideos.length)
+                ? Math.round(allVideos.reduce((s, v) => s + (v.views||0), 0) / allVideos.length)
                 : 0;
             document.getElementById('avgViews').textContent = formatViews(avgViews);
             document.getElementById('lastUpdated').textContent = `Last updated: ${formatDate(trendsData.scrapedAt)}`;
         }
         
+        function renderActionableInsights() {
+            const container = document.getElementById('actionableInsights');
+            const patterns = trendsData.patterns || [];
+            const niches = Object.entries(trendsData.niches || {});
+            const allVideos = niches.flatMap(([id, n]) => (n.videos || []).map(v => ({...v, niche: n.name})));
+            
+            const insights = [];
+            
+            // Insight 1: Best performing pattern with real numbers
+            if (patterns.length > 0) {
+                const top = patterns[0];
+                const secondBest = patterns[1];
+                const improvement = secondBest ? Math.round(((top.avgViews - secondBest.avgViews) / secondBest.avgViews) * 100) : 0;
+                insights.push({
+                    title: `"${top.name}" titles get ${formatViews(top.avgViews)} avg views`,
+                    data: `This pattern outperforms "${secondBest?.name || 'others'}" by ${improvement}%. Found in ${top.count} of the top videos analyzed.`,
+                    action: `Try: "${top.name === 'shorts' ? '#shorts' : top.name === 'question' ? 'Why/How/What...' : top.name === 'listicle' ? '10 Ways to...' : top.name === 'comparison' ? 'X vs Y' : top.name}" format in your next video`
+                });
+            }
+            
+            // Insight 2: Best niche right now
+            const nichesByAvg = niches
+                .map(([id, n]) => ({ id, name: n.name, avgViews: n.videos?.length ? n.videos.reduce((s,v) => s + (v.views||0), 0) / n.videos.length : 0 }))
+                .sort((a, b) => b.avgViews - a.avgViews);
+            
+            if (nichesByAvg.length > 0) {
+                const topNiche = nichesByAvg[0];
+                insights.push({
+                    title: `${topNiche.name} is the hottest niche right now`,
+                    data: `Average ${formatViews(Math.round(topNiche.avgViews))} views in the last 14 days. ${nichesByAvg.length > 1 ? `That's ${Math.round(topNiche.avgViews / nichesByAvg[1].avgViews)}x more than ${nichesByAvg[1].name}.` : ''}`,
+                    action: `Consider creating content in the ${topNiche.name} space`
+                });
+            }
+            
+            // Insight 3: Shorts vs long-form
+            const shortsVideos = allVideos.filter(v => (v.patterns || []).includes('shorts'));
+            const longVideos = allVideos.filter(v => !(v.patterns || []).includes('shorts'));
+            if (shortsVideos.length > 0 && longVideos.length > 0) {
+                const shortsAvg = shortsVideos.reduce((s,v) => s + (v.views||0), 0) / shortsVideos.length;
+                const longAvg = longVideos.reduce((s,v) => s + (v.views||0), 0) / longVideos.length;
+                const winner = shortsAvg > longAvg ? 'Shorts' : 'Long-form';
+                const ratio = Math.round(Math.max(shortsAvg, longAvg) / Math.min(shortsAvg, longAvg));
+                insights.push({
+                    title: `${winner} content is winning right now (${ratio}x higher avg views)`,
+                    data: `Shorts: ${formatViews(Math.round(shortsAvg))} avg | Long-form: ${formatViews(Math.round(longAvg))} avg. Based on ${shortsVideos.length} shorts and ${longVideos.length} long videos.`,
+                    action: winner === 'Shorts' ? 'Prioritize short-form vertical content' : 'Invest in longer, in-depth videos'
+                });
+            }
+            
+            // Insight 4: Virality timing
+            const recentVideos = allVideos.filter(v => v.virality > 0).sort((a,b) => b.virality - a.virality).slice(0, 5);
+            if (recentVideos.length > 0) {
+                const avgVirality = Math.round(recentVideos.reduce((s,v) => s + v.virality, 0) / recentVideos.length);
+                insights.push({
+                    title: `Top videos get ${formatViews(avgVirality)} views/day in first 2 weeks`,
+                    data: `The fastest-growing video "${escapeHtml(recentVideos[0]?.title?.slice(0,40))}..." hit ${formatViews(recentVideos[0]?.views || 0)} views.`,
+                    action: 'Optimize for first 48 hours: thumbnail, title, and initial engagement'
+                });
+            }
+            
+            container.innerHTML = insights.map(i => `
+                <div class="insight-card">
+                    <div class="insight-title">💡 ${escapeHtml(i.title)}</div>
+                    <div class="insight-data">${escapeHtml(i.data)}</div>
+                    <div class="insight-action">→ ${escapeHtml(i.action)}</div>
+                </div>
+            `).join('') || '<p style="color: var(--muted)">Not enough data yet</p>';
+        }
+        
         function renderPatterns() {
             const container = document.getElementById('patternBars');
-            const maxViews = trendsData.patterns[0]?.avgViews || 1;
+            const patterns = trendsData.patterns || [];
+            if (!patterns.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No pattern data</p>';
+                return;
+            }
             
-            container.innerHTML = trendsData.patterns.slice(0, 8).map(p => `
+            const maxViews = patterns[0]?.avgViews || 1;
+            
+            container.innerHTML = patterns.slice(0, 8).map(p => `
                 <div class="pattern-bar">
-                    <span class="name">${p.name}</span>
+                    <span class="name">${escapeHtml(p.name)}</span>
                     <div class="bar-container">
                         <div class="bar" style="width: ${Math.max(10, (p.avgViews / maxViews) * 100)}%">
-                            ${formatViews(p.avgViews)} avg
+                            ${formatViews(p.avgViews)} avg · ${p.count} videos
                         </div>
                     </div>
                 </div>
             `).join('');
         }
         
+        function renderConnections() {
+            const container = document.getElementById('connectionsGrid');
+            const niches = Object.entries(trendsData.niches || {});
+            const allVideos = niches.flatMap(([id, n]) => (n.videos || []).map(v => ({...v, niche: n.name, nicheId: id})));
+            
+            // Find videos with similar patterns across different niches
+            const connections = [];
+            const patternGroups = {};
+            
+            allVideos.forEach(v => {
+                (v.patterns || []).forEach(p => {
+                    if (!patternGroups[p]) patternGroups[p] = [];
+                    patternGroups[p].push(v);
+                });
+            });
+            
+            Object.entries(patternGroups).forEach(([pattern, videos]) => {
+                // Find pairs from different niches
+                for (let i = 0; i < videos.length && connections.length < 6; i++) {
+                    for (let j = i + 1; j < videos.length && connections.length < 6; j++) {
+                        if (videos[i].nicheId !== videos[j].nicheId) {
+                            connections.push({
+                                v1: videos[i],
+                                v2: videos[j],
+                                pattern,
+                                combinedViews: (videos[i].views || 0) + (videos[j].views || 0)
+                            });
+                        }
+                    }
+                }
+            });
+            
+            // Sort by combined views and take top
+            connections.sort((a, b) => b.combinedViews - a.combinedViews);
+            
+            if (!connections.length) {
+                container.innerHTML = '<p style="color: var(--muted)">Not enough cross-niche patterns yet</p>';
+                return;
+            }
+            
+            container.innerHTML = connections.slice(0, 6).map(c => `
+                <div class="connection-card">
+                    <div class="conn-from">
+                        <strong>${escapeHtml(c.v1.niche)}</strong><br>
+                        ${escapeHtml((c.v1.title || '').slice(0, 50))}...
+                        <br><small style="color: var(--accent)">${formatViews(c.v1.views || 0)} views</small>
+                    </div>
+                    <div class="conn-arrow">↕ Same "${c.pattern}" pattern</div>
+                    <div class="conn-to">
+                        <strong>${escapeHtml(c.v2.niche)}</strong><br>
+                        ${escapeHtml((c.v2.title || '').slice(0, 50))}...
+                        <br><small style="color: var(--accent)">${formatViews(c.v2.views || 0)} views</small>
+                    </div>
+                    <div class="conn-reason">💡 This "${c.pattern}" format works across ${escapeHtml(c.v1.niche)} and ${escapeHtml(c.v2.niche)}</div>
+                </div>
+            `).join('');
+        }
+        
         function renderNicheTabs() {
             const container = document.getElementById('nicheTabs');
-            const niches = Object.entries(trendsData.niches);
+            const niches = Object.entries(trendsData.niches || {});
             
             let html = `<button class="niche-tab ${currentNiche === 'all' ? 'active' : ''}" data-niche="all">All Niches</button>`;
             niches.forEach(([id, niche]) => {
-                html += `<button class="niche-tab ${currentNiche === id ? 'active' : ''}" data-niche="${id}" style="--tab-color: ${niche.color}">${niche.name}</button>`;
+                html += `<button class="niche-tab ${currentNiche === id ? 'active' : ''}" data-niche="${id}">${escapeHtml(niche.name)}</button>`;
             });
             
             container.innerHTML = html;
@@ -348,11 +616,11 @@
             let videos = [];
             
             if (currentNiche === 'all') {
-                videos = Object.values(trendsData.niches)
-                    .flatMap(n => n.videos.slice(0, 5))
-                    .sort((a, b) => b.virality - a.virality);
+                videos = Object.values(trendsData.niches || {})
+                    .flatMap(n => (n.videos || []).slice(0, 4))
+                    .sort((a, b) => (b.virality || 0) - (a.virality || 0));
             } else {
-                videos = trendsData.niches[currentNiche]?.videos || [];
+                videos = trendsData.niches?.[currentNiche]?.videos || [];
             }
             
             if (!videos.length) {
@@ -360,7 +628,7 @@
                 return;
             }
             
-            container.innerHTML = videos.slice(0, 24).map(v => `
+            container.innerHTML = videos.slice(0, 20).map(v => `
                 <div class="video-card">
                     <a href="https://youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">
                         <img class="thumb" src="${v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`}" alt="" loading="lazy">
@@ -368,11 +636,11 @@
                             <div class="title">${escapeHtml(v.title)}</div>
                             <div class="meta">
                                 <span>${escapeHtml(v.channelName)}</span>
-                                <span class="views">${formatViews(v.views)} views</span>
+                                <span class="views">${formatViews(v.views || 0)} views</span>
                             </div>
-                            ${v.patterns?.length ? `
+                            ${(v.patterns || []).length ? `
                                 <div class="patterns">
-                                    ${v.patterns.map(p => `<span class="pattern-tag">${p}</span>`).join('')}
+                                    ${v.patterns.map(p => `<span class="pattern-tag">${escapeHtml(p)}</span>`).join('')}
                                 </div>
                             ` : ''}
                         </div>
@@ -381,27 +649,24 @@
             `).join('');
         }
         
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
-        }
-        
         async function loadData() {
             try {
-                // Try to load from same origin first
                 const res = await fetch('youtube-trends-data.json');
                 if (!res.ok) throw new Error('Data not found');
                 trendsData = await res.json();
                 
+                renderQuota();
                 renderStats();
+                renderActionableInsights();
                 renderPatterns();
+                renderConnections();
                 renderNicheTabs();
                 renderVideos();
             } catch (err) {
                 console.error('Failed to load trends data:', err);
-                document.getElementById('videosGrid').innerHTML = `
-                    <p style="color: var(--muted); padding: 40px;">
-                        Unable to load trends data. Please check back later.
-                    </p>`;
+                document.querySelectorAll('.loading').forEach(el => {
+                    el.innerHTML = 'Unable to load data. Please check back later.';
+                });
             }
         }
         

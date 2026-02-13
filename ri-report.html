@@ -207,9 +207,9 @@ const rawData =
         initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
         .then(SQL => {
             db = new SQL.Database();
-            db.run(`CREATE TABLE properties (address TEXT, city TEXT, zip TEXT, price INT, propertyType TEXT, beds INT, baths REAL, sqft INT, lotSize INT, yearBuilt INT, dom INT, soldDate TEXT, url TEXT)`);
-            const stmt = db.prepare(`INSERT INTO properties VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-            rawData.properties.forEach(p => stmt.run([p.address, p.city, p.zip, p.price, p.propertyType, p.beds, p.baths, p.sqft, p.lotSize, p.yearBuilt, p.dom, p.soldDate, p.url]));
+            db.run(`CREATE TABLE properties (address TEXT, city TEXT, zip TEXT, price INT, propertyType TEXT, beds INT, baths REAL, sqft INT, lotSize INT, yearBuilt INT, dom INT, soldDate TEXT, url TEXT, status TEXT)`);
+            const stmt = db.prepare(`INSERT INTO properties VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+            rawData.properties.forEach(p => stmt.run([p.address, p.city, p.zip, p.price, p.propertyType, p.beds, p.baths, p.sqft, p.lotSize, p.yearBuilt, p.dom, p.soldDate, p.url, p.status || 'Sold']));
             stmt.free();
             const cities = [...new Set(rawData.properties.map(p => p.city))].sort();
             const sel = document.getElementById('filterCity');

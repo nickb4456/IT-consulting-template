@@ -213,9 +213,12 @@
             </div>
             
             <!-- Manual Entry Toggle -->
-            <div style="margin-bottom:1.5rem">
+            <div style="margin-bottom:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
                 <button onclick="toggleManualEntry()" class="btn-secondary" style="font-size:0.85rem">
                     📝 My address isn't listed - Enter manually
+                </button>
+                <button onclick="lookupOnRedfin()" class="btn-secondary" style="font-size:0.85rem;background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.4)">
+                    🔍 Look up my home's details on Redfin
                 </button>
             </div>
             
@@ -679,6 +682,19 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
         function toggleManualEntry() {
             const form = document.getElementById('manualEntryForm');
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Open Redfin to look up property details
+        function lookupOnRedfin() {
+            const address = document.getElementById('addressSearch').value.trim() || 
+                           document.getElementById('manualAddress')?.value.trim() || '';
+            if (!address) {
+                alert('Enter an address first, then click this button to look up details on Redfin');
+                return;
+            }
+            // Format for Redfin search
+            const query = encodeURIComponent(address + ', RI');
+            window.open('https://www.redfin.com/RI/search?q=' + query, '_blank');
         }
         
         // Populate manual city dropdown

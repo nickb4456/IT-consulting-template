@@ -307,6 +307,56 @@
                 <strong>Stigmergic Fitness:</strong> SF = σ + C + R + E &nbsp;&nbsp;(Scale: 0-100)<br><br>
                 <strong>Overall Colony Health:</strong> H = (SF/100 + DE) / 2 &nbsp;&nbsp;(Scale: 0-1)
             </div>
+            
+            <h3>4.3 Continuous Improvement Mathematics</h3>
+            <p>A critical insight from biological systems: evolution has no ceiling. Organisms do not "max out" at some optimal fitness and stop improving. To ensure our colony exhibits the same continuous improvement property, we implement three key mathematical mechanisms.</p>
+            
+            <h4>4.3.1 Open-Ended Scoring (No Ceiling)</h4>
+            <p>Traditional sigmoid scoring asymptotes at a maximum value, creating an artificial ceiling that halts improvement once reached. We extend our scoring formula with linear-log growth and relative excellence components:</p>
+            
+            <div class="formula">
+                <strong>Base Score:</strong> S<sub>base</sub> = 50 + 30σ(core/3-1) + 15σ(boost/2.5-1) - 25(1-e<sup>-noise/2</sup>) + 10log(1+words/200)<br><br>
+                <strong>Linear-Log Growth:</strong> S<sub>growth</sub> = 5 × log(1 + max(0, matches - 8))<br><br>
+                <strong>Relative Excellence:</strong> S<sub>rel</sub> = (S<sub>base</sub> - μ<sub>colony</sub>) × α<br>
+                where α = 0.2 if above average, 0.1 if below<br><br>
+                <strong>Final Score:</strong> S = S<sub>base</sub> + S<sub>growth</sub> + S<sub>rel</sub> &nbsp;&nbsp;<em>(no upper bound)</em>
+            </div>
+            
+            <p>The relative excellence component creates an ever-rising bar: as the colony improves, μ<sub>colony</sub> increases, requiring greater effort for the same relative score. This mirrors natural selection's Red Queen effect.</p>
+            
+            <h4>4.3.2 Entropy Floor and Thermal Spikes</h4>
+            <p>Standard exponential decay eventually freezes exploration entirely. We introduce an entropy floor—a minimum exploration rate that prevents complete convergence—and thermal spikes to escape local optima:</p>
+            
+            <div class="formula">
+                <strong>Decay with Entropy Floor:</strong><br>
+                strength(t) = max(strength<sub>0</sub> × e<sup>-λt×T</sup>, ε<sub>floor</sub>)<br><br>
+                where ε<sub>floor</sub> = 0.15 (minimum exploration rate)<br><br>
+                <strong>Echo Chamber Detection:</strong><br>
+                if avg(top5_similarity) > 0.9 for N consecutive runs:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;T ← T × 2 &nbsp;&nbsp;<em>(thermal spike)</em><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;duration = 1 hour
+            </div>
+            
+            <p>The thermal spike mechanism ensures the colony can escape echo chambers automatically. When similarity becomes too high (indicating the colony is trapped in a local optimum), temperature doubles briefly, forcing exploration of new territory.</p>
+            
+            <h4>4.3.3 Success-Weighted Novelty</h4>
+            <p>Pure density-aware novelty rewards "unique but useless" behavior. We weight novelty by proximity to previously successful discoveries:</p>
+            
+            <div class="formula">
+                <strong>Success Weight:</strong><br>
+                w<sub>success</sub> = f(max_similarity_to_breakthroughs)<br><br>
+                = 2.0 &nbsp;&nbsp;if sim > 0.8 &nbsp;&nbsp;<em>(very close to successful area)</em><br>
+                = 1.5 &nbsp;&nbsp;if sim > 0.6 &nbsp;&nbsp;<em>(moderately close)</em><br>
+                = 1.0 &nbsp;&nbsp;if sim > 0.4 &nbsp;&nbsp;<em>(neutral)</em><br>
+                = 0.7 &nbsp;&nbsp;otherwise &nbsp;&nbsp;<em>(far from known successes)</em><br><br>
+                <strong>Weighted Novelty:</strong> N<sub>weighted</sub> = (N<sub>base</sub> × w<sub>success</sub>) / density_penalty
+            </div>
+            
+            <p>This prioritizes exploring "weird but promising" areas over "just weird" areas, directing the colony's exploration toward regions where novelty has historically led to breakthroughs.</p>
+            
+            <div class="highlight">
+                <strong>Key Insight:</strong> These three mechanisms ensure the colony can improve indefinitely without hitting artificial ceilings, never stops exploring even when exploiting known good paths, and focuses exploration on promising rather than arbitrary directions.
+            </div>
         </section>
 
         <!-- Section 5 -->
@@ -381,6 +431,9 @@ CREATE TABLE edges (
             <ol>
                 <li><strong>Ten metrics</strong> spanning behavioral health and discovery effectiveness</li>
                 <li><strong>Gaussian reinforcement curve</strong> preserving exploration-exploitation balance</li>
+                <li><strong>Continuous improvement mathematics</strong> ensuring no performance ceiling</li>
+                <li><strong>Entropy floor and thermal spikes</strong> preventing exploration freeze</li>
+                <li><strong>Success-weighted novelty</strong> prioritizing promising exploration</li>
                 <li><strong>Automated monitoring</strong> with Colony Collapse detection</li>
                 <li><strong>Corrective action protocols</strong> for graduated system response</li>
             </ol>

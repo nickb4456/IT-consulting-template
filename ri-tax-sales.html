@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhode Island Tax Delinquency & Tax Sale Properties</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --primary: #ef4444; --secondary: #f59e0b; --accent: #10b981; --dark: #0f172a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        
+        .home-btn { position: fixed; top: 1rem; left: 1rem; z-index: 100; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(239,68,68,0.9); color: white; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: all 0.2s; }
+        .home-btn:hover { background: rgba(239,68,68,1); transform: scale(1.05); }
+        
+        .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(245,158,11,0.2)); border-radius: 24px; margin-bottom: 2rem; border: 1px solid rgba(255,255,255,0.1); }
+        h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #ef4444, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #94a3b8; font-size: 1.1rem; margin-top: 0.5rem; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 2rem 0; }
+        .stat-card { background: rgba(255,255,255,0.05); padding: 1.25rem; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .stat-value { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #ef4444, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-label { color: #94a3b8; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .warning-box { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 12px; padding: 1.5rem; margin: 1.5rem 0; }
+        .warning-box h3 { color: #f59e0b; margin-bottom: 0.5rem; }
+        
+        h2 { font-size: 1.5rem; margin: 2rem 0 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        h2::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, rgba(239,68,68,0.5), transparent); }
+        
+        .chart-card { background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); margin-bottom: 1.5rem; }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { background: rgba(239,68,68,0.3); padding: 0.75rem; text-align: left; position: sticky; top: 0; }
+        td { padding: 0.6rem 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        tr:hover { background: rgba(255,255,255,0.05); }
+        .price { color: #ef4444; font-weight: 700; }
+        
+        .results { max-height: 600px; overflow-y: auto; border-radius: 12px; }
+        
+        .resource-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 1.5rem 0; }
+        .resource-card { background: rgba(255,255,255,0.05); padding: 1.25rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+        .resource-card h4 { color: #f59e0b; margin-bottom: 0.5rem; }
+        .resource-card a { color: #10b981; text-decoration: none; }
+        .resource-card a:hover { text-decoration: underline; }
+        
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .resource-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <a href="https://aibridges.org" class="home-btn">← Home</a>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>🏚️ Rhode Island Tax Delinquency</h1>
+            <p class="subtitle">Tax Sale Properties & Delinquent Tax Liens • Providence 2024 Data</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value">179</div><div class="stat-label">Properties Sold</div></div>
+            <div class="stat-card"><div class="stat-value">$1.46M</div><div class="stat-label">Total Auction Value</div></div>
+            <div class="stat-card"><div class="stat-value">$8,165</div><div class="stat-label">Avg Tax Lien</div></div>
+            <div class="stat-card"><div class="stat-value">1</div><div class="stat-label">Cities (Providence)</div></div>
+        </div>
+        
+        <div class="warning-box">
+            <h3>⚠️ Important Notes</h3>
+            <p>This data shows properties that were <strong>sold at tax sale</strong> (liens already auctioned). For <strong>upcoming</strong> tax delinquent properties, check each city's tax collector website before their annual sale. Rhode Island has no centralized delinquency database - each of the 39 cities/towns handles tax sales independently.</p>
+        </div>
+        
+        <h2>📊 Tax Sale Analysis</h2>
+        <div class="chart-card">
+            <canvas id="priceChart" height="100"></canvas>
+        </div>
+        
+        <h2>🏚️ Providence 2024 Tax Sale Properties (179)</h2>
+        <div class="results">
+            <table id="propertyTable">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Former Owner</th>
+                        <th>Auction Price</th>
+                        <th>Purchaser</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        
+        <h2>🔗 RI City Tax Sale Resources</h2>
+        <div class="resource-grid">
+            <div class="resource-card">
+                <h4>Providence</h4>
+                <p><a href="https://www.providenceri.gov/tax-collector/" target="_blank">Tax Collector →</a></p>
+                <p>Annual sale: May</p>
+            </div>
+            <div class="resource-card">
+                <h4>Cranston</h4>
+                <p><a href="https://www.cranstonri.gov/departments/finance/tax-collections/" target="_blank">Tax Collections →</a></p>
+                <p>Contact for sale dates</p>
+            </div>
+            <div class="resource-card">
+                <h4>Warwick</h4>
+                <p><a href="https://www.warwickri.gov/tax-collector" target="_blank">Tax Collector →</a></p>
+                <p>Contact for sale dates</p>
+            </div>
+            <div class="resource-card">
+                <h4>Pawtucket</h4>
+                <p><a href="https://www.pawtucketri.com/tax-collector" target="_blank">Tax Collector →</a></p>
+                <p>Contact for sale dates</p>
+            </div>
+            <div class="resource-card">
+                <h4>Woonsocket</h4>
+                <p><a href="https://www.woonsocketri.org/" target="_blank">City Website →</a></p>
+                <p>Contact for sale dates</p>
+            </div>
+            <div class="resource-card">
+                <h4>Newport</h4>
+                <p><a href="https://www.cityofnewport.com/departments/finance/tax-collector" target="_blank">Tax Collector →</a></p>
+                <p>Contact for sale dates</p>
+            </div>
+        </div>
+        
+        <div class="warning-box" style="background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3);">
+            <h3 style="color: #10b981;">💡 Investment Tips</h3>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Tax liens in RI typically have a 1-year redemption period</li>
+                <li>Interest rates on liens can be 12-18% annually</li>
+                <li>Research title issues before bidding</li>
+                <li>Contact city tax collectors 30-60 days before sales for upcoming lists</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        const data = {"properties":[{"address":"1000 Providence Pl","city":"Providence","owner":"AJ PROPERTIES,LLC","auctionPrice":4832.41,"purchaser":"AJ PROPERTIES, LLC","accountNum":"026-0367-0279","status":"Tax Lien Sold"},{"address":"122 Elmwood Ave Unit 2","city":"Providence","owner":"AJ PROPERTIES,LLC","auctionPrice":5390.16,"purchaser":"AJ PROPERTIES, LLC","accountNum":"030-0420-0002","status":"Tax Lien Sold"},{"address":"221 Gallatin St","city":"Providence","owner":"AJ PROPERTIES,LLC","auctionPrice":1157.1,"purchaser":"AJ PROPERTIES, LLC","accountNum":"052-0447-0000","status":"Tax Lien Sold"},{"address":"191 Smith St","city":"Providence","owner":"BARR, ROBERT G","auctionPrice":5677.02,"purchaser":"AJ PROPERTIES, LLC","accountNum":"026-0206-0000","status":"Tax Lien Sold"},{"address":"50 Parkis Ave","city":"Providence","owner":"BIANCHI, LOUIS A-ESTATE","auctionPrice":2610.32,"purchaser":"AJ PROPERTIES, LLC","accountNum":"060-0173-0000","status":"Tax Lien Sold"}]};
+        
+        // Load full data
+        fetch('https://engagement-hooks-site.s3.amazonaws.com/ri-tax-sales.json')
+            .then(r => r.json())
+            .then(fullData => {
+                renderTable(fullData.properties);
+                renderChart(fullData.properties);
+            })
+            .catch(() => {
+                renderTable(data.properties);
+                renderChart(data.properties);
+            });
+        
+        function renderTable(properties) {
+            const tbody = document.querySelector('#propertyTable tbody');
+            tbody.innerHTML = properties.map(p => `
+                <tr>
+                    <td><strong>${p.address}</strong></td>
+                    <td>${p.owner}</td>
+                    <td class="price">$${p.auctionPrice.toLocaleString()}</td>
+                    <td>${p.purchaser}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderChart(properties) {
+            // Price distribution
+            const ranges = {'<$1K':0, '$1-5K':0, '$5-10K':0, '$10-25K':0, '$25-50K':0, '>$50K':0};
+            properties.forEach(p => {
+                if (p.auctionPrice < 1000) ranges['<$1K']++;
+                else if (p.auctionPrice < 5000) ranges['$1-5K']++;
+                else if (p.auctionPrice < 10000) ranges['$5-10K']++;
+                else if (p.auctionPrice < 25000) ranges['$10-25K']++;
+                else if (p.auctionPrice < 50000) ranges['$25-50K']++;
+                else ranges['>$50K']++;
+            });
+            
+            new Chart(document.getElementById('priceChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(ranges),
+                    datasets: [{
+                        label: 'Properties by Lien Amount',
+                        data: Object.values(ranges),
+                        backgroundColor: ['#10b981', '#22c55e', '#f59e0b', '#ef4444', '#dc2626', '#991b1b'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

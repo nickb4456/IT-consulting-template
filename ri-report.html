@@ -193,8 +193,63 @@
                 <button onclick="runQuery()">▶️ Run</button>
                 <button class="btn-secondary" onclick="resetFilters()">🔄 Reset</button>
                 <button class="btn-accent" onclick="exportCSV()">📥 CSV</button>
+                <button class="btn-accent" onclick="exportHTML()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">📄 HTML</button>
+                <span id="dbStatus" style="margin-left:auto;color:#f59e0b;font-size:0.8rem">⏳ Loading database...</span>
             </div>
             <div id="results"></div>
+        </div>
+
+        <h2 id="price-comp">🔍 Price Comparator Tool</h2>
+        <div class="sql-section">
+            <p style="color:#94a3b8;margin-bottom:1.5rem">Find comparable properties based on your criteria. Filter by sold data, active listings, or both.</p>
+            <div class="filters">
+                <div class="filter-group">
+                    <label>Data Source</label>
+                    <select id="compSource">
+                        <option value="sold">Sold Only</option>
+                        <option value="active">Active Only</option>
+                        <option value="both" selected>Both</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>City</label>
+                    <select id="compCity"><option value="">All Cities</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Type</label>
+                    <select id="compType">
+                        <option value="">All</option>
+                        <option value="Single Family">Single Family</option>
+                        <option value="Condo">Condo</option>
+                        <option value="Multi">Multi-Family</option>
+                        <option value="Land">Land</option>
+                    </select>
+                </div>
+                <div class="filter-group"><label>Beds</label><select id="compBeds"><option value="">Any</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option></select></div>
+                <div class="filter-group"><label>Baths</label><select id="compBaths"><option value="">Any</option><option value="1">1+</option><option value="1.5">1.5+</option><option value="2">2+</option><option value="3">3+</option></select></div>
+                <div class="filter-group"><label>Min SqFt</label><input type="number" id="compSqftMin" placeholder="0"></div>
+                <div class="filter-group"><label>Max SqFt</label><input type="number" id="compSqftMax" placeholder="Any"></div>
+                <div class="filter-group"><label>Year Built (Min)</label><input type="number" id="compYearMin" placeholder="1900"></div>
+                <div class="filter-group"><label>Year Built (Max)</label><input type="number" id="compYearMax" placeholder="2026"></div>
+                <div class="filter-group"><label>Min Price</label><input type="number" id="compPriceMin" placeholder="0"></div>
+                <div class="filter-group"><label>Max Price</label><input type="number" id="compPriceMax" placeholder="Any"></div>
+            </div>
+            <div class="btn-row">
+                <button onclick="runComparison()">🔎 Find Comparables</button>
+                <button class="btn-secondary" onclick="clearCompFilters()">🔄 Clear</button>
+                <button class="btn-accent" onclick="exportCompCSV()">📥 Export CSV</button>
+                <button class="btn-accent" onclick="exportCompHTML()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6)">📄 Export HTML</button>
+            </div>
+            <div id="compStats" style="display:none;margin:1.5rem 0">
+                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr)">
+                    <div class="stat-card"><div class="stat-value" id="compCount">0</div><div class="stat-label">Matches</div></div>
+                    <div class="stat-card"><div class="stat-value" id="compMedian">$0</div><div class="stat-label">Median</div></div>
+                    <div class="stat-card"><div class="stat-value" id="compAvg">$0</div><div class="stat-label">Average</div></div>
+                    <div class="stat-card"><div class="stat-value" id="compPsf">$0</div><div class="stat-label">Avg $/SqFt</div></div>
+                    <div class="stat-card"><div class="stat-value" id="compRange">-</div><div class="stat-label">Range</div></div>
+                </div>
+            </div>
+            <div id="compResults"></div>
         </div>
     </div>
 
@@ -215,6 +270,20 @@ const rawData =
             const sel = document.getElementById('filterCity');
             cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
             buildQuery();
+            // Update status to show database is ready
+            const statusEl = document.getElementById('dbStatus');
+            if (statusEl) {
+                statusEl.textContent = '✅ Database ready (' + rawData.properties.length.toLocaleString() + ' properties)';
+                statusEl.style.color = '#10b981';
+            }
+            console.log('✅ SQL database initialized with ' + rawData.properties.length + ' properties');
+        }).catch(err => {
+            console.error('SQL.js initialization failed:', err);
+            const statusEl = document.getElementById('dbStatus');
+            if (statusEl) {
+                statusEl.textContent = '❌ Database failed to load';
+                statusEl.style.color = '#ec4899';
+            }
         });
         
         function buildQuery() {
@@ -265,6 +334,10 @@ const rawData =
         }
         
         function runQuery() {
+            if (!db) { 
+                document.getElementById('results').innerHTML = '<p style="color:#f59e0b">⏳ Database loading... please wait a moment and try again</p>'; 
+                return; 
+            }
             const sql = document.getElementById('sqlInput').value;
             try {
                 const res = db.exec(sql);
@@ -284,6 +357,184 @@ const rawData =
             lastResults.forEach(r => { csv += h.map(k => `"${(r[k]||'').toString().replace(/"/g,'""')}"`).join(',') + '\n'; });
             const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'ri-real-estate.csv'; a.click();
         }
+        
+        function exportHTML() {
+            if (!lastResults.length) return alert('Run query first');
+            const h = Object.keys(lastResults[0]);
+            const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>RI Real Estate Export</title>
+<style>body{font-family:system-ui;background:#1a1a2e;color:#eee;padding:2rem}table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:8px;text-align:left}th{background:#6366f1}tr:hover{background:rgba(255,255,255,0.05)}a{color:#10b981}</style>
+</head><body><h1>Rhode Island Real Estate - ${lastResults.length} Results</h1><p>Exported: ${new Date().toLocaleString()}</p>
+<table><thead><tr>${h.map(c => '<th>'+c+'</th>').join('')}</tr></thead><tbody>
+${lastResults.map(r => '<tr>' + h.map(k => {
+    const v = r[k] || '';
+    return k === 'url' && String(v).startsWith('http') ? '<td><a href="'+v+'" target="_blank">View</a></td>' : '<td>'+v+'</td>';
+}).join('') + '</tr>').join('\n')}
+</tbody></table></body></html>`;
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(new Blob([html], {type:'text/html'})); 
+            a.download = 'ri-real-estate-export.html'; 
+            a.click();
+        }
+        
+        // ============ PRICE COMPARATOR ============
+        let compResults = [];
+        let compPage = 1;
+        const compPageSize = 25;
+        
+        // Populate comparator city dropdown when db loads
+        function initComparator() {
+            const cities = [...new Set(rawData.properties.map(p => p.city))].sort();
+            const sel = document.getElementById('compCity');
+            cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+        }
+        
+        function median(arr) {
+            if (!arr.length) return 0;
+            const sorted = [...arr].sort((a,b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid-1] + sorted[mid]) / 2;
+        }
+        
+        function fmt(n) { return '$' + Math.round(n).toLocaleString(); }
+        
+        function runComparison() {
+            const source = document.getElementById('compSource').value;
+            const city = document.getElementById('compCity').value;
+            const ptype = document.getElementById('compType').value;
+            const beds = parseFloat(document.getElementById('compBeds').value) || 0;
+            const baths = parseFloat(document.getElementById('compBaths').value) || 0;
+            const sqftMin = parseInt(document.getElementById('compSqftMin').value) || 0;
+            const sqftMax = parseInt(document.getElementById('compSqftMax').value) || Infinity;
+            const yearMin = parseInt(document.getElementById('compYearMin').value) || 0;
+            const yearMax = parseInt(document.getElementById('compYearMax').value) || 9999;
+            const priceMin = parseInt(document.getElementById('compPriceMin').value) || 0;
+            const priceMax = parseInt(document.getElementById('compPriceMax').value) || Infinity;
+            
+            // Filter properties
+            compResults = rawData.properties.filter(p => {
+                // Source filter
+                const status = p.status || 'Sold';
+                if (source === 'sold' && status !== 'Sold') return false;
+                if (source === 'active' && status === 'Sold') return false;
+                
+                if (city && p.city !== city) return false;
+                if (ptype && !p.propertyType.includes(ptype)) return false;
+                if ((p.beds || 0) < beds) return false;
+                if ((p.baths || 0) < baths) return false;
+                if (p.sqft && (p.sqft < sqftMin || p.sqft > sqftMax)) return false;
+                if (p.yearBuilt && (p.yearBuilt < yearMin || p.yearBuilt > yearMax)) return false;
+                if (p.price < priceMin || p.price > priceMax) return false;
+                return true;
+            }).sort((a,b) => b.price - a.price);
+            
+            // Update stats
+            const prices = compResults.map(p => p.price);
+            const psfs = compResults.filter(p => p.sqft > 0).map(p => p.price / p.sqft);
+            
+            document.getElementById('compCount').textContent = compResults.length.toLocaleString();
+            document.getElementById('compMedian').textContent = prices.length ? fmt(median(prices)) : '$0';
+            document.getElementById('compAvg').textContent = prices.length ? fmt(prices.reduce((a,b)=>a+b,0)/prices.length) : '$0';
+            document.getElementById('compPsf').textContent = psfs.length ? '$' + Math.round(psfs.reduce((a,b)=>a+b,0)/psfs.length) : '$0';
+            document.getElementById('compRange').textContent = prices.length ? fmt(Math.min(...prices)) + '-' + fmt(Math.max(...prices)) : '-';
+            
+            document.getElementById('compStats').style.display = 'block';
+            compPage = 1;
+            renderCompTable();
+        }
+        
+        function renderCompTable() {
+            const start = (compPage - 1) * compPageSize;
+            const end = start + compPageSize;
+            const pageData = compResults.slice(start, end);
+            const totalPages = Math.ceil(compResults.length / compPageSize);
+            
+            let html = `<table style="width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:1rem">
+                <thead><tr style="background:rgba(99,102,241,0.3)">
+                <th style="padding:0.6rem">Address</th><th>City</th><th>Type</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Price</th><th>$/SqFt</th><th>Status</th></tr></thead><tbody>`;
+            
+            pageData.forEach(p => {
+                const psf = p.sqft ? '$' + Math.round(p.price / p.sqft) : '-';
+                const status = p.status || 'Sold';
+                const statusColor = status === 'For Sale' ? '#10b981' : '#94a3b8';
+                html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05)">
+                    <td style="padding:0.5rem"><a href="${p.url}" target="_blank" style="color:#10b981">${p.address}</a></td>
+                    <td>${p.city}</td>
+                    <td>${(p.propertyType || '').split(' ')[0]}</td>
+                    <td>${p.beds || '-'}</td>
+                    <td>${p.baths || '-'}</td>
+                    <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
+                    <td>${p.yearBuilt || '-'}</td>
+                    <td><strong>${fmt(p.price)}</strong></td>
+                    <td>${psf}</td>
+                    <td style="color:${statusColor}">${status}</td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            
+            // Pagination
+            if (totalPages > 1) {
+                html += `<div style="margin-top:1rem;display:flex;gap:0.5rem;align-items:center;justify-content:center">
+                    <button class="btn-secondary" onclick="compGoPage(1)" ${compPage===1?'disabled':''}>«</button>
+                    <button class="btn-secondary" onclick="compGoPage(${compPage-1})" ${compPage===1?'disabled':''}>‹</button>
+                    <span style="color:#94a3b8">Page ${compPage} of ${totalPages}</span>
+                    <button class="btn-secondary" onclick="compGoPage(${compPage+1})" ${compPage===totalPages?'disabled':''}>›</button>
+                    <button class="btn-secondary" onclick="compGoPage(${totalPages})" ${compPage===totalPages?'disabled':''}>»</button>
+                </div>`;
+            }
+            
+            document.getElementById('compResults').innerHTML = html;
+        }
+        
+        function compGoPage(n) {
+            compPage = n;
+            renderCompTable();
+            document.getElementById('price-comp').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function clearCompFilters() {
+            ['compCity','compType','compBeds','compBaths'].forEach(id => document.getElementById(id).value = '');
+            ['compSqftMin','compSqftMax','compYearMin','compYearMax','compPriceMin','compPriceMax'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('compSource').value = 'both';
+            document.getElementById('compStats').style.display = 'none';
+            document.getElementById('compResults').innerHTML = '';
+            compResults = [];
+        }
+        
+        function exportCompCSV() {
+            if (!compResults.length) return alert('Run comparison first');
+            let csv = 'Address,City,Type,Beds,Baths,SqFt,Year,Price,$/SqFt,Status,URL\n';
+            compResults.forEach(p => {
+                const psf = p.sqft ? Math.round(p.price / p.sqft) : '';
+                csv += `"${p.address}","${p.city}","${p.propertyType}",${p.beds||''},${p.baths||''},${p.sqft||''},${p.yearBuilt||''},${p.price},${psf},"${p.status||'Sold'}","${p.url}"\n`;
+            });
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'})); a.download = 'ri-comparables.csv'; a.click();
+        }
+        
+        function exportCompHTML() {
+            if (!compResults.length) return alert('Run comparison first');
+            const prices = compResults.map(p => p.price);
+            const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>RI Price Comparables</title>
+<style>body{font-family:system-ui;background:#1a1a2e;color:#eee;padding:2rem}table{border-collapse:collapse;width:100%}th,td{border:1px solid #333;padding:8px;text-align:left}th{background:#6366f1}tr:hover{background:rgba(255,255,255,0.05)}a{color:#10b981}.stat{display:inline-block;background:#2a2a4a;padding:1rem 1.5rem;border-radius:8px;margin:0.5rem;text-align:center}.stat-val{font-size:1.5rem;font-weight:bold;color:#6366f1}.stat-lbl{font-size:0.8rem;color:#888}</style>
+</head><body>
+<h1>Rhode Island Price Comparables</h1>
+<p>Exported: ${new Date().toLocaleString()}</p>
+<div style="margin:1.5rem 0">
+<div class="stat"><div class="stat-val">${compResults.length}</div><div class="stat-lbl">Properties</div></div>
+<div class="stat"><div class="stat-val">${fmt(median(prices))}</div><div class="stat-lbl">Median</div></div>
+<div class="stat"><div class="stat-val">${fmt(prices.reduce((a,b)=>a+b,0)/prices.length)}</div><div class="stat-lbl">Average</div></div>
+<div class="stat"><div class="stat-val">${fmt(Math.min(...prices))} - ${fmt(Math.max(...prices))}</div><div class="stat-lbl">Range</div></div>
+</div>
+<table><thead><tr><th>Address</th><th>City</th><th>Type</th><th>Beds</th><th>Baths</th><th>SqFt</th><th>Year</th><th>Price</th><th>$/SqFt</th><th>Status</th></tr></thead><tbody>
+${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}</a></td><td>${p.city}</td><td>${(p.propertyType||'').split(' ')[0]}</td><td>${p.beds||'-'}</td><td>${p.baths||'-'}</td><td>${p.sqft?p.sqft.toLocaleString():'-'}</td><td>${p.yearBuilt||'-'}</td><td><strong>${fmt(p.price)}</strong></td><td>${p.sqft?'$'+Math.round(p.price/p.sqft):'-'}</td><td>${p.status||'Sold'}</td></tr>`).join('')}
+</tbody></table></body></html>`;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], {type:'text/html'})); a.download = 'ri-comparables.html'; a.click();
+        }
+        
+        // Initialize comparator when DOM is ready
+        document.addEventListener('DOMContentLoaded', initComparator);
         
         // CHARTS
         const chartColors = { purple: '#6366f1', pink: '#ec4899', green: '#10b981', amber: '#f59e0b', cyan: '#06b6d4' };

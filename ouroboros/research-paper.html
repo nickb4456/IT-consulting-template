@@ -419,8 +419,14 @@ CREATE TABLE edges (
             <h3>7.1 Framework Validation</h3>
             <p>The testing framework successfully detected the reinforcement bug through anomalously low R scores. This validates the utility of stigmergic metrics for infrastructure monitoring—the colony's "vital signs" accurately reflected its health status.</p>
             
-            <h3>7.2 Gaussian Reinforcement Insight</h3>
-            <p>The decision to use a Gaussian curve peaking at 80% rather than linear scaling proved critical. A system achieving 100% reinforcement would score only 18.2/25, correctly penalizing echo-chamber behavior. This aligns with ACO theory where exploration must be preserved.</p>
+            <h3>7.2 Asymmetric Gaussian Reinforcement Insight</h3>
+            <p>The decision to use an <strong>asymmetric</strong> Gaussian curve peaking at 80% proved critical. The formula uses different variances above and below the optimal:</p>
+            <ul>
+                <li><strong>Below 80% (σ² = 0.08):</strong> Gentle slope allows recovery from under-reinforcement</li>
+                <li><strong>Above 80% (σ² = 0.02):</strong> Steep cliff punishes echo chambers aggressively</li>
+            </ul>
+            <p>A system achieving 100% reinforcement scores only <strong>3.38/25</strong> (down from 18.2 in the symmetric version), while 60% under-reinforcement scores <strong>15.16/25</strong>. This 1.9x asymmetric penalty prevents model collapse by making echo chambers categorically worse than under-exploration.</p>
+            <p>Additionally, a <strong>catastrophe mechanism</strong> triggers when the Coefficient of Variation (CV = σ/μ) drops below 0.20, randomly deleting 10% of weak edges to shake up the topology.</p>
         </section>
 
         <!-- Section 8 -->
@@ -430,7 +436,8 @@ CREATE TABLE edges (
             <p><strong>Key contributions:</strong></p>
             <ol>
                 <li><strong>Ten metrics</strong> spanning behavioral health and discovery effectiveness</li>
-                <li><strong>Gaussian reinforcement curve</strong> preserving exploration-exploitation balance</li>
+                <li><strong>Asymmetric Gaussian reinforcement curve</strong> with steep cliff above 80% to prevent echo chambers</li>
+                <li><strong>Catastrophe mechanism</strong> triggered by low Coefficient of Variation to prevent over-convergence</li>
                 <li><strong>Continuous improvement mathematics</strong> ensuring no performance ceiling</li>
                 <li><strong>Entropy floor and thermal spikes</strong> preventing exploration freeze</li>
                 <li><strong>Success-weighted novelty</strong> prioritizing promising exploration</li>

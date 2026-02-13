@@ -109,6 +109,11 @@
             50% { transform: translateX(5px); }
         }
         .refresh-note { text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 2rem; }
+        /* Connection cards */
+        .connection-card { padding: 1rem; }
+        .connection-papers { display: flex; flex-direction: column; gap: 0.5rem; }
+        .paper-link { color: #c4b5fd; font-size: 0.9rem; }
+        .connection-arrow { color: #22c55e; font-weight: 600; font-size: 0.85rem; padding-left: 1.5rem; }
     </style>
 </head>
 <body>
@@ -180,13 +185,16 @@
                     </div>
                 `).join('');
 
-                // Connections
+                // Connections (paper1 ↔ paper2 format)
                 document.getElementById('connections').innerHTML = data.connections.slice(0, 8).map(c => `
-                    <div class="finding">
-                        <div class="finding-title">${c.title.replace('[CONNECTION] ', '').substring(0, 120)}</div>
+                    <div class="finding connection-card">
+                        <div class="connection-papers">
+                            <div class="paper-link">📄 ${(c.paper1 || '').substring(0, 80)}</div>
+                            <div class="connection-arrow">↔ ${c.score}% related</div>
+                            <div class="paper-link">📄 ${(c.paper2 || '').substring(0, 80)}</div>
+                        </div>
                         <div class="finding-meta">
-                            <span class="score">${c.score}</span>
-                            <span class="date">${new Date(c.created_at).toLocaleDateString()}</span>
+                            <span class="date">${c.created_at ? new Date(c.created_at).toLocaleDateString() : ''}</span>
                         </div>
                     </div>
                 `).join('');

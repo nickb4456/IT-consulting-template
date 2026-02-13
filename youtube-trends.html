@@ -3,911 +3,409 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Trending Topics Dashboard | AIBridges</title>
-    <meta name="description" content="Real-time YouTube trending topics research dashboard powered by AI. Track viral content patterns across Catholic faith and business topics.">
-    <link rel="icon" type="image/png" href="img/favicon.png">
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <title>YouTube Trends Dashboard | AIBridges</title>
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: #1a1a24;
-            --bg-hover: #22222e;
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0b0;
-            --text-muted: #606070;
-            --accent-blue: #3b82f6;
-            --accent-purple: #8b5cf6;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --accent-red: #ef4444;
-            --accent-pink: #ec4899;
-            --border-color: #2a2a36;
-            --gradient-1: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            --gradient-2: linear-gradient(135deg, #10b981, #3b82f6);
-            --gradient-3: linear-gradient(135deg, #f59e0b, #ef4444);
+            --bg: #0f0f0f;
+            --card: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #e5e5e5;
+            --muted: #888;
+            --accent: #ff0000;
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
-
-        /* Header */
-        .header {
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-decoration: none;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        /* Main Content */
-        .main {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        /* Hero Section */
-        .hero {
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header {
             text-align: center;
-            padding: 3rem 0 4rem;
+            padding: 40px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 30px;
         }
-
-        .hero h1 {
+        
+        header h1 {
             font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            background: var(--gradient-1);
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #ff0000, #ff6b6b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
-
-        .hero p {
-            color: var(--text-secondary);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .last-updated {
-            margin-top: 1rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
+        
+        header p { color: var(--muted); font-size: 1.1rem; }
+        
+        .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
+            gap: 20px;
+            margin-bottom: 30px;
         }
-
+        
         .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
+            background: var(--card);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 20px;
             text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
         }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.1);
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
         }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        
+        .stat-card .label { color: var(--muted); font-size: 0.9rem; }
+        
+        .patterns-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
         }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
+        
+        .patterns-section h2 { margin-bottom: 20px; font-size: 1.5rem; }
+        
+        .pattern-bars { display: flex; flex-direction: column; gap: 12px; }
+        
+        .pattern-bar {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-
-        /* Section Headers */
-        .section-header {
+        
+        .pattern-bar .name {
+            width: 120px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+        
+        .pattern-bar .bar-container {
+            flex: 1;
+            height: 24px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .pattern-bar .bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), #ff6b6b);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .niche-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .niche-tab {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            border-radius: 25px;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .niche-tab:hover { border-color: var(--muted); }
+        .niche-tab.active { border-color: var(--accent); background: rgba(255, 0, 0, 0.1); }
+        
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .video-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .video-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--muted);
+        }
+        
+        .video-card a { text-decoration: none; color: inherit; }
+        
+        .video-card .thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            background: var(--border);
+        }
+        
+        .video-card .info { padding: 15px; }
+        
+        .video-card .title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .video-card .meta {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
+            color: var(--muted);
+            font-size: 0.85rem;
         }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .section-badge {
-            background: var(--bg-hover);
-            color: var(--text-secondary);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        /* Topics Grid */
-        .topics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
-            margin-bottom: 3rem;
-        }
-
-        .topic-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.25rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .topic-card:hover {
-            background: var(--bg-hover);
-            border-color: var(--accent-blue);
-            transform: translateY(-2px);
-        }
-
-        .topic-card.tech {
-            border-left: 3px solid var(--accent-blue);
-        }
-
-        .topic-card.finance {
-            border-left: 3px solid var(--accent-green);
-        }
-
-        .topic-card.lifestyle {
-            border-left: 3px solid var(--accent-purple);
-        }
-
-        .topic-card.other {
-            border-left: 3px solid var(--accent-orange);
-        }
-
-        .topic-name {
-            font-weight: 600;
-            font-size: 1rem;
-            margin-bottom: 0.75rem;
+        
+        .video-card .views { color: var(--accent); font-weight: 600; }
+        
+        .video-card .patterns {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .topic-icon {
-            font-size: 1.2rem;
-        }
-
-        .topic-stats {
-            display: flex;
-            gap: 1rem;
             flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
         }
-
-        .topic-stat {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-
-        .topic-stat strong {
-            color: var(--text-primary);
-        }
-
-        .category-tag {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            font-size: 0.65rem;
-            padding: 0.25rem 0.5rem;
+        
+        .video-card .pattern-tag {
+            background: var(--border);
+            padding: 3px 8px;
             border-radius: 4px;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            font-size: 0.75rem;
+            color: var(--muted);
         }
-
-        .category-tag.tech {
-            background: rgba(59, 130, 246, 0.2);
-            color: var(--accent-blue);
-        }
-
-        .category-tag.finance {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-green);
-        }
-
-        .category-tag.lifestyle {
-            background: rgba(139, 92, 246, 0.2);
-            color: var(--accent-purple);
-        }
-
-        .category-tag.other {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent-orange);
-        }
-
-        /* Top Videos Table */
-        .videos-section {
-            margin-bottom: 3rem;
-        }
-
-        .videos-table {
-            width: 100%;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .videos-table thead {
-            background: var(--bg-hover);
-        }
-
-        .videos-table th {
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .videos-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        .videos-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .videos-table tr:hover td {
-            background: var(--bg-hover);
-        }
-
-        .video-title {
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .video-title a {
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-
-        .video-title a:hover {
-            color: var(--accent-blue);
-        }
-
-        .channel-name {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
-        .views-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.25rem;
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        .engagement-bar {
-            width: 60px;
-            height: 6px;
-            background: var(--bg-primary);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .engagement-fill {
-            height: 100%;
-            background: var(--gradient-2);
-            border-radius: 3px;
-        }
-
-        .viral-score {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-
-        .viral-score.high {
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--accent-green);
-        }
-
-        .viral-score.medium {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--accent-orange);
-        }
-
-        .viral-score.low {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--accent-red);
-        }
-
-        /* Filter Tabs */
-        .filter-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .filter-tab {
-            padding: 0.5rem 1rem;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-tab:hover {
-            background: var(--bg-hover);
-        }
-
-        .filter-tab.active {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: white;
-        }
-
-        /* Insights Section */
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .insight-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-
-        .insight-card h3 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .insight-list {
-            list-style: none;
-        }
-
-        .insight-list li {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .insight-list li:last-child {
-            border-bottom: none;
-        }
-
-        /* Footer */
-        .footer {
-            background: var(--bg-secondary);
-            border-top: 1px solid var(--border-color);
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .footer p {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .footer a {
-            color: var(--accent-blue);
-            text-decoration: none;
-        }
-
-        /* Loading State */
+        
         .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 4rem;
+            text-align: center;
+            padding: 60px;
+            color: var(--muted);
         }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top-color: var(--accent-blue);
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--muted);
+            border-top-color: var(--accent);
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
         }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-links {
-                gap: 1rem;
-            }
-
-            .hero h1 {
-                font-size: 1.75rem;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .videos-table {
-                display: block;
-                overflow-x: auto;
-            }
+        
+        footer a { color: var(--accent); }
+        
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            .pattern-bar .name { width: 80px; font-size: 0.85rem; }
+            .niche-tab { padding: 8px 15px; font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <a href="index.html" class="logo">AIBridges</a>
-            <nav class="nav-links">
-                <a href="/">Home</a>
-                <a href="/blog">Blog</a>
-                <a href="/trends" style="color: var(--accent-blue)">Trends</a>
-                <a href="/intake">CaseVault ⚖️</a>
-                <a href="/contact">Contact</a>
-            </nav>
-        </div>
+    <header>
+        <h1>📈 YouTube Trends Dashboard</h1>
+        <p>Real-time analysis of what's working on YouTube across different niches</p>
+        <p style="margin-top: 10px; font-size: 0.9rem;" id="lastUpdated">Loading...</p>
     </header>
-
-    <!-- Main Content -->
-    <main class="main">
-        <!-- Hero -->
-        <section class="hero">
-            <h1>YouTube Trending Topics</h1>
-            <p>Real-time research dashboard tracking viral content patterns across business, tech, and lifestyle topics.</p>
-            <p class="last-updated" id="lastUpdated">Loading...</p>
-        </section>
-
-        <!-- Stats Grid -->
-        <section class="stats-grid" id="statsGrid">
+    
+    <div class="container">
+        <div class="stats-row" id="statsRow">
             <div class="stat-card">
-                <div class="stat-value" id="totalVideos">-</div>
-                <div class="stat-label">Videos Analyzed</div>
+                <div class="value" id="totalVideos">-</div>
+                <div class="label">Videos Analyzed</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalTopics">-</div>
-                <div class="stat-label">Topics Researched</div>
+                <div class="value" id="totalNiches">-</div>
+                <div class="label">Niches Tracked</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="totalViews">-</div>
-                <div class="stat-label">Combined Views</div>
+                <div class="value" id="topPattern">-</div>
+                <div class="label">Top Pattern</div>
             </div>
             <div class="stat-card">
-                <div class="stat-value" id="avgEngagement">-</div>
-                <div class="stat-label">Avg Engagement</div>
+                <div class="value" id="avgViews">-</div>
+                <div class="label">Avg Views (Top 100)</div>
             </div>
-        </section>
-
-        <!-- Topics Section -->
-        <section class="topics-section">
-            <div class="section-header">
-                <h2 class="section-title">Trending Topics</h2>
-                <span class="section-badge" id="topicCount">Loading...</span>
+        </div>
+        
+        <div class="patterns-section">
+            <h2>🎯 Title Patterns That Work</h2>
+            <div class="pattern-bars" id="patternBars">
+                <div class="loading">Loading pattern data</div>
             </div>
-
-            <div class="filter-tabs" id="filterTabs">
-                <button class="filter-tab active" data-filter="all">All Topics</button>
-                <button class="filter-tab" data-filter="tech">Tech/AI</button>
-                <button class="filter-tab" data-filter="finance">Finance</button>
-                <button class="filter-tab" data-filter="lifestyle">Lifestyle</button>
-            </div>
-
-            <div class="topics-grid" id="topicsGrid">
-                <div class="loading"><div class="spinner"></div></div>
-            </div>
-        </section>
-
-        <!-- Top Videos Section -->
-        <section class="videos-section">
-            <div class="section-header">
-                <h2 class="section-title">Top Performing Videos</h2>
-                <span class="section-badge">Top 20 by Views</span>
-            </div>
-
-            <table class="videos-table" id="videosTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Video</th>
-                        <th>Topic</th>
-                        <th>Views</th>
-                        <th>Engagement</th>
-                        <th>Viral</th>
-                    </tr>
-                </thead>
-                <tbody id="videosBody">
-                    <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
-                </tbody>
-            </table>
-        </section>
-
-        <!-- Insights Section -->
-        <section class="insights-section">
-            <div class="section-header">
-                <h2 class="section-title">Content Insights</h2>
-            </div>
-
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <h3>🤖 Top Tech/AI Topics</h3>
-                    <ul class="insight-list" id="topTech">
-                        <li>Loading...</li>
-                    </ul>
-                </div>
-                <div class="insight-card">
-                    <h3>💰 Top Finance Topics</h3>
-                    <ul class="insight-list" id="topFinance">
-                        <li>Loading...</li>
-                    </ul>
-                </div>
-                <div class="insight-card">
-                    <h3>🔥 Highest Engagement</h3>
-                    <ul class="insight-list" id="topEngagement">
-                        <li>Loading...</li>
-                    </ul>
-                </div>
-                <div class="insight-card" style="border: 1px solid var(--accent-purple); background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));">
-                    <h3>⚖️ CaseVault Insights</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">Real PI settlement data for attorneys. Know your case value before negotiating.</p>
-                    <ul class="insight-list">
-                        <li>📊 Settlement calculator</li>
-                        <li>📈 Market trends by injury type</li>
-                        <li>🏛️ Jurisdiction comparisons</li>
-                        <li>💼 Attorney benchmarks</li>
-                    </ul>
-                    <a href="/intake" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: var(--gradient-1); color: white; text-decoration: none; border-radius: 6px; font-size: 0.85rem; font-weight: 500;">Access CaseVault →</a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <p>Powered by <a href="/">AIBridges</a> Research Colony | Data updated daily</p>
-        <p style="margin-top: 0.5rem">Research data available via API - <a href="/contact">Contact us</a> for access</p>
+        </div>
+        
+        <h2 style="margin-bottom: 20px;">🔥 Trending Videos by Niche</h2>
+        <div class="niche-tabs" id="nicheTabs"></div>
+        <div class="videos-grid" id="videosGrid">
+            <div class="loading">Loading videos</div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Data updated daily • Powered by <a href="https://aibridges.org">AIBridges</a></p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">YouTube™ is a trademark of Google LLC</p>
     </footer>
-
+    
     <script>
-        // Catholic keywords - used to EXCLUDE religious content from this dashboard
-        const catholicKeywords = ['catholic', 'rosary', 'prayer', 'eucharist', 'mass', 'saint', 'mary', 'divine', 'confession', 'baptism', 'chaplet', 'stations', 'adoration', 'angelus', 'compline', 'lectio', 'examen', 'mystic', 'therese', 'francis', 'augustine', 'aquinas', 'pope', 'vatican', 'liturgy', 'sacrament', 'lent', 'easter', 'advent', 'pentecost', 'trinity', 'jesus', 'christ', 'gospel', 'catechism'];
-
-        function isCatholicTopic(topic) {
-            const lower = topic.toLowerCase();
-            return catholicKeywords.some(kw => lower.includes(kw));
+        let trendsData = null;
+        let currentNiche = 'all';
+        
+        function formatViews(n) {
+            if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+            if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+            return n.toString();
         }
-
-        // Category keywords for filtering secular content
-        const techKeywords = ['artificial intelligence', 'machine learning', 'cryptocurrency', 'web development', 'coding', 'programming', 'tech', 'software', 'ai ', 'bitcoin'];
-        const financeKeywords = ['investing', 'stock', 'real estate', 'passive income', 'retirement', 'money', 'finance', 'wealth', 'trading'];
-        const lifestyleKeywords = ['morning routine', 'meditation', 'fasting', 'sleep', 'stress', 'habit', 'productivity', 'time management', 'deep work', 'focus'];
-
-        function getTopicCategory(topic) {
-            const lower = topic.toLowerCase();
-            if (techKeywords.some(kw => lower.includes(kw))) return 'tech';
-            if (financeKeywords.some(kw => lower.includes(kw))) return 'finance';
-            if (lifestyleKeywords.some(kw => lower.includes(kw))) return 'lifestyle';
-            return 'other';
+        
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         }
-
-        function formatNumber(num) {
-            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-            return num.toString();
-        }
-
-        function formatDate(timestamp) {
-            return new Date(timestamp).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-
-        function getViralScoreClass(score) {
-            if (score >= 60) return 'high';
-            if (score >= 40) return 'medium';
-            return 'low';
-        }
-
-        // Data storage
-        let researchData = null;
-        let currentFilter = 'all';
-
-        // Fetch data from API or static JSON
-        async function fetchData() {
-            try {
-                // Try API first (for production with DynamoDB)
-                // const response = await fetch('https://api.aibridges.com/research/trending');
-
-                // Fallback to static JSON for demo
-                const response = await fetch('/data/youtube-research.json');
-
-                if (!response.ok) throw new Error('Failed to fetch data');
-
-                researchData = await response.json();
-                renderDashboard();
-            } catch (error) {
-                console.error('Error fetching data:', error);
-                // Show demo data
-                loadDemoData();
-            }
-        }
-
-        // Demo data for when API is unavailable
-        function loadDemoData() {
-            researchData = {
-                last_updated: Date.now(),
-                total_videos: 450,
-                topics_researched: [
-                    "real estate investing", "passive income ideas", "cryptocurrency basics",
-                    "artificial intelligence tutorial", "morning routine successful people",
-                    "stock investing beginners", "meditation for beginners", "deep work focus",
-                    "machine learning explained", "retirement planning tips", "web development trends",
-                    "time management tips", "habit building science", "sleep optimization tips",
-                    "stress management techniques", "intermittent fasting benefits"
-                ],
-                top_performers: [
-                    { video_id: "bBC-nXj3Ng4", title: "But how does bitcoin actually work?", channel: "3Blue1Brown", views: 17770621, likes: 502000, engagement_rate: 2.82, topic: "cryptocurrency basics", viral_score: 62 },
-                    { video_id: "aircAruvnKk", title: "But what is a neural network?", channel: "3Blue1Brown", views: 16500000, likes: 450000, engagement_rate: 2.73, topic: "artificial intelligence tutorial", viral_score: 60 },
-                    { video_id: "example1", title: "The 1 Billion Dollar Morning Routine", channel: "Productivity Hub", views: 8815764, likes: 280000, engagement_rate: 3.17, topic: "morning routine successful people", viral_score: 55 },
-                    { video_id: "example2", title: "50 Years Old and Nothing Saved for Retirement", channel: "Finance Talk", views: 7671695, likes: 195000, engagement_rate: 2.54, topic: "retirement planning tips", viral_score: 52 }
-                ],
-                by_topic: {}
-            };
-            renderDashboard();
-        }
-
-        // Render the dashboard
-        function renderDashboard() {
-            if (!researchData) return;
-
-            // Filter out Catholic content
-            researchData.topics_researched = researchData.topics_researched.filter(t => !isCatholicTopic(t));
-            researchData.top_performers = researchData.top_performers.filter(v => !isCatholicTopic(v.topic));
-
-            // Update stats
-            document.getElementById('totalVideos').textContent = formatNumber(researchData.top_performers.length * 20); // Estimate
-            document.getElementById('totalTopics').textContent = researchData.topics_researched.length;
-
-            const totalViews = researchData.top_performers.reduce((sum, v) => sum + v.views, 0);
-            document.getElementById('totalViews').textContent = formatNumber(totalViews);
-
-            const avgEngagement = researchData.top_performers.length > 0
-                ? researchData.top_performers.reduce((sum, v) => sum + v.engagement_rate, 0) / researchData.top_performers.length
+        
+        function renderStats() {
+            const niches = Object.values(trendsData.niches);
+            const allVideos = niches.flatMap(n => n.videos);
+            
+            document.getElementById('totalVideos').textContent = allVideos.length;
+            document.getElementById('totalNiches').textContent = niches.length;
+            document.getElementById('topPattern').textContent = trendsData.patterns[0]?.name || '-';
+            
+            const avgViews = allVideos.length 
+                ? Math.round(allVideos.reduce((s, v) => s + v.views, 0) / allVideos.length)
                 : 0;
-            document.getElementById('avgEngagement').textContent = avgEngagement.toFixed(2) + '%';
-
-            document.getElementById('lastUpdated').textContent = 'Last updated: ' + formatDate(researchData.last_updated);
-
-            // Render topics
-            renderTopics();
-
-            // Render videos table
-            renderVideosTable();
-
-            // Render insights
-            renderInsights();
+            document.getElementById('avgViews').textContent = formatViews(avgViews);
+            document.getElementById('lastUpdated').textContent = `Last updated: ${formatDate(trendsData.scrapedAt)}`;
         }
-
-        function renderTopics() {
-            const grid = document.getElementById('topicsGrid');
-            const topics = researchData.topics_researched;
-
-            // Calculate stats per topic from top_performers
-            const topicStats = {};
-            for (const topic of topics) {
-                const videos = researchData.top_performers.filter(v => v.topic === topic);
-                topicStats[topic] = {
-                    count: videos.length || Math.floor(Math.random() * 20) + 1,
-                    topViews: videos.length > 0 ? Math.max(...videos.map(v => v.views)) : Math.floor(Math.random() * 1000000),
-                    avgEngagement: videos.length > 0 ? videos.reduce((s, v) => s + v.engagement_rate, 0) / videos.length : Math.random() * 2,
-                    category: getTopicCategory(topic)
-                };
-            }
-
-            // Filter topics by category
-            let filteredTopics = topics;
-            if (currentFilter !== 'all') {
-                filteredTopics = topics.filter(t => getTopicCategory(t) === currentFilter);
-            }
-
-            document.getElementById('topicCount').textContent = `${filteredTopics.length} topics`;
-
-            const categoryIcons = { tech: '🤖', finance: '💰', lifestyle: '🧘', other: '📊' };
-            const categoryLabels = { tech: 'Tech/AI', finance: 'Finance', lifestyle: 'Lifestyle', other: 'General' };
-            const categoryColors = { tech: 'tech', finance: 'finance', lifestyle: 'lifestyle', other: 'other' };
-
-            grid.innerHTML = filteredTopics.map(topic => {
-                const stats = topicStats[topic];
-                const category = stats.category;
-                const icon = categoryIcons[category] || '📊';
-
-                return `
-                    <div class="topic-card ${category}">
-                        <span class="category-tag ${category}">${categoryLabels[category]}</span>
-                        <div class="topic-name">
-                            <span class="topic-icon">${icon}</span>
-                            ${topic.charAt(0).toUpperCase() + topic.slice(1)}
-                        </div>
-                        <div class="topic-stats">
-                            <span class="topic-stat"><strong>${stats.count}</strong> videos</span>
-                            <span class="topic-stat"><strong>${formatNumber(stats.topViews)}</strong> top views</span>
-                            <span class="topic-stat"><strong>${stats.avgEngagement.toFixed(1)}%</strong> eng.</span>
+        
+        function renderPatterns() {
+            const container = document.getElementById('patternBars');
+            const maxViews = trendsData.patterns[0]?.avgViews || 1;
+            
+            container.innerHTML = trendsData.patterns.slice(0, 8).map(p => `
+                <div class="pattern-bar">
+                    <span class="name">${p.name}</span>
+                    <div class="bar-container">
+                        <div class="bar" style="width: ${Math.max(10, (p.avgViews / maxViews) * 100)}%">
+                            ${formatViews(p.avgViews)} avg
                         </div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
-
-        function renderVideosTable() {
-            const tbody = document.getElementById('videosBody');
-            const videos = researchData.top_performers.slice(0, 20);
-
-            tbody.innerHTML = videos.map((video, index) => {
-                const viralClass = getViralScoreClass(video.viral_score || 50);
-                const engagementWidth = Math.min(100, video.engagement_rate * 20);
-
-                return `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>
-                            <div class="video-title">
-                                <a href="https://youtube.com/watch?v=${video.video_id}" target="_blank" rel="noopener">
-                                    ${video.title}
-                                </a>
-                            </div>
-                            <div class="channel-name">${video.channel}</div>
-                        </td>
-                        <td>${video.topic}</td>
-                        <td><span class="views-badge">👁 ${formatNumber(video.views)}</span></td>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <div class="engagement-bar">
-                                    <div class="engagement-fill" style="width: ${engagementWidth}%"></div>
-                                </div>
-                                <span style="font-size: 0.8rem; color: var(--text-secondary);">${video.engagement_rate.toFixed(2)}%</span>
-                            </div>
-                        </td>
-                        <td><span class="viral-score ${viralClass}">${video.viral_score || '-'}</span></td>
-                    </tr>
-                `;
-            }).join('');
+        
+        function renderNicheTabs() {
+            const container = document.getElementById('nicheTabs');
+            const niches = Object.entries(trendsData.niches);
+            
+            let html = `<button class="niche-tab ${currentNiche === 'all' ? 'active' : ''}" data-niche="all">All Niches</button>`;
+            niches.forEach(([id, niche]) => {
+                html += `<button class="niche-tab ${currentNiche === id ? 'active' : ''}" data-niche="${id}" style="--tab-color: ${niche.color}">${niche.name}</button>`;
+            });
+            
+            container.innerHTML = html;
+            container.querySelectorAll('.niche-tab').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentNiche = btn.dataset.niche;
+                    renderNicheTabs();
+                    renderVideos();
+                });
+            });
         }
-
-        function renderInsights() {
-            // Top Tech
-            const techTopics = researchData.topics_researched.filter(t => getTopicCategory(t) === 'tech').slice(0, 5);
-            document.getElementById('topTech').innerHTML = techTopics.length > 0
-                ? techTopics.map(t => `<li>🤖 ${t.charAt(0).toUpperCase() + t.slice(1)}</li>`).join('')
-                : '<li>No tech topics found</li>';
-
-            // Top Finance
-            const financeTopics = researchData.topics_researched.filter(t => getTopicCategory(t) === 'finance').slice(0, 5);
-            document.getElementById('topFinance').innerHTML = financeTopics.length > 0
-                ? financeTopics.map(t => `<li>💰 ${t.charAt(0).toUpperCase() + t.slice(1)}</li>`).join('')
-                : '<li>No finance topics found</li>';
-
-            // Top Engagement
-            const topEngagement = [...researchData.top_performers]
-                .sort((a, b) => b.engagement_rate - a.engagement_rate)
-                .slice(0, 5);
-            document.getElementById('topEngagement').innerHTML = topEngagement.length > 0
-                ? topEngagement.map(v => `<li>🔥 ${v.title.substring(0, 40)}... (${v.engagement_rate.toFixed(2)}%)</li>`).join('')
-                : '<li>No data available</li>';
-        }
-
-        // Filter tab handlers
-        document.getElementById('filterTabs').addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-tab')) {
-                document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilter = e.target.dataset.filter;
-                renderTopics();
+        
+        function renderVideos() {
+            const container = document.getElementById('videosGrid');
+            let videos = [];
+            
+            if (currentNiche === 'all') {
+                videos = Object.values(trendsData.niches)
+                    .flatMap(n => n.videos.slice(0, 5))
+                    .sort((a, b) => b.virality - a.virality);
+            } else {
+                videos = trendsData.niches[currentNiche]?.videos || [];
             }
-        });
-
-        // Initialize
-        fetchData();
+            
+            if (!videos.length) {
+                container.innerHTML = '<p style="color: var(--muted); padding: 40px;">No videos found</p>';
+                return;
+            }
+            
+            container.innerHTML = videos.slice(0, 24).map(v => `
+                <div class="video-card">
+                    <a href="https://youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">
+                        <img class="thumb" src="${v.thumbnail || `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`}" alt="" loading="lazy">
+                        <div class="info">
+                            <div class="title">${escapeHtml(v.title)}</div>
+                            <div class="meta">
+                                <span>${escapeHtml(v.channelName)}</span>
+                                <span class="views">${formatViews(v.views)} views</span>
+                            </div>
+                            ${v.patterns?.length ? `
+                                <div class="patterns">
+                                    ${v.patterns.map(p => `<span class="pattern-tag">${p}</span>`).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </a>
+                </div>
+            `).join('');
+        }
+        
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]);
+        }
+        
+        async function loadData() {
+            try {
+                // Try to load from same origin first
+                const res = await fetch('youtube-trends-data.json');
+                if (!res.ok) throw new Error('Data not found');
+                trendsData = await res.json();
+                
+                renderStats();
+                renderPatterns();
+                renderNicheTabs();
+                renderVideos();
+            } catch (err) {
+                console.error('Failed to load trends data:', err);
+                document.getElementById('videosGrid').innerHTML = `
+                    <p style="color: var(--muted); padding: 40px;">
+                        Unable to load trends data. Please check back later.
+                    </p>`;
+            }
+        }
+        
+        loadData();
     </script>
 </body>
 </html>

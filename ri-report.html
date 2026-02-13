@@ -204,12 +204,65 @@
             <p style="color:#94a3b8;margin-bottom:1.5rem">Enter an address to get a full comparable sales report based on 2 years of sales data.</p>
             
             <!-- Address Search -->
-            <div style="position:relative;margin-bottom:1.5rem">
-                <label style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:0.5rem">Search Address</label>
+            <div style="position:relative;margin-bottom:1rem">
+                <label style="font-size:0.75rem;color:#94a3b8;text-transform:uppercase;display:block;margin-bottom:0.5rem">Search Address (from database)</label>
                 <input type="text" id="addressSearch" placeholder="Start typing an address... (e.g., 123 Main St)" 
                     style="width:100%;padding:1rem;font-size:1.1rem;background:rgba(0,0,0,0.4);border:2px solid rgba(99,102,241,0.5);border-radius:12px;color:#e2e8f0"
                     oninput="searchAddress(this.value)" autocomplete="off">
                 <div id="addressResults" style="position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;max-height:300px;overflow-y:auto;display:none;z-index:100"></div>
+            </div>
+            
+            <!-- Manual Entry Toggle -->
+            <div style="margin-bottom:1.5rem">
+                <button onclick="toggleManualEntry()" class="btn-secondary" style="font-size:0.85rem">
+                    📝 My address isn't listed - Enter manually
+                </button>
+            </div>
+            
+            <!-- Manual Entry Form (hidden by default) -->
+            <div id="manualEntryForm" style="display:none;background:rgba(0,0,0,0.2);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem">
+                <h4 style="color:#a5b4fc;margin-bottom:1rem">Enter Your Property Details</h4>
+                <div class="filters" style="margin-bottom:1rem">
+                    <div class="filter-group" style="flex:2">
+                        <label>Address</label>
+                        <input type="text" id="manualAddress" placeholder="123 Main St" style="width:100%">
+                    </div>
+                    <div class="filter-group">
+                        <label>City</label>
+                        <select id="manualCity"></select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Property Type</label>
+                        <select id="manualType">
+                            <option value="Single Family">Single Family</option>
+                            <option value="Condo">Condo</option>
+                            <option value="Multi-Family">Multi-Family</option>
+                            <option value="Townhouse">Townhouse</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Bedrooms</label>
+                        <input type="number" id="manualBeds" placeholder="3" min="0" max="10">
+                    </div>
+                    <div class="filter-group">
+                        <label>Bathrooms</label>
+                        <input type="number" id="manualBaths" placeholder="2" min="0" max="10" step="0.5">
+                    </div>
+                    <div class="filter-group">
+                        <label>Square Feet</label>
+                        <input type="number" id="manualSqft" placeholder="1500">
+                    </div>
+                    <div class="filter-group">
+                        <label>Year Built</label>
+                        <input type="number" id="manualYear" placeholder="1990">
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button onclick="runManualComp()" style="background:linear-gradient(135deg,#10b981,#059669)">🔍 Find Comps</button>
+                    </div>
+                </div>
             </div>
             
             <!-- Subject Property Card (hidden until address selected) -->
@@ -434,7 +487,7 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
             
             const s = subjectProperty;
             const bedRange = 1;  // +/- 1 bedroom
-            const sqftRange = 0.25;  // +/- 25% sqft
+            const sqftRange = 0.30;  // +/- 30% sqft (more flexible)
             const minSqft = s.sqft ? s.sqft * (1 - sqftRange) : 0;
             const maxSqft = s.sqft ? s.sqft * (1 + sqftRange) : Infinity;
             
@@ -444,10 +497,10 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
                 if ((p.status || 'Sold') !== 'Sold') return false;  // Only sold
                 if (p.city !== s.city) return false;  // Same city
                 
-                // Similar beds (+/- 1)
+                // Similar beds (+/- 1) - only if subject has beds specified
                 if (s.beds && p.beds && Math.abs(p.beds - s.beds) > bedRange) return false;
                 
-                // Similar sqft (+/- 25%)
+                // Similar sqft (+/- 30%) - only if subject has sqft specified
                 if (s.sqft && p.sqft && (p.sqft < minSqft || p.sqft > maxSqft)) return false;
                 
                 // Similar property type (if available)
@@ -459,11 +512,23 @@ ${lastResults.map(r => '<tr>' + h.map(k => {
                 
                 return true;
             }).sort((a, b) => {
-                // Sort by similarity score (closer sqft = better)
-                const aDiff = s.sqft ? Math.abs(a.sqft - s.sqft) : 0;
-                const bDiff = s.sqft ? Math.abs(b.sqft - s.sqft) : 0;
-                return aDiff - bDiff;
-            }).slice(0, 25);  // Top 25 comps
+                // Sort by similarity score
+                let aScore = 0, bScore = 0;
+                
+                // Closer sqft = better
+                if (s.sqft) {
+                    aScore += Math.abs((a.sqft || 0) - s.sqft) / s.sqft;
+                    bScore += Math.abs((b.sqft || 0) - s.sqft) / s.sqft;
+                }
+                
+                // Same beds = better
+                if (s.beds) {
+                    aScore += Math.abs((a.beds || 0) - s.beds) * 0.1;
+                    bScore += Math.abs((b.beds || 0) - s.beds) * 0.1;
+                }
+                
+                return aScore - bScore;
+            }).slice(0, 30);  // Top 30 comps
             
             // Calculate stats
             const prices = compResults.map(p => p.price);
@@ -609,6 +674,68 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
                 document.getElementById('addressResults').style.display = 'none';
             }
         });
+        
+        // Toggle manual entry form
+        function toggleManualEntry() {
+            const form = document.getElementById('manualEntryForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // Populate manual city dropdown
+        function initManualCityDropdown() {
+            const cities = [...new Set(rawData.properties.map(p => p.city))].sort();
+            const sel = document.getElementById('manualCity');
+            sel.innerHTML = '<option value="">Select City</option>';
+            cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
+        }
+        document.addEventListener('DOMContentLoaded', initManualCityDropdown);
+        
+        // Run comp analysis with manual entry
+        function runManualComp() {
+            const address = document.getElementById('manualAddress').value.trim();
+            const city = document.getElementById('manualCity').value;
+            const ptype = document.getElementById('manualType').value;
+            const beds = parseInt(document.getElementById('manualBeds').value) || null;
+            const baths = parseFloat(document.getElementById('manualBaths').value) || null;
+            const sqft = parseInt(document.getElementById('manualSqft').value) || null;
+            const year = parseInt(document.getElementById('manualYear').value) || null;
+            
+            if (!address || !city) {
+                alert('Please enter at least an address and city');
+                return;
+            }
+            
+            // Create a virtual subject property
+            subjectProperty = {
+                address: address,
+                city: city,
+                propertyType: ptype,
+                beds: beds,
+                baths: baths,
+                sqft: sqft,
+                yearBuilt: year,
+                price: null,  // Unknown
+                url: null,
+                isManual: true
+            };
+            
+            // Show subject property details
+            const details = document.getElementById('subjectDetails');
+            details.innerHTML = `
+                <div><strong style="color:#94a3b8">Address:</strong><br>${address}, ${city}</div>
+                <div><strong style="color:#94a3b8">Type:</strong><br>${ptype}</div>
+                <div><strong style="color:#94a3b8">Beds/Baths:</strong><br>${beds || '?'} bd / ${baths || '?'} ba</div>
+                <div><strong style="color:#94a3b8">Sq Ft:</strong><br>${sqft ? sqft.toLocaleString() : 'N/A'}</div>
+                <div><strong style="color:#94a3b8">Year Built:</strong><br>${year || 'N/A'}</div>
+                <div><strong style="color:#94a3b8">Your Property:</strong><br><span style="color:#f59e0b">Manual Entry</span></div>
+            `;
+            document.getElementById('subjectProperty').style.display = 'block';
+            document.getElementById('manualEntryForm').style.display = 'none';
+            document.getElementById('addressSearch').value = address + ', ' + city;
+            
+            // Find comps
+            findComps();
+        }
         
         // CHARTS
         const chartColors = { purple: '#6366f1', pink: '#ec4899', green: '#10b981', amber: '#f59e0b', cyan: '#06b6d4' };

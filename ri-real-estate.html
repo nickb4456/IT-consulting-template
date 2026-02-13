@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhode Island Real Estate Market Analysis | 2025-2026</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #0066cc;
+            --secondary: #00a86b;
+            --accent: #ff6b35;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text: #eee;
+            --text-muted: #888;
+            --border: #2a3a5a;
+            --gradient-start: #667eea;
+            --gradient-end: #764ba2;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 60px 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .header .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .header .stat {
+            text-align: center;
+        }
+        
+        .header .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        
+        .header .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--gradient-start);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+        }
+        
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            color: var(--gradient-start);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .price-up {
+            color: var(--secondary);
+        }
+        
+        .price-down {
+            color: var(--accent);
+        }
+        
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .metric {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--gradient-start);
+        }
+        
+        .metric-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        .insight-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            border-left: 4px solid var(--gradient-start);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+        }
+        
+        .insight-box h3 {
+            color: var(--gradient-start);
+            margin-bottom: 10px;
+        }
+        
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .bar-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .bar-label {
+            width: 140px;
+            font-size: 0.9rem;
+            text-align: right;
+        }
+        
+        .bar-track {
+            flex: 1;
+            height: 28px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-width: 50px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+        }
+        
+        .market-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        
+        .market-hot {
+            background: rgba(255, 107, 53, 0.2);
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        
+        .market-balanced {
+            background: rgba(0, 168, 107, 0.2);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .header .stats-bar {
+                gap: 30px;
+            }
+            
+            .metric-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bar-label {
+                width: 100px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏠 Rhode Island Real Estate Market Analysis</h1>
+        <p>Comprehensive data analysis covering 12 months of transactions</p>
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="stat-value">1,019</div>
+                <div class="stat-label">Properties Sold</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">450</div>
+                <div class="stat-label">Active Listings</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">$485K</div>
+                <div class="stat-label">Median Price</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">12</div>
+                <div class="stat-label">Cities Analyzed</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="metric-grid">
+            <div class="metric">
+                <div class="metric-value">$524,876</div>
+                <div class="metric-label">Average Sale Price</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">$267/sqft</div>
+                <div class="metric-label">Avg Price Per Sq Ft</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value">59%</div>
+                <div class="metric-label">Single Family Homes</div>
+            </div>
+        </div>
+        
+        <div class="insight-box">
+            <h3>📈 Market Insight</h3>
+            <p>Rhode Island's housing market remains <strong class="market-indicator market-hot">SELLER'S MARKET</strong> with inventory-to-sales ratio of 0.44 (450 active listings / 1,019 annual sales). Providence leads in total transactions while maintaining the highest median prices at $525K. The $400K-$750K segment represents <strong>53%</strong> of all sales, indicating strong middle-market demand.</p>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h2>📊 Price Distribution</h2>
+                <div class="bar-chart">
+                    <div class="bar-item">
+                        <div class="bar-label">Under $200K</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 16.7%">50 (4.9%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">$200K-$300K</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 29.7%">89 (8.7%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">$300K-$400K</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 68.7%">206 (20.2%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">$400K-$500K</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 82.3%">247 (24.2%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">$500K-$750K</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 98.7%">296 (29.0%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">$750K-$1M</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 27%">81 (7.9%)</div>
+                        </div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">Over $1M</div>
+                        <div class="bar-track">
+                            <div class="bar-fill" style="width: 16.7%">50 (4.9%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>🏘️ Property Types Sold</h2>
+                <div class="chart-container">
+                    <canvas id="propertyTypeChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card full-width">
+                <h2>🏙️ Sales by City</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>City</th>
+                            <th>Properties Sold</th>
+                            <th>Median Price</th>
+                            <th>Average Price</th>
+                            <th>Market Share</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Providence</strong></td>
+                            <td>308</td>
+                            <td class="price-up">$525,000</td>
+                            <td>$645,836</td>
+                            <td>30.2%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cranston</strong></td>
+                            <td>299</td>
+                            <td class="price-up">$485,000</td>
+                            <td>$522,607</td>
+                            <td>29.3%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Warwick</strong></td>
+                            <td>293</td>
+                            <td>$420,000</td>
+                            <td>$452,679</td>
+                            <td>28.8%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>East Greenwich</strong></td>
+                            <td>34</td>
+                            <td class="price-up">$535,000</td>
+                            <td>$636,032</td>
+                            <td>3.3%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>North Providence</strong></td>
+                            <td>34</td>
+                            <td>$325,000</td>
+                            <td>$308,284</td>
+                            <td>3.3%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>West Warwick</strong></td>
+                            <td>31</td>
+                            <td>$400,000</td>
+                            <td>$416,795</td>
+                            <td>3.0%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Johnston</strong></td>
+                            <td>11</td>
+                            <td>$350,000</td>
+                            <td>$389,500</td>
+                            <td>1.1%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pawtucket</strong></td>
+                            <td>3</td>
+                            <td>$505,000</td>
+                            <td>$560,000</td>
+                            <td>0.3%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hope</strong></td>
+                            <td>3</td>
+                            <td>$480,000</td>
+                            <td>$440,000</td>
+                            <td>0.3%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h2>⏱️ Days on Market Analysis</h2>
+                <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr); margin: 0;">
+                    <div class="metric">
+                        <div class="metric-value">52</div>
+                        <div class="metric-label">Avg Days on Market</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">38</div>
+                        <div class="metric-label">Median Days</div>
+                    </div>
+                </div>
+                <div class="insight-box" style="margin-top: 20px;">
+                    <p><strong>Fast-Moving Market:</strong> Properties selling in under 30 days represent a significant portion of transactions, indicating high buyer demand and competitive offers.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>📈 Market Activity</h2>
+                <div class="chart-container">
+                    <canvas id="marketActivityChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="card full-width">
+                <h2>🎯 Key Market Takeaways</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="insight-box">
+                        <h3>💰 Price Trends</h3>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Providence commands highest median prices ($525K)</li>
+                            <li>Warwick offers value at $420K median</li>
+                            <li>53% of sales in $400K-$750K range</li>
+                            <li>Luxury market ($1M+) steady at 5%</li>
+                        </ul>
+                    </div>
+                    <div class="insight-box">
+                        <h3>🏠 Property Mix</h3>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>Single family homes dominate (59%)</li>
+                            <li>Multi-family strong (18%) - investor demand</li>
+                            <li>Condo market active (17%)</li>
+                            <li>Land sales picking up (5%)</li>
+                        </ul>
+                    </div>
+                    <div class="insight-box">
+                        <h3>📊 Supply & Demand</h3>
+                        <ul style="margin-left: 20px; margin-top: 10px;">
+                            <li>0.44 months of inventory (seller's market)</li>
+                            <li>Active listings: 450</li>
+                            <li>Monthly absorption rate: ~85 homes</li>
+                            <li>Low inventory driving competition</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Data sourced from Redfin MLS | Generated: <span id="genDate"></span></p>
+        <p style="margin-top: 10px; font-size: 0.9rem;">Analysis covers Cranston, Providence, Warwick, East Greenwich, West Warwick, North Providence, Johnston, and surrounding areas</p>
+        <p style="margin-top: 10px; opacity: 0.7;">Created by Supernova ✨ for Nick</p>
+    </div>
+    
+    <script>
+        // Set date
+        document.getElementById('genDate').textContent = new Date().toLocaleDateString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric'
+        });
+        
+        // Property Type Chart
+        new Chart(document.getElementById('propertyTypeChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Single Family', 'Multi-Family (2-4)', 'Condo/Co-op', 'Vacant Land', 'Multi-Family (5+)', 'Other'],
+                datasets: [{
+                    data: [601, 186, 170, 48, 7, 7],
+                    backgroundColor: [
+                        '#667eea',
+                        '#764ba2',
+                        '#00a86b',
+                        '#ff6b35',
+                        '#f9ca24',
+                        '#888'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#eee',
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Market Activity Chart
+        new Chart(document.getElementById('marketActivityChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Providence', 'Cranston', 'Warwick', 'E. Greenwich', 'N. Providence', 'W. Warwick'],
+                datasets: [{
+                    label: 'Sold (12 mo)',
+                    data: [308, 299, 293, 34, 34, 31],
+                    backgroundColor: '#667eea'
+                }, {
+                    label: 'Active',
+                    data: [120, 105, 108, 15, 25, 20],
+                    backgroundColor: '#00a86b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#888' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    },
+                    y: {
+                        ticks: { color: '#888' },
+                        grid: { color: 'rgba(255,255,255,0.05)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#eee' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

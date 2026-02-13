@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sell Your Home FSBO — $49 Flat Fee | RI Real Estate Hub</title>
+    <meta name="description" content="List your Rhode Island home for sale by owner. $49 flat fee, no 6% agent commission. Save thousands selling your home yourself.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        /* Nav */
+        nav {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: #e2e8f0; }
+        .nav-cta {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white !important;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #fcd34d, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        .hero .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+        
+        /* Main Section */
+        .fsbo-section {
+            background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02));
+            border: 1px solid rgba(245,158,11,0.2);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .fsbo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .fsbo-grid { grid-template-columns: 1fr; }
+            .fsbo-form-grid-2, .fsbo-form-grid-3 { grid-template-columns: 1fr !important; }
+            .hero h1 { font-size: 2rem; }
+        }
+        
+        /* Form */
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .filter-group label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        input, select, textarea {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        button {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Benefits */
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .benefit-badge {
+            background: #10b981;
+            color: black;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        /* Savings Box */
+        .savings-box {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(16,185,129,0.2);
+            border-radius: 8px;
+            border: 1px solid rgba(16,185,129,0.3);
+        }
+        
+        /* Listings Grid */
+        .listings-section {
+            margin-top: 3rem;
+        }
+        .listings-section h2 {
+            color: #fcd34d;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+        .listings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .listing-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .listing-header {
+            background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05));
+            padding: 1rem;
+        }
+        .listing-price {
+            color: #fcd34d;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .listing-body {
+            padding: 1rem;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+        .footer a { color: #6366f1; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="https://aibridges.org" class="logo">AIBridges</a>
+            <ul class="nav-links">
+                <li><a href="ri-report">RI Real Estate</a></li>
+                <li><a href="https://aibridges.org/#contact" class="nav-cta">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>🏷️ Sell Your Home — FSBO</h1>
+            <p class="subtitle">$49 flat fee • No 6% agent commission • Save thousands</p>
+        </div>
+        
+        <div class="fsbo-section">
+            <div class="fsbo-grid">
+                <div>
+                    <h3 style="color:#fcd34d;margin-bottom:1rem">Why List With Us?</h3>
+                    <div style="display:flex;flex-direction:column;gap:0.75rem">
+                        <div class="benefit-item">
+                            <span class="benefit-badge">$49</span>
+                            <span>Flat fee listing — no commission, no catches</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span style="font-size:1.25rem">📊</span>
+                            <span>Free market analysis & comp report</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span style="font-size:1.25rem">📅</span>
+                            <span>90-day listing (renew anytime)</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span style="font-size:1.25rem">👀</span>
+                            <span>Exposure to active RI buyers</span>
+                        </div>
+                        <div class="benefit-item">
+                            <span style="font-size:1.25rem">💬</span>
+                            <span>Direct buyer-seller contact</span>
+                        </div>
+                    </div>
+                    <div class="savings-box">
+                        <div style="color:#94a3b8;font-size:0.8rem">Example: $500K sale</div>
+                        <div style="display:flex;justify-content:space-between;margin-top:0.5rem">
+                            <div><span style="color:#ef4444">Traditional Agent:</span> <strong>$30,000</strong></div>
+                            <div><span style="color:#10b981">With Us:</span> <strong>$49</strong></div>
+                        </div>
+                        <div style="color:#10b981;font-weight:bold;margin-top:0.5rem">You save: $29,951 💰</div>
+                    </div>
+                    <div style="margin-top:1rem;padding:0.75rem;background:rgba(99,102,241,0.15);border-radius:8px;font-size:0.85rem;color:#a5b4fc">
+                        💡 <strong>No broker license needed</strong> — you're selling your own property. We just help you find buyers.
+                    </div>
+                </div>
+                <div>
+                    <h3 style="color:#fcd34d;margin-bottom:1rem">List Your Property — $49</h3>
+                    <form id="fsboForm" style="display:flex;flex-direction:column;gap:1rem" data-loaded="">
+                        <!-- Honeypot -->
+                        <div style="position:absolute;left:-9999px;opacity:0;height:0;overflow:hidden" aria-hidden="true">
+                            <label>Leave blank</label>
+                            <input type="text" id="fsboWebsite" name="website" tabindex="-1" autocomplete="off">
+                        </div>
+                        <div class="filter-group">
+                            <label>Property Address *</label>
+                            <input type="text" id="fsboAddress" placeholder="123 Main St, Providence, RI" required>
+                        </div>
+                        <div class="fsbo-form-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                            <div class="filter-group">
+                                <label>Asking Price *</label>
+                                <input type="number" id="fsboPrice" placeholder="450000" required>
+                            </div>
+                            <div class="filter-group">
+                                <label>Square Feet</label>
+                                <input type="number" id="fsboSqft" placeholder="1800">
+                            </div>
+                        </div>
+                        <div class="fsbo-form-grid-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem">
+                            <div class="filter-group">
+                                <label>Beds</label>
+                                <select id="fsboBeds"><option value="1">1</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5+</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Baths</label>
+                                <select id="fsboBaths"><option value="1">1</option><option value="1.5">1.5</option><option value="2" selected>2</option><option value="2.5">2.5</option><option value="3">3+</option></select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Property Type</label>
+                                <select id="fsboType"><option value="house">Single Family</option><option value="condo">Condo</option><option value="multi">Multi-Family</option><option value="land">Land</option></select>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                            <label>Your Email *</label>
+                            <input type="email" id="fsboEmail" placeholder="you@email.com" required>
+                        </div>
+                        <div class="filter-group">
+                            <label>Your Phone</label>
+                            <input type="tel" id="fsboPhone" placeholder="(401) 555-1234">
+                        </div>
+                        <div class="filter-group">
+                            <label>Description</label>
+                            <textarea id="fsboDesc" rows="3" placeholder="Tell buyers about your property..." style="resize:vertical"></textarea>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.5rem">
+                            <input type="checkbox" id="fsboAgree" required>
+                            <label for="fsboAgree" style="font-size:0.8rem;color:#94a3b8">I agree to the $49 flat listing fee for 90 days</label>
+                        </div>
+                        <button type="submit">🏷️ List My Property — $49</button>
+                    </form>
+                    <p style="color:#64748b;font-size:0.75rem;margin-top:1rem;text-align:center">One-time fee. No commissions. No hidden costs.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Active Listings -->
+        <div class="listings-section">
+            <h2>📋 Active FSBO Listings</h2>
+            <div id="fsboListings" class="listings-grid">
+                <div style="color:#94a3b8;text-align:center;padding:2rem;grid-column:1/-1">Loading listings...</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Part of <a href="https://aibridges.org">AIBridges</a> • <a href="ri-report">RI Real Estate Hub</a></p>
+        </div>
+    </div>
+
+    <script>
+        const FSBO_API = 'https://7x9s7vp75j.execute-api.us-east-1.amazonaws.com/listings';
+        const FSBO_S3 = 'https://ri-fsbo-listings.s3.amazonaws.com/listings.json';
+        let fsboListingsCache = [];
+        
+        async function loadFsboListings() {
+            try {
+                const res = await fetch(FSBO_S3 + '?t=' + Date.now());
+                if (res.ok) {
+                    fsboListingsCache = await res.json();
+                    return fsboListingsCache;
+                }
+            } catch (e) {
+                console.warn('S3 fetch failed, trying API:', e);
+            }
+            try {
+                const res = await fetch(FSBO_API);
+                if (res.ok) {
+                    const data = await res.json();
+                    fsboListingsCache = data.listings || [];
+                    return fsboListingsCache;
+                }
+            } catch (e) {
+                console.error('FSBO API failed:', e);
+            }
+            return fsboListingsCache;
+        }
+        
+        async function renderFsboListings() {
+            const container = document.getElementById('fsboListings');
+            if (!container) return;
+            
+            const listings = await loadFsboListings();
+            
+            if (listings.length === 0) {
+                container.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:2rem;grid-column:1/-1">No active listings yet. Be the first!</div>';
+                return;
+            }
+            
+            container.innerHTML = listings.map((l, idx) => {
+                const daysAgo = Math.floor((Date.now() - l.listedAt) / (1000 * 60 * 60 * 24));
+                return `<div class="listing-card">
+                    <div class="listing-header">
+                        <div style="display:flex;justify-content:space-between;align-items:start">
+                            <div class="listing-price">$${l.price.toLocaleString()}</div>
+                            <span style="background:rgba(16,185,129,0.3);color:#10b981;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.7rem">FSBO</span>
+                        </div>
+                        <div style="color:#e2e8f0;margin-top:0.25rem">${l.address}</div>
+                    </div>
+                    <div class="listing-body">
+                        <div style="display:flex;gap:1rem;color:#94a3b8;font-size:0.85rem;margin-bottom:0.75rem">
+                            <span>🛏️ ${l.beds} bed</span>
+                            <span>🚿 ${l.baths} bath</span>
+                            ${l.sqft ? `<span>📐 ${l.sqft.toLocaleString()} sf</span>` : ''}
+                        </div>
+                        ${l.description ? `<p style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.75rem">${l.description.substring(0, 100)}${l.description.length > 100 ? '...' : ''}</p>` : ''}
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.5rem">
+                            <span style="color:#64748b;font-size:0.75rem">${daysAgo} days ago</span>
+                            <button onclick="contactSeller(${idx})" style="background:#6366f1;padding:0.4rem 0.8rem;font-size:0.8rem">📧 Contact</button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        function contactSeller(idx) {
+            const listing = fsboListingsCache[idx];
+            if (!listing) return;
+            
+            const subject = encodeURIComponent('Interested in ' + listing.address);
+            const body = encodeURIComponent(`Hi,\n\nI'm interested in your property at ${listing.address} listed for $${listing.price.toLocaleString()}.\n\nPlease let me know a good time to discuss.\n\nThanks!`);
+            
+            window.open('mailto:' + listing.email + '?subject=' + subject + '&body=' + body);
+        }
+        
+        async function submitFsboListing(e) {
+            e.preventDefault();
+            
+            // Honeypot check
+            const honeypot = document.getElementById('fsboWebsite');
+            if (honeypot && honeypot.value) {
+                console.warn('Honeypot triggered');
+                alert('Submission failed. Please try again.');
+                return;
+            }
+            
+            // Time check
+            const form = document.getElementById('fsboForm');
+            const loadTime = parseInt(form.dataset.loaded) || 0;
+            if (Date.now() - loadTime < 5000) {
+                alert('Please take a moment to review your listing before submitting.');
+                return;
+            }
+            
+            // Rate limiting
+            const now = Date.now();
+            const hourAgo = now - 3600000;
+            let submissions = JSON.parse(localStorage.getItem('_fsbo_sub') || '[]').filter(t => t > hourAgo);
+            if (submissions.length >= 2) {
+                alert("You've submitted too many listings recently. Please try again in an hour.");
+                return;
+            }
+            
+            const address = document.getElementById('fsboAddress').value.trim();
+            const price = parseInt(document.getElementById('fsboPrice').value);
+            const email = document.getElementById('fsboEmail').value.trim().toLowerCase();
+            const description = document.getElementById('fsboDesc').value || '';
+            
+            // Address validation
+            if (!/^\d+\s+.+,\s*.+,?\s*(RI|Rhode Island)?/i.test(address)) {
+                alert('Please enter a valid Rhode Island address (e.g., "123 Main St, Providence, RI")');
+                return;
+            }
+            
+            // Price validation
+            if (price < 10000 || price > 50000000) {
+                alert('Please enter a realistic price between $10,000 and $50,000,000');
+                return;
+            }
+            
+            // Email validation
+            const disposableDomains = ['tempmail','guerrillamail','10minutemail','mailinator','throwaway','fakeinbox','trashmail'];
+            const emailDomain = email.split('@')[1] || '';
+            if (disposableDomains.some(d => emailDomain.includes(d))) {
+                alert('Please use a permanent email address.');
+                return;
+            }
+            
+            // Duplicate check
+            const existingListings = await loadFsboListings();
+            const normalizedAddr = address.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const isDupe = existingListings.some(l => 
+                l.address.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedAddr
+            );
+            if (isDupe) {
+                alert('This property is already listed. Contact us if you need to update an existing listing.');
+                return;
+            }
+            
+            const listing = {
+                address: address,
+                price: price,
+                sqft: parseInt(document.getElementById('fsboSqft').value) || null,
+                beds: document.getElementById('fsboBeds').value,
+                baths: document.getElementById('fsboBaths').value,
+                type: document.getElementById('fsboType').value,
+                email: email,
+                phone: document.getElementById('fsboPhone').value || '',
+                description: description.substring(0, 500)
+            };
+            
+            submissions.push(now);
+            localStorage.setItem('_fsbo_sub', JSON.stringify(submissions));
+            
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Submitting...';
+            
+            try {
+                const res = await fetch(FSBO_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(listing)
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.error || data.errors?.join(', ') || 'Submission failed');
+                }
+                
+                form.reset();
+                form.dataset.loaded = Date.now().toString();
+                
+                const goToPay = confirm('✅ Listing saved!\n\nClick OK to complete your $49 payment via Stripe.\n\nYour listing will go live after payment.');
+                
+                if (goToPay) {
+                    window.location.href = 'https://buy.stripe.com/4gM8wP98H8JF8t406ifUQ01';
+                } else {
+                    alert('No problem! You can pay later.\n\nYour listing is saved but won\'t appear until payment is received.\n\nPayment link: https://buy.stripe.com/4gM8wP98H8JF8t406ifUQ01');
+                }
+                
+                setTimeout(renderFsboListings, 1500);
+                
+            } catch (err) {
+                alert('❌ Submission failed: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🏷️ List My Property — $49';
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const fsboForm = document.getElementById('fsboForm');
+            if (fsboForm) {
+                fsboForm.dataset.loaded = Date.now().toString();
+                fsboForm.addEventListener('submit', submitFsboListing);
+            }
+            renderFsboListings();
+        });
+    </script>
+</body>
+</html>

@@ -124,6 +124,11 @@
         .deep-insight-card.expanded .finding-content::after { display: none; }
         .expand-hint { color: #8b5cf6; font-size: 0.8rem; margin-top: 0.5rem; }
         .deep-insight-card.expanded .expand-hint { display: none; }
+        /* Topic filter buttons */
+        .topic-btn { background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; padding: 0.4rem 0.8rem; border-radius: 20px; cursor: pointer; font-size: 0.8rem; transition: all 0.2s; }
+        .topic-btn:hover { background: rgba(99,102,241,0.3); }
+        .topic-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
+        .deep-insight-card.hidden { display: none; }
     </style>
 </head>
 <body>
@@ -156,7 +161,20 @@
 
         <div class="section">
             <div class="section-title">🧠 Deep Insights</div>
-            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1rem;">LLM-synthesized explanations of why research is connected</p>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.75rem;">LLM-synthesized explanations of why research is connected</p>
+            
+            <!-- Topic Filter -->
+            <div class="topic-filter" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+                <button class="topic-btn active" data-topic="all">All</button>
+                <button class="topic-btn" data-topic="transformer">Transformers</button>
+                <button class="topic-btn" data-topic="attention">Attention</button>
+                <button class="topic-btn" data-topic="mamba">Mamba/SSM</button>
+                <button class="topic-btn" data-topic="rag">RAG</button>
+                <button class="topic-btn" data-topic="agent">Agents</button>
+                <button class="topic-btn" data-topic="rlhf">RLHF</button>
+                <button class="topic-btn" data-topic="reasoning">Reasoning</button>
+            </div>
+            
             <div id="deep-insights"><div class="loading">Loading...</div></div>
         </div>
 
@@ -217,12 +235,26 @@
 
                 // Deep Insights (LLM-synthesized) - click to expand
                 if (data.deepInsights && data.deepInsights.length > 0) {
-                    document.getElementById('deep-insights').innerHTML = data.deepInsights.slice(0, 6).map((i, idx) => {
-                        // Parse the content to extract the explanation
+                    // Extract topics from content
+                    const detectTopics = (text) => {
+                        const t = (text || '').toLowerCase();
+                        const topics = [];
+                        if (t.includes('transformer') || t.includes('attention is all')) topics.push('transformer');
+                        if (t.includes('attention') || t.includes('self-attention')) topics.push('attention');
+                        if (t.includes('mamba') || t.includes('state space') || t.includes('ssm')) topics.push('mamba');
+                        if (t.includes('rag') || t.includes('retrieval') || t.includes('rerank')) topics.push('rag');
+                        if (t.includes('agent') || t.includes('tool use')) topics.push('agent');
+                        if (t.includes('rlhf') || t.includes('reinforcement') || t.includes('human feedback')) topics.push('rlhf');
+                        if (t.includes('reason') || t.includes('chain of thought') || t.includes('cot')) topics.push('reasoning');
+                        return topics.join(' ');
+                    };
+                    
+                    document.getElementById('deep-insights').innerHTML = data.deepInsights.slice(0, 12).map((i, idx) => {
                         const whyMatch = (i.content || '').match(/WHY THEY'RE RELATED:\n([\s\S]*?)(?:\n\nSimilarity:|$)/);
                         const explanation = whyMatch ? whyMatch[1].trim() : (i.content || '').substring(0, 500);
+                        const topics = detectTopics(i.title + ' ' + i.content);
                         return `
-                        <div class="finding deep-insight-card" onclick="this.classList.toggle('expanded')">
+                        <div class="finding deep-insight-card" data-topics="${topics}" onclick="this.classList.toggle('expanded')">
                             <div class="finding-title">${(i.title || '').replace('[INSIGHT] ', '')}</div>
                             <div class="finding-content collapsed">${explanation}</div>
                             <div class="expand-hint">tap to expand ↓</div>
@@ -232,6 +264,22 @@
                             </div>
                         </div>
                     `}).join('');
+                    
+                    // Setup topic filter buttons
+                    document.querySelectorAll('.topic-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            const topic = btn.dataset.topic;
+                            document.querySelectorAll('.deep-insight-card').forEach(card => {
+                                if (topic === 'all' || card.dataset.topics.includes(topic)) {
+                                    card.classList.remove('hidden');
+                                } else {
+                                    card.classList.add('hidden');
+                                }
+                            });
+                        });
+                    });
                 } else {
                     document.getElementById('deep-insights').innerHTML = '<div class="loading">No deep insights yet — check back later!</div>';
                 }

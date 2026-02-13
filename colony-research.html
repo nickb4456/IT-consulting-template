@@ -137,6 +137,18 @@
         .paper-card.expanded .finding-content { max-height: none; }
         .paper-card.expanded .finding-content::after { display: none; }
         .paper-card.expanded .expand-hint { display: none; }
+        /* Breakthrough cards - expandable with TLDR */
+        .breakthrough-card { cursor: pointer; transition: all 0.2s; border-left: 3px solid #f59e0b; }
+        .breakthrough-card:hover { background: #2d3748; }
+        .breakthrough-card .tldr { color: #fbbf24; font-size: 0.85rem; margin: 0.5rem 0; font-style: italic; }
+        .breakthrough-card .finding-content.collapsed { max-height: 0; overflow: hidden; }
+        .breakthrough-card.expanded .finding-content { max-height: none; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        .breakthrough-card.expanded .tldr { display: none; }
+        .breakthrough-card.expanded .expand-hint { display: none; }
+        /* Connection cards clickable hint */
+        .connection-card { cursor: pointer; }
+        .connection-card:hover { background: #2d3748; }
+        .connection-card:hover .connection-arrow { color: #8b5cf6 !important; }
     </style>
 </head>
 <body>
@@ -214,25 +226,33 @@
                     return `<span class="trend-tag">${topic}</span>`;
                 }).join('');
 
-                // Breakthroughs
-                document.getElementById('breakthroughs').innerHTML = data.breakthroughs.slice(0, 10).map(b => `
-                    <div class="finding">
+                // Breakthroughs - expandable with TLDR
+                document.getElementById('breakthroughs').innerHTML = data.breakthroughs.slice(0, 10).map(b => {
+                    const content = (b.content || '');
+                    // Extract TLDR from content or generate short summary
+                    const tldrMatch = content.match(/PURPOSE:?\s*([^\\n]+)/i) || content.match(/^([^.]+\.)/);
+                    const tldr = tldrMatch ? tldrMatch[1].trim().substring(0, 150) : content.substring(0, 100);
+                    const fullContent = content.replace(/\n/g, '<br>');
+                    return `
+                    <div class="finding breakthrough-card" onclick="this.classList.toggle('expanded')">
                         <div class="finding-title">${b.title.replace('[BREAKTHROUGH] ', '').substring(0, 100)}</div>
-                        <div class="finding-content">${(b.content || '').substring(0, 200)}...</div>
+                        <div class="tldr">💡 ${tldr}${tldr.length >= 100 ? '...' : ''}</div>
+                        <div class="finding-content collapsed">${fullContent}</div>
+                        <div class="expand-hint">tap to expand ↓</div>
                         <div class="finding-meta">
                             <span class="score high">${b.score}</span>
                             <span class="source">${b.source}</span>
                             <span class="date">${new Date(b.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
 
-                // Connections (paper1 ↔ paper2 format)
+                // Connections (paper1 ↔ paper2 format) - clickable to jump to deep insights
                 document.getElementById('connections').innerHTML = data.connections.slice(0, 8).map(c => `
-                    <div class="finding connection-card">
+                    <div class="finding connection-card" onclick="document.getElementById('deep-insights').scrollIntoView({behavior: 'smooth'})" title="Click to see why these are connected">
                         <div class="connection-papers">
                             <div class="paper-link">📄 ${(c.paper1 || '').substring(0, 80)}</div>
-                            <div class="connection-arrow">↔ ${c.score}% related</div>
+                            <div class="connection-arrow">↔ ${c.score}% related — <span style="color:#8b5cf6">see why ↓</span></div>
                             <div class="paper-link">📄 ${(c.paper2 || '').substring(0, 80)}</div>
                         </div>
                         <div class="finding-meta">

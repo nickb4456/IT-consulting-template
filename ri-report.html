@@ -212,60 +212,12 @@
                 <div id="addressResults" style="position:absolute;top:100%;left:0;right:0;background:#1e293b;border:1px solid rgba(255,255,255,0.1);border-radius:8px;max-height:300px;overflow-y:auto;display:none;z-index:100"></div>
             </div>
             
-            <!-- Manual Entry Toggle -->
-            <div style="margin-bottom:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap">
-                <button onclick="toggleManualEntry()" class="btn-secondary" style="font-size:0.85rem">
-                    📝 My address isn't listed - Enter manually
+            <!-- Auto Lookup Button -->
+            <div style="margin-bottom:1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+                <button onclick="autoLookupProperty()" style="background:linear-gradient(135deg,#10b981,#059669);font-size:1rem;padding:0.8rem 1.5rem">
+                    🔍 Auto-Lookup & Find Comps
                 </button>
-                <button onclick="lookupOnRedfin()" class="btn-secondary" style="font-size:0.85rem;background:rgba(16,185,129,0.2);border-color:rgba(16,185,129,0.4)">
-                    🔍 Look up my home's details on Redfin
-                </button>
-            </div>
-            
-            <!-- Manual Entry Form (hidden by default) -->
-            <div id="manualEntryForm" style="display:none;background:rgba(0,0,0,0.2);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem">
-                <h4 style="color:#a5b4fc;margin-bottom:1rem">Enter Your Property Details</h4>
-                <div class="filters" style="margin-bottom:1rem">
-                    <div class="filter-group" style="flex:2">
-                        <label>Address</label>
-                        <input type="text" id="manualAddress" placeholder="123 Main St" style="width:100%">
-                    </div>
-                    <div class="filter-group">
-                        <label>City</label>
-                        <select id="manualCity"></select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Property Type</label>
-                        <select id="manualType">
-                            <option value="Single Family">Single Family</option>
-                            <option value="Condo">Condo</option>
-                            <option value="Multi-Family">Multi-Family</option>
-                            <option value="Townhouse">Townhouse</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="filters">
-                    <div class="filter-group">
-                        <label>Bedrooms</label>
-                        <input type="number" id="manualBeds" placeholder="3" min="0" max="10">
-                    </div>
-                    <div class="filter-group">
-                        <label>Bathrooms</label>
-                        <input type="number" id="manualBaths" placeholder="2" min="0" max="10" step="0.5">
-                    </div>
-                    <div class="filter-group">
-                        <label>Square Feet</label>
-                        <input type="number" id="manualSqft" placeholder="1500">
-                    </div>
-                    <div class="filter-group">
-                        <label>Year Built</label>
-                        <input type="number" id="manualYear" placeholder="1990">
-                    </div>
-                    <div class="filter-group">
-                        <label>&nbsp;</label>
-                        <button onclick="runManualComp()" style="background:linear-gradient(135deg,#10b981,#059669)">🔍 Find Comps</button>
-                    </div>
-                </div>
+                <span id="lookupStatus" style="color:#94a3b8;font-size:0.9rem"></span>
             </div>
             
             <!-- Subject Property Card (hidden until address selected) -->
@@ -684,17 +636,126 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
             form.style.display = form.style.display === 'none' ? 'block' : 'none';
         }
         
-        // Open Redfin to look up property details
-        function lookupOnRedfin() {
-            const address = document.getElementById('addressSearch').value.trim() || 
-                           document.getElementById('manualAddress')?.value.trim() || '';
-            if (!address) {
-                alert('Enter an address first, then click this button to look up details on Redfin');
+        // Auto-lookup property details from Redfin
+        async function autoLookupProperty() {
+            const addressInput = document.getElementById('addressSearch').value.trim();
+            if (!addressInput) {
+                alert('Enter an address first (e.g., "77 Westfield Dr, Cranston")');
                 return;
             }
-            // Format for Redfin search
-            const query = encodeURIComponent(address + ', RI');
-            window.open('https://www.redfin.com/RI/search?q=' + query, '_blank');
+            
+            const status = document.getElementById('lookupStatus');
+            status.textContent = '🔄 Looking up property...';
+            status.style.color = '#f59e0b';
+            
+            try {
+                // Parse address and city from input
+                const parts = addressInput.split(',').map(s => s.trim());
+                const address = parts[0];
+                const city = parts[1] || 'Cranston';
+                
+                // Try to fetch from Redfin via CORS proxy
+                const query = encodeURIComponent(address + ' ' + city + ' RI');
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const redfinUrl = 'https://www.redfin.com/stingray/do/location-autocomplete?v=2&al=1&location=' + query;
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(redfinUrl));
+                const text = await response.text();
+                
+                // Redfin returns {}&&{...} format, strip the prefix
+                const jsonStr = text.replace(/^\{\}\&\&/, '');
+                const data = JSON.parse(jsonStr);
+                
+                if (data.payload && data.payload.sections) {
+                    // Find the property in results
+                    let property = null;
+                    for (const section of data.payload.sections) {
+                        if (section.rows) {
+                            for (const row of section.rows) {
+                                if (row.type === 'A' || row.name?.toLowerCase().includes(address.toLowerCase().split(' ')[0])) {
+                                    property = row;
+                                    break;
+                                }
+                            }
+                        }
+                        if (property) break;
+                    }
+                    
+                    if (property) {
+                        // Extract property details
+                        const beds = property.beds || null;
+                        const baths = property.baths || null;
+                        const sqft = property.sqFt || property.sqft || null;
+                        const yearBuilt = property.yearBuilt || null;
+                        const ptype = property.propertyType || 'Single Family';
+                        const url = property.url ? 'https://www.redfin.com' + property.url : null;
+                        
+                        // Create subject property
+                        subjectProperty = {
+                            address: address,
+                            city: city,
+                            propertyType: ptype,
+                            beds: beds,
+                            baths: baths,
+                            sqft: sqft,
+                            yearBuilt: yearBuilt,
+                            price: property.price || null,
+                            url: url,
+                            isManual: false
+                        };
+                        
+                        // Show subject property details
+                        const details = document.getElementById('subjectDetails');
+                        details.innerHTML = `
+                            <div><strong style="color:#94a3b8">Address:</strong><br>${address}, ${city}</div>
+                            <div><strong style="color:#94a3b8">Type:</strong><br>${ptype}</div>
+                            <div><strong style="color:#94a3b8">Beds/Baths:</strong><br>${beds || '?'} bd / ${baths || '?'} ba</div>
+                            <div><strong style="color:#94a3b8">Sq Ft:</strong><br>${sqft ? sqft.toLocaleString() : 'N/A'}</div>
+                            <div><strong style="color:#94a3b8">Year Built:</strong><br>${yearBuilt || 'N/A'}</div>
+                            <div><strong style="color:#94a3b8">Source:</strong><br><span style="color:#10b981">✓ Redfin</span></div>
+                        `;
+                        document.getElementById('subjectProperty').style.display = 'block';
+                        
+                        status.textContent = '✓ Found! ' + (beds || '?') + 'bd/' + (baths || '?') + 'ba, ' + (sqft ? sqft.toLocaleString() + ' sqft' : 'sqft N/A');
+                        status.style.color = '#10b981';
+                        
+                        // Find comps
+                        findComps();
+                        return;
+                    }
+                }
+                
+                // Fallback: property not found in Redfin, use city-only search
+                status.textContent = '⚠️ Property details not found - using city comps only';
+                status.style.color = '#f59e0b';
+                
+                // Still run comps with just city
+                const parts2 = addressInput.split(',').map(s => s.trim());
+                subjectProperty = {
+                    address: parts2[0],
+                    city: parts2[1] || 'Cranston',
+                    propertyType: 'Single Family',
+                    beds: null,
+                    baths: null,
+                    sqft: null,
+                    yearBuilt: null,
+                    price: null,
+                    url: null,
+                    isManual: true
+                };
+                
+                document.getElementById('subjectDetails').innerHTML = `
+                    <div><strong style="color:#94a3b8">Address:</strong><br>${subjectProperty.address}, ${subjectProperty.city}</div>
+                    <div><strong style="color:#94a3b8">Details:</strong><br><span style="color:#f59e0b">Not found on Redfin</span></div>
+                `;
+                document.getElementById('subjectProperty').style.display = 'block';
+                findComps();
+                
+            } catch (err) {
+                console.error('Lookup error:', err);
+                status.textContent = '❌ Lookup failed - ' + err.message;
+                status.style.color = '#ec4899';
+            }
         }
         
         // Populate manual city dropdown

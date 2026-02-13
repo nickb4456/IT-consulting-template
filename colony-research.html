@@ -129,6 +129,14 @@
         .topic-btn:hover { background: rgba(99,102,241,0.3); }
         .topic-btn.active { background: #6366f1; color: white; border-color: #6366f1; }
         .deep-insight-card.hidden { display: none; }
+        /* Paper cards - expandable */
+        .paper-card { cursor: pointer; transition: all 0.2s; border-left: 3px solid #10b981; }
+        .paper-card:hover { background: #2d3748; }
+        .paper-card .finding-content.collapsed { max-height: 80px; overflow: hidden; position: relative; }
+        .paper-card .finding-content.collapsed::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #1e293b); }
+        .paper-card.expanded .finding-content { max-height: none; }
+        .paper-card.expanded .finding-content::after { display: none; }
+        .paper-card.expanded .expand-hint { display: none; }
     </style>
 </head>
 <body>
@@ -284,17 +292,20 @@
                     document.getElementById('deep-insights').innerHTML = '<div class="loading">No deep insights yet — check back later!</div>';
                 }
 
-                // Papers
-                document.getElementById('papers').innerHTML = data.topPapers.slice(0, 15).map(p => `
-                    <div class="finding">
+                // Papers - click to expand full content
+                document.getElementById('papers').innerHTML = data.topPapers.slice(0, 15).map(p => {
+                    const fullContent = (p.content || '').replace(/\n/g, '<br>');
+                    return `
+                    <div class="finding paper-card" onclick="this.classList.toggle('expanded')">
                         <div class="finding-title">${p.title.substring(0, 100)}</div>
-                        <div class="finding-content">${(p.content || '').substring(0, 180)}...</div>
+                        <div class="finding-content collapsed">${fullContent}</div>
+                        <div class="expand-hint">tap to expand ↓</div>
                         <div class="finding-meta">
                             <span class="score high">${p.score}</span>
                             <span class="date">${new Date(p.created_at).toLocaleDateString()}</span>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
 
                 // Generated time
                 document.getElementById('generated').textContent = 'Last updated: ' + new Date(data.generated).toLocaleString();

@@ -18,6 +18,61 @@
                 window.location.href = 'casevault-intake.html';
             }
         })();
+        
+        // ===== Anti-Scraping Protections =====
+        (function() {
+            // 1. Bot/headless detection
+            const isBot = navigator.webdriver || 
+                window.__nightmare || 
+                window.phantom ||
+                window._phantom ||
+                /HeadlessChrome|PhantomJS/.test(navigator.userAgent) ||
+                !navigator.languages || navigator.languages.length === 0;
+            
+            if (isBot) {
+                document.body.innerHTML = '<h1 style="text-align:center;margin-top:200px;font-family:sans-serif">Access Denied</h1>';
+                throw new Error('Automated access blocked');
+            }
+
+            // 2. Rate limiting (30 loads/hour)
+            const now = Date.now();
+            const hourAgo = now - 3600000;
+            let loads = JSON.parse(localStorage.getItem('_cv_loads') || '[]').filter(t => t > hourAgo);
+            if (loads.length >= 30) {
+                alert('Rate limit exceeded. Please try again later.');
+                window.location.href = 'https://aibridges.org';
+                return;
+            }
+            loads.push(now);
+            localStorage.setItem('_cv_loads', JSON.stringify(loads));
+
+            // 3. Console warning
+            console.log('%c⚠️ WARNING', 'color: red; font-size: 24px; font-weight: bold;');
+            console.log('%cScraping this data is prohibited. All access is logged and monitored.', 'color: red; font-size: 14px;');
+            console.log('%cData is proprietary and protected by copyright.', 'color: orange;');
+
+            // 4. Disable right-click on data elements
+            document.addEventListener('contextmenu', function(e) {
+                if (e.target.closest('#results, .settlement-data, table')) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // 5. DevTools detection
+            let devtools = false;
+            const threshold = 160;
+            setInterval(() => {
+                if (window.outerHeight - window.innerHeight > threshold || 
+                    window.outerWidth - window.innerWidth > threshold) {
+                    if (!devtools) {
+                        devtools = true;
+                        console.clear();
+                        console.log('%c🔒 Developer tools detected. Data access logged.', 'color: red; font-size: 16px;');
+                    }
+                }
+            }, 1000);
+        })();
     </script>
     <style>
         .casevault-hero {

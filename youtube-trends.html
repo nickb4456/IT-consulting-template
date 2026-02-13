@@ -140,6 +140,99 @@
             font-size: 0.9rem;
         }
         
+        /* Hook Pattern Tiles - Compact & Expandable */
+        .hooks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        
+        .hook-tile {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.08), rgba(255, 107, 107, 0.08));
+            border: 1px solid rgba(255, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        
+        .hook-tile:hover {
+            border-color: rgba(255, 0, 0, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 0, 0, 0.15);
+        }
+        
+        .hook-tile.expanded {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.12), rgba(255, 107, 107, 0.12));
+        }
+        
+        @media (max-width: 600px) {
+            .hook-tile.expanded { grid-column: span 1; }
+        }
+        
+        .hook-tile .hook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .hook-tile .hook-name {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+        
+        .hook-tile .hook-stats {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        
+        .hook-tile .hook-views {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text);
+        }
+        
+        .hook-tile .hook-expand-icon {
+            color: var(--muted);
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+        
+        .hook-tile.expanded .hook-expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .hook-tile .hook-details {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 0, 0, 0.2);
+        }
+        
+        .hook-tile.expanded .hook-details {
+            display: block;
+        }
+        
+        .hook-tile .hook-example {
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+        
+        .hook-tile .hook-tip {
+            font-size: 0.8rem;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px 10px;
+            border-radius: 6px;
+            color: var(--text);
+        }
+        
         /* Pattern bars */
         .pattern-bars { display: flex; flex-direction: column; gap: 12px; }
         
@@ -550,15 +643,22 @@
             
             // Analyze title hooks (first part of title)
             const hookTypes = {
-                'Question Hook': { pattern: /^(why|what|how|is|are|can|do|does|should|would|will|did)/i, count: 0, examples: [], avgViews: 0 },
-                'Number/List Hook': { pattern: /^(\d+|top \d+|the \d+)/i, count: 0, examples: [], avgViews: 0 },
-                'Challenge Hook': { pattern: /(challenge|impossible|bet you|try this|can you)/i, count: 0, examples: [], avgViews: 0 },
-                'Story Hook': { pattern: /^(i |my |we |this is how|the story|what happened)/i, count: 0, examples: [], avgViews: 0 },
-                'Urgency Hook': { pattern: /(now|today|2025|2024|new|just|finally|breaking)/i, count: 0, examples: [], avgViews: 0 },
-                'Curiosity Gap': { pattern: /(secret|truth|nobody|don't want you|won't believe|shocking)/i, count: 0, examples: [], avgViews: 0 },
-                'How-To Hook': { pattern: /^(how to|how i|the way to|step by step)/i, count: 0, examples: [], avgViews: 0 },
-                'Comparison Hook': { pattern: /(vs\.?|versus|compared|better than|or )/i, count: 0, examples: [], avgViews: 0 },
+                'Comparison': { pattern: /(vs\.?|versus|compared|better than|or )/i, tip: 'Try: "X vs Y - Which is Better?"', icon: '⚔️' },
+                'Challenge': { pattern: /(challenge|impossible|bet you|try this|can you)/i, tip: 'Try: "I Tried X for 30 Days"', icon: '🏆' },
+                'Story': { pattern: /^(i |my |we |this is how|the story|what happened)/i, tip: 'Try: "I Finally Did X..." or "My Journey to..."', icon: '📖' },
+                'Curiosity Gap': { pattern: /(secret|truth|nobody|don't want you|won't believe|shocking)/i, tip: 'Try: "The Truth About X" or "What They Don\'t Tell You"', icon: '🤫' },
+                'Question': { pattern: /^(why|what|how|is|are|can|do|does|should|would|will|did)/i, tip: 'Try: "Why Does X Happen?" or "What If..."', icon: '❓' },
+                'Listicle': { pattern: /^(\d+|top \d+|the \d+)/i, tip: 'Try: "10 Ways to..." or "5 Things You Need"', icon: '📋' },
+                'How-To': { pattern: /^(how to|how i|the way to|step by step)/i, tip: 'Try: "How to X in 5 Minutes"', icon: '🎓' },
+                'Urgency': { pattern: /(now|today|2025|2026|new|just|finally|breaking)/i, tip: 'Try: "NEW 2026..." or "This Changes Everything"', icon: '⚡' },
             };
+            
+            // Count matches
+            Object.keys(hookTypes).forEach(name => {
+                hookTypes[name].count = 0;
+                hookTypes[name].avgViews = 0;
+                hookTypes[name].examples = [];
+            });
             
             allVideos.forEach(v => {
                 const title = (v.title || '').toLowerCase();
@@ -580,6 +680,8 @@
                     count: data.count,
                     avgViews: data.count > 0 ? Math.round(data.avgViews / data.count) : 0,
                     examples: data.examples,
+                    tip: data.tip,
+                    icon: data.icon,
                 }))
                 .filter(h => h.count > 0)
                 .sort((a, b) => b.avgViews - a.avgViews);
@@ -589,19 +691,30 @@
                 return;
             }
             
-            container.innerHTML = hooks.map(h => `
-                <div class="insight-card" style="background: linear-gradient(135deg, rgba(255, 0, 0, 0.05), rgba(255, 107, 107, 0.05)); border-color: rgba(255, 0, 0, 0.2);">
-                    <div class="insight-title" style="color: var(--accent);">🎣 ${escapeHtml(h.name)}</div>
-                    <div class="insight-data">
-                        <strong>${formatViews(h.avgViews)}</strong> avg views · Used in <strong>${h.count}</strong> top videos
-                    </div>
-                    ${h.examples.length ? `
-                        <div style="font-size: 0.85rem; color: var(--muted); margin-top: 8px;">
-                            Example: "${escapeHtml(h.examples[0].title.slice(0, 60))}..."
+            container.innerHTML = `<div class="hooks-grid">${hooks.map((h, i) => `
+                <div class="hook-tile" data-hook="${i}" onclick="toggleHook(this)">
+                    <div class="hook-header">
+                        <div>
+                            <div class="hook-name">${h.icon} ${escapeHtml(h.name)}</div>
+                            <div class="hook-views">${formatViews(h.avgViews)}</div>
+                            <div class="hook-stats">${h.count} videos</div>
                         </div>
-                    ` : ''}
+                        <span class="hook-expand-icon">▼</span>
+                    </div>
+                    <div class="hook-details">
+                        ${h.examples.length ? `
+                            <div class="hook-example">
+                                "${escapeHtml(h.examples[0].title.slice(0, 55))}..."
+                            </div>
+                        ` : ''}
+                        <div class="hook-tip">💡 ${escapeHtml(h.tip)}</div>
+                    </div>
                 </div>
-            `).join('');
+            `).join('')}</div>`;
+        }
+        
+        function toggleHook(el) {
+            el.classList.toggle('expanded');
         }
         
         function renderTalkingPoints() {

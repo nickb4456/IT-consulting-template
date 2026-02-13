@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ouroboros Colony Research | AI Memory Research</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+        .header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+            padding: 1.5rem 2rem;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header p { color: #94a3b8; margin-top: 0.5rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stat-val { font-size: 2.5rem; font-weight: 700; color: #8b5cf6; }
+        .stat-lbl { color: #94a3b8; font-size: 0.9rem; margin-top: 0.25rem; }
+        .section {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .finding {
+            background: rgba(15, 23, 42, 0.6);
+            border-left: 3px solid #8b5cf6;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 0 8px 8px 0;
+        }
+        .finding:hover { background: rgba(139, 92, 246, 0.1); }
+        .finding-title {
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 0.5rem;
+        }
+        .finding-content {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .finding-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .score {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .score.high { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+        .source { color: #64748b; }
+        .date { color: #64748b; }
+        .trend-tag {
+            display: inline-block;
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+            padding: 0.3rem 0.75rem;
+            border-radius: 20px;
+            margin: 0.25rem;
+            font-size: 0.85rem;
+        }
+        .loading { text-align: center; padding: 3rem; color: #64748b; }
+        a { color: #a78bfa; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .snake { animation: slither 2s ease-in-out infinite; display: inline-block; }
+        @keyframes slither {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(5px); }
+        }
+        .refresh-note { text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span class="snake">🐍</span> Ouroboros Colony Research</h1>
+        <p>Self-improving AI research colony • Autonomous knowledge discovery</p>
+    </div>
+
+    <div class="container">
+        <div class="stats-row" id="stats">
+            <div class="stat-card"><div class="stat-val">-</div><div class="stat-lbl">Total Findings</div></div>
+            <div class="stat-card"><div class="stat-val">-</div><div class="stat-lbl">Connections</div></div>
+            <div class="stat-card"><div class="stat-val">-</div><div class="stat-lbl">Breakthroughs</div></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔥 Emerging Trends</div>
+            <div id="trends"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🏆 Recent Breakthroughs</div>
+            <div id="breakthroughs"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔗 Novel Connections</div>
+            <div id="connections"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📚 Top Research Papers</div>
+            <div id="papers"><div class="loading">Loading...</div></div>
+        </div>
+
+        <div class="refresh-note">
+            Data refreshed automatically by the colony • <span id="generated"></span>
+        </div>
+    </div>
+
+    <script>
+        fetch('colony-research.json')
+            .then(r => r.json())
+            .then(data => {
+                // Stats
+                document.getElementById('stats').innerHTML = `
+                    <div class="stat-card"><div class="stat-val">${data.stats.totalFindings.toLocaleString()}</div><div class="stat-lbl">Total Findings</div></div>
+                    <div class="stat-card"><div class="stat-val">${data.stats.totalEdges.toLocaleString()}</div><div class="stat-lbl">Connections</div></div>
+                    <div class="stat-card"><div class="stat-val">${data.stats.totalBreakthroughs.toLocaleString()}</div><div class="stat-lbl">Breakthroughs</div></div>
+                `;
+
+                // Trends
+                document.getElementById('trends').innerHTML = data.trends.map(t => {
+                    const match = t.title.match(/trend: (.+?) with/i);
+                    const topic = match ? match[1] : t.title;
+                    return `<span class="trend-tag">${topic}</span>`;
+                }).join('');
+
+                // Breakthroughs
+                document.getElementById('breakthroughs').innerHTML = data.breakthroughs.slice(0, 10).map(b => `
+                    <div class="finding">
+                        <div class="finding-title">${b.title.replace('[BREAKTHROUGH] ', '').substring(0, 100)}</div>
+                        <div class="finding-content">${(b.content || '').substring(0, 200)}...</div>
+                        <div class="finding-meta">
+                            <span class="score high">${b.score}</span>
+                            <span class="source">${b.source}</span>
+                            <span class="date">${new Date(b.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Connections
+                document.getElementById('connections').innerHTML = data.connections.slice(0, 8).map(c => `
+                    <div class="finding">
+                        <div class="finding-title">${c.title.replace('[CONNECTION] ', '').substring(0, 120)}</div>
+                        <div class="finding-meta">
+                            <span class="score">${c.score}</span>
+                            <span class="date">${new Date(c.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Papers
+                document.getElementById('papers').innerHTML = data.topPapers.slice(0, 15).map(p => `
+                    <div class="finding">
+                        <div class="finding-title">${p.title.substring(0, 100)}</div>
+                        <div class="finding-content">${(p.content || '').substring(0, 180)}...</div>
+                        <div class="finding-meta">
+                            <span class="score high">${p.score}</span>
+                            <span class="date">${new Date(p.created_at).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Generated time
+                document.getElementById('generated').textContent = 'Last updated: ' + new Date(data.generated).toLocaleString();
+            })
+            .catch(e => {
+                document.querySelectorAll('.loading').forEach(el => el.textContent = 'Error loading data');
+            });
+    </script>
+</body>
+</html>

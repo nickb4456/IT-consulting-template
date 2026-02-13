@@ -115,8 +115,15 @@
         .paper-link { color: #c4b5fd; font-size: 0.9rem; }
         .connection-arrow { color: #22c55e; font-weight: 600; font-size: 0.85rem; padding-left: 1.5rem; }
         /* Deep insight cards */
-        .deep-insight-card { border-left: 3px solid #8b5cf6; }
+        .deep-insight-card { border-left: 3px solid #8b5cf6; cursor: pointer; transition: all 0.2s; }
+        .deep-insight-card:hover { background: #2d3748; }
         .deep-insight-card .finding-content { color: #e2e8f0; line-height: 1.6; white-space: pre-line; }
+        .deep-insight-card .finding-content.collapsed { max-height: 120px; overflow: hidden; position: relative; }
+        .deep-insight-card .finding-content.collapsed::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40px; background: linear-gradient(transparent, #1e293b); }
+        .deep-insight-card.expanded .finding-content { max-height: none; }
+        .deep-insight-card.expanded .finding-content::after { display: none; }
+        .expand-hint { color: #8b5cf6; font-size: 0.8rem; margin-top: 0.5rem; }
+        .deep-insight-card.expanded .expand-hint { display: none; }
     </style>
 </head>
 <body>
@@ -208,16 +215,17 @@
                     </div>
                 `).join('');
 
-                // Deep Insights (LLM-synthesized)
+                // Deep Insights (LLM-synthesized) - click to expand
                 if (data.deepInsights && data.deepInsights.length > 0) {
-                    document.getElementById('deep-insights').innerHTML = data.deepInsights.slice(0, 6).map(i => {
+                    document.getElementById('deep-insights').innerHTML = data.deepInsights.slice(0, 6).map((i, idx) => {
                         // Parse the content to extract the explanation
                         const whyMatch = (i.content || '').match(/WHY THEY'RE RELATED:\n([\s\S]*?)(?:\n\nSimilarity:|$)/);
-                        const explanation = whyMatch ? whyMatch[1].trim() : (i.content || '').substring(0, 300);
+                        const explanation = whyMatch ? whyMatch[1].trim() : (i.content || '').substring(0, 500);
                         return `
-                        <div class="finding deep-insight-card">
+                        <div class="finding deep-insight-card" onclick="this.classList.toggle('expanded')">
                             <div class="finding-title">${(i.title || '').replace('[INSIGHT] ', '')}</div>
-                            <div class="finding-content">${explanation.substring(0, 350)}${explanation.length > 350 ? '...' : ''}</div>
+                            <div class="finding-content collapsed">${explanation}</div>
+                            <div class="expand-hint">tap to expand ↓</div>
                             <div class="finding-meta">
                                 <span class="score">${i.score}</span>
                                 <span class="date">${i.created_at ? new Date(i.created_at).toLocaleDateString() : ''}</span>

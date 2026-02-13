@@ -209,16 +209,16 @@
 <body>
     <div class="header">
         <h1>🏠 Rhode Island Real Estate Report</h1>
-        <p>Complete market analysis with SQL query verification • 2,034 properties • 14 cities</p>
+        <p>Complete market analysis with SQL query verification • 3,089 properties • 52 cities</p>
     </div>
     
     <div class="stats-row">
         <div class="stat">
-            <div class="stat-value">2,034</div>
+            <div class="stat-value">3,089</div>
             <div class="stat-label">Total Properties</div>
         </div>
         <div class="stat">
-            <div class="stat-value">14</div>
+            <div class="stat-value">52</div>
             <div class="stat-label">RI Cities</div>
         </div>
         <div class="stat">
@@ -312,7 +312,7 @@
         <div class="sql-section">
             <h2 class="sql-title">🔍 SQL Query Verification</h2>
             <p class="sql-description">
-                Query the raw data directly to verify any statistic. The database contains <strong>2,034 property records</strong> with fields: 
+                Query the raw data directly to verify any statistic. The database contains <strong>3,089 property records</strong> with fields: 
                 <code>city, zip, price, propertyType, beds, baths, sqft, lotSize, yearBuilt, soldDate, month, address</code>
             </p>
             
@@ -351,49 +351,430 @@ ORDER BY sales DESC;</textarea>
     <script>
         // Data
         const cityData = [
-            { city: "Providence", count: 713, landCount: 35, median: 520000, avg: 632657, min: 15000, max: 8900000 },
-            { city: "Cranston", count: 554, landCount: 8, median: 468000, avg: 511616, min: 6000, max: 1381374 },
-            { city: "Warwick", count: 534, landCount: 5, median: 405000, avg: 434527, min: 80000, max: 1599000 },
-            { city: "East Greenwich", count: 73, landCount: 1, median: 540000, avg: 628241, min: 200000, max: 1450000 },
-            { city: "North Providence", count: 64, landCount: 0, median: 350000, avg: 320518, min: 120000, max: 680000 },
-            { city: "West Warwick", count: 51, landCount: 0, median: 400000, avg: 405741, min: 180000, max: 750000 },
-            { city: "Johnston", count: 22, landCount: 1, median: 382500, avg: 389500, min: 200000, max: 620000 },
-            { city: "Pawtucket", count: 6, landCount: 0, median: 505000, avg: 490000, min: 350000, max: 650000 },
-            { city: "East Providence", count: 6, landCount: 0, median: 485000, avg: 510000, min: 320000, max: 1150000 },
-            { city: "Hope", count: 5, landCount: 0, median: 510000, avg: 529750, min: 400000, max: 680000 },
-            { city: "Coventry", count: 2, landCount: 0, median: 330000, avg: 330000, min: 280000, max: 380000 },
-            { city: "North Kingstown", count: 2, landCount: 0, median: 799900, avg: 799900, min: 699000, max: 900800 },
-            { city: "Rumford", count: 1, landCount: 0, median: 1100000, avg: 1100000, min: 1100000, max: 1100000 },
-            { city: "East Side Of Providence", count: 1, landCount: 0, median: 780000, avg: 780000, min: 780000, max: 780000 }
-        ];
+    {
+        "city": "Providence",
+        "count": 719,
+        "landCount": 59,
+        "median": 510000,
+        "avg": 649079,
+        "min": 6000,
+        "max": 5625000
+    },
+    {
+        "city": "Cranston",
+        "count": 554,
+        "landCount": 15,
+        "median": 484000,
+        "avg": 532051,
+        "min": 100000,
+        "max": 1599000
+    },
+    {
+        "city": "Warwick",
+        "count": 536,
+        "landCount": 16,
+        "median": 415000,
+        "avg": 438786,
+        "min": 60000,
+        "max": 3500000
+    },
+    {
+        "city": "Coventry",
+        "count": 152,
+        "landCount": 5,
+        "median": 421000,
+        "avg": 443207,
+        "min": 30000,
+        "max": 1328740
+    },
+    {
+        "city": "West Warwick",
+        "count": 134,
+        "landCount": 2,
+        "median": 400000,
+        "avg": 400337,
+        "min": 75000,
+        "max": 675000
+    },
+    {
+        "city": "Wakefield",
+        "count": 104,
+        "landCount": 2,
+        "median": 695000,
+        "avg": 891815,
+        "min": 252000,
+        "max": 3000000
+    },
+    {
+        "city": "East Greenwich",
+        "count": 98,
+        "landCount": 1,
+        "median": 640000,
+        "avg": 770303,
+        "min": 89900,
+        "max": 2575000
+    },
+    {
+        "city": "Narragansett",
+        "count": 91,
+        "landCount": 2,
+        "median": 800000,
+        "avg": 1138359,
+        "min": 15000,
+        "max": 14500000
+    },
+    {
+        "city": "North Providence",
+        "count": 77,
+        "landCount": 3,
+        "median": 350000,
+        "avg": 332300,
+        "min": 32000,
+        "max": 625000
+    },
+    {
+        "city": "Barrington",
+        "count": 64,
+        "landCount": 0,
+        "median": 828000,
+        "avg": 1067124,
+        "min": 350000,
+        "max": 8650000
+    },
+    {
+        "city": "Johnston",
+        "count": 51,
+        "landCount": 3,
+        "median": 449900,
+        "avg": 784162,
+        "min": 105000,
+        "max": 8900000
+    },
+    {
+        "city": "Bristol",
+        "count": 49,
+        "landCount": 0,
+        "median": 665000,
+        "avg": 773008,
+        "min": 200000,
+        "max": 2622500
+    },
+    {
+        "city": "Pawtucket",
+        "count": 43,
+        "landCount": 0,
+        "median": 470000,
+        "avg": 497163,
+        "min": 38000,
+        "max": 1300000
+    },
+    {
+        "city": "East Providence",
+        "count": 42,
+        "landCount": 0,
+        "median": 460000,
+        "avg": 507009,
+        "min": 150000,
+        "max": 1289999
+    },
+    {
+        "city": "Riverside",
+        "count": 33,
+        "landCount": 0,
+        "median": 417500,
+        "avg": 424361,
+        "min": 200000,
+        "max": 775000
+    },
+    {
+        "city": "South Kingstown",
+        "count": 33,
+        "landCount": 5,
+        "median": 820288,
+        "avg": 739477,
+        "min": 200000,
+        "max": 1265213
+    },
+    {
+        "city": "Charlestown",
+        "count": 30,
+        "landCount": 1,
+        "median": 590000,
+        "avg": 880065,
+        "min": 70000,
+        "max": 3400000
+    },
+    {
+        "city": "Saunderstown",
+        "count": 29,
+        "landCount": 1,
+        "median": 799000,
+        "avg": 959341,
+        "min": 403500,
+        "max": 2605000
+    },
+    {
+        "city": "North Kingstown",
+        "count": 28,
+        "landCount": 2,
+        "median": 639000,
+        "avg": 801443,
+        "min": 300000,
+        "max": 3995000
+    },
+    {
+        "city": "Warren",
+        "count": 22,
+        "landCount": 0,
+        "median": 702888,
+        "avg": 718427,
+        "min": 315000,
+        "max": 1225000
+    },
+    {
+        "city": "Lincoln",
+        "count": 19,
+        "landCount": 0,
+        "median": 500000,
+        "avg": 493426,
+        "min": 138000,
+        "max": 1135000
+    },
+    {
+        "city": "West Kingston",
+        "count": 16,
+        "landCount": 0,
+        "median": 653000,
+        "avg": 630544,
+        "min": 349000,
+        "max": 1100000
+    },
+    {
+        "city": "Hope",
+        "count": 15,
+        "landCount": 0,
+        "median": 510000,
+        "avg": 500304,
+        "min": 180000,
+        "max": 807000
+    },
+    {
+        "city": "Woonsocket",
+        "count": 15,
+        "landCount": 1,
+        "median": 372400,
+        "avg": 396760,
+        "min": 132000,
+        "max": 625000
+    },
+    {
+        "city": "Cumberland",
+        "count": 13,
+        "landCount": 1,
+        "median": 530000,
+        "avg": 552408,
+        "min": 120000,
+        "max": 1375000
+    },
+    {
+        "city": "Kingston",
+        "count": 13,
+        "landCount": 0,
+        "median": 650000,
+        "avg": 650923,
+        "min": 360000,
+        "max": 860000
+    },
+    {
+        "city": "Newport",
+        "count": 12,
+        "landCount": 0,
+        "median": 1550360,
+        "avg": 1573650,
+        "min": 880000,
+        "max": 2966250
+    },
+    {
+        "city": "West Greenwich",
+        "count": 12,
+        "landCount": 2,
+        "median": 580000,
+        "avg": 528950,
+        "min": 174900,
+        "max": 1100000
+    },
+    {
+        "city": "Foster",
+        "count": 10,
+        "landCount": 0,
+        "median": 550000,
+        "avg": 503190,
+        "min": 175000,
+        "max": 861000
+    },
+    {
+        "city": "Exeter",
+        "count": 10,
+        "landCount": 0,
+        "median": 630000,
+        "avg": 618694,
+        "min": 244939,
+        "max": 1245000
+    }
+];
         
         const monthlyData = [
-            { month: "2024-02", sales: 13, avgPrice: 383385, land: 0 },
-            { month: "2024-03", sales: 40, avgPrice: 478533, land: 1 },
-            { month: "2024-04", sales: 38, avgPrice: 437309, land: 0 },
-            { month: "2024-05", sales: 36, avgPrice: 422763, land: 3 },
-            { month: "2024-06", sales: 40, avgPrice: 654325, land: 0 },
-            { month: "2024-07", sales: 44, avgPrice: 635080, land: 1 },
-            { month: "2024-08", sales: 38, avgPrice: 547726, land: 0 },
-            { month: "2024-09", sales: 44, avgPrice: 502451, land: 1 },
-            { month: "2024-10", sales: 38, avgPrice: 503716, land: 0 },
-            { month: "2024-11", sales: 22, avgPrice: 652772, land: 0 },
-            { month: "2024-12", sales: 32, avgPrice: 508950, land: 2 },
-            { month: "2025-01", sales: 25, avgPrice: 543576, land: 4 },
-            { month: "2025-02", sales: 37, avgPrice: 600545, land: 0 },
-            { month: "2025-03", sales: 70, avgPrice: 438811, land: 6 },
-            { month: "2025-04", sales: 82, avgPrice: 519850, land: 3 },
-            { month: "2025-05", sales: 95, avgPrice: 591537, land: 4 },
-            { month: "2025-06", sales: 90, avgPrice: 578489, land: 1 },
-            { month: "2025-07", sales: 71, avgPrice: 562369, land: 4 },
-            { month: "2025-08", sales: 86, avgPrice: 513761, land: 6 },
-            { month: "2025-09", sales: 75, avgPrice: 546771, land: 1 },
-            { month: "2025-10", sales: 60, avgPrice: 492491, land: 5 },
-            { month: "2025-11", sales: 42, avgPrice: 479710, land: 2 },
-            { month: "2025-12", sales: 82, avgPrice: 597519, land: 2 },
-            { month: "2026-01", sales: 36, avgPrice: 495668, land: 4 },
-            { month: "2026-02", sales: 12, avgPrice: 409575, land: 0 }
-        ];
+    {
+        "month": "2024-02",
+        "sales": 13,
+        "avgPrice": 383385,
+        "land": 0
+    },
+    {
+        "month": "2024-03",
+        "sales": 40,
+        "avgPrice": 478533,
+        "land": 1
+    },
+    {
+        "month": "2024-04",
+        "sales": 38,
+        "avgPrice": 437309,
+        "land": 0
+    },
+    {
+        "month": "2024-05",
+        "sales": 36,
+        "avgPrice": 422763,
+        "land": 3
+    },
+    {
+        "month": "2024-06",
+        "sales": 40,
+        "avgPrice": 654325,
+        "land": 0
+    },
+    {
+        "month": "2024-07",
+        "sales": 44,
+        "avgPrice": 635080,
+        "land": 1
+    },
+    {
+        "month": "2024-08",
+        "sales": 38,
+        "avgPrice": 547726,
+        "land": 0
+    },
+    {
+        "month": "2024-09",
+        "sales": 44,
+        "avgPrice": 502451,
+        "land": 1
+    },
+    {
+        "month": "2024-10",
+        "sales": 38,
+        "avgPrice": 503716,
+        "land": 0
+    },
+    {
+        "month": "2024-11",
+        "sales": 22,
+        "avgPrice": 652772,
+        "land": 0
+    },
+    {
+        "month": "2024-12",
+        "sales": 32,
+        "avgPrice": 508950,
+        "land": 2
+    },
+    {
+        "month": "2025-01",
+        "sales": 25,
+        "avgPrice": 543576,
+        "land": 4
+    },
+    {
+        "month": "2025-02",
+        "sales": 65,
+        "avgPrice": 608823,
+        "land": 1
+    },
+    {
+        "month": "2025-03",
+        "sales": 132,
+        "avgPrice": 631072,
+        "land": 9
+    },
+    {
+        "month": "2025-04",
+        "sales": 144,
+        "avgPrice": 593904,
+        "land": 3
+    },
+    {
+        "month": "2025-05",
+        "sales": 198,
+        "avgPrice": 655242,
+        "land": 6
+    },
+    {
+        "month": "2025-06",
+        "sales": 187,
+        "avgPrice": 607407,
+        "land": 4
+    },
+    {
+        "month": "2025-07",
+        "sales": 174,
+        "avgPrice": 653697,
+        "land": 5
+    },
+    {
+        "month": "2025-08",
+        "sales": 169,
+        "avgPrice": 685829,
+        "land": 9
+    },
+    {
+        "month": "2025-09",
+        "sales": 157,
+        "avgPrice": 800093,
+        "land": 2
+    },
+    {
+        "month": "2025-10",
+        "sales": 123,
+        "avgPrice": 633020,
+        "land": 7
+    },
+    {
+        "month": "2025-11",
+        "sales": 90,
+        "avgPrice": 585332,
+        "land": 2
+    },
+    {
+        "month": "2025-12",
+        "sales": 151,
+        "avgPrice": 620195,
+        "land": 5
+    },
+    {
+        "month": "2026-01",
+        "sales": 87,
+        "avgPrice": 604791,
+        "land": 4
+    },
+    {
+        "month": "2026-02",
+        "sales": 30,
+        "avgPrice": 723427,
+        "land": 1
+    }
+];
         
         // Populate city table
         const cityTableBody = document.getElementById('cityTable');

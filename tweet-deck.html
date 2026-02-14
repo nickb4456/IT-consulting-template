@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tweet Deck | Nick's Twitter Tools</title>
+    <style>
+        :root {
+            --bg: #15202b;
+            --card: #192734;
+            --border: #38444d;
+            --text: #ffffff;
+            --muted: #8899a6;
+            --accent: #1da1f2;
+            --green: #17bf63;
+            --red: #e0245e;
+            --orange: #ffad1f;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 25px;
+        }
+        
+        header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        header p { color: var(--muted); }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
+        }
+        
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        .panel {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Tweet Composer */
+        .composer {
+            position: relative;
+        }
+        
+        .composer textarea {
+            width: 100%;
+            min-height: 120px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1.1rem;
+            padding: 15px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .composer textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .char-count {
+            text-align: right;
+            margin-top: 8px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        
+        .char-count.warning { color: var(--orange); }
+        .char-count.danger { color: var(--red); }
+        
+        .composer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-primary:hover { background: #1a91da; }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-secondary:hover { background: var(--border); }
+        
+        /* Thread Builder */
+        .thread-tweet {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .thread-tweet::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 50px;
+            bottom: -15px;
+            width: 2px;
+            background: var(--border);
+        }
+        
+        .thread-tweet:last-child::before { display: none; }
+        
+        .thread-tweet textarea {
+            width: 100%;
+            min-height: 80px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        .thread-tweet textarea:focus { outline: none; }
+        
+        .thread-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .tweet-number {
+            background: var(--accent);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .remove-tweet {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .remove-tweet:hover { color: var(--red); }
+        
+        .add-tweet-btn {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+        
+        .add-tweet-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        /* Templates */
+        .template-grid {
+            display: grid;
+            gap: 10px;
+        }
+        
+        .template-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .template-card:hover {
+            border-color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .template-card .template-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .template-card .template-preview {
+            color: var(--muted);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        /* Algorithm Tips */
+        .tip {
+            background: rgba(23, 191, 99, 0.1);
+            border: 1px solid rgba(23, 191, 99, 0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .tip-icon { margin-right: 8px; }
+        
+        .warning-tip {
+            background: rgba(224, 36, 94, 0.1);
+            border-color: rgba(224, 36, 94, 0.3);
+        }
+        
+        /* Drafts */
+        .draft-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        
+        .draft-item:hover { border-color: var(--muted); }
+        
+        .draft-preview {
+            font-size: 0.85rem;
+            color: var(--muted);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .draft-meta {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 5px;
+        }
+        
+        /* Preview */
+        .preview-tweet {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 15px;
+        }
+        
+        .preview-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .preview-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+        
+        .preview-name { font-weight: bold; }
+        .preview-handle { color: var(--muted); font-size: 0.9rem; }
+        
+        .preview-content {
+            font-size: 1.05rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .preview-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-weight: 500;
+            position: relative;
+        }
+        
+        .tab.active {
+            color: var(--text);
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Link detector */
+        .link-warning {
+            background: rgba(224, 36, 94, 0.15);
+            border: 1px solid var(--red);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            display: none;
+        }
+        
+        .link-warning.show { display: block; }
+        
+        /* Schedule */
+        .schedule-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .schedule-row input, .schedule-row select {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐦 Tweet Deck</h1>
+        <p>Compose, preview, and plan your tweets</p>
+    </header>
+    
+    <div class="container">
+        <div class="main-grid">
+            <div class="left-col">
+                <!-- Composer Panel -->
+                <div class="panel">
+                    <div class="tabs">
+                        <button class="tab active" data-tab="single">Single Tweet</button>
+                        <button class="tab" data-tab="thread">Thread</button>
+                    </div>
+                    
+                    <!-- Single Tweet -->
+                    <div class="tab-content active" id="single">
+                        <div class="composer">
+                            <textarea id="singleTweet" placeholder="What's happening?"></textarea>
+                            <div id="linkWarning" class="link-warning">
+                                ⚠️ <strong>Link detected!</strong> External links reduce reach by ~50%. Consider putting the link in a reply instead.
+                            </div>
+                            <div class="char-count" id="charCount">0 / 280</div>
+                        </div>
+                        <div class="composer-actions">
+                            <div>
+                                <button class="btn btn-secondary" onclick="saveDraft()">💾 Save Draft</button>
+                                <button class="btn btn-secondary" onclick="clearComposer()">🗑️ Clear</button>
+                            </div>
+                            <button class="btn btn-primary" onclick="copyTweet()">📋 Copy Tweet</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Thread Builder -->
+                    <div class="tab-content" id="thread">
+                        <div id="threadContainer">
+                            <div class="thread-tweet" data-index="0">
+                                <div class="thread-header">
+                                    <span class="tweet-number">1</span>
+                                    <span class="char-count thread-char">0/280</span>
+                                </div>
+                                <textarea placeholder="Start your thread..." oninput="updateThreadChar(this)"></textarea>
+                            </div>
+                        </div>
+                        <button class="add-tweet-btn" onclick="addThreadTweet()">+ Add Tweet</button>
+                        <div class="composer-actions" style="margin-top: 15px;">
+                            <button class="btn btn-secondary" onclick="copyThread()">📋 Copy Thread</button>
+                            <button class="btn btn-secondary" onclick="clearThread()">🗑️ Clear All</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview Panel -->
+                <div class="panel">
+                    <h2>👀 Preview</h2>
+                    <div class="preview-tweet" id="previewArea">
+                        <div class="preview-header">
+                            <div class="preview-avatar"></div>
+                            <div>
+                                <div class="preview-name">Nick</div>
+                                <div class="preview-handle">@nickb445</div>
+                            </div>
+                        </div>
+                        <div class="preview-content" id="previewContent">Your tweet will appear here...</div>
+                        <div class="preview-actions">
+                            <span>💬 Reply</span>
+                            <span>🔄 Retweet</span>
+                            <span>❤️ Like</span>
+                            <span>📊 Analytics</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-col">
+                <!-- Algorithm Tips -->
+                <div class="panel">
+                    <h2>⚡ Algorithm Tips</h2>
+                    <div class="tip">
+                        <span class="tip-icon">🎯</span>
+                        <strong>Replies get 27x weight</strong> vs likes at 0.5x. Engage on big accounts!
+                    </div>
+                    <div class="tip warning-tip">
+                        <span class="tip-icon">🔗</span>
+                        <strong>Links kill reach.</strong> Put links in a reply to your tweet instead.
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">⏰</span>
+                        <strong>First 15 min matter most.</strong> Have engagement ready.
+                    </div>
+                    <div class="tip">
+                        <span class="tip-icon">🧵</span>
+                        <strong>Threads = dwell time.</strong> Algorithm loves them.
+                    </div>
+                </div>
+                
+                <!-- Templates -->
+                <div class="panel">
+                    <h2>📝 Templates</h2>
+                    <div class="template-grid">
+                        <div class="template-card" onclick="useTemplate('contrarian')">
+                            <div class="template-name">🔥 Contrarian Take</div>
+                            <div class="template-preview">Unpopular opinion: [thing]...</div>
+                        </div>
+                        <div class="template-card" onclick="useTemplate('curiosity')">
+                            <div class="template-name">🧵 Curiosity Thread</div>
+                            <div class="template-preview">I spent [time] researching...</div>
+                        </div>
+                        <div class="template-card" onclick="useTemplate('list')">
+                            <div class="template-name">📋 List Format</div>
+                            <div class="template-preview">10 [things] that [benefit]...</div>
+                        </div>
+                        <div class="template-card" onclick="useTemplate('story')">
+                            <div class="template-name">📖 Story Hook</div>
+                            <div class="template-preview">In [year], I [failed at]...</div>
+                        </div>
+                        <div class="template-card" onclick="useTemplate('tutorial')">
+                            <div class="template-name">🎓 Quick Tutorial</div>
+                            <div class="template-preview">How to [result] in [time]...</div>
+                        </div>
+                        <div class="template-card" onclick="useTemplate('build')">
+                            <div class="template-name">🔨 Build Log</div>
+                            <div class="template-preview">Week X building [project]...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Drafts -->
+                <div class="panel">
+                    <h2>💾 Saved Drafts</h2>
+                    <div id="draftsContainer">
+                        <p style="color: var(--muted); font-size: 0.85rem;">No drafts yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Templates
+        const templates = {
+            contrarian: `Unpopular opinion: [thing everyone believes] is actually [opposite].
+
+Here's why:`,
+            curiosity: `I spent [X hours/days] researching [topic].
+
+What I found changed everything I thought I knew.
+
+Thread 🧵`,
+            list: `10 [things] that [will help you achieve benefit]:
+
+(#7 is the one nobody talks about)`,
+            story: `In [year], I [failed at something big].
+
+Here's what I learned:`,
+            tutorial: `How to [achieve result] in [time]:
+
+Step 1: [Action]
+Step 2: [Action]  
+Step 3: [Action]
+
+That's it. No [complicated thing] required.`,
+            build: `Week [X] building [project]:
+
+✅ [Accomplished]
+✅ [Accomplished]
+❌ [Didn't work]
+
+Lesson learned: [Insight]
+
+Next week: [Plan]`
+        };
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Single tweet handling
+        const singleTweet = document.getElementById('singleTweet');
+        const charCount = document.getElementById('charCount');
+        const linkWarning = document.getElementById('linkWarning');
+        const previewContent = document.getElementById('previewContent');
+        
+        singleTweet.addEventListener('input', () => {
+            const len = singleTweet.value.length;
+            charCount.textContent = `${len} / 280`;
+            charCount.className = 'char-count' + (len > 280 ? ' danger' : len > 250 ? ' warning' : '');
+            
+            // Link detection
+            const hasLink = /https?:\/\/|www\./i.test(singleTweet.value);
+            linkWarning.classList.toggle('show', hasLink);
+            
+            // Update preview
+            previewContent.textContent = singleTweet.value || 'Your tweet will appear here...';
+        });
+        
+        // Thread handling
+        let threadCount = 1;
+        
+        function addThreadTweet() {
+            threadCount++;
+            const container = document.getElementById('threadContainer');
+            const tweet = document.createElement('div');
+            tweet.className = 'thread-tweet';
+            tweet.dataset.index = threadCount - 1;
+            tweet.innerHTML = `
+                <div class="thread-header">
+                    <span class="tweet-number">${threadCount}</span>
+                    <button class="remove-tweet" onclick="removeThreadTweet(this)">×</button>
+                </div>
+                <textarea placeholder="Continue your thread..." oninput="updateThreadChar(this)"></textarea>
+                <span class="char-count thread-char" style="text-align: right; display: block; margin-top: 5px; font-size: 0.8rem;">0/280</span>
+            `;
+            container.appendChild(tweet);
+        }
+        
+        function removeThreadTweet(btn) {
+            if (threadCount <= 1) return;
+            btn.closest('.thread-tweet').remove();
+            threadCount--;
+            // Renumber
+            document.querySelectorAll('.thread-tweet').forEach((t, i) => {
+                t.querySelector('.tweet-number').textContent = i + 1;
+            });
+        }
+        
+        function updateThreadChar(textarea) {
+            const len = textarea.value.length;
+            const counter = textarea.parentElement.querySelector('.thread-char');
+            if (counter) {
+                counter.textContent = `${len}/280`;
+                counter.style.color = len > 280 ? '#e0245e' : len > 250 ? '#ffad1f' : '#8899a6';
+            }
+        }
+        
+        function useTemplate(name) {
+            singleTweet.value = templates[name];
+            singleTweet.dispatchEvent(new Event('input'));
+            singleTweet.focus();
+            // Switch to single tab
+            document.querySelector('[data-tab="single"]').click();
+        }
+        
+        function copyTweet() {
+            navigator.clipboard.writeText(singleTweet.value);
+            alert('Tweet copied to clipboard!');
+        }
+        
+        function copyThread() {
+            const tweets = Array.from(document.querySelectorAll('.thread-tweet textarea'))
+                .map((t, i) => `[${i+1}/${threadCount}] ${t.value}`)
+                .join('\n\n---\n\n');
+            navigator.clipboard.writeText(tweets);
+            alert('Thread copied to clipboard!');
+        }
+        
+        function clearComposer() {
+            singleTweet.value = '';
+            singleTweet.dispatchEvent(new Event('input'));
+        }
+        
+        function clearThread() {
+            document.getElementById('threadContainer').innerHTML = `
+                <div class="thread-tweet" data-index="0">
+                    <div class="thread-header">
+                        <span class="tweet-number">1</span>
+                        <span class="char-count thread-char">0/280</span>
+                    </div>
+                    <textarea placeholder="Start your thread..." oninput="updateThreadChar(this)"></textarea>
+                </div>
+            `;
+            threadCount = 1;
+        }
+        
+        // Drafts
+        function saveDraft() {
+            const drafts = JSON.parse(localStorage.getItem('tweetDrafts') || '[]');
+            const content = singleTweet.value.trim();
+            if (!content) return;
+            
+            drafts.unshift({
+                content,
+                date: new Date().toISOString()
+            });
+            
+            // Keep only last 10
+            if (drafts.length > 10) drafts.pop();
+            
+            localStorage.setItem('tweetDrafts', JSON.stringify(drafts));
+            renderDrafts();
+            alert('Draft saved!');
+        }
+        
+        function renderDrafts() {
+            const drafts = JSON.parse(localStorage.getItem('tweetDrafts') || '[]');
+            const container = document.getElementById('draftsContainer');
+            
+            if (!drafts.length) {
+                container.innerHTML = '<p style="color: var(--muted); font-size: 0.85rem;">No drafts yet</p>';
+                return;
+            }
+            
+            container.innerHTML = drafts.map((d, i) => `
+                <div class="draft-item" onclick="loadDraft(${i})">
+                    <div class="draft-preview">${d.content.slice(0, 60)}...</div>
+                    <div class="draft-meta">${new Date(d.date).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+        
+        function loadDraft(index) {
+            const drafts = JSON.parse(localStorage.getItem('tweetDrafts') || '[]');
+            if (drafts[index]) {
+                singleTweet.value = drafts[index].content;
+                singleTweet.dispatchEvent(new Event('input'));
+                document.querySelector('[data-tab="single"]').click();
+            }
+        }
+        
+        // Init
+        renderDrafts();
+    </script>
+</body>
+</html>

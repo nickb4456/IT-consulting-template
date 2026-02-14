@@ -963,28 +963,35 @@
 let rawData = null;
 let db, lastResults = [];
 
-async function loadPropertyData() {
-  const statusEl = document.getElementById('dbStatus');
-  if (statusEl) {
-    statusEl.textContent = 'Loading property data...';
-    statusEl.style.color = '#f59e0b';
-  }
-  const response = await fetch('ri-sales.json.gz');
-  const buffer = await response.arrayBuffer();
-  const decompressed = pako.ungzip(new Uint8Array(buffer), {to: 'string'});
-  return JSON.parse(decompressed);
-}
-
-loadPropertyData().then(data => {
+// Parallel load: fetch gzip data AND SQL.js WASM at the same time
+const t0 = performance.now();
+Promise.all([
+  // Load data
+  fetch('ri-sales.json.gz').then(r => r.arrayBuffer()).then(buf => {
+    const decompressed = pako.ungzip(new Uint8Array(buf), {to: 'string'});
+    return JSON.parse(decompressed);
+  }),
+  // Load SQL.js WASM
+  initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
+]).then(([data, SQL]) => {
   rawData = data;
-  console.log('Loaded ' + rawData.properties.length + ' properties from external file');
-  return initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` });
-}).then(SQL => {
+  console.log('Parallel load took', Math.round(performance.now() - t0), 'ms for', rawData.properties.length, 'properties');
+  
+  // Create database with batch insert (much faster than row-by-row)
   db = new SQL.Database();
   db.run(`CREATE TABLE properties (address TEXT, city TEXT, zip TEXT, price INT, propertyType TEXT, beds INT, baths REAL, sqft INT, lotSize INT, yearBuilt INT, dom INT, soldDate TEXT, url TEXT, status TEXT)`);
-  const stmt = db.prepare(`INSERT INTO properties VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-  rawData.properties.forEach(p => stmt.run([p.address, p.city, p.zip, p.price, p.propertyType, p.beds, p.baths, p.sqft, p.lotSize, p.yearBuilt, p.dom, p.soldDate, p.url, p.status || 'Sold']));
-  stmt.free();
+  
+  // Batch insert in chunks of 500 for optimal performance
+  const BATCH = 500;
+  const t1 = performance.now();
+  for (let i = 0; i < rawData.properties.length; i += BATCH) {
+    const chunk = rawData.properties.slice(i, i + BATCH);
+    const placeholders = chunk.map(() => '(?,?,?,?,?,?,?,?,?,?,?,?,?,?)').join(',');
+    const values = chunk.flatMap(p => [p.address, p.city, p.zip, p.price, p.propertyType, p.beds, p.baths, p.sqft, p.lotSize, p.yearBuilt, p.dom, p.soldDate, p.url, p.status || 'Sold']);
+    db.run(`INSERT INTO properties VALUES ${placeholders}`, values);
+  }
+  console.log('Batch insert took', Math.round(performance.now() - t1), 'ms');
+  
   const cities = [...new Set(rawData.properties.map(p => p.city))].sort();
   const sel = document.getElementById('filterCity');
   cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });

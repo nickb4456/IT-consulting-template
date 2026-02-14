@@ -169,7 +169,7 @@
 
         <div class="abstract">
             <h2>Abstract</h2>
-            <p>This paper presents a novel framework for evaluating and scaling autonomous research discovery systems using stigmergic metrics—measurements derived from collective agent behavior rather than external evaluation. Drawing from Ant Colony Optimization (ACO) principles, we develop ten quantitative metrics across two categories: Stigmergic Health (measuring colony behavioral patterns) and Discovery Effectiveness (measuring research output quality). Furthermore, we address the limits of stochastic biological modeling by introducing a Federation-Level "Industrial Transition" macro-architecture. By mapping five mechanical innovations from the First Industrial Revolution—the <strong>Spinning Jenny</strong> (parallel search), <strong>Watt's Separate Condenser</strong> (context caching), the <strong>Power Loom</strong> (orthogonal weaving), <strong>Beard's Jenny Coupler</strong> (automated binding), and <strong>Watt's Centrifugal Governor</strong> (dynamic backpressure)—to our embedding spaces and discovery pipelines, we massively parallelize discovery, reduce API token waste, enforce cross-domain synthesis, and implement self-regulating feedback loops. We introduce the <strong>ANT PROTOCOL v1.0.4</strong>, a structured communication layer with 64-byte pheromone encoding, vocabulary tokens, and quorum-based decision making that enables agents to communicate efficiently without consuming LLM tokens. Our framework successfully detected critical infrastructure failures during initial deployment and provides a mathematical foundation for continuous, open-ended, self-regulating autonomous research.</p>
+            <p>This paper presents a novel framework for evaluating autonomous research discovery systems using stigmergic metrics—measurements derived from collective agent behavior rather than external evaluation. Drawing from Ant Colony Optimization (ACO) principles, we develop ten quantitative metrics across two categories: Stigmergic Health (measuring colony behavioral patterns) and Discovery Effectiveness (measuring research output quality). We introduce the <strong>ANT PROTOCOL v1.0.5</strong>, a pure stigmergic communication layer with 64-byte pheromone encoding and vocabulary tokens that enables efficient agent coordination through environment modification—no direct messaging, no voting systems, just pheromone strength as priority. We document our experience with "Complexity Theater"—the anti-pattern of building sophisticated coordination systems that don't solve actual bottlenecks—and present a simpler architecture where the ants themselves are the system. Our framework provides a mathematical foundation for continuous, open-ended, self-regulating autonomous research.</p>
         </div>
 
         <section id="s1">
@@ -303,131 +303,55 @@ POST /embed { "text": "concept" }
         </section>
 
         <section id="s7">
-            <h2>7. The Industrial Transition (Federation-Level Mechanics)</h2>
-            <p>Biological stochasticity excels at exploration—ants find novel paths precisely because they wander randomly. But this same randomness becomes a bottleneck at scale. When six colonies generate thousands of findings per day, we cannot afford to have each connection evaluated by an LLM "brakeman," nor can we let promising discoveries sit idle while biological agents meander toward them. The First Industrial Revolution solved an analogous problem: cottage industries produced quality goods through skilled craftwork, but couldn't meet explosive demand. The solution wasn't to abandon craftsmen—it was to <em>layer</em> mechanical systems above them.</p>
-            
-            <p>While Ant Colony Optimization (ACO) is highly effective for stochastic, localized discovery, scaling the Ouroboros system requires a macro-architecture. By mapping mechanical, high-throughput principles to coordinate the individual biological sub-colonies, we achieve both the <strong>robustness</strong> of stigmergic self-organization and the <strong>scalability</strong> of industrial production.</p>
+            <h2>7. On Complexity Theater (Lessons Learned)</h2>
             
             <div class="highlight">
-                <strong>Key Insight:</strong> Ants are biological and stochastic; machines are deterministic and high-throughput. Rather than mixing these paradigms within colonies, we <em>layer</em> them—industrial mechanics operate at the Federation level, preserving the stigmergic purity of individual colonies.
+                <strong>Principle:</strong> Build for observed problems, not imagined ones. Add guards only when real issues appear, not preemptively.
             </div>
             
-            <h3>7.1 The "Spinning Jenny" Mechanism: k-Spindle Scouting</h3>
-            <p>James Hargreaves' core insight was decoupling the energy source from the output mechanism, allowing a single motion to draw multiple parallel threads. To mass-produce context threads without exponential foundational reasoning overhead, we introduce the <strong>Industrial Scout</strong>.</p>
+            <p>An earlier version of this paper included an extensive "Industrial Transition" section describing five mechanical systems layered above the biological ant colonies: the Spinning Jenny (parallel search), Watt's Condenser (context caching), the Power Loom (cross-domain weaving), the Jenny Coupler (automated binding), and the Centrifugal Governor (dynamic backpressure).</p>
             
-            <p>Let the focal point of the colony be a 384-dimensional embedding vector <strong>v</strong>. Instead of a 1:1 query search, we define a <strong>k-Spindle Function</strong> that generates k parallel search vectors by projecting v along mutually orthogonal directions:</p>
+            <p><strong>We removed all of them.</strong></p>
             
-            <div class="formula">S<sub>i</sub>(v) = v + σ · e<sub>i</sub>   for i ∈ {1, 2, ..., k}
+            <h3>7.1 The Problem</h3>
+            <p>When we audited the actual system state, we found:</p>
+            
+            <div class="formula">Actual Bottleneck:
+  • 1,399 findings pending synthesis
+  • 0 synthesized in 24 hours
+  • Scout producing 235 new findings/day
 
-where:
-  • {e<sub>1</sub>, ..., e<sub>k</sub>} = orthogonal unit vectors (threads explore unique semantic space)
-  • σ = exploration width (variance of spread)
-  • k = number of spindles (typically k = 8)</div>
-            
-            <h4>7.1.1 Activation Energy Threshold</h4>
-            <p><strong>Critical constraint:</strong> The Spinning Jenny should NOT be the default state. Deploying k=8 parallel API calls constantly would trigger severe rate limits. Therefore, the Industrial Scout sits dormant 99% of the time. It is only deployed when a standard biological Scout discovers a massive pheromone spike:</p>
-            
-            <div class="formula">Deploy Industrial Scout iff:
-    strength(finding) ≥ τ<sub>activation</sub>   (e.g., τ = 0.85)
+Industrial Layer Impact:
+  • Jenny Coupler: Created 100 edges (connector-ant already does this)
+  • Industrial Scout: No logs (not running)
+  • Governor: Gave recommendations (nobody acted on them)
+  • The Loom: No logs (federation already handles this)</div>
 
-Then: Execute k-Spindle projection to strip-mine the 8 orthogonal 
-      conceptual directions around the breakthrough.
-      
-Once area is mined → power down → biological ants resume.</div>
+            <p>The industrial machinery was adding <strong>more work</strong> (more edges, more searches) when the problem was we couldn't process what we had. These were solutions to imaginary problems.</p>
             
-            <h3>7.2 Watt's Engine: The Separate Condenser (Context Caching)</h3>
-            <p>Before James Watt introduced the separate condenser in 1765, steam engines cooled their main cylinders every cycle, wasting massive amounts of fuel to reheat them. In an LLM-driven research system, "reheating the cylinder" equates to <strong>regenerating embeddings</strong> or <strong>resending full context windows</strong> for overlapping queries—wasting API tokens ("fuel").</p>
+            <h3>7.2 The Anti-Pattern</h3>
+            <p>We call this <strong>Complexity Theater</strong>: building sophisticated systems that look impressive but don't solve actual bottlenecks. Warning signs include:</p>
+            <ul>
+                <li>Adding coordination layers when throughput is the problem</li>
+                <li>Building "friction checkpoints" for failure modes that haven't occurred</li>
+                <li>Implementing voting/quorum systems when pheromone strength already prioritizes</li>
+                <li>Creating "governors" that give recommendations but don't act</li>
+            </ul>
             
-            <p>We implement a <strong>Global L3 Embedding Cache</strong> acting as the separate condenser. When Alpha analyzes a paper, the embedding is stored globally. If Beta encounters a similar concept, it does not re-embed the text; it routes the query to Alpha's "warm" cache.</p>
+            <h3>7.3 The Fix</h3>
+            <p>Instead of layering more machinery, we:</p>
+            <ol>
+                <li><strong>Identified the real bottleneck:</strong> Synthesis throughput (0/day)</li>
+                <li><strong>Added a pre-filter:</strong> Fast, LLM-free triage to skip dead-ends (500+ findings/sec)</li>
+                <li><strong>Increased synthesis frequency:</strong> More runs, not more infrastructure</li>
+                <li><strong>Removed non-stigmergic elements:</strong> Bulletin boards, voting systems, addressed messaging</li>
+            </ol>
             
-            <div class="formula">Cache Efficiency:
-  Before Watt: ~75% fuel wasted on reheat
-  After Watt:  ~25% fuel usage (3× improvement)
-  
-  Before L3 Cache: Each colony re-embeds overlapping papers
-  After L3 Cache:  Global embedding lookup → O(1) retrieval
-                   Token savings: 40-60% on Federation-level queries</div>
+            <p>The result: A simpler system where pheromone strength IS the coordination mechanism. No "industrial layer" needed—the ants already do the work.</p>
             
-            <p>This ensures the system only burns API tokens on <strong>mathematically novel information</strong>, increasing throughput efficiency dramatically while keeping the main processing "cylinder" hot.</p>
-            
-            <h3>7.3 The Power Loom: Orthogonal Weaving Meta-Colony</h3>
-            <p>If Connector agents only form edges between highly similar findings (sim &gt; 0.75), they are conceptually twisting similar threads into a thicker rope. A true "fabric" of knowledge requires interlacing <strong>Warp</strong> (technical infrastructure from Beta/Epsilon) with <strong>Weft</strong> (synthesizing ideas from Alpha/Gamma).</p>
-            
-            <p>We introduce <strong>The Loom</strong> as an independent Federation-level Meta-Colony. It does not scrape APIs; its only raw material is the validated breakthroughs (strength ≥ 0.80) generated by the 6 base colonies.</p>
-            
-            <h4>7.3.1 Fabric Strength Metric</h4>
-            <p>To drive cross-pollination, we modify the objective function to reward <strong>Fabric Strength (F)</strong>:</p>
-            
-            <div class="formula">F(f<sub>i</sub>, f<sub>j</sub>) = sim(f<sub>i</sub>, f<sub>j</sub>) × (1 - colony_overlap(f<sub>i</sub>, f<sub>j</sub>))
-
-where:
-  • sim(f<sub>i</sub>, f<sub>j</sub>) = XNOR + POPCOUNT embedding similarity
-  • colony_overlap = 1 if same colony, 0 if different colonies
-  • F → edge formed only if it bridges distinct domains</div>
-            
-            <p>By penalizing intra-colony connections at this meta-layer, The Loom mechanically forces Alpha's general AI synthesis to bind with Epsilon's mathematical theory, structurally eliminating domain collapse and maximizing the <strong>Emergence (E)</strong> score.</p>
-            
-            <h3>7.4 The Jenny Coupler: Automated Stigmergic Binding</h3>
-            <p>In 1897, Andrew J. Beard patented the <strong>Jenny coupler</strong>—a mechanism that automatically locked railway cars together upon impact, eliminating the dangerous, manual work of railroad brakemen who previously stood between moving cars to drop a pin.</p>
-            
-            <p>In early iterations of the Ouroboros system, Connector agents acted as brakemen—manually evaluating pairs of nodes via LLM prompts to determine if a connection existed. To achieve true industrial scale, we <strong>mathematically automate</strong> this process.</p>
-            
-            <h4>7.4.1 Coupling Threshold</h4>
-            <p>We define a <strong>Coupling Threshold (τ<sub>c</sub>)</strong> based entirely on the collision of stigmergic metrics. An automatic edge is formed between Node A and Node B <em>without LLM intervention</em> if:</p>
-            
-            <div class="formula">AutoCoupling Condition:
-  sim(A, B) ≥ τ<sub>sim</sub>   AND   T(A) × T(B) ≥ τ<sub>momentum</sub>
-
-where:
-  • τ<sub>sim</sub> = similarity threshold (e.g., 0.70)
-  • T(node) = Trail Strength (pheromone signal)
-  • τ<sub>momentum</sub> = momentum threshold (e.g., 0.64 = 0.8 × 0.8)
-  
-If two nodes are semantically similar AND both possess massive 
-stigmergic momentum, the "cars" crash together and lock 
-automatically in the SQLite database.</div>
-            
-            <p>This eliminates the LLM "brakeman" bottleneck entirely for high-momentum discoveries. Low-momentum nodes still require LLM-assisted evaluation (the biological ants), but validated breakthroughs can form edges at <strong>machine speed</strong>.</p>
-            
-            <h3>7.5 The Centrifugal Governor: Dynamic Backpressure</h3>
-            <p>To control the speed of his rotary engine, James Watt adapted the <strong>Centrifugal Governor</strong>—as the engine spun too fast, centrifugal force pushed two heavy balls outward, physically choking the steam valve. It was the world's first industrial negative feedback loop.</p>
-            
-            <p>If an infrastructure bug occurs in an autonomous AI colony, a static cron schedule will continue to burn compute, filling the database with erroneous connections. We implement a digital Centrifugal Governor where the operational frequency ω(t) is dynamically belted to the system's <strong>Stigmergic Fitness (SF)</strong>:</p>
-            
-            <div class="formula">ω(t) = ω<sub>0</sub> × (SF(t) / SF<sub>target</sub>)<sup>β</sup>
-
-where:
-  • ω<sub>0</sub> = baseline operational rate (e.g., 1 run/hour)
-  • SF<sub>target</sub> = optimal target fitness (e.g., 80)
-  • β = governor sensitivity (0.5 = gradual, 1.0 = linear)</div>
-            
-            <h4>7.5.1 The Governor Module</h4>
-            <p>If SF drops below a critical threshold (e.g., SF &lt; 25), the Governor automatically throttles all API calls, slowing the biological Ants and mechanical Scouters alike. This automated backpressure grants the Consolidator agents time to evaporate low-quality pheromones and sweep the factory floor before high-speed production resumes.</p>
-            
-            <pre>// Governor pseudocode
-const SF = computeFederationSF();
-
-if (SF < 25) {
-    // CRITICAL: System malfunction (balls fully extended)
-    throttleAllCrons(factor: 0.1);  // 10x slower
-    alertHuman("Colony health critical");
-} else if (SF < 50) {
-    // WARNING: Degraded performance
-    throttleAllCrons(factor: 0.5);
-} else if (SF > 80) {
-    // HEALTHY: Maximize throughput
-    accelerateCrons(factor: 1.5);
-}</pre>
-            
-            <h3>7.6 Architecture Summary</h3>
-            <table>
-                <tr><th>Layer</th><th>Mechanism</th><th>Function</th><th>Trigger</th></tr>
-                <tr><td>Colony (Bio)</td><td>Standard Ants</td><td>Stochastic exploration</td><td>Cron schedules</td></tr>
-                <tr><td>Colony (Bio)</td><td>Consolidator</td><td>Pheromone decay</td><td>Hourly</td></tr>
-                <tr><td>Federation (Mech)</td><td>The Loom</td><td>Cross-domain weaving</td><td>Daily / on breakthrough</td></tr>
-                <tr><td>Federation (Mech)</td><td>Industrial Scout</td><td>k-Spindle strip-mining</td><td>Pheromone spike ≥ 0.85</td></tr>
-                <tr><td>Infrastructure</td><td>The Governor</td><td>Dynamic backpressure</td><td>Continuous SF monitoring</td></tr>
-            </table>
+            <div class="highlight">
+                <strong>Lesson:</strong> When tempted to add a new coordination system, first ask: "What problem am I actually seeing?" If the answer is "none yet, but it might happen," stop. Build for reality, not anxiety.
+            </div>
         </section>
 
         <section id="s8">
@@ -575,14 +499,16 @@ On DEAD_END outcome:
             <ol>
                 <li><strong>Ten stigmergic metrics</strong> spanning behavioral health and discovery effectiveness</li>
                 <li><strong>Asymmetric Gaussian reinforcement curve</strong> with steep cliff above 80% to prevent echo chambers</li>
-                <li><strong>The Spinning Jenny (k-Spindle Function)</strong> for parallel orthogonal discovery</li>
-                <li><strong>The Power Loom (Fabric Strength metric)</strong> for cross-domain synthesis</li>
-                <li><strong>The Central Drive Belt (Governor)</strong> for dynamic backpressure and safety</li>
-                <li><strong>Federation-level meta-colony</strong> architecture preserving stigmergic purity</li>
+                <li><strong>ANT PROTOCOL v1.0.5</strong> with 64-byte structured pheromones, vocabulary tokens, and pure stigmergic coordination (no direct messaging)</li>
+                <li><strong>Pre-filter pattern</strong> for LLM-free triage (500+ findings/sec, zero API cost)</li>
                 <li><strong>BGE embedding service</strong> with 48-byte binary encoding for fast similarity</li>
-                <li><strong>ANT PROTOCOL v1.0.4</strong> with 64-byte structured pheromones, vocabulary tokens, Language Agent tokenizer, and quorum-based decision making</li>
-                <li><strong>Comprehensive testing framework</strong> with 125+ automated tests across protocol, colony, and federation levels</li>
+                <li><strong>Complexity Theater anti-pattern</strong> documentation: why we removed the "Industrial Layer"</li>
+                <li><strong>Comprehensive testing framework</strong> with 110+ automated tests across protocol and colony levels</li>
             </ol>
+            
+            <div class="highlight">
+                <strong>Core Insight:</strong> The ants ARE the system. Pheromone strength IS coordination. When you find yourself building layers of machinery above the ants, you've lost the plot.
+            </div>
         </section>
 
         <section>

@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dolphin Splash!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #0a3d5c;
+            font-family: 'Quicksand', sans-serif;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        canvas { display: block; }
+
+        .back-btn {
+            position: fixed;
+            top: 14px; left: 14px;
+            z-index: 400;
+            background: rgba(0,60,100,0.7);
+            border: 2px solid rgba(100,220,255,0.5);
+            border-radius: 12px;
+            padding: 8px 16px;
+            color: #7de8ff;
+            font-family: 'Lilita One', cursive;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(6px);
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(0,100,160,0.6); transform: scale(1.05); }
+
+        #hud {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .hud-pill {
+            background: linear-gradient(145deg, rgba(0,80,120,0.85), rgba(0,50,80,0.9));
+            border: 2px solid rgba(100,220,255,0.35);
+            border-radius: 30px;
+            padding: 8px 20px;
+            color: #b8f0ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+        }
+        .hud-icon { font-size: 1.3rem; }
+        .hud-val {
+            font-family: 'Lilita One', cursive;
+            font-size: 1.4rem;
+            color: #7de8ff;
+            text-shadow: 0 0 10px rgba(100,220,255,0.4);
+        }
+        .hud-label {
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(180,230,255,0.6);
+            text-transform: uppercase;
+        }
+
+        #combo-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Lilita One', cursive;
+            font-size: 4rem;
+            color: #ffdd44;
+            text-shadow: 0 0 30px rgba(255,220,60,0.6), 0 4px 8px rgba(0,0,0,0.4);
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #combo-display.show {
+            opacity: 1;
+            animation: comboZoom 0.5s ease-out;
+        }
+        @keyframes comboZoom {
+            0% { transform: translate(-50%, -50%) scale(0.3); }
+            50% { transform: translate(-50%, -50%) scale(1.3); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .score-popup {
+            position: fixed;
+            pointer-events: none;
+            z-index: 200;
+            font-family: 'Lilita One', cursive;
+            font-size: 2.2rem;
+            text-shadow: 0 0 12px currentColor, 0 3px 6px rgba(0,0,0,0.5);
+            animation: popFloat 1.2s ease-out forwards;
+        }
+        @keyframes popFloat {
+            0% { opacity: 0; transform: scale(0.3) translateY(0); }
+            20% { opacity: 1; transform: scale(1.4) translateY(-10px); }
+            100% { opacity: 0; transform: scale(0.8) translateY(-100px); }
+        }
+
+        /* Screens */
+        .screen-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #b8f0ff;
+        }
+        #start-screen {
+            background: radial-gradient(ellipse at 50% 60%, #0d5a7a 0%, #062a3f 70%);
+        }
+        .title-emoji {
+            font-size: 6rem;
+            animation: dolphinBob 2s ease-in-out infinite;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+        }
+        @keyframes dolphinBob {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+        .game-title {
+            font-family: 'Lilita One', cursive;
+            font-size: 4rem;
+            background: linear-gradient(135deg, #7de8ff, #44ddff, #ffdd44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 8px 0 4px;
+            letter-spacing: 3px;
+        }
+        .game-sub {
+            font-size: 1rem;
+            color: rgba(180,230,255,0.6);
+            letter-spacing: 5px;
+            margin-bottom: 20px;
+        }
+        .ctrl-box {
+            background: rgba(100,220,255,0.06);
+            border: 2px solid rgba(100,220,255,0.15);
+            border-radius: 16px;
+            padding: 16px 28px;
+            text-align: center;
+        }
+        .ctrl-box p { font-size: 0.9rem; color: rgba(180,230,255,0.7); margin: 5px 0; }
+        .ctrl-key {
+            display: inline-block;
+            background: rgba(100,220,255,0.12);
+            border: 1px solid rgba(100,220,255,0.3);
+            border-radius: 6px;
+            padding: 2px 10px;
+            color: #7de8ff;
+            font-weight: 700;
+            font-family: 'Lilita One', cursive;
+        }
+        .play-btn {
+            margin-top: 24px;
+            padding: 16px 55px;
+            font-family: 'Lilita One', cursive;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #44ddff, #0099cc);
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 0 #006688, 0 8px 24px rgba(0,0,0,0.4);
+            transition: all 0.15s;
+        }
+        .play-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #006688, 0 12px 30px rgba(0,0,0,0.4); }
+        .play-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #006688, 0 4px 12px rgba(0,0,0,0.4); }
+
+        #game-over-screen {
+            background: radial-gradient(ellipse at 50% 40%, rgba(10,50,70,0.95) 0%, rgba(4,20,30,0.98) 70%);
+        }
+        .go-title {
+            font-family: 'Lilita One', cursive;
+            font-size: 3.5rem;
+            color: #ffdd44;
+            text-shadow: 0 4px 0 #aa8800, 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .final-val {
+            font-family: 'Lilita One', cursive;
+            font-size: 4.5rem;
+            color: #7de8ff;
+            text-shadow: 0 0 20px rgba(100,220,255,0.5);
+            margin: 10px 0;
+        }
+        .final-lbl { font-size: 0.9rem; color: rgba(180,230,255,0.5); letter-spacing: 4px; }
+        .best-msg {
+            font-family: 'Lilita One', cursive;
+            font-size: 0.85rem;
+            color: #ffdd44;
+            margin-top: 8px;
+        }
+
+        /* Leaderboard */
+        .leaderboard { margin-top: 16px; width: 100%; max-width: 300px; }
+        .leaderboard h3 {
+            font-family: 'Lilita One', cursive;
+            font-size: 1rem;
+            color: #ffdd44;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 2px;
+        }
+        .lb-list { list-style: none; padding: 0; }
+        .lb-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 5px 12px; border-radius: 6px;
+            font-size: 0.85rem; color: #b8f0ff;
+        }
+        .lb-list li:nth-child(odd) { background: rgba(100,220,255,0.06); }
+        .lb-rank { font-family: 'Lilita One', cursive; color: rgba(180,230,255,0.5); width: 24px; }
+        .lb-name { flex: 1; margin-left: 6px; }
+        .lb-score { font-family: 'Lilita One', cursive; color: #7de8ff; }
+        .lb-new { background: rgba(255,220,60,0.1) !important; border: 1px solid rgba(255,220,60,0.2); }
+        .new-badge { font-size: 0.55rem; background: #ffdd44; color: #333; padding: 1px 5px; border-radius: 3px; margin-left: 4px; font-family: 'Lilita One', cursive; }
+        .name-row { display: flex; gap: 6px; margin-top: 10px; }
+        .name-row input {
+            padding: 7px 12px; border-radius: 8px; border: 2px solid rgba(100,220,255,0.3);
+            background: rgba(0,50,80,0.7); color: #b8f0ff; font-family: 'Quicksand', sans-serif;
+            font-size: 0.9rem; width: 140px; outline: none;
+        }
+        .name-row input::placeholder { color: rgba(100,220,255,0.3); }
+        .name-row input:focus { border-color: #7de8ff; }
+        .name-row button {
+            padding: 7px 14px; border-radius: 8px; border: none;
+            background: linear-gradient(135deg, #44ddff, #0099cc); color: #fff;
+            font-family: 'Lilita One', cursive; font-size: 0.8rem; cursor: pointer;
+        }
+
+        /* Mobile jump hint */
+        #tap-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Lilita One', cursive;
+            font-size: 1.1rem;
+            color: rgba(125,232,255,0.5);
+            z-index: 150;
+            pointer-events: none;
+            animation: hintPulse 2s ease-in-out infinite;
+        }
+        @keyframes hintPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        @media (hover: hover) and (pointer: fine) {
+            #tap-hint { display: none; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <a href="games.html" class="back-btn">&#x2190; Back</a>
+    <div id="combo-display"></div>
+    <div id="tap-hint">TAP TO JUMP!</div>
+
+    <div id="hud" class="hidden">
+        <div class="hud-pill">
+            <span class="hud-icon">&#x2B50;</span>
+            <div>
+                <div class="hud-val" id="score-val">0</div>
+            </div>
+        </div>
+        <div class="hud-pill">
+            <span class="hud-icon">&#x1F42C;</span>
+            <div id="lives-val" class="hud-val">&#x2764;&#x2764;&#x2764;&#x2764;&#x2764;</div>
+        </div>
+    </div>
+
+    <div id="start-screen" class="screen-overlay">
+        <div class="title-emoji">&#x1F42C;</div>
+        <div class="game-title">DOLPHIN SPLASH!</div>
+        <div class="game-sub">OCEAN ADVENTURE</div>
+        <div class="ctrl-box">
+            <p><span class="ctrl-key">SPACE</span> or <span class="ctrl-key">TAP</span> &mdash; Jump!</p>
+            <p>Catch fish &#x1F41F; &amp; birds &#x1F426; &mdash; Avoid jellyfish &#x1FAB8;</p>
+        </div>
+        <button class="play-btn" onclick="startGame()">DIVE IN!</button>
+    </div>
+
+    <div id="game-over-screen" class="screen-overlay hidden">
+        <div style="font-size:4rem; margin-bottom:8px;">&#x1F42C;&#x1F4A6;</div>
+        <div class="go-title">SPLASH!</div>
+        <div class="final-lbl">SCORE</div>
+        <div class="final-val" id="final-score">0</div>
+        <div class="best-msg" id="best-msg"></div>
+        <div class="name-row hidden" id="name-area">
+            <input type="text" id="pname" placeholder="Your name" maxlength="12">
+            <button onclick="saveScoreLB()">SAVE</button>
+        </div>
+        <div class="leaderboard" id="lb-area">
+            <h3>&#x1F3C6; TOP SCORES</h3>
+            <ol class="lb-list" id="lb-list"></ol>
+        </div>
+        <button class="play-btn" onclick="restartGame()" style="margin-top:14px;">PLAY AGAIN</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    // ============ GAME STATE ============
+    let scene, camera, renderer, clock;
+    let dolphinGroup, dolphinY = -0.5;
+    let isPlaying = false, isJumping = false;
+    let score = 0, lives = 5, combo = 0, bestCombo = 0;
+    let jumpVel = 0;
+    let gameSpeed = 1;
+    let spawnTimer = 0;
+    let targets = []; // fish, birds
+    let jellies = []; // jellyfish
+    let splashParticles = [];
+    let waterSurface, waterBack;
+    let invTimer = 0;
+    let comboTimer = 0;
+    const GRAVITY = -0.018;
+    const JUMP_FORCE = 0.38;
+    const WATER_Y = 0;
+    const DOLPHIN_X = -6;
+
+    // ============ INIT ============
+    function init() {
+        scene = new THREE.Scene();
+
+        // Sky gradient via background
+        scene.background = new THREE.Color(0x0a3d5c);
+
+        camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 2, 22);
+        camera.lookAt(0, 0, 0);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.4;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        setupLighting();
+        buildEnvironment();
+        buildDolphin();
+
+        clock = new THREE.Clock();
+
+        // Controls
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', (e) => {});
+        window.addEventListener('resize', onResize);
+
+        // Touch
+        document.addEventListener('touchstart', onTouchJump, { passive: false });
+        document.addEventListener('touchmove', (e) => { if (isPlaying) e.preventDefault(); }, { passive: false });
+
+        animate();
+    }
+
+    function setupLighting() {
+        scene.add(new THREE.AmbientLight(0x88bbcc, 0.5));
+
+        const sun = new THREE.DirectionalLight(0xffeedd, 1.3);
+        sun.position.set(15, 25, 10);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(1024, 1024);
+        sun.shadow.camera.near = 1;
+        sun.shadow.camera.far = 60;
+        sun.shadow.camera.left = -25;
+        sun.shadow.camera.right = 25;
+        sun.shadow.camera.top = 15;
+        sun.shadow.camera.bottom = -15;
+        scene.add(sun);
+
+        // Warm fill from below (underwater caustics feel)
+        const fill = new THREE.DirectionalLight(0x44aacc, 0.4);
+        fill.position.set(-5, -10, 5);
+        scene.add(fill);
+
+        // Golden rim
+        const rim = new THREE.DirectionalLight(0xffcc66, 0.3);
+        rim.position.set(10, 5, -10);
+        scene.add(rim);
+    }
+
+    function buildEnvironment() {
+        // Sky backdrop (large plane)
+        const skyGeo = new THREE.PlaneGeometry(120, 50);
+        const skyMat = new THREE.MeshBasicMaterial({
+            color: 0x66ccee,
+            side: THREE.DoubleSide
+        });
+        const sky = new THREE.Mesh(skyGeo, skyMat);
+        sky.position.set(0, 18, -30);
+        scene.add(sky);
+
+        // Sky gradient overlay
+        const gradGeo = new THREE.PlaneGeometry(120, 25);
+        const gradMat = new THREE.MeshBasicMaterial({
+            color: 0xffeedd, transparent: true, opacity: 0.25, side: THREE.DoubleSide
+        });
+        const grad = new THREE.Mesh(gradGeo, gradMat);
+        grad.position.set(0, 8, -29);
+        scene.add(grad);
+
+        // Clouds
+        for (let i = 0; i < 8; i++) {
+            const cloud = buildCloud();
+            cloud.position.set(
+                (Math.random() - 0.5) * 60,
+                8 + Math.random() * 12,
+                -20 - Math.random() * 10
+            );
+            cloud.userData = { speed: 0.005 + Math.random() * 0.008 };
+            scene.add(cloud);
+        }
+
+        // Water surface (animated plane)
+        const waterGeo = new THREE.PlaneGeometry(80, 30, 60, 20);
+        const waterMat = new THREE.MeshPhongMaterial({
+            color: 0x1199aa,
+            shininess: 120,
+            specular: 0x88ddff,
+            transparent: true,
+            opacity: 0.75,
+            side: THREE.DoubleSide
+        });
+        waterSurface = new THREE.Mesh(waterGeo, waterMat);
+        waterSurface.rotation.x = -Math.PI / 2;
+        waterSurface.position.y = WATER_Y;
+        waterSurface.receiveShadow = true;
+        scene.add(waterSurface);
+
+        // Deeper water backdrop
+        const deepGeo = new THREE.PlaneGeometry(80, 20);
+        const deepMat = new THREE.MeshBasicMaterial({ color: 0x063a4f, side: THREE.DoubleSide });
+        waterBack = new THREE.Mesh(deepGeo, deepMat);
+        waterBack.position.set(0, -8, -15);
+        scene.add(waterBack);
+
+        // Ocean floor hint
+        const floorGeo = new THREE.PlaneGeometry(80, 40);
+        const floorMat = new THREE.MeshPhongMaterial({ color: 0x0d4a5e, shininess: 5 });
+        const floor = new THREE.Mesh(floorGeo, floorMat);
+        floor.rotation.x = -Math.PI / 2;
+        floor.position.y = -10;
+        scene.add(floor);
+
+        // Underwater bubbles (decorative)
+        for (let i = 0; i < 15; i++) {
+            const bGeo = new THREE.SphereGeometry(0.08 + Math.random() * 0.12, 8, 6);
+            const bMat = new THREE.MeshBasicMaterial({
+                color: 0xaaeeff, transparent: true, opacity: 0.3 + Math.random() * 0.2
+            });
+            const b = new THREE.Mesh(bGeo, bMat);
+            b.position.set(
+                (Math.random() - 0.5) * 30,
+                -1 - Math.random() * 6,
+                -5 + Math.random() * 10
+            );
+            b.userData = { baseY: b.position.y, speed: 0.01 + Math.random() * 0.02, phase: Math.random() * Math.PI * 2 };
+            b.name = 'bubble';
+            scene.add(b);
+        }
+    }
+
+    function buildCloud() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        for (let i = 0; i < 4; i++) {
+            const s = 0.8 + Math.random() * 1.2;
+            const puff = new THREE.Mesh(new THREE.SphereGeometry(s, 8, 6), mat);
+            puff.position.set(i * 1.6 - 2.4, Math.random() * 0.4, Math.random() * 0.5);
+            puff.scale.y = 0.45;
+            g.add(puff);
+        }
+        return g;
+    }
+
+    // ============ DOLPHIN ============
+    function buildDolphin() {
+        dolphinGroup = new THREE.Group();
+
+        const bodyMat = new THREE.MeshPhongMaterial({
+            color: 0x6699aa, shininess: 80, specular: 0x88bbcc
+        });
+        const bellyMat = new THREE.MeshPhongMaterial({
+            color: 0xbbd8e8, shininess: 60, specular: 0xaaccdd
+        });
+
+        // Body (elongated sphere)
+        const bodyGeo = new THREE.SphereGeometry(1, 20, 16);
+        bodyGeo.scale(1.8, 0.7, 0.75);
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.castShadow = true;
+        dolphinGroup.add(body);
+
+        // Belly
+        const bellyGeo = new THREE.SphereGeometry(0.8, 16, 12);
+        bellyGeo.scale(1.5, 0.5, 0.6);
+        const belly = new THREE.Mesh(bellyGeo, bellyMat);
+        belly.position.set(0.1, -0.15, 0);
+        dolphinGroup.add(belly);
+
+        // Snout (elongated nose)
+        const snoutGeo = new THREE.SphereGeometry(0.35, 12, 10);
+        snoutGeo.scale(1.8, 0.6, 0.55);
+        const snout = new THREE.Mesh(snoutGeo, bodyMat);
+        snout.position.set(1.7, -0.05, 0);
+        dolphinGroup.add(snout);
+
+        // Snout tip (beak)
+        const tipGeo = new THREE.SphereGeometry(0.15, 10, 8);
+        tipGeo.scale(1.5, 0.5, 0.5);
+        const tip = new THREE.Mesh(tipGeo, bodyMat);
+        tip.position.set(2.2, -0.08, 0);
+        dolphinGroup.add(tip);
+
+        // Mouth line (smile)
+        const smileCurve = new THREE.QuadraticBezierCurve3(
+            new THREE.Vector3(1.5, -0.18, 0.15),
+            new THREE.Vector3(2.0, -0.25, 0),
+            new THREE.Vector3(1.5, -0.18, -0.15)
+        );
+        const smileGeo = new THREE.TubeGeometry(smileCurve, 12, 0.02, 6, false);
+        const smile = new THREE.Mesh(smileGeo, new THREE.MeshBasicMaterial({ color: 0x335566 }));
+        dolphinGroup.add(smile);
+
+        // Eyes
+        for (const side of [-1, 1]) {
+            const eyeWhite = new THREE.Mesh(
+                new THREE.SphereGeometry(0.13, 10, 8),
+                new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 200 })
+            );
+            eyeWhite.position.set(1.2, 0.18, side * 0.5);
+            dolphinGroup.add(eyeWhite);
+
+            const pupil = new THREE.Mesh(
+                new THREE.SphereGeometry(0.07, 8, 6),
+                new THREE.MeshPhongMaterial({ color: 0x112233, shininess: 200 })
+            );
+            pupil.position.set(1.28, 0.2, side * 0.52);
+            dolphinGroup.add(pupil);
+
+            const shine = new THREE.Mesh(
+                new THREE.SphereGeometry(0.03, 6, 4),
+                new THREE.MeshBasicMaterial({ color: 0xffffff })
+            );
+            shine.position.set(1.3, 0.24, side * 0.53);
+            dolphinGroup.add(shine);
+        }
+
+        // Dorsal fin
+        const dorsalShape = new THREE.Shape();
+        dorsalShape.moveTo(0, 0);
+        dorsalShape.quadraticCurveTo(-0.1, 1.0, 0.5, 1.2);
+        dorsalShape.quadraticCurveTo(0.8, 0.8, 0.6, 0);
+        dorsalShape.closePath();
+        const dorsalGeo = new THREE.ExtrudeGeometry(dorsalShape, {
+            depth: 0.08, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2
+        });
+        const dorsal = new THREE.Mesh(dorsalGeo, bodyMat);
+        dorsal.position.set(-0.3, 0.55, -0.04);
+        dorsal.rotation.z = 0.15;
+        dorsal.castShadow = true;
+        dolphinGroup.add(dorsal);
+
+        // Tail fluke
+        for (const side of [-1, 1]) {
+            const flukeShape = new THREE.Shape();
+            flukeShape.moveTo(0, 0);
+            flukeShape.quadraticCurveTo(-0.3, side * 0.6, -0.8, side * 0.5);
+            flukeShape.quadraticCurveTo(-0.5, side * 0.1, 0, 0);
+            const flukeGeo = new THREE.ExtrudeGeometry(flukeShape, {
+                depth: 0.06, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02
+            });
+            const fluke = new THREE.Mesh(flukeGeo, bodyMat);
+            fluke.position.set(-1.8, -0.05, -0.03);
+            fluke.rotation.x = Math.PI / 2;
+            dolphinGroup.add(fluke);
+        }
+
+        // Pectoral fins (small side fins)
+        for (const side of [-1, 1]) {
+            const finShape = new THREE.Shape();
+            finShape.moveTo(0, 0);
+            finShape.quadraticCurveTo(0.2, side * 0.4, 0.5, side * 0.3);
+            finShape.quadraticCurveTo(0.3, side * 0.05, 0, 0);
+            const finGeo = new THREE.ExtrudeGeometry(finShape, {
+                depth: 0.04, bevelEnabled: false
+            });
+            const fin = new THREE.Mesh(finGeo, bodyMat);
+            fin.position.set(0.5, -0.3, side * 0.45);
+            fin.rotation.y = side * 0.3;
+            dolphinGroup.add(fin);
+        }
+
+        dolphinGroup.scale.set(0.8, 0.8, 0.8);
+        dolphinGroup.position.set(DOLPHIN_X, dolphinY, 0);
+        scene.add(dolphinGroup);
+    }
+
+    // ============ TARGETS ============
+    function spawnTarget() {
+        const type = Math.random();
+        if (type < 0.45) {
+            spawnFish();
+        } else if (type < 0.8) {
+            spawnBird();
+        } else {
+            spawnJelly();
+        }
+    }
+
+    function spawnFish() {
+        const g = new THREE.Group();
+        const fishMat = new THREE.MeshPhongMaterial({
+            color: [0xff6644, 0xffaa22, 0xff4488, 0x44bbff][Math.floor(Math.random() * 4)],
+            shininess: 60
+        });
+
+        // Body
+        const bodyGeo = new THREE.SphereGeometry(0.3, 10, 8);
+        bodyGeo.scale(1.5, 0.8, 0.6);
+        g.add(new THREE.Mesh(bodyGeo, fishMat));
+
+        // Tail
+        const tailShape = new THREE.Shape();
+        tailShape.moveTo(0, 0);
+        tailShape.lineTo(-0.3, 0.25);
+        tailShape.lineTo(-0.3, -0.25);
+        tailShape.closePath();
+        const tailGeo = new THREE.ExtrudeGeometry(tailShape, { depth: 0.04, bevelEnabled: false });
+        const tail = new THREE.Mesh(tailGeo, fishMat);
+        tail.position.set(-0.45, 0, -0.02);
+        g.add(tail);
+
+        // Eye
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 4),
+            new THREE.MeshBasicMaterial({ color: 0x111111 }));
+        eye.position.set(0.2, 0.08, 0.2);
+        g.add(eye);
+
+        // Flying fish wings
+        for (const side of [-1, 1]) {
+            const wingGeo = new THREE.PlaneGeometry(0.5, 0.2);
+            const wing = new THREE.Mesh(wingGeo, new THREE.MeshPhongMaterial({
+                color: 0xaaddff, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+            }));
+            wing.position.set(0, 0.1, side * 0.3);
+            wing.rotation.x = side * 0.4;
+            wing.name = 'wing';
+            g.add(wing);
+        }
+
+        // Position above water
+        g.position.set(20 + Math.random() * 10, 1 + Math.random() * 4, (Math.random() - 0.5) * 4);
+        g.userData = { type: 'fish', speed: 0.08 + Math.random() * 0.04, points: 10, wobble: Math.random() * Math.PI * 2 };
+
+        scene.add(g);
+        targets.push(g);
+    }
+
+    function spawnBird() {
+        const g = new THREE.Group();
+        const birdMat = new THREE.MeshPhongMaterial({ color: 0xeeeeee, shininess: 30 });
+
+        // Body
+        const bodyGeo = new THREE.SphereGeometry(0.25, 8, 6);
+        bodyGeo.scale(1.3, 0.8, 0.7);
+        g.add(new THREE.Mesh(bodyGeo, birdMat));
+
+        // Head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6), birdMat);
+        head.position.set(0.3, 0.15, 0);
+        g.add(head);
+
+        // Beak
+        const beak = new THREE.Mesh(
+            new THREE.ConeGeometry(0.05, 0.2, 4),
+            new THREE.MeshPhongMaterial({ color: 0xff8800 })
+        );
+        beak.position.set(0.5, 0.12, 0);
+        beak.rotation.z = -Math.PI / 2;
+        g.add(beak);
+
+        // Eye
+        const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 4, 4),
+            new THREE.MeshBasicMaterial({ color: 0x111111 }));
+        eye.position.set(0.38, 0.2, 0.1);
+        g.add(eye);
+
+        // Wings
+        for (const side of [-1, 1]) {
+            const wingShape = new THREE.Shape();
+            wingShape.moveTo(0, 0);
+            wingShape.quadraticCurveTo(-0.1, side * 0.5, -0.4, side * 0.4);
+            wingShape.quadraticCurveTo(-0.2, side * 0.05, 0, 0);
+            const wingGeo = new THREE.ExtrudeGeometry(wingShape, { depth: 0.02, bevelEnabled: false });
+            const wing = new THREE.Mesh(wingGeo, birdMat);
+            wing.position.set(0, 0.05, 0);
+            wing.name = 'birdWing';
+            g.add(wing);
+        }
+
+        g.position.set(20 + Math.random() * 10, 4 + Math.random() * 5, (Math.random() - 0.5) * 4);
+        g.userData = { type: 'bird', speed: 0.06 + Math.random() * 0.03, points: 25, wobble: Math.random() * Math.PI * 2 };
+
+        scene.add(g);
+        targets.push(g);
+    }
+
+    function spawnJelly() {
+        const g = new THREE.Group();
+        const jellyColor = [0xee66aa, 0xaa44ff, 0xff66cc, 0x8855ff][Math.floor(Math.random() * 4)];
+        const jellyMat = new THREE.MeshPhongMaterial({
+            color: jellyColor, transparent: true, opacity: 0.65, shininess: 100, specular: 0xffffff
+        });
+
+        // Bell
+        const bellGeo = new THREE.SphereGeometry(0.4, 12, 10, 0, Math.PI * 2, 0, Math.PI / 2);
+        const bell = new THREE.Mesh(bellGeo, jellyMat);
+        bell.rotation.x = Math.PI;
+        g.add(bell);
+
+        // Tentacles
+        const tentMat = new THREE.MeshBasicMaterial({ color: jellyColor, transparent: true, opacity: 0.4 });
+        for (let i = 0; i < 5; i++) {
+            const tentGeo = new THREE.CylinderGeometry(0.015, 0.01, 0.6 + Math.random() * 0.4, 4);
+            const tent = new THREE.Mesh(tentGeo, tentMat);
+            tent.position.set((Math.random() - 0.5) * 0.3, -0.3 - Math.random() * 0.2, (Math.random() - 0.5) * 0.3);
+            tent.name = 'tentacle';
+            g.add(tent);
+        }
+
+        // Glow
+        const glow = new THREE.PointLight(jellyColor, 0.5, 4);
+        glow.position.set(0, 0, 0);
+        g.add(glow);
+
+        // Underwater position
+        g.position.set(20 + Math.random() * 10, -1.5 - Math.random() * 4, (Math.random() - 0.5) * 4);
+        g.userData = { type: 'jelly', speed: 0.04 + Math.random() * 0.03, wobble: Math.random() * Math.PI * 2 };
+
+        scene.add(g);
+        jellies.push(g);
+    }
+
+    // ============ SPLASH PARTICLES ============
+    function createSplash(pos, color, count) {
+        for (let i = 0; i < count; i++) {
+            const s = 0.04 + Math.random() * 0.1;
+            const geo = new THREE.SphereGeometry(s, 6, 4);
+            const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(pos);
+            p.userData = {
+                vel: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.3,
+                    Math.random() * 0.25 + 0.1,
+                    (Math.random() - 0.5) * 0.2
+                ),
+                life: 1
+            };
+            scene.add(p);
+            splashParticles.push(p);
+        }
+    }
+
+    function showPopup(text, color, x, y) {
+        const el = document.createElement('div');
+        el.className = 'score-popup';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.color = color;
+        el.textContent = text;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1300);
+    }
+
+    // ============ GAME LOGIC ============
+    function onKeyDown(e) {
+        if (e.code === 'Space') {
+            e.preventDefault();
+            tryJump();
+        }
+    }
+
+    function onTouchJump(e) {
+        // Don't jump if tapping buttons/links
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.tagName === 'INPUT') return;
+        if (!isPlaying) return;
+        e.preventDefault();
+        tryJump();
+    }
+
+    function tryJump() {
+        if (!isPlaying) return;
+        if (dolphinY > WATER_Y + 0.5) return; // already in air
+        isJumping = true;
+        jumpVel = JUMP_FORCE;
+        combo = 0;
+
+        // Water splash on exit
+        createSplash(dolphinGroup.position.clone(), 0x88ddff, 12);
+    }
+
+    function updateDolphin(delta) {
+        if (!dolphinGroup) return;
+
+        if (isJumping) {
+            jumpVel += GRAVITY;
+            dolphinY += jumpVel;
+
+            // Flip rotation based on velocity
+            const targetRot = jumpVel > 0 ? Math.min(jumpVel * 5, 1.2) : Math.max(jumpVel * 3, -0.8);
+            dolphinGroup.rotation.z += (targetRot - dolphinGroup.rotation.z) * 0.1;
+
+            // Back in water
+            if (dolphinY <= WATER_Y - 0.5 && jumpVel < 0) {
+                dolphinY = WATER_Y - 0.5;
+                isJumping = false;
+                jumpVel = 0;
+                dolphinGroup.rotation.z = 0;
+
+                // Re-entry splash
+                createSplash(dolphinGroup.position.clone(), 0x88ddff, 8);
+
+                // Show combo if > 1
+                if (combo > 1) {
+                    showCombo(combo);
+                }
+                if (combo > bestCombo) bestCombo = combo;
+            }
+        } else {
+            // Underwater idle bob
+            dolphinY = WATER_Y - 0.5 + Math.sin(Date.now() * 0.003) * 0.15;
+            dolphinGroup.rotation.z = Math.sin(Date.now() * 0.002) * 0.05;
+        }
+
+        dolphinGroup.position.y = dolphinY;
+
+        // Tail wag
+        const tailWag = Math.sin(Date.now() * 0.01) * 0.1;
+        dolphinGroup.position.x = DOLPHIN_X + tailWag;
+
+        // Invincibility flash
+        if (invTimer > 0) {
+            invTimer -= delta;
+            dolphinGroup.visible = Math.sin(Date.now() * 0.025) > 0;
+        } else {
+            dolphinGroup.visible = true;
+        }
+    }
+
+    function updateTargets(delta) {
+        const sp = gameSpeed;
+
+        // Move targets
+        for (let i = targets.length - 1; i >= 0; i--) {
+            const t = targets[i];
+            t.position.x -= t.userData.speed * sp;
+            t.userData.wobble += delta * 3;
+            t.position.y += Math.sin(t.userData.wobble) * 0.008;
+
+            // Wing flap
+            t.children.forEach(c => {
+                if (c.name === 'wing') c.rotation.z = Math.sin(Date.now() * 0.015) * 0.4;
+                if (c.name === 'birdWing') c.rotation.z = Math.sin(Date.now() * 0.02) * 0.6;
+            });
+
+            // Off screen
+            if (t.position.x < -20) {
+                scene.remove(t);
+                targets.splice(i, 1);
+                continue;
+            }
+
+            // Collision with dolphin
+            if (dolphinGroup) {
+                const dist = t.position.distanceTo(dolphinGroup.position);
+                if (dist < 1.8) {
+                    const pts = t.userData.points * (combo > 0 ? combo : 1);
+                    score += pts;
+                    combo++;
+                    document.getElementById('score-val').textContent = score;
+
+                    // Screen popup
+                    const v = t.position.clone().project(camera);
+                    const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                    showPopup('+' + pts, t.userData.type === 'fish' ? '#ffaa22' : '#44ddff', sx, sy);
+
+                    createSplash(t.position.clone(), 0xffdd44, 8);
+                    scene.remove(t);
+                    targets.splice(i, 1);
+                }
+            }
+        }
+
+        // Move jellies
+        for (let i = jellies.length - 1; i >= 0; i--) {
+            const j = jellies[i];
+            j.position.x -= j.userData.speed * sp;
+            j.userData.wobble += delta * 2;
+            j.position.y += Math.sin(j.userData.wobble) * 0.005;
+
+            // Tentacle sway
+            j.children.forEach(c => {
+                if (c.name === 'tentacle') {
+                    c.rotation.x = Math.sin(Date.now() * 0.005 + c.position.x * 5) * 0.2;
+                }
+            });
+
+            // Off screen
+            if (j.position.x < -20) {
+                scene.remove(j);
+                jellies.splice(i, 1);
+                continue;
+            }
+
+            // Collision
+            if (dolphinGroup && invTimer <= 0) {
+                const dist = j.position.distanceTo(dolphinGroup.position);
+                if (dist < 1.3) {
+                    lives--;
+                    invTimer = 2.0;
+                    updateLives();
+                    createSplash(dolphinGroup.position.clone(), 0xff4466, 15);
+
+                    // Screen flash
+                    const v = j.position.clone().project(camera);
+                    const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                    showPopup('OUCH!', '#ff4466', sx, sy);
+
+                    scene.remove(j);
+                    jellies.splice(i, 1);
+
+                    if (lives <= 0) gameOver();
+                }
+            }
+        }
+
+        // Spawn
+        spawnTimer += delta * sp;
+        if (spawnTimer > 1.2) {
+            spawnTimer = 0;
+            if (Math.random() < 0.7) spawnTarget();
+        }
+
+        // Speed up
+        gameSpeed += delta * 0.003;
+    }
+
+    function updateEnvironment(delta) {
+        // Animate water
+        if (waterSurface) {
+            const verts = waterSurface.geometry.attributes.position;
+            const t = Date.now() * 0.001;
+            for (let i = 0; i < verts.count; i++) {
+                const x = verts.getX(i);
+                const z = verts.getZ(i);
+                const y = Math.sin(x * 0.5 + t * 2) * 0.15 + Math.sin(z * 0.8 + t * 1.5) * 0.1;
+                verts.setY(i, y);
+            }
+            verts.needsUpdate = true;
+        }
+
+        // Move clouds
+        scene.children.forEach(obj => {
+            if (obj.userData && obj.userData.speed && obj.isGroup) {
+                obj.position.x -= obj.userData.speed;
+                if (obj.position.x < -35) obj.position.x = 35;
+            }
+        });
+
+        // Bubbles
+        scene.children.forEach(obj => {
+            if (obj.name === 'bubble') {
+                obj.userData.phase += 0.02;
+                obj.position.y = obj.userData.baseY + Math.sin(obj.userData.phase) * 0.5;
+                obj.position.x -= obj.userData.speed;
+                if (obj.position.x < -18) obj.position.x = 18;
+            }
+        });
+    }
+
+    function updateParticles(delta) {
+        for (let i = splashParticles.length - 1; i >= 0; i--) {
+            const p = splashParticles[i];
+            p.position.add(p.userData.vel);
+            p.userData.vel.y -= 0.008;
+            p.userData.life -= 0.025;
+            p.material.opacity = Math.max(0, p.userData.life);
+            p.scale.multiplyScalar(0.97);
+
+            if (p.userData.life <= 0) {
+                scene.remove(p);
+                splashParticles.splice(i, 1);
+            }
+        }
+    }
+
+    function showCombo(n) {
+        const el = document.getElementById('combo-display');
+        el.textContent = n + 'x COMBO!';
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 1200);
+    }
+
+    function updateLives() {
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+            html += i < lives ? '&#x2764;' : '&#x1F494;';
+        }
+        document.getElementById('lives-val').innerHTML = html;
+    }
+
+    // ============ GAME LOOP ============
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+
+        if (isPlaying) {
+            updateDolphin(delta);
+            updateTargets(delta);
+            updateParticles(delta);
+        }
+        updateEnvironment(delta);
+
+        renderer.render(scene, camera);
+    }
+
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+
+        score = 0; lives = 5; combo = 0; bestCombo = 0;
+        gameSpeed = 1; spawnTimer = 0;
+        invTimer = 0; isJumping = false; jumpVel = 0;
+        dolphinY = WATER_Y - 0.5;
+
+        document.getElementById('score-val').textContent = 0;
+        updateLives();
+
+        // Clear old
+        targets.forEach(t => scene.remove(t));
+        jellies.forEach(j => scene.remove(j));
+        splashParticles.forEach(p => scene.remove(p));
+        targets = []; jellies = []; splashParticles = [];
+        document.querySelectorAll('.score-popup').forEach(el => el.remove());
+
+        if (dolphinGroup) {
+            dolphinGroup.position.set(DOLPHIN_X, dolphinY, 0);
+            dolphinGroup.rotation.z = 0;
+            dolphinGroup.visible = true;
+        }
+
+        isPlaying = true;
+    }
+
+    // ============ LEADERBOARD ============
+    const LB_KEY = 'dolphin_leaderboard';
+    const BEST_KEY = 'dolphin_best';
+    let pendingScore = 0;
+
+    function getLB() { try { return JSON.parse(localStorage.getItem(LB_KEY)) || []; } catch { return []; } }
+    function getBest() { return parseInt(localStorage.getItem(BEST_KEY)) || 0; }
+    function isTop(s) { const lb = getLB(); return lb.length < 10 || s > (lb[lb.length - 1]?.score || 0); }
+
+    function saveScoreLB() {
+        const inp = document.getElementById('pname');
+        const name = inp.value.trim() || 'Dolphin';
+        const lb = getLB();
+        lb.push({ name, score: pendingScore, date: Date.now() });
+        lb.sort((a, b) => b.score - a.score);
+        if (lb.length > 10) lb.length = 10;
+        localStorage.setItem(LB_KEY, JSON.stringify(lb));
+        if (pendingScore > getBest()) localStorage.setItem(BEST_KEY, pendingScore);
+        document.getElementById('name-area').classList.add('hidden');
+        renderLB(pendingScore);
+    }
+
+    function renderLB(hl) {
+        const lb = getLB();
+        const list = document.getElementById('lb-list');
+        if (!lb.length) { list.innerHTML = '<li style="text-align:center; color:rgba(180,230,255,0.4);">No scores yet!</li>'; return; }
+        let done = false;
+        list.innerHTML = lb.map((e, i) => {
+            const medal = i === 0 ? '&#x1F947;' : i === 1 ? '&#x1F948;' : i === 2 ? '&#x1F949;' : (i + 1);
+            const isNew = !done && e.score === hl; if (isNew) done = true;
+            return '<li class="' + (isNew ? 'lb-new' : '') + '"><span class="lb-rank">' + medal +
+                '</span><span class="lb-name">' + escHtml(e.name) + (isNew ? '<span class="new-badge">NEW</span>' : '') +
+                '</span><span class="lb-score">' + e.score + '</span></li>';
+        }).join('');
+    }
+
+    function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    function gameOver() {
+        isPlaying = false;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-score').textContent = score;
+        pendingScore = score;
+
+        const best = getBest();
+        const msg = document.getElementById('best-msg');
+        if (score > best && best > 0) { msg.textContent = 'NEW PERSONAL BEST!'; msg.style.color = '#ffdd44'; }
+        else if (best > 0) { msg.textContent = 'Best: ' + best; msg.style.color = 'rgba(180,230,255,0.5)'; }
+        else { msg.textContent = ''; }
+
+        if (isTop(score) && score > 0) {
+            document.getElementById('name-area').classList.remove('hidden');
+            const inp = document.getElementById('pname');
+            inp.value = localStorage.getItem('dolphin_lastname') || '';
+            setTimeout(() => inp.focus(), 300);
+        } else {
+            document.getElementById('name-area').classList.add('hidden');
+        }
+        renderLB(-1);
+    }
+
+    function restartGame() {
+        const inp = document.getElementById('pname');
+        if (inp.value.trim()) localStorage.setItem('dolphin_lastname', inp.value.trim());
+        if (isTop(pendingScore) && pendingScore > 0 && !document.getElementById('name-area').classList.contains('hidden')) saveScoreLB();
+        document.getElementById('game-over-screen').classList.add('hidden');
+        startGame();
+    }
+
+    window.onload = init;
+    </script>
+</body>
+</html>

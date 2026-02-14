@@ -2871,6 +2871,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  beds: h.beds || 0,
  baths: h.baths || 0,
  dom: h.dom,
+ lat: h.lat,
+ lng: h.lng,
  ppsf: Math.round(h.price / h.sqft),
  avgPpsf: Math.round(avgPpsf),
  marketValue: marketValue,
@@ -3334,8 +3336,26 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  options: { ...chartOpts, scales: { ...chartOpts.scales, y1: { position: 'right', grid: { display: false }, ticks: { color: '#ec4899' } } } }
  });
  
- // City charts
- const cityData = rawData.summary.cities.slice(0, 15);
+ // City charts - compute from properties
+ const cityStats = {};
+ rawData.properties.forEach(p => {
+   if (!cityStats[p.city]) cityStats[p.city] = { count: 0, prices: [], landCount: 0 };
+   cityStats[p.city].count++;
+   if (p.price > 0) cityStats[p.city].prices.push(p.price);
+   if (p.propertyType && p.propertyType.includes('Land')) cityStats[p.city].landCount++;
+ });
+ const cityData = Object.entries(cityStats)
+   .map(([city, s]) => ({
+     city,
+     count: s.count,
+     medianPrice: s.prices.length ? s.prices.sort((a,b)=>a-b)[Math.floor(s.prices.length/2)] : 0,
+     landCount: s.landCount
+   }))
+   .sort((a,b) => b.count - a.count)
+   .slice(0, 15);
+ // Store for later use
+ window.computedCityStats = cityStats;
+ 
  new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } } } });
  new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.medianPrice/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '$'+v+'K' } } } } });
  
@@ -3408,7 +3428,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  new Chart(document.getElementById('sqftChart'), { type: 'bar', data: { labels: Object.keys(sqftRanges), datasets: [{ data: Object.values(sqftRanges), backgroundColor: chartColors.pink, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
  
  // Land by city
- const landCities = rawData.summary.cities.filter(c => c.landCount > 0).sort((a,b) => b.landCount - a.landCount).slice(0, 10);
+ // Use computed city stats for land chart
+ const landCities = Object.entries(window.computedCityStats || cityStats || {})
+   .map(([city, s]) => ({ city, landCount: s.landCount }))
+   .filter(c => c.landCount > 0)
+   .sort((a,b) => b.landCount - a.landCount)
+   .slice(0, 10);
  new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
  } catch(e) { console.error('Chart init error:', e); }
  }
@@ -3699,7 +3724,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  let propertyData = null;
  let propFilteredData = [];
  let propPage = 1;
- const propPageSize = 50;
+ let propPageSize = 25;
+ 
+ function setPageSize(size) {
+  propPageSize = size;
+  propPage = 1;
+  renderPropResults();
+ }
  
  async function searchProperties() {
  const status = document.getElementById('propStatus');
@@ -3801,13 +3832,22 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  // Pagination
  const totalPages = Math.ceil(propFilteredData.length / propPageSize);
  const pagination = document.getElementById('propPagination');
- if (totalPages > 1) {
+ if (propFilteredData.length > 0) {
+ const pageSizeSelect = '<select onchange="setPageSize(parseInt(this.value))" style="padding:0.4rem;background:#1e293b;border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;margin-right:0.5rem">' +
+  [25, 50, 75, 100].map(n => '<option value="' + n + '"' + (propPageSize === n ? ' selected' : '') + '>' + n + '</option>').join('') +
+  '<option value="9999"' + (propPageSize === 9999 ? ' selected' : '') + '>All</option>' +
+ '</select>';
  pagination.innerHTML = 
- '<button onclick="propPage=1;renderPropResults()" ' + (propPage === 1 ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">First</button>' +
- '<button onclick="propPage--;renderPropResults()" ' + (propPage === 1 ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Prev</button>' +
- '<span style="color:#94a3b8">Page ' + propPage + ' of ' + totalPages + '</span>' +
- '<button onclick="propPage++;renderPropResults()" ' + (propPage === totalPages ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Next</button>' +
- '<button onclick="propPage=' + totalPages + ';renderPropResults()" ' + (propPage === totalPages ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Last</button>';
+ '<div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;justify-content:center">' +
+ '<span style="color:#94a3b8;font-size:0.85rem">Show:</span>' + pageSizeSelect +
+ (totalPages > 1 ? (
+  '<button onclick="propPage=1;renderPropResults()" ' + (propPage === 1 ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">First</button>' +
+  '<button onclick="propPage--;renderPropResults()" ' + (propPage === 1 ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Prev</button>' +
+  '<span style="color:#94a3b8">Page ' + propPage + ' of ' + totalPages + ' (' + propFilteredData.length + ' total)</span>' +
+  '<button onclick="propPage++;renderPropResults()" ' + (propPage === totalPages ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Next</button>' +
+  '<button onclick="propPage=' + totalPages + ';renderPropResults()" ' + (propPage === totalPages ? 'disabled' : '') + ' style="padding:0.4rem 0.8rem;background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);color:#a5b4fc;border-radius:6px;cursor:pointer">Last</button>'
+ ) : '<span style="color:#94a3b8">(' + propFilteredData.length + ' results)</span>') +
+ '</div>';
  } else {
  pagination.innerHTML = '';
  }

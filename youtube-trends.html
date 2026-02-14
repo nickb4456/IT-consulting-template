@@ -251,23 +251,26 @@
         
         .pattern-bar .bar-container {
             flex: 1;
-            height: 28px;
+            height: 24px;
             background: var(--border);
             border-radius: 4px;
             overflow: hidden;
+            max-width: 50%;
         }
         
         .pattern-bar .bar {
             height: 100%;
             background: linear-gradient(90deg, var(--accent), #ff6b6b);
             border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
+            min-width: 20px;
+        }
+        
+        .pattern-bar .stats {
             font-size: 0.8rem;
             font-weight: bold;
-            min-width: 90px;
+            white-space: nowrap;
+            min-width: 130px;
+            text-align: right;
         }
         
         /* Connections Section */
@@ -617,6 +620,7 @@
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
             .pattern-bar .name { width: 80px; font-size: 0.8rem; }
+            .pattern-bar .stats { font-size: 0.75rem; min-width: 100px; }
             .niche-tab { padding: 8px 15px; font-size: 0.85rem; }
         }
     </style>
@@ -888,10 +892,9 @@
                 <div class="pattern-bar">
                     <span class="name">${escapeHtml(p.name)}</span>
                     <div class="bar-container">
-                        <div class="bar" style="width: ${Math.min(100, Math.max(10, (p.avgViews / maxViews) * 100))}%">
-                            ${formatViews(p.avgViews)} avg · ${p.count} videos
-                        </div>
+                        <div class="bar" style="width: ${Math.min(100, Math.max(10, (p.avgViews / maxViews) * 100))}%"></div>
                     </div>
+                    <span class="stats">${formatViews(p.avgViews)} avg · ${p.count} video${p.count !== 1 ? 's' : ''}</span>
                 </div>
             `).join('');
         }

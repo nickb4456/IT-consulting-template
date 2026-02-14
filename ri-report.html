@@ -979,6 +979,34 @@ Promise.all([
   rawData = data;
   console.log('Parallel load took', Math.round(performance.now() - t0), 'ms for', rawData.properties.length, 'properties');
   
+  // Precompute city stats once for faster insights
+  const t_precompute = performance.now();
+  window.cityStats = {};
+  rawData.properties.forEach(p => {
+    if (!window.cityStats[p.city]) {
+      window.cityStats[p.city] = { prices: [], doms: [], soldPrices: [], yearlyPrices: {} };
+    }
+    const cs = window.cityStats[p.city];
+    if (p.price > 50000) cs.prices.push(p.price);
+    if (p.dom > 0 && p.dom < 365) cs.doms.push(p.dom);
+    if (p.status === 'Sold' || p.soldDate) {
+      if (p.price > 50000) cs.soldPrices.push(p.price);
+      if (p.soldDate) {
+        const year = parseInt(p.soldDate.split('-')[0]) || parseInt(p.soldDate.split('-').pop());
+        if (!cs.yearlyPrices[year]) cs.yearlyPrices[year] = [];
+        cs.yearlyPrices[year].push(p.price);
+      }
+    }
+  });
+  // Compute aggregates
+  Object.keys(window.cityStats).forEach(city => {
+    const cs = window.cityStats[city];
+    cs.count = cs.prices.length;
+    cs.medianPrice = cs.prices.length ? cs.prices.sort((a,b)=>a-b)[Math.floor(cs.prices.length/2)] : 0;
+    cs.avgDom = cs.doms.length ? Math.round(cs.doms.reduce((a,b)=>a+b,0) / cs.doms.length) : 999;
+  });
+  console.log('Precomputed stats for', Object.keys(window.cityStats).length, 'cities in', Math.round(performance.now() - t_precompute), 'ms');
+  
   // Create database with batch insert (much faster than row-by-row)
   db = new SQL.Database();
   db.run(`CREATE TABLE properties (address TEXT, city TEXT, zip TEXT, price INT, propertyType TEXT, beds INT, baths REAL, sqft INT, lotSize INT, yearBuilt INT, dom INT, soldDate TEXT, url TEXT, status TEXT)`);
@@ -1033,7 +1061,7 @@ Promise.all([
 });
 
 function updateInsights() {
-  if (!rawData || !rawData.properties) return;
+  if (!rawData || !rawData.properties || !window.cityStats) return;
   
   // Price formatter - use M for millions
   const fmtPrice = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
@@ -1042,18 +1070,10 @@ function updateInsights() {
   const coastalCities = ['Newport', 'Narragansett', 'Westerly', 'Jamestown', 'Block Island', 'New Shoreham', 
     'Little Compton', 'Middletown', 'Portsmouth', 'Tiverton', 'Bristol', 'Warren', 'Barrington', 'Charlestown'];
   
-  // Top 5 NON-COASTAL cities by median price
-  const cityPrices = {};
-  rawData.properties.filter(p => p.price > 50000).forEach(p => {
-    if (!cityPrices[p.city]) cityPrices[p.city] = [];
-    cityPrices[p.city].push(p.price);
-  });
-  const topCities = Object.entries(cityPrices)
-    .filter(([c, ps]) => ps.length >= 10 && !coastalCities.includes(c))
-    .map(([city, prices]) => ({
-      city,
-      median: prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)]
-    }))
+  // Top 5 NON-COASTAL cities by median price (using precomputed stats)
+  const topCities = Object.entries(window.cityStats)
+    .filter(([c, stats]) => stats.count >= 10 && !coastalCities.includes(c))
+    .map(([city, stats]) => ({ city, median: stats.medianPrice }))
     .sort((a,b) => b.median - a.median)
     .slice(0, 5);
   
@@ -1064,18 +1084,10 @@ function updateInsights() {
     ).join('');
   }
   
-  // Fastest to sell (lowest avg DOM)
-  const cityDom = {};
-  rawData.properties.filter(p => p.dom && p.dom > 0 && p.dom < 365).forEach(p => {
-    if (!cityDom[p.city]) cityDom[p.city] = [];
-    cityDom[p.city].push(p.dom);
-  });
-  const fastestCities = Object.entries(cityDom)
-    .filter(([c, doms]) => doms.length >= 5)
-    .map(([city, doms]) => ({
-      city,
-      avgDom: Math.round(doms.reduce((a,b)=>a+b,0) / doms.length)
-    }))
+  // Fastest to sell - using precomputed avgDom
+  const fastestCities = Object.entries(window.cityStats)
+    .filter(([c, stats]) => stats.doms.length >= 5)
+    .map(([city, stats]) => ({ city, avgDom: stats.avgDom }))
     .sort((a,b) => a.avgDom - b.avgDom)
     .slice(0, 5);
   
@@ -2276,7 +2288,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function showLandNeighborhood(idx) {
  const land = window.landDealsData[idx];
  if (!land.lat || !land.lng) {
- alert('No location data available for this property');
+ // Fall back to city-level view with message
+ showCityComps(land.city, land.address + ' (No coordinates - showing city-wide data)');
  return;
  }
  

@@ -3057,6 +3057,59 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  return R * c;
  }
  
+ // Fallback function when lat/lng missing - shows city-wide comps
+ function showCityComps(city, titleNote) {
+   const cityProps = rawData.properties.filter(p => p.city === city && p.price > 0);
+   const soldProps = cityProps.filter(p => p.status === 'Sold' || p.soldDate);
+   const houses = soldProps.filter(p => p.propertyType && !p.propertyType.includes('Land'));
+   
+   const avgPrice = houses.length ? Math.round(houses.reduce((a,p) => a + p.price, 0) / houses.length) : 0;
+   const avgPpsf = houses.filter(p => p.sqft > 0).length 
+     ? Math.round(houses.filter(p => p.sqft > 0).reduce((a,p) => a + (p.price / p.sqft), 0) / houses.filter(p => p.sqft > 0).length) 
+     : 0;
+   
+   // Build HTML for top 15 recent sales
+   const recentSales = houses.slice(0, 15);
+   let salesHtml = recentSales.map(p => 
+     `<a href="${p.url}" target="_blank" style="background:rgba(0,0,0,0.3);padding:0.75rem;border-radius:8px;text-decoration:none;display:block">
+       <div style="display:flex;justify-content:space-between"><span style="color:#10b981;font-weight:600">${formatPrice(p.price)}</span><span style="color:#94a3b8;font-size:0.7rem">${p.sqft ? '$' + Math.round(p.price/p.sqft) + '/sf' : ''}</span></div>
+       <div style="color:#94a3b8;font-size:0.75rem">${p.beds || '?'}bd/${p.baths || '?'}ba • ${p.sqft ? p.sqft.toLocaleString() + ' sf' : '?'}</div>
+       <div style="color:#6366f1;font-size:0.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.address}</div>
+     </a>`
+   ).join('');
+   
+   const modal = document.createElement('div');
+   modal.id = 'cityCompsModal';
+   modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:1001;display:flex;align-items:center;justify-content:center';
+   modal.onclick = () => modal.remove();
+   
+   modal.innerHTML = `<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:700px;width:95%;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
+     <button onclick="this.closest('#cityCompsModal').remove()" style="position:absolute;top:15px;right:15px;background:#ef4444;border:none;color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem">✕</button>
+     <h2 style="color:#f59e0b;margin:0 0 0.5rem 0">📍 ${city} Market Data</h2>
+     <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:1.5rem">${titleNote}</p>
+     
+     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
+       <div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:10px;text-align:center">
+         <div style="color:#94a3b8;font-size:0.75rem">Total Sold</div>
+         <div style="color:#10b981;font-size:1.5rem;font-weight:bold">${houses.length}</div>
+       </div>
+       <div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:10px;text-align:center">
+         <div style="color:#94a3b8;font-size:0.75rem">Avg Price</div>
+         <div style="color:#ec4899;font-size:1.5rem;font-weight:bold">${avgPrice ? formatPrice(avgPrice) : 'N/A'}</div>
+       </div>
+       <div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:10px;text-align:center">
+         <div style="color:#94a3b8;font-size:0.75rem">Avg $/SqFt</div>
+         <div style="color:#f59e0b;font-size:1.5rem;font-weight:bold">${avgPpsf ? '$' + avgPpsf : 'N/A'}</div>
+       </div>
+     </div>
+     
+     <h4 style="color:#a5b4fc;margin-bottom:0.75rem">🏠 Recent Sales in ${city}</h4>
+     <div style="display:grid;gap:0.5rem;max-height:350px;overflow-y:auto">${salesHtml || '<p style="color:#94a3b8">No sales data available</p>'}</div>
+   </div>`;
+   
+   document.body.appendChild(modal);
+ }
+ 
  function getNearbyProperties(lat, lng, radiusMiles, excludeAddress) {
  if (!lat || !lng) return [];
  return rawData.properties.filter(p => {
@@ -3073,7 +3126,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function showNeighborhood(idx) {
  const house = window.houseDealsData[idx];
  if (!house.lat || !house.lng) {
- alert('No location data available for this property');
+ // Fall back to city-level view with message
+ showCityComps(house.city, house.address + ' (No coordinates - showing city-wide data)');
  return;
  }
  

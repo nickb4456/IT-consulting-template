@@ -555,6 +555,65 @@
             text-decoration: underline;
         }
         
+        /* Expandable hook cards */
+        .hook-example-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .hook-example-card:hover {
+            border-color: #f59e0b;
+            transform: translateY(-2px);
+        }
+        
+        .hook-example-card .hook-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .hook-example-card .expand-icon {
+            color: var(--muted);
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+        
+        .hook-example-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+        
+        .hook-example-card .hook-preview {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .hook-example-card.expanded .hook-preview {
+            display: block;
+        }
+        
+        .hook-example-card .preview-text {
+            font-style: italic;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .hook-example-card a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        
+        .hook-example-card a:hover {
+            text-decoration: underline;
+        }
+        
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
             .pattern-bar .name { width: 80px; font-size: 0.8rem; }
@@ -1290,17 +1349,24 @@
                 return;
             }
             
-            container.innerHTML = hooks.slice(0, 6).map(h => `
-                <div class="transcript-video-card">
-                    <div class="tv-header">
-                        <div class="tv-topics" style="margin: 0;">
+            container.innerHTML = hooks.slice(0, 8).map(h => `
+                <div class="hook-example-card" onclick="toggleHookCard(this)">
+                    <div class="hook-header">
+                        <div class="tv-topics" style="display: flex; flex-wrap: wrap; gap: 5px;">
                             ${(h.hooks || []).slice(0, 3).map(hook => `<span class="tv-topic" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${escapeHtml(hook)}</span>`).join('')}
                         </div>
+                        <span class="expand-icon">▼</span>
                     </div>
-                    <div class="tv-preview" style="margin-top: 10px; font-style: italic;">"${escapeHtml(h.preview)}"</div>
-                    <a href="https://youtube.com/watch?v=${h.videoId}" target="_blank" rel="noopener">Watch Video →</a>
+                    <div class="hook-preview">
+                        <div class="preview-text">"${escapeHtml(h.preview)}"</div>
+                        <a href="https://youtube.com/watch?v=${h.videoId}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Watch Video →</a>
+                    </div>
                 </div>
             `).join('');
+        }
+        
+        function toggleHookCard(el) {
+            el.classList.toggle('expanded');
         }
         
         async function loadData() {

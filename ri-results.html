@@ -5,70 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RI Real Estate Results</title>
     <style>
-        :root { --primary: #6366f1; --secondary: #ec4899; --accent: #10b981; --dark: #0f172a; }
+        :root { --primary: #6366f1; --secondary: #ec4899; --accent: #10b981; --dark: #0f172a; --darker: #020617; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #e2e8f0; line-height: 1.6; min-height: 100vh; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--dark) 0%, #1e293b 50%, var(--dark) 100%); color: #e2e8f0; line-height: 1.6; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
         
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .home-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.3); color: #a5b4fc; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.2s; }
-        .home-btn:hover { background: rgba(99,102,241,0.4); transform: scale(1.02); }
-        .back-btn { background: rgba(16,185,129,0.2); border-color: rgba(16,185,129,0.3); color: #6ee7b7; }
-        .back-btn:hover { background: rgba(16,185,129,0.4); }
+        /* Header with gradient border */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; }
+        .home-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
+        .home-btn:hover { background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(99,102,241,0.2)); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
+        .back-btn { background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1)); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
+        .back-btn:hover { background: linear-gradient(135deg, rgba(16,185,129,0.4), rgba(16,185,129,0.2)); box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
         
-        h1 { font-size: 1.75rem; font-weight: 700; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitle { color: #94a3b8; font-size: 0.95rem; margin-top: 0.25rem; }
+        h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: #64748b; font-size: 0.95rem; margin-top: 0.25rem; }
         
-        .stats { display: flex; gap: 2rem; margin: 1.5rem 0; }
-        .stat { text-align: center; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: #10b981; }
-        .stat-label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; }
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card { background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.25rem; text-align: center; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(99,102,241,0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+        .stat-value { font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, #10b981, #6ee7b7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-value.purple { background: linear-gradient(135deg, #6366f1, #a5b4fc); -webkit-background-clip: text; }
+        .stat-value.pink { background: linear-gradient(135deg, #ec4899, #f9a8d4); -webkit-background-clip: text; }
+        .stat-value.amber { background: linear-gradient(135deg, #f59e0b, #fcd34d); -webkit-background-clip: text; }
+        .stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.25rem; }
         
-        .results-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.02); border-radius: 12px; overflow: hidden; }
-        .results-table th { background: rgba(99,102,241,0.3); padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
-        .results-table td { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
-        .results-table tr:hover { background: rgba(255,255,255,0.05); }
+        /* Section Headers */
+        .section-header { display: flex; align-items: center; gap: 1rem; margin: 2.5rem 0 1.5rem; }
+        .section-header h2 { font-size: 1.25rem; color: #94a3b8; font-weight: 600; }
+        .section-header::after { content: ''; flex: 1; height: 2px; background: linear-gradient(90deg, rgba(99,102,241,0.5), transparent); border-radius: 1px; }
+        
+        /* Charts Grid */
+        .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .chart-card { background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; transition: all 0.3s; }
+        .chart-card:hover { border-color: rgba(99,102,241,0.3); }
+        .chart-card.full-width { grid-column: span 2; }
+        .chart-title { color: #a5b4fc; font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .chart-title .emoji { font-size: 1.2rem; }
+        
+        /* Box Plot */
+        .boxplot-container { margin-top: 1rem; }
+        .boxplot { height: 50px; position: relative; background: rgba(255,255,255,0.02); border-radius: 12px; margin: 0.5rem 0; }
+        .boxplot-whisker { position: absolute; top: 50%; height: 3px; background: linear-gradient(90deg, #64748b, #94a3b8); border-radius: 2px; }
+        .boxplot-box { position: absolute; top: 15%; height: 70%; background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(139,92,246,0.4)); border: 2px solid #6366f1; border-radius: 8px; }
+        .boxplot-median { position: absolute; top: 10%; height: 80%; width: 4px; background: linear-gradient(180deg, #ec4899, #f472b6); border-radius: 2px; box-shadow: 0 0 10px rgba(236,72,153,0.5); }
+        .boxplot-labels { display: flex; justify-content: space-between; color: #64748b; font-size: 0.75rem; padding: 0 0.5rem; }
+        
+        .quartile-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-top: 1.25rem; }
+        .quartile-item { text-align: center; padding: 0.75rem; background: rgba(0,0,0,0.2); border-radius: 10px; }
+        .quartile-value { font-weight: 700; font-size: 1.1rem; }
+        .quartile-value.min { color: #06b6d4; }
+        .quartile-value.q1 { color: #10b981; }
+        .quartile-value.median { color: #ec4899; }
+        .quartile-value.q3 { color: #f59e0b; }
+        .quartile-value.max { color: #ef4444; }
+        .quartile-label { font-size: 0.65rem; color: #64748b; margin-top: 0.25rem; }
+        
+        /* Table */
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: rgba(255,255,255,0.02); border-radius: 16px; overflow: hidden; }
+        .results-table th { background: linear-gradient(135deg, rgba(99,102,241,0.3), rgba(99,102,241,0.2)); padding: 1rem; text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #a5b4fc; }
+        .results-table td { padding: 0.875rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .results-table tr:hover { background: rgba(99,102,241,0.1); }
         .results-table a { color: #10b981; text-decoration: none; }
-        .results-table a:hover { text-decoration: underline; }
         
-        .view-btn { display: inline-flex; align-items: center; gap: 0.3rem; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.35rem 0.7rem; border-radius: 6px; text-decoration: none; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
-        .view-btn:hover { transform: scale(1.05); text-decoration: none; }
+        .view-btn { display: inline-flex; align-items: center; gap: 0.3rem; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; text-decoration: none; font-size: 0.8rem; font-weight: 600; transition: all 0.2s; }
+        .view-btn:hover { transform: scale(1.05); box-shadow: 0 4px 15px rgba(16,185,129,0.4); }
         
         .price { font-weight: 700; color: #6366f1; }
-        .address { max-width: 300px; }
         
+        /* Loading */
         .loading { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
-        .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        .loading-spinner { width: 60px; height: 60px; border: 4px solid rgba(99,102,241,0.2); border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        .empty { text-align: center; padding: 4rem 2rem; color: #94a3b8; }
-        .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
-        
-        .nav-buttons { display: flex; gap: 1rem; }
-        
-        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
-        .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; }
-        .chart-title { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .boxplot-container { display: flex; flex-direction: column; gap: 0.5rem; }
-        .boxplot { height: 40px; position: relative; background: rgba(255,255,255,0.02); border-radius: 8px; }
-        .boxplot-whisker { position: absolute; top: 50%; height: 2px; background: #64748b; }
-        .boxplot-box { position: absolute; top: 10%; height: 80%; background: rgba(99,102,241,0.4); border: 2px solid #6366f1; border-radius: 4px; }
-        .boxplot-median { position: absolute; top: 5%; height: 90%; width: 3px; background: #ec4899; border-radius: 2px; }
-        .boxplot-label { font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; padding: 0 0.5rem; }
-        
-        .quartile-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 1rem; }
-        .quartile-stat { text-align: center; padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; }
-        .quartile-value { font-weight: 700; color: #6366f1; }
-        .quartile-label { font-size: 0.7rem; color: #64748b; }
+        /* Pagination */
+        .pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1.25rem; background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; margin: 1rem 0; }
+        .pagination button { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; padding: 0.6rem 1.25rem; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
+        .pagination button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(99,102,241,0.4); }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination select { background: var(--dark); color: #e2e8f0; border: 1px solid rgba(99,102,241,0.3); padding: 0.5rem 1rem; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .pagination select:focus { outline: none; border-color: #6366f1; }
+        .page-info { color: #64748b; font-size: 0.9rem; }
         
         @media (max-width: 768px) {
-            .charts-section { grid-template-columns: 1fr; }
+            .charts-grid { grid-template-columns: 1fr; }
+            .chart-card.full-width { grid-column: span 1; }
             .header { flex-direction: column; gap: 1rem; align-items: flex-start; }
-            .stats { flex-wrap: wrap; gap: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .quartile-grid { grid-template-columns: repeat(3, 1fr); }
             .results-table { font-size: 0.8rem; display: block; overflow-x: auto; }
-            .results-table th, .results-table td { padding: 0.5rem; }
-            .nav-buttons { width: 100%; justify-content: space-between; }
+            h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -79,50 +105,95 @@
                 <h1 id="title">Loading Results...</h1>
                 <p class="subtitle" id="subtitle"></p>
             </div>
-            <div class="nav-buttons">
+            <div style="display:flex;gap:1rem;">
                 <a href="ri-report.html" class="home-btn back-btn">← Back to Report</a>
                 <a href="https://aibridges.org" class="home-btn">🏠 Home</a>
             </div>
         </div>
         
-        <div class="stats" id="stats" style="display: none;">
-            <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Properties</div></div>
-            <div class="stat"><div class="stat-value" id="medianPrice">$0</div><div class="stat-label">Median Price</div></div>
-            <div class="stat"><div class="stat-value" id="avgPrice">$0</div><div class="stat-label">Average Price</div></div>
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="statsGrid" style="display:none;">
+            <div class="stat-card"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Properties</div></div>
+            <div class="stat-card"><div class="stat-value purple" id="medianPrice">$0</div><div class="stat-label">Median Price</div></div>
+            <div class="stat-card"><div class="stat-value pink" id="avgPrice">$0</div><div class="stat-label">Average Price</div></div>
+            <div class="stat-card"><div class="stat-value amber" id="avgPpsf">$0</div><div class="stat-label">Avg $/SqFt</div></div>
+            <div class="stat-card"><div class="stat-value" id="avgDom">0</div><div class="stat-label">Avg Days on Market</div></div>
+            <div class="stat-card"><div class="stat-value purple" id="forSaleCount">0</div><div class="stat-label">For Sale Now</div></div>
         </div>
         
-        <div class="charts-section" id="chartsSection" style="display: none;">
+        <!-- Charts Section -->
+        <div class="section-header" id="chartsHeader" style="display:none;">
+            <h2>📊 Market Analytics</h2>
+        </div>
+        
+        <div class="charts-grid" id="chartsGrid" style="display:none;">
+            <!-- Box Plot -->
             <div class="chart-card">
-                <div class="chart-title">📊 Price Distribution (Box Plot)</div>
+                <div class="chart-title"><span class="emoji">📦</span> Price Distribution (Box Plot)</div>
                 <div class="boxplot-container">
                     <div class="boxplot" id="boxplot"></div>
-                    <div class="boxplot-label"><span id="minLabel">$0</span><span id="maxLabel">$0</span></div>
+                    <div class="boxplot-labels"><span id="minLabel">$0</span><span id="maxLabel">$0</span></div>
                 </div>
-                <div class="quartile-stats">
-                    <div class="quartile-stat"><div class="quartile-value" id="q0">$0</div><div class="quartile-label">Min</div></div>
-                    <div class="quartile-stat"><div class="quartile-value" id="q1">$0</div><div class="quartile-label">Q1 (25%)</div></div>
-                    <div class="quartile-stat"><div class="quartile-value" id="q2">$0</div><div class="quartile-label">Median</div></div>
-                    <div class="quartile-stat"><div class="quartile-value" id="q3">$0</div><div class="quartile-label">Q3 (75%)</div></div>
-                    <div class="quartile-stat"><div class="quartile-value" id="q4">$0</div><div class="quartile-label">Max</div></div>
+                <div class="quartile-grid">
+                    <div class="quartile-item"><div class="quartile-value min" id="q0">$0</div><div class="quartile-label">Min</div></div>
+                    <div class="quartile-item"><div class="quartile-value q1" id="q1">$0</div><div class="quartile-label">Q1 (25%)</div></div>
+                    <div class="quartile-item"><div class="quartile-value median" id="q2">$0</div><div class="quartile-label">Median</div></div>
+                    <div class="quartile-item"><div class="quartile-value q3" id="q3">$0</div><div class="quartile-label">Q3 (75%)</div></div>
+                    <div class="quartile-item"><div class="quartile-value max" id="q4">$0</div><div class="quartile-label">Max</div></div>
                 </div>
             </div>
+            
+            <!-- Price Histogram -->
             <div class="chart-card">
-                <div class="chart-title">📈 Price Histogram</div>
-                <canvas id="histogramChart" height="150"></canvas>
+                <div class="chart-title"><span class="emoji">📈</span> Price Distribution</div>
+                <canvas id="histogramChart" height="200"></canvas>
+            </div>
+            
+            <!-- Property Types -->
+            <div class="chart-card">
+                <div class="chart-title"><span class="emoji">🏠</span> Property Types</div>
+                <canvas id="typeChart" height="200"></canvas>
+            </div>
+            
+            <!-- Bedrooms -->
+            <div class="chart-card">
+                <div class="chart-title"><span class="emoji">🛏️</span> Bedrooms Distribution</div>
+                <canvas id="bedsChart" height="200"></canvas>
+            </div>
+            
+            <!-- DOM Distribution -->
+            <div class="chart-card">
+                <div class="chart-title"><span class="emoji">⏱️</span> Days on Market</div>
+                <canvas id="domChart" height="200"></canvas>
+            </div>
+            
+            <!-- Year Built -->
+            <div class="chart-card">
+                <div class="chart-title"><span class="emoji">🏗️</span> Year Built</div>
+                <canvas id="yearChart" height="200"></canvas>
+            </div>
+            
+            <!-- Monthly Trend (full width) -->
+            <div class="chart-card full-width">
+                <div class="chart-title"><span class="emoji">📅</span> Monthly Sales Trend</div>
+                <canvas id="trendChart" height="120"></canvas>
             </div>
         </div>
         
+        <!-- Loading -->
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
             <p>Loading property data...</p>
         </div>
         
-        <div id="empty" class="empty" style="display: none;">
-            <div class="empty-icon">🏠</div>
-            <p>No properties found matching your criteria</p>
+        <!-- Results Section -->
+        <div class="section-header" id="resultsHeader" style="display:none;">
+            <h2>📋 Property Listings</h2>
         </div>
         
-        <table class="results-table" id="resultsTable" style="display: none;">
+        <div id="paginationTop"></div>
+        
+        <table class="results-table" id="resultsTable" style="display:none;">
             <thead>
                 <tr>
                     <th>Address</th>
@@ -138,31 +209,34 @@
             </thead>
             <tbody id="resultsBody"></tbody>
         </table>
+        
+        <div id="paginationBottom"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const DATA_URL = 'ri-sales.json.gz?v=' + Date.now(); // Cache bust
-        const RESULTS_LIMIT = 100; // Show 100 at a time for performance
-        let allFilteredData = [];
-        let showingAll = false;
+        const DATA_URL = 'ri-sales.json.gz?v=' + new Date().toISOString().split('T')[0];
         
-        // Parse URL params
+        // Chart.js defaults for dark theme
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.05)';
+        
         const params = new URLSearchParams(window.location.search);
-        const filterType = params.get('type'); // city, price, beds, land, year, type
+        const filterType = params.get('type');
         const filterValue = params.get('value');
         
-        // Title mapping
         const titles = {
-            city: (v) => `Properties in ${v}`,
-            price: (v) => `Properties: ${v}`,
-            beds: (v) => `${v} Bedroom Properties`,
-            land: (v) => `Land Sales in ${v}`,
-            year: (v) => `Sales in ${v}`,
-            type: (v) => `${v} Properties`,
+            city: v => `Properties in ${v}`,
+            price: v => `Properties: ${v}`,
+            beds: v => `${v} Bedroom Properties`,
+            land: v => `Land Sales in ${v}`,
+            year: v => `Sales in ${v}`,
+            type: v => `${v} Properties`,
             all: () => 'All Properties'
         };
+        
+        const fmt = v => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
         
         async function loadData() {
             try {
@@ -176,12 +250,12 @@
                 let subtitleText = '';
                 
                 if (filterType && filterValue) {
-                    titleText = titles[filterType] ? titles[filterType](filterValue) : filterValue;
+                    titleText = titles[filterType]?.(filterValue) || filterValue;
                     
                     switch (filterType) {
                         case 'city':
                             filtered = filtered.filter(p => p.city === filterValue);
-                            subtitleText = `All properties sold in ${filterValue}, RI`;
+                            subtitleText = `All properties in ${filterValue}, RI`;
                             break;
                         case 'price':
                             const priceRanges = {
@@ -199,28 +273,20 @@
                         case 'beds':
                             const beds = filterValue === '6+' ? 6 : parseInt(filterValue);
                             filtered = filtered.filter(p => beds >= 6 ? p.beds >= beds : p.beds === beds);
-                            subtitleText = beds >= 6 ? '6+ bedroom properties' : `Properties with ${beds} bedrooms`;
                             break;
                         case 'land':
-                            filtered = filtered.filter(p => 
-                                (p.propertyType?.toLowerCase().includes('land') || 
-                                 p.propertyType?.toLowerCase().includes('vacant')) &&
-                                (filterValue === 'all' || p.city === filterValue)
-                            );
-                            subtitleText = filterValue === 'all' ? 'All land sales in Rhode Island' : `Land sales in ${filterValue}`;
+                            filtered = filtered.filter(p => p.propertyType?.toLowerCase().includes('land') || p.propertyType?.toLowerCase().includes('vacant'));
+                            if (filterValue !== 'all') filtered = filtered.filter(p => p.city === filterValue);
                             break;
                         case 'year':
                             filtered = filtered.filter(p => p.soldDate?.includes(filterValue));
-                            subtitleText = `Properties sold in ${filterValue}`;
                             break;
                         case 'type':
                             filtered = filtered.filter(p => p.propertyType?.includes(filterValue));
-                            subtitleText = `${filterValue} type properties`;
                             break;
                     }
                 }
                 
-                // Sort by price descending
                 filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
                 
                 document.getElementById('title').textContent = titleText;
@@ -228,125 +294,55 @@
                 document.getElementById('loading').style.display = 'none';
                 
                 if (filtered.length === 0) {
-                    document.getElementById('empty').style.display = 'block';
+                    document.getElementById('loading').innerHTML = '<div style="font-size:4rem;margin-bottom:1rem;">🏠</div><p>No properties found</p>';
+                    document.getElementById('loading').style.display = 'block';
                     return;
                 }
                 
-                // Calculate stats
+                // Calculate comprehensive stats
                 const prices = filtered.map(p => p.price).filter(p => p > 0).sort((a, b) => a - b);
                 const median = prices[Math.floor(prices.length / 2)] || 0;
                 const avg = prices.reduce((a, b) => a + b, 0) / prices.length || 0;
+                const withSqft = filtered.filter(p => p.sqft > 0);
+                const avgPpsf = withSqft.length ? withSqft.reduce((a, p) => a + p.price / p.sqft, 0) / withSqft.length : 0;
+                const withDom = filtered.filter(p => p.dom > 0 && p.dom < 365);
+                const avgDom = withDom.length ? Math.round(withDom.reduce((a, p) => a + p.dom, 0) / withDom.length) : 0;
+                const forSale = filtered.filter(p => p.status === 'For Sale').length;
                 
-                document.getElementById('stats').style.display = 'flex';
+                // Update stats
+                document.getElementById('statsGrid').style.display = 'grid';
                 document.getElementById('totalCount').textContent = filtered.length.toLocaleString();
-                document.getElementById('medianPrice').textContent = '$' + Math.round(median / 1000) + 'K';
-                document.getElementById('avgPrice').textContent = '$' + Math.round(avg / 1000) + 'K';
+                document.getElementById('medianPrice').textContent = fmt(median);
+                document.getElementById('avgPrice').textContent = fmt(avg);
+                document.getElementById('avgPpsf').textContent = '$' + Math.round(avgPpsf);
+                document.getElementById('avgDom').textContent = avgDom + ' days';
+                document.getElementById('forSaleCount').textContent = forSale;
                 
-                // Render charts if enough data
+                // Render charts
                 if (prices.length >= 5) {
-                    renderCharts(prices);
-                    document.getElementById('chartsSection').style.display = 'grid';
+                    document.getElementById('chartsHeader').style.display = 'flex';
+                    document.getElementById('chartsGrid').style.display = 'grid';
+                    renderAllCharts(filtered, prices);
                 }
                 
-                // Render table with pagination (default 25 per page)
-                let pageSize = 25;
-                let currentPage = 0;
-                const tbody = document.getElementById('resultsBody');
-                
-                function renderPage() {
-                    const effectivePageSize = pageSize === 'all' ? filtered.length : pageSize;
-                    const start = currentPage * effectivePageSize;
-                    const end = Math.min(start + effectivePageSize, filtered.length);
-                    const pageData = filtered.slice(start, end);
-                    
-                    tbody.innerHTML = pageData.map(p => `
-                        <tr>
-                            <td class="address">${p.address || 'N/A'}</td>
-                            <td>${p.city || 'N/A'}</td>
-                            <td class="price">$${(p.price || 0).toLocaleString()}</td>
-                            <td>${p.beds || '-'}</td>
-                            <td>${p.baths || '-'}</td>
-                            <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
-                            <td>${(p.propertyType || 'N/A').replace('Residential', '').trim()}</td>
-                            <td>${p.soldDate || '-'}</td>
-                            <td>${p.url ? `<a href="${p.url}" target="_blank" class="view-btn">View 🔗</a>` : '-'}</td>
-                        </tr>
-                    `).join('');
-                    
-                    // Update pagination info
-                    const totalPages = pageSize === 'all' ? 1 : Math.ceil(filtered.length / effectivePageSize);
-                    document.querySelectorAll('.page-info').forEach(el => {
-                        el.textContent = pageSize === 'all' 
-                            ? `Showing all ${filtered.length} results`
-                            : `Page ${currentPage + 1} of ${totalPages} (${start + 1}-${end} of ${filtered.length})`;
-                    });
-                    document.querySelectorAll('.prev-btn').forEach(el => el.disabled = currentPage === 0 || pageSize === 'all');
-                    document.querySelectorAll('.next-btn').forEach(el => el.disabled = end >= filtered.length || pageSize === 'all');
-                }
-                
-                // Add pagination controls with page size selector
-                const paginationHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin:1rem 0; padding:1rem; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px;">
-                        <div style="display:flex; gap:0.5rem; align-items:center;">
-                            <button class="prev-btn" onclick="prevPage()" style="background:linear-gradient(135deg,#6366f1,#4f46e5); color:white; padding:0.5rem 1rem; border:none; border-radius:8px; cursor:pointer; font-weight:600;">← Prev</button>
-                            <span class="page-info" style="color:#94a3b8; min-width:200px; text-align:center;"></span>
-                            <button class="next-btn" onclick="nextPage()" style="background:linear-gradient(135deg,#6366f1,#4f46e5); color:white; padding:0.5rem 1rem; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Next →</button>
-                        </div>
-                        <div style="display:flex; gap:0.5rem; align-items:center;">
-                            <span style="color:#94a3b8; font-size:0.85rem;">Show:</span>
-                            <select onchange="changePageSize(this.value)" style="background:#1e293b; color:#e2e8f0; border:1px solid rgba(99,102,241,0.3); padding:0.4rem 0.8rem; border-radius:8px; cursor:pointer;">
-                                <option value="25" selected>25</option>
-                                <option value="50">50</option>
-                                <option value="75">75</option>
-                                <option value="100">100</option>
-                                <option value="all">All</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('resultsTable').insertAdjacentHTML('beforebegin', paginationHTML);
-                document.getElementById('resultsTable').insertAdjacentHTML('afterend', paginationHTML);
-                
-                window.prevPage = () => { if (currentPage > 0) { currentPage--; renderPage(); window.scrollTo(0,0); } };
-                window.nextPage = () => { if (pageSize !== 'all' && (currentPage + 1) * pageSize < filtered.length) { currentPage++; renderPage(); window.scrollTo(0,0); } };
-                window.changePageSize = (val) => { 
-                    pageSize = val === 'all' ? 'all' : parseInt(val); 
-                    currentPage = 0; 
-                    document.querySelectorAll('select').forEach(s => s.value = val);
-                    renderPage(); 
-                };
-                
-                renderPage();
-                document.getElementById('resultsTable').style.display = 'table';
+                // Setup pagination & table
+                document.getElementById('resultsHeader').style.display = 'flex';
+                setupPagination(filtered);
                 
             } catch (err) {
-                console.error('Error loading data:', err);
-                document.getElementById('loading').innerHTML = `
-                    <div class="empty-icon">⚠️</div>
-                    <p>Error loading data. Please try again.</p>
-                `;
+                console.error('Error:', err);
+                document.getElementById('loading').innerHTML = '<div style="font-size:4rem;margin-bottom:1rem;">⚠️</div><p>Error loading data</p>';
             }
         }
         
-        loadData();
-        
-        function renderCharts(prices) {
-            // Calculate quartiles with outlier handling (use IQR method)
+        function renderAllCharts(filtered, prices) {
+            // Box plot
             const n = prices.length;
-            const q0 = prices[0];
-            const q1 = prices[Math.floor(n * 0.25)];
-            const q2 = prices[Math.floor(n * 0.5)];
-            const q3 = prices[Math.floor(n * 0.75)];
-            const q4 = prices[n - 1];
-            
-            // Use IQR to set display range (exclude extreme outliers)
+            const q0 = prices[0], q1 = prices[Math.floor(n*0.25)], q2 = prices[Math.floor(n*0.5)], q3 = prices[Math.floor(n*0.75)], q4 = prices[n-1];
             const iqr = q3 - q1;
-            const displayMin = Math.max(q0, q1 - 1.5 * iqr);
-            const displayMax = Math.min(q4, q3 + 1.5 * iqr);
+            const displayMin = Math.max(q0, q1 - 1.5*iqr);
+            const displayMax = Math.min(q4, q3 + 1.5*iqr);
             
-            const fmt = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
-            
-            // Update quartile stats
             document.getElementById('q0').textContent = fmt(q0);
             document.getElementById('q1').textContent = fmt(q1);
             document.getElementById('q2').textContent = fmt(q2);
@@ -355,63 +351,173 @@
             document.getElementById('minLabel').textContent = fmt(displayMin);
             document.getElementById('maxLabel').textContent = fmt(displayMax);
             
-            // Render box plot with proper scaling
-            const boxplot = document.getElementById('boxplot');
             const range = displayMax - displayMin;
-            if (range <= 0) {
-                boxplot.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:10px;">All prices similar</div>';
-                return;
+            if (range > 0) {
+                const toP = v => Math.max(0, Math.min(100, (v - displayMin) / range * 100));
+                document.getElementById('boxplot').innerHTML = `
+                    <div class="boxplot-whisker" style="left:0;width:${toP(q1)}%"></div>
+                    <div class="boxplot-whisker" style="left:${toP(q3)}%;width:${100-toP(q3)}%"></div>
+                    <div class="boxplot-box" style="left:${toP(q1)}%;width:${Math.max(2,toP(q3)-toP(q1))}%"></div>
+                    <div class="boxplot-median" style="left:${toP(q2)}%"></div>
+                `;
             }
-            const toPercent = (v) => Math.max(0, Math.min(100, ((v - displayMin) / range * 100)));
             
-            const whiskerL = toPercent(q1);
-            const whiskerR = toPercent(q3);
-            const boxW = whiskerR - whiskerL;
-            
-            boxplot.innerHTML = `
-                <div class="boxplot-whisker" style="left: 0; width: ${whiskerL}%"></div>
-                <div class="boxplot-whisker" style="left: ${whiskerR}%; width: ${100 - whiskerR}%"></div>
-                <div class="boxplot-box" style="left: ${whiskerL}%; width: ${Math.max(2, boxW)}%"></div>
-                <div class="boxplot-median" style="left: ${toPercent(q2)}%"></div>
-            `;
-            
-            // Render histogram with better buckets
-            const buckets = Array(10).fill(0);
-            const bucketSize = range / 10 || 1;
-            prices.forEach(p => {
-                if (p >= displayMin && p <= displayMax) {
-                    const idx = Math.min(9, Math.floor((p - displayMin) / bucketSize));
-                    buckets[idx]++;
-                }
-            });
-            
-            const labels = buckets.map((_, i) => {
-                const low = displayMin + i * bucketSize;
-                return fmt(low);
-            });
-            
+            // Histogram
+            const buckets = Array(12).fill(0);
+            const bSize = range / 12 || 1;
+            prices.forEach(p => { if (p >= displayMin && p <= displayMax) buckets[Math.min(11, Math.floor((p - displayMin) / bSize))]++; });
             new Chart(document.getElementById('histogramChart'), {
                 type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        data: buckets,
-                        backgroundColor: 'rgba(99,102,241,0.6)',
-                        borderColor: '#6366f1',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
+                data: { labels: buckets.map((_, i) => fmt(displayMin + i * bSize)), datasets: [{ data: buckets, backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 6 }] },
+                options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, font: { size: 9 } } } } }
+            });
+            
+            // Property Types
+            const types = {};
+            filtered.forEach(p => { const t = (p.propertyType || 'Unknown').split(' ')[0]; types[t] = (types[t] || 0) + 1; });
+            const typeData = Object.entries(types).sort((a, b) => b[1] - a[1]).slice(0, 6);
+            new Chart(document.getElementById('typeChart'), {
+                type: 'doughnut',
+                data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6'], borderWidth: 0 }] },
+                options: { plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } } } }
+            });
+            
+            // Bedrooms
+            const beds = {};
+            filtered.filter(p => p.beds != null).forEach(p => { const b = p.beds > 5 ? '6+' : String(p.beds); beds[b] = (beds[b] || 0) + 1; });
+            new Chart(document.getElementById('bedsChart'), {
+                type: 'bar',
+                data: { labels: ['0', '1', '2', '3', '4', '5', '6+'], datasets: [{ data: ['0', '1', '2', '3', '4', '5', '6+'].map(b => beds[b] || 0), backgroundColor: ['#06b6d4', '#10b981', '#22c55e', '#84cc16', '#f59e0b', '#ec4899', '#6366f1'], borderRadius: 6 }] },
+                options: { plugins: { legend: { display: false } } }
+            });
+            
+            // DOM Distribution
+            const domBuckets = { '0-30': 0, '31-60': 0, '61-90': 0, '91-180': 0, '180+': 0 };
+            filtered.filter(p => p.dom > 0).forEach(p => {
+                if (p.dom <= 30) domBuckets['0-30']++;
+                else if (p.dom <= 60) domBuckets['31-60']++;
+                else if (p.dom <= 90) domBuckets['61-90']++;
+                else if (p.dom <= 180) domBuckets['91-180']++;
+                else domBuckets['180+']++;
+            });
+            new Chart(document.getElementById('domChart'), {
+                type: 'bar',
+                data: { labels: Object.keys(domBuckets), datasets: [{ data: Object.values(domBuckets), backgroundColor: ['#10b981', '#22c55e', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 6 }] },
+                options: { plugins: { legend: { display: false } } }
+            });
+            
+            // Year Built
+            const decades = { 'Pre-1900': 0, '1900-50': 0, '1950-80': 0, '1980-00': 0, '2000-20': 0, '2020+': 0 };
+            filtered.filter(p => p.yearBuilt > 0).forEach(p => {
+                if (p.yearBuilt < 1900) decades['Pre-1900']++;
+                else if (p.yearBuilt < 1950) decades['1900-50']++;
+                else if (p.yearBuilt < 1980) decades['1950-80']++;
+                else if (p.yearBuilt < 2000) decades['1980-00']++;
+                else if (p.yearBuilt < 2020) decades['2000-20']++;
+                else decades['2020+']++;
+            });
+            new Chart(document.getElementById('yearChart'), {
+                type: 'bar',
+                data: { labels: Object.keys(decades), datasets: [{ data: Object.values(decades), backgroundColor: '#f59e0b', borderRadius: 6 }] },
+                options: { plugins: { legend: { display: false } } }
+            });
+            
+            // Monthly trend
+            const monthNum = { 'January': 1, 'February': 2, 'March': 3, 'April': 4, 'May': 5, 'June': 6, 'July': 7, 'August': 8, 'September': 9, 'October': 10, 'November': 11, 'December': 12 };
+            const byMonth = {};
+            filtered.filter(p => p.soldDate).forEach(p => {
+                const parts = p.soldDate.split('-');
+                if (parts.length === 3 && monthNum[parts[0]]) {
+                    const key = parts[2] + '-' + String(monthNum[parts[0]]).padStart(2, '0');
+                    if (!byMonth[key]) byMonth[key] = { count: 0, total: 0 };
+                    byMonth[key].count++;
+                    byMonth[key].total += p.price || 0;
+                }
+            });
+            const monthly = Object.entries(byMonth).sort((a, b) => a[0].localeCompare(b[0])).slice(-24);
+            
+            new Chart(document.getElementById('trendChart'), {
+                type: 'line',
+                data: { 
+                    labels: monthly.map(m => m[0]),
+                    datasets: [
+                        { label: 'Sales', data: monthly.map(m => m[1].count), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.1)', fill: true, tension: 0.4, yAxisID: 'y' },
+                        { label: 'Avg Price ($K)', data: monthly.map(m => Math.round(m[1].total / m[1].count / 1000)), borderColor: '#ec4899', borderDash: [5, 5], tension: 0.4, yAxisID: 'y1' }
+                    ]
                 },
-                options: {
-                    responsive: true,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', maxRotation: 45, font: { size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+                options: { 
+                    plugins: { legend: { labels: { boxWidth: 12 } } },
+                    scales: { 
+                        x: { ticks: { maxRotation: 45, font: { size: 9 } } },
+                        y: { position: 'left', title: { display: true, text: 'Sales', color: '#6366f1' } },
+                        y1: { position: 'right', grid: { display: false }, title: { display: true, text: 'Avg Price ($K)', color: '#ec4899' } }
                     }
                 }
             });
         }
+        
+        function setupPagination(filtered) {
+            let pageSize = 25;
+            let currentPage = 0;
+            const tbody = document.getElementById('resultsBody');
+            
+            function renderPage() {
+                const size = pageSize === 'all' ? filtered.length : pageSize;
+                const start = currentPage * size;
+                const end = Math.min(start + size, filtered.length);
+                
+                tbody.innerHTML = filtered.slice(start, end).map(p => `
+                    <tr>
+                        <td>${p.address || 'N/A'}</td>
+                        <td>${p.city || 'N/A'}</td>
+                        <td class="price">$${(p.price || 0).toLocaleString()}</td>
+                        <td>${p.beds ?? '-'}</td>
+                        <td>${p.baths ?? '-'}</td>
+                        <td>${p.sqft?.toLocaleString() ?? '-'}</td>
+                        <td>${(p.propertyType || '').replace('Residential', '').trim() || '-'}</td>
+                        <td>${p.soldDate || (p.status === 'For Sale' ? '🟢 Active' : '-')}</td>
+                        <td>${p.url ? `<a href="${p.url}" target="_blank" class="view-btn">View 🔗</a>` : '-'}</td>
+                    </tr>
+                `).join('');
+                
+                const totalPages = pageSize === 'all' ? 1 : Math.ceil(filtered.length / size);
+                const info = pageSize === 'all' ? `Showing all ${filtered.length}` : `Page ${currentPage + 1} of ${totalPages} (${start + 1}-${end} of ${filtered.length})`;
+                document.querySelectorAll('.page-info').forEach(el => el.textContent = info);
+                document.querySelectorAll('.prev-btn').forEach(el => el.disabled = currentPage === 0 || pageSize === 'all');
+                document.querySelectorAll('.next-btn').forEach(el => el.disabled = end >= filtered.length || pageSize === 'all');
+            }
+            
+            const paginationHTML = `
+                <div class="pagination">
+                    <div style="display:flex;gap:0.75rem;align-items:center;">
+                        <button class="prev-btn" onclick="window.prevPage()">← Prev</button>
+                        <span class="page-info"></span>
+                        <button class="next-btn" onclick="window.nextPage()">Next →</button>
+                    </div>
+                    <div style="display:flex;gap:0.75rem;align-items:center;">
+                        <span style="color:#64748b;font-size:0.85rem;">Show:</span>
+                        <select onchange="window.changeSize(this.value)">
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="75">75</option>
+                            <option value="100">100</option>
+                            <option value="all">All</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            document.getElementById('paginationTop').innerHTML = paginationHTML;
+            document.getElementById('paginationBottom').innerHTML = paginationHTML;
+            
+            window.prevPage = () => { if (currentPage > 0) { currentPage--; renderPage(); window.scrollTo(0, 0); } };
+            window.nextPage = () => { if (pageSize !== 'all' && (currentPage + 1) * pageSize < filtered.length) { currentPage++; renderPage(); window.scrollTo(0, 0); } };
+            window.changeSize = (val) => { pageSize = val === 'all' ? 'all' : parseInt(val); currentPage = 0; document.querySelectorAll('select').forEach(s => s.value = val); renderPage(); };
+            
+            renderPage();
+            document.getElementById('resultsTable').style.display = 'table';
+        }
+        
+        loadData();
     </script>
 </body>
 </html>

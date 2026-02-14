@@ -1064,7 +1064,7 @@ function updateInsights() {
   if (!rawData || !rawData.properties || !window.cityStats) return;
   
   // Price formatter - use M for millions
-  const fmtPrice = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
+  const fmtPrice = (v) => { const abs = Math.abs(v), s = v < 0 ? '-' : ''; return abs >= 1000000 ? '$' + s + (abs/1000000).toFixed(1) + 'M' : '$' + s + Math.round(abs/1000) + 'K'; };
   
   // Coastal cities to exclude for "inland" top 5
   const coastalCities = ['Newport', 'Narragansett', 'Westerly', 'Jamestown', 'Block Island', 'New Shoreham', 
@@ -2059,9 +2059,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  }
  
- // Format price helper (inline version)
+ // Format price helper (inline version) - handles negatives properly
  function fmtPrice(amt) {
- return amt >= 1000000 ? '$' + (amt/1000000).toFixed(1) + 'M' : '$' + Math.round(amt/1000) + 'K';
+ const absAmt = Math.abs(amt);
+ const sign = amt < 0 ? '-' : '';
+ if (absAmt >= 1000000) return '$' + sign + (absAmt/1000000).toFixed(1) + 'M';
+ return '$' + sign + Math.round(absAmt/1000) + 'K';
  }
  
  function loadLandComps(idx) {
@@ -2101,10 +2104,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Format price for display: $500K or $1.5M
  function formatPrice(amount) {
- if (amount >= 1000000) {
- return '$' + (amount / 1000000).toFixed(1) + 'M';
+ const abs = Math.abs(amount);
+ const sign = amount < 0 ? '-' : '';
+ if (abs >= 1000000) {
+ return '$' + sign + (abs / 1000000).toFixed(1) + 'M';
  } else {
- return '$' + Math.round(amount / 1000) + 'K';
+ return '$' + sign + Math.round(abs / 1000) + 'K';
  }
  }
  

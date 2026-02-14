@@ -1,10 +1,10 @@
 (function() {
   var pages = [
     { href: '/ouroboros/', label: '🐍 Ouroboros' },
+    { href: '/ouroboros/colony-dashboard.html', label: '📊 Dashboard' },
     { href: '/colony-research.html', label: '🧠 Insights' },
     { href: '/youtube-trends.html', label: '📺 YouTube' },
     { href: '/ouroboros/research-paper.html', label: '📄 Paper' },
-    { href: '/ouroboros/colony-report-2026-02-09.html', label: '📊 Report' },
     { href: '/ouroboros/ouroboros-architecture.html', label: '🏗️ Architecture' },
     { href: '/ouroboros/xnor-popcount-explained.html', label: '⚡ XNOR' },
     { href: '/ouroboros/colony-code-explained.html', label: '💻 Code' },

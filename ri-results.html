@@ -139,6 +139,7 @@
                     <div class="quartile-item"><div class="quartile-value" id="q3">$0</div><div class="quartile-label">Q3 (75%)</div></div>
                     <div class="quartile-item"><div class="quartile-value" id="q4">$0</div><div class="quartile-label">Max</div></div>
                 </div>
+                <div class="chart-insight" id="priceInsight"></div>
             </div>
             
             <!-- Price Histogram -->
@@ -370,6 +371,11 @@
                     <div class="boxplot-median" style="left:${toP(q2)}%"></div>
                 `;
             }
+            // Price insight
+            const iqr = q3 - q1;
+            const spreadPct = Math.round(iqr / q2 * 100);
+            const skew = q2 < (q1 + q3) / 2 ? 'lower-end' : 'higher-end';
+            document.getElementById('priceInsight').innerHTML = `<strong>${spreadPct}% IQR spread</strong> around median. Most properties cluster toward the <strong>${skew}</strong>. ${q4 > q3 * 2 ? 'Outliers at the top skew the max.' : ''}`;
             
             // Histogram
             const buckets = Array(12).fill(0);

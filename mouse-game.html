@@ -274,10 +274,140 @@
             letter-spacing: 4px;
         }
 
+        /* Back button */
+        .back-btn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 400;
+            background: rgba(62, 39, 18, 0.85);
+            border: 2px solid #c8913a;
+            border-radius: 12px;
+            padding: 8px 16px;
+            color: #ffe4a8;
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            backdrop-filter: blur(8px);
+        }
+        .back-btn:hover {
+            background: rgba(200, 145, 58, 0.4);
+            transform: scale(1.05);
+        }
+
+        /* Leaderboard */
+        .leaderboard {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 320px;
+        }
+        .leaderboard h3 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.1rem;
+            color: #ffcc44;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+        .lb-list {
+            list-style: none;
+            padding: 0;
+        }
+        .lb-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-family: 'Nunito', sans-serif;
+            font-size: 0.9rem;
+            color: #ffe4a8;
+        }
+        .lb-list li:nth-child(odd) {
+            background: rgba(255,220,140,0.06);
+        }
+        .lb-rank {
+            font-family: 'Fredoka One', cursive;
+            color: #c8913a;
+            width: 28px;
+        }
+        .lb-rank.gold { color: #ffcc44; }
+        .lb-rank.silver { color: #c0c0c0; }
+        .lb-rank.bronze { color: #cd7f32; }
+        .lb-name {
+            flex: 1;
+            margin-left: 8px;
+        }
+        .lb-score {
+            font-family: 'Fredoka One', cursive;
+            color: #ffcc44;
+        }
+        .lb-new {
+            background: rgba(255,204,68,0.12) !important;
+            border: 1px solid rgba(255,204,68,0.3);
+        }
+        .new-badge {
+            font-size: 0.65rem;
+            background: #ffcc44;
+            color: #3d2510;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-family: 'Fredoka One', cursive;
+        }
+        .best-score-text {
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.85rem;
+            color: #c8913a;
+            margin-top: 10px;
+        }
+
+        /* Name input */
+        .name-input-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            align-items: center;
+        }
+        .name-input-row input {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 2px solid #c8913a;
+            background: rgba(62, 39, 18, 0.8);
+            color: #ffe4a8;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1rem;
+            width: 160px;
+            outline: none;
+        }
+        .name-input-row input::placeholder {
+            color: rgba(200, 145, 58, 0.5);
+        }
+        .name-input-row input:focus {
+            border-color: #ffcc44;
+        }
+        .name-input-row button {
+            padding: 8px 18px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, #ffcc44, #e8a020);
+            color: #3d2510;
+            font-family: 'Fredoka One', cursive;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <a href="games.html" class="back-btn">&#x2190; Back</a>
+
     <div id="danger-overlay"></div>
     <div id="danger-text">RUN!</div>
 
@@ -323,8 +453,16 @@
         <div class="go-title">OH NO!</div>
         <div class="final-label">CHEESE COLLECTED</div>
         <div class="final-score" id="final-score">0</div>
-        <p style="color:#c8913a; font-size:1rem; margin-bottom:5px;">Great job, little mouse!</p>
-        <button class="start-btn" onclick="restartGame()">TRY AGAIN</button>
+        <p id="best-score-msg" class="best-score-text"></p>
+        <div id="name-input-area" class="name-input-row hidden">
+            <input type="text" id="player-name" placeholder="Your name" maxlength="12">
+            <button onclick="saveScore()">SAVE</button>
+        </div>
+        <div class="leaderboard" id="leaderboard-area">
+            <h3>&#x1F3C6; TOP SCORES</h3>
+            <ol class="lb-list" id="lb-list"></ol>
+        </div>
+        <button class="start-btn" onclick="restartGame()" style="margin-top:16px;">TRY AGAIN</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -345,7 +483,7 @@
     let environmentGroup = null; // so we can swap levels
     let ants = []; // ant enemies for Level 3
     const FLOOR_SIZE = 28;
-    const MOUSE_SPEED = 0.25;
+    const MOUSE_SPEED = 0.21;
 
     function init() {
         scene = new THREE.Scene();
@@ -1828,6 +1966,73 @@
         isPlaying = true;
     }
 
+    // ============ LEADERBOARD ============
+    const LB_KEY = 'mousetrap_leaderboard';
+    const BEST_KEY = 'mousetrap_best';
+    let pendingScore = 0;
+
+    function getLeaderboard() {
+        try {
+            return JSON.parse(localStorage.getItem(LB_KEY)) || [];
+        } catch { return []; }
+    }
+
+    function getBestScore() {
+        return parseInt(localStorage.getItem(BEST_KEY)) || 0;
+    }
+
+    function isTopScore(s) {
+        const lb = getLeaderboard();
+        return lb.length < 10 || s > (lb[lb.length - 1]?.score || 0);
+    }
+
+    function saveScore() {
+        const nameInput = document.getElementById('player-name');
+        const name = nameInput.value.trim() || 'Mouse';
+        const lb = getLeaderboard();
+        lb.push({ name, score: pendingScore, date: Date.now() });
+        lb.sort((a, b) => b.score - a.score);
+        if (lb.length > 10) lb.length = 10;
+        localStorage.setItem(LB_KEY, JSON.stringify(lb));
+
+        // Update best
+        const best = getBestScore();
+        if (pendingScore > best) localStorage.setItem(BEST_KEY, pendingScore);
+
+        // Re-render
+        document.getElementById('name-input-area').classList.add('hidden');
+        renderLeaderboard(pendingScore);
+    }
+
+    function renderLeaderboard(highlightScore) {
+        const lb = getLeaderboard();
+        const list = document.getElementById('lb-list');
+
+        if (lb.length === 0) {
+            list.innerHTML = '<li style="text-align:center; color:#c8913a;">No scores yet!</li>';
+            return;
+        }
+
+        let highlighted = false;
+        list.innerHTML = lb.map((entry, i) => {
+            const rankClass = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
+            const isNew = !highlighted && entry.score === highlightScore;
+            if (isNew) highlighted = true;
+            const medal = i === 0 ? '&#x1F947;' : i === 1 ? '&#x1F948;' : i === 2 ? '&#x1F949;' : (i + 1);
+            return '<li class="' + (isNew ? 'lb-new' : '') + '">' +
+                '<span class="lb-rank ' + rankClass + '">' + medal + '</span>' +
+                '<span class="lb-name">' + escapeHtml(entry.name) + (isNew ? '<span class="new-badge">NEW</span>' : '') + '</span>' +
+                '<span class="lb-score">' + entry.score + ' &#x1F9C0;</span>' +
+                '</li>';
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        const d = document.createElement('div');
+        d.textContent = str;
+        return d.innerHTML;
+    }
+
     function gameOver() {
         isPlaying = false;
         dangerActive = false;
@@ -1835,9 +2040,45 @@
         document.getElementById('danger-text').classList.remove('show');
         document.getElementById('game-over-screen').classList.remove('hidden');
         document.getElementById('final-score').innerHTML = score + ' &#x1F9C0;';
+
+        pendingScore = score;
+
+        // Best score message
+        const best = getBestScore();
+        const bestMsg = document.getElementById('best-score-msg');
+        if (score > best && best > 0) {
+            bestMsg.textContent = 'NEW PERSONAL BEST!';
+            bestMsg.style.color = '#ffcc44';
+        } else if (best > 0) {
+            bestMsg.textContent = 'Personal best: ' + best;
+            bestMsg.style.color = '#c8913a';
+        } else {
+            bestMsg.textContent = '';
+        }
+
+        // Show name input if it's a top 10 score
+        if (isTopScore(score) && score > 0) {
+            document.getElementById('name-input-area').classList.remove('hidden');
+            const nameInput = document.getElementById('player-name');
+            nameInput.value = localStorage.getItem('mousetrap_lastname') || '';
+            setTimeout(() => nameInput.focus(), 300);
+        } else {
+            document.getElementById('name-input-area').classList.add('hidden');
+        }
+
+        renderLeaderboard(-1);
     }
 
     function restartGame() {
+        // Save name for next time
+        const nameInput = document.getElementById('player-name');
+        if (nameInput.value.trim()) {
+            localStorage.setItem('mousetrap_lastname', nameInput.value.trim());
+        }
+        // Auto-save if they didn't click save but had a qualifying score
+        if (isTopScore(pendingScore) && pendingScore > 0 && !document.getElementById('name-input-area').classList.contains('hidden')) {
+            saveScore();
+        }
         document.getElementById('game-over-screen').classList.add('hidden');
         startGame();
     }

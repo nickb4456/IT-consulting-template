@@ -3665,6 +3665,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
        type: 'line'
      }
    };
+   console.log('Hover chart data ready:', {
+     inlandCities: topCities.length,
+     domCities: fastestCities.length,
+     priceDatasets: priceDatasets.map(d => ({city: d.label, data: d.data})),
+     domData: domValues,
+     growthData: yearlyMedians
+   });
  }
  
  let hoverTimeout = null;
@@ -3688,6 +3695,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  hoverTimeout = setTimeout(function() {
  if (currentHoverCard === self) {
  const chartType = self.dataset.chart;
+ console.log('Hover on chart type:', chartType, 'Data available:', !!insightChartData[chartType]);
  const data = insightChartData[chartType];
  showInsightChart(data, self);
  }
@@ -3703,7 +3711,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  function showInsightChart(data, cardEl) {
- if (!data || !data.labels || data.labels.length === 0) return;
+ console.log('showInsightChart called with:', data);
+ if (!data || !data.labels || data.labels.length === 0) {
+   console.warn('No data for chart:', data);
+   return;
+ }
  
  const modal = document.getElementById('insightChartModal');
  const canvas = document.getElementById('insightChart');

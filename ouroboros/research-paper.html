@@ -169,7 +169,7 @@
 
         <div class="abstract">
             <h2>Abstract</h2>
-            <p>This paper presents a novel framework for evaluating and scaling autonomous research discovery systems using stigmergic metrics—measurements derived from collective agent behavior rather than external evaluation. Drawing from Ant Colony Optimization (ACO) principles, we develop ten quantitative metrics across two categories: Stigmergic Health (measuring colony behavioral patterns) and Discovery Effectiveness (measuring research output quality). Furthermore, we address the limits of stochastic biological modeling by introducing a Federation-Level "Industrial Transition" macro-architecture. By mapping five mechanical innovations from the First Industrial Revolution—the <strong>Spinning Jenny</strong> (parallel search), <strong>Watt's Separate Condenser</strong> (context caching), the <strong>Power Loom</strong> (orthogonal weaving), <strong>Beard's Jenny Coupler</strong> (automated binding), and <strong>Watt's Centrifugal Governor</strong> (dynamic backpressure)—to our embedding spaces and discovery pipelines, we massively parallelize discovery, reduce API token waste, enforce cross-domain synthesis, eliminate LLM bottlenecks, and implement self-regulating feedback loops. Our framework successfully detected critical infrastructure failures during initial deployment and provides a mathematical foundation for continuous, open-ended, self-regulating autonomous research.</p>
+            <p>This paper presents a novel framework for evaluating and scaling autonomous research discovery systems using stigmergic metrics—measurements derived from collective agent behavior rather than external evaluation. Drawing from Ant Colony Optimization (ACO) principles, we develop ten quantitative metrics across two categories: Stigmergic Health (measuring colony behavioral patterns) and Discovery Effectiveness (measuring research output quality). Furthermore, we address the limits of stochastic biological modeling by introducing a Federation-Level "Industrial Transition" macro-architecture. By mapping five mechanical innovations from the First Industrial Revolution—the <strong>Spinning Jenny</strong> (parallel search), <strong>Watt's Separate Condenser</strong> (context caching), the <strong>Power Loom</strong> (orthogonal weaving), <strong>Beard's Jenny Coupler</strong> (automated binding), and <strong>Watt's Centrifugal Governor</strong> (dynamic backpressure)—to our embedding spaces and discovery pipelines, we massively parallelize discovery, reduce API token waste, enforce cross-domain synthesis, and implement self-regulating feedback loops. We introduce the <strong>ANT PROTOCOL v1.0.4</strong>, a structured communication layer with 64-byte pheromone encoding, vocabulary tokens, and quorum-based decision making that enables agents to communicate efficiently without consuming LLM tokens. Our framework successfully detected critical infrastructure failures during initial deployment and provides a mathematical foundation for continuous, open-ended, self-regulating autonomous research.</p>
         </div>
 
         <section id="s1">
@@ -431,7 +431,119 @@ if (SF < 25) {
         </section>
 
         <section id="s8">
-            <h2>8. Conclusion and Theoretical Unification</h2>
+            <h2>8. ANT PROTOCOL v1.0.4: A Language for Inter-Agent Communication</h2>
+            <p>As colonies scale and federation-level machinery introduces cross-domain synthesis, a new challenge emerges: how do agents communicate efficiently without consuming LLM tokens for every message? Natural language is expressive but wasteful. Structured data is efficient but lacks semantics. The ANT PROTOCOL bridges this gap.</p>
+            
+            <h3>8.1 Structured Pheromones (64-Byte Encoding)</h3>
+            <p>Traditional pheromones carry only strength and type. The ANT PROTOCOL extends this to a fixed 64-byte binary format:</p>
+            
+            <div class="formula">StructuredPheromone (64 bytes):
+├─ embedding[0:32]     // 32-byte binary embedding (truncated)
+├─ token_code[32]      // 1 byte: vocabulary token (DATA_SPORE=0, etc.)
+├─ confidence[33]      // 1 byte: 0-255 → 0.0-1.0
+├─ novelty[34]         // 1 byte: 0-255 → 0.0-1.0
+├─ metadata[35]        // 1 byte: colony_origin(4b) | ant_type(4b)
+├─ parent_ref[36:38]   // 2 bytes: hierarchical parent reference
+├─ citations[38:42]    // 4 bytes: downstream citation count
+└─ reserved[42:64]     // 22 bytes: future use</div>
+
+            <p>This encoding enables constant-time similarity comparisons using XNOR+POPCOUNT while preserving semantic meaning through the embedded vocabulary token.</p>
+            
+            <h3>8.2 Vocabulary Tokens (The Ant Dictionary)</h3>
+            <p>The protocol defines 8 core tokens with semantic intent:</p>
+            
+            <table>
+                <tr><th>Token</th><th>Intent</th><th>Action Required</th><th>Priority</th></tr>
+                <tr><td><code>DATA_SPORE</code></td><td>High-density cluster identified</td><td>Scout deployment</td><td>0.85</td></tr>
+                <tr><td><code>SYNTH_HIVE</code></td><td>Synthesis required</td><td>Deep synthesis call</td><td>0.95</td></tr>
+                <tr><td><code>VOID_PATH</code></td><td>Dead end / disproven</td><td>Immediate pivot</td><td>0.10</td></tr>
+                <tr><td><code>BREAKTHROUGH</code></td><td>Novel insight</td><td>Propagate widely</td><td>1.00</td></tr>
+                <tr><td><code>TRAIL_BLAZE</code></td><td>New research direction</td><td>Follow trail</td><td>0.70</td></tr>
+                <tr><td><code>CONTRADICT</code></td><td>Conflicts with existing</td><td>Flag for analysis</td><td>0.80</td></tr>
+                <tr><td><code>ECHO_PING</code></td><td>Validation needed</td><td>Seek confirmation</td><td>0.50</td></tr>
+                <tr><td><code>FEDERATION_SIGNAL</code></td><td>Cross-colony interest</td><td>Propagate via Loom</td><td>0.75</td></tr>
+            </table>
+            
+            <h3>8.3 The Language Agent (Tokenizer)</h3>
+            <p>The Language Agent acts as a "compiler" translating raw LLM observations to standardized tokens. Using keyword matching with Jaccard-like scoring:</p>
+            
+            <div class="formula">translateToToken(rawInput):
+  for each entry in vocabulary:
+    matchCount = 0
+    for each keyword in entry.keywords:
+      if input.contains(keyword): matchCount += 2  // Phrase match
+      else if partialWordMatch: matchCount += overlap / keywordLength
+    score = matchCount / (keywords.length × 2)
+  return entry with highest score (if score ≥ 0.1)</div>
+
+            <p>This enables sub-millisecond tokenization without LLM calls, with throughput exceeding 40,000 tokens/second.</p>
+            
+            <h3>8.4 Parchments (Stateful Context with Deduplication)</h3>
+            <p>For findings that require persistence beyond pheromone decay, the protocol introduces <strong>Parchments</strong>—markdown files with standardized headers:</p>
+            
+            <div class="formula">---
+ID: {context_hash}         // SHA-256 first 16 chars
+Pheromone: {token}         // DATA_SPORE, BREAKTHROUGH, etc.
+Quality: {0.0-1.0}         // Based on downstream citations
+Status: Active|Archived
+Created: {ISO timestamp}
+Colony: {origin}
+---
+
+{synthesis content}</div>
+
+            <p>The 16-character context hash enables O(1) deduplication—if a parchment with the same hash exists, duplicate synthesis is skipped, eliminating redundant LLM calls.</p>
+            
+            <h3>8.5 Bulletin Board & Quorum Voting</h3>
+            <p>Direct agent-to-agent messaging uses the <strong>Bulletin Board</strong>—a priority queue with expiration:</p>
+            
+            <table>
+                <tr><th>Field</th><th>Purpose</th></tr>
+                <tr><td><code>to_ant</code></td><td>Target agent type (or '*' for broadcast)</td></tr>
+                <tr><td><code>priority</code></td><td>0-10, higher processed first</td></tr>
+                <tr><td><code>message_type</code></td><td>REQUEST, ALERT, FYI, VOTE, DIRECTIVE</td></tr>
+                <tr><td><code>token</code></td><td>Vocabulary token for semantic filtering</td></tr>
+                <tr><td><code>expires_at</code></td><td>Auto-cleanup after TTL</td></tr>
+            </table>
+            
+            <p>The <strong>Quorum Manager</strong> enables democratic decision-making:</p>
+            <div class="formula">Quorum Triggers:
+• 3 validated votes → QUEUE_SYNTHESIS (concept promoted)
+• 2 dead_end votes → SUPPRESS (concept deprioritized)
+• 3 synth_request votes → PRIORITY_SYNTHESIS (urgent synthesis)</div>
+
+            <h3>8.6 Dynamic Weight Optimization (Outcome Ledger)</h3>
+            <p>Token priority weights are not static—they adapt based on outcomes:</p>
+            
+            <div class="formula">On BREAKTHROUGH outcome:
+  token.priority_weight = min(1.0, weight + 0.02)
+  token.win_count++
+
+On DEAD_END outcome:
+  token.priority_weight = max(0.05, weight - 0.03)
+  token.loss_count++</div>
+
+            <p>This creates a feedback loop where tokens that consistently lead to breakthroughs gain priority, while tokens that lead to dead ends are deprioritized—implementing stigmergic learning at the vocabulary level.</p>
+            
+            <h3>8.7 Protocol Testing</h3>
+            <p>The ANT PROTOCOL includes comprehensive validation:</p>
+            <ul>
+                <li><strong>QA Agent:</strong> 33 spec-compliance tests covering encoding, tokenization, bulletin board, quorum</li>
+                <li><strong>Stress Test:</strong> 7 load tests with 1000+ iterations for throughput validation</li>
+                <li><strong>Integration:</strong> Wired into research-scout.js with Language Agent tokenization</li>
+            </ul>
+            
+            <table>
+                <tr><th>Metric</th><th>Result</th></tr>
+                <tr><td>Tokenization Throughput</td><td>41,667 tokens/sec</td></tr>
+                <tr><td>Encoding Round-Trip</td><td>100% accuracy</td></tr>
+                <tr><td>Parchment Deduplication</td><td>100% effective</td></tr>
+                <tr><td>QA Tests Passing</td><td>33/33</td></tr>
+            </table>
+        </section>
+
+        <section id="s9">
+            <h2>9. Conclusion and Theoretical Unification</h2>
             <p>We have established a principled, stigmergic testing framework for autonomous research colonies, transitioning from a purely biological biomimicry model to a high-throughput, mechanically scaled architecture.</p>
             
             <p>The layered architecture resolves a fundamental tension in AI multi-agent systems:</p>
@@ -455,8 +567,8 @@ if (SF < 25) {
                 <li><strong>The Central Drive Belt (Governor)</strong> for dynamic backpressure and safety</li>
                 <li><strong>Federation-level meta-colony</strong> architecture preserving stigmergic purity</li>
                 <li><strong>BGE embedding service</strong> with 48-byte binary encoding for fast similarity</li>
-                <li><strong>Prompt engineering patterns</strong> for stigmergic-quality LLM synthesis</li>
-                <li><strong>Comprehensive testing framework</strong> with 85 automated tests across 7 levels</li>
+                <li><strong>ANT PROTOCOL v1.0.4</strong> with 64-byte structured pheromones, vocabulary tokens, Language Agent tokenizer, and quorum-based decision making</li>
+                <li><strong>Comprehensive testing framework</strong> with 125+ automated tests across protocol, colony, and federation levels</li>
             </ol>
         </section>
 

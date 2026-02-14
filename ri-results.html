@@ -143,7 +143,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const DATA_URL = 'ri-sales.json.gz';
+        const DATA_URL = 'ri-sales.json.gz?v=' + Date.now(); // Cache bust
+        const RESULTS_LIMIT = 100; // Show 100 at a time for performance
+        let allFilteredData = [];
+        let showingAll = false;
         
         // Parse URL params
         const params = new URLSearchParams(window.location.search);
@@ -245,22 +248,52 @@
                     document.getElementById('chartsSection').style.display = 'grid';
                 }
                 
-                // Render table
+                // Render table with pagination (max 100 per page)
+                const PAGE_SIZE = 100;
+                let currentPage = 0;
                 const tbody = document.getElementById('resultsBody');
-                tbody.innerHTML = filtered.map(p => `
-                    <tr>
-                        <td class="address">${p.address || 'N/A'}</td>
-                        <td>${p.city || 'N/A'}</td>
-                        <td class="price">$${(p.price || 0).toLocaleString()}</td>
-                        <td>${p.beds || '-'}</td>
-                        <td>${p.baths || '-'}</td>
-                        <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
-                        <td>${(p.propertyType || 'N/A').replace('Residential', '').trim()}</td>
-                        <td>${p.soldDate || '-'}</td>
-                        <td>${p.url ? `<a href="${p.url}" target="_blank" class="view-btn">View 🔗</a>` : '-'}</td>
-                    </tr>
-                `).join('');
                 
+                function renderPage() {
+                    const start = currentPage * PAGE_SIZE;
+                    const end = Math.min(start + PAGE_SIZE, filtered.length);
+                    const pageData = filtered.slice(start, end);
+                    
+                    tbody.innerHTML = pageData.map(p => `
+                        <tr>
+                            <td class="address">${p.address || 'N/A'}</td>
+                            <td>${p.city || 'N/A'}</td>
+                            <td class="price">$${(p.price || 0).toLocaleString()}</td>
+                            <td>${p.beds || '-'}</td>
+                            <td>${p.baths || '-'}</td>
+                            <td>${p.sqft ? p.sqft.toLocaleString() : '-'}</td>
+                            <td>${(p.propertyType || 'N/A').replace('Residential', '').trim()}</td>
+                            <td>${p.soldDate || '-'}</td>
+                            <td>${p.url ? `<a href="${p.url}" target="_blank" class="view-btn">View 🔗</a>` : '-'}</td>
+                        </tr>
+                    `).join('');
+                    
+                    // Update pagination info
+                    const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+                    document.getElementById('pageInfo').textContent = `Page ${currentPage + 1} of ${totalPages} (showing ${start + 1}-${end} of ${filtered.length})`;
+                    document.getElementById('prevBtn').disabled = currentPage === 0;
+                    document.getElementById('nextBtn').disabled = end >= filtered.length;
+                }
+                
+                // Add pagination controls
+                const paginationHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin:1rem 0; padding:1rem; background:rgba(255,255,255,0.02); border-radius:8px;">
+                        <button id="prevBtn" onclick="prevPage()" style="background:#6366f1; color:white; padding:0.5rem 1rem; border:none; border-radius:6px; cursor:pointer;">← Previous</button>
+                        <span id="pageInfo" style="color:#94a3b8;"></span>
+                        <button id="nextBtn" onclick="nextPage()" style="background:#6366f1; color:white; padding:0.5rem 1rem; border:none; border-radius:6px; cursor:pointer;">Next →</button>
+                    </div>
+                `;
+                document.getElementById('resultsTable').insertAdjacentHTML('beforebegin', paginationHTML);
+                document.getElementById('resultsTable').insertAdjacentHTML('afterend', paginationHTML.replace(/id="/g, 'id="bottom-'));
+                
+                window.prevPage = () => { if (currentPage > 0) { currentPage--; renderPage(); window.scrollTo(0,0); } };
+                window.nextPage = () => { if ((currentPage + 1) * PAGE_SIZE < filtered.length) { currentPage++; renderPage(); window.scrollTo(0,0); } };
+                
+                renderPage();
                 document.getElementById('resultsTable').style.display = 'table';
                 
             } catch (err) {
@@ -275,13 +308,18 @@
         loadData();
         
         function renderCharts(prices) {
-            // Calculate quartiles
+            // Calculate quartiles with outlier handling (use IQR method)
             const n = prices.length;
             const q0 = prices[0];
             const q1 = prices[Math.floor(n * 0.25)];
             const q2 = prices[Math.floor(n * 0.5)];
             const q3 = prices[Math.floor(n * 0.75)];
             const q4 = prices[n - 1];
+            
+            // Use IQR to set display range (exclude extreme outliers)
+            const iqr = q3 - q1;
+            const displayMin = Math.max(q0, q1 - 1.5 * iqr);
+            const displayMax = Math.min(q4, q3 + 1.5 * iqr);
             
             const fmt = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
             
@@ -291,31 +329,41 @@
             document.getElementById('q2').textContent = fmt(q2);
             document.getElementById('q3').textContent = fmt(q3);
             document.getElementById('q4').textContent = fmt(q4);
-            document.getElementById('minLabel').textContent = fmt(q0);
-            document.getElementById('maxLabel').textContent = fmt(q4);
+            document.getElementById('minLabel').textContent = fmt(displayMin);
+            document.getElementById('maxLabel').textContent = fmt(displayMax);
             
-            // Render box plot
+            // Render box plot with proper scaling
             const boxplot = document.getElementById('boxplot');
-            const range = q4 - q0;
-            const toPercent = (v) => ((v - q0) / range * 100);
+            const range = displayMax - displayMin;
+            if (range <= 0) {
+                boxplot.innerHTML = '<div style="color:#94a3b8;text-align:center;padding:10px;">All prices similar</div>';
+                return;
+            }
+            const toPercent = (v) => Math.max(0, Math.min(100, ((v - displayMin) / range * 100)));
+            
+            const whiskerL = toPercent(q1);
+            const whiskerR = toPercent(q3);
+            const boxW = whiskerR - whiskerL;
             
             boxplot.innerHTML = `
-                <div class="boxplot-whisker" style="left: 0; width: ${toPercent(q1)}%"></div>
-                <div class="boxplot-whisker" style="left: ${toPercent(q3)}%; width: ${100 - toPercent(q3)}%"></div>
-                <div class="boxplot-box" style="left: ${toPercent(q1)}%; width: ${toPercent(q3) - toPercent(q1)}%"></div>
+                <div class="boxplot-whisker" style="left: 0; width: ${whiskerL}%"></div>
+                <div class="boxplot-whisker" style="left: ${whiskerR}%; width: ${100 - whiskerR}%"></div>
+                <div class="boxplot-box" style="left: ${whiskerL}%; width: ${Math.max(2, boxW)}%"></div>
                 <div class="boxplot-median" style="left: ${toPercent(q2)}%"></div>
             `;
             
-            // Render histogram
+            // Render histogram with better buckets
             const buckets = Array(10).fill(0);
-            const bucketSize = range / 10;
+            const bucketSize = range / 10 || 1;
             prices.forEach(p => {
-                const idx = Math.min(9, Math.floor((p - q0) / bucketSize));
-                buckets[idx]++;
+                if (p >= displayMin && p <= displayMax) {
+                    const idx = Math.min(9, Math.floor((p - displayMin) / bucketSize));
+                    buckets[idx]++;
+                }
             });
             
             const labels = buckets.map((_, i) => {
-                const low = q0 + i * bucketSize;
+                const low = displayMin + i * bucketSize;
                 return fmt(low);
             });
             
@@ -335,7 +383,7 @@
                     responsive: true,
                     plugins: { legend: { display: false } },
                     scales: {
-                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', maxRotation: 45 } },
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', maxRotation: 45, font: { size: 10 } } },
                         y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
                     }
                 }

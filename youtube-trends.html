@@ -592,7 +592,7 @@
         <!-- Transcript Analysis Section -->
         <div class="section" id="transcriptSection" style="display: none;">
             <h2>📝 Transcript Analysis</h2>
-            <p style="color: var(--muted); margin-bottom: 15px;">Deep content analysis from 165 video transcripts (242 attempted)</p>
+            <p style="color: var(--muted); margin-bottom: 15px;">Deep content analysis from video transcripts — what creators are actually saying</p>
             
             <div class="transcript-stats" id="transcriptStats">
                 <div class="transcript-stat">
@@ -604,23 +604,38 @@
                     <div class="ts-label">Success Rate</div>
                 </div>
                 <div class="transcript-stat">
-                    <div class="ts-value" id="tsTechAI">-</div>
-                    <div class="ts-label">Tech/AI Videos</div>
+                    <div class="ts-value" id="tsSentiment">-</div>
+                    <div class="ts-label">Positive %</div>
                 </div>
                 <div class="transcript-stat">
-                    <div class="ts-value" id="tsChars">-</div>
-                    <div class="ts-label">Total Characters</div>
+                    <div class="ts-value" id="tsHype">-</div>
+                    <div class="ts-label">Hype Videos</div>
                 </div>
             </div>
             
-            <h3 style="font-size: 1.1rem; margin: 20px 0 15px;">🔬 Topic Distribution</h3>
+            <h3 style="font-size: 1.1rem; margin: 20px 0 15px;">🔬 Topic Distribution (What Creators Talk About)</h3>
             <div class="topic-bars" id="topicBars">
                 <div class="loading">Loading topic data...</div>
             </div>
             
-            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">🎬 Longest Transcripts (Most In-Depth Content)</h3>
-            <div class="transcript-videos" id="transcriptVideos">
-                <div class="loading">Loading transcripts...</div>
+            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">💬 Most Used Words (Across All Transcripts)</h3>
+            <div id="wordCloud" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                <div class="loading">Loading words...</div>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">🎣 Opening Hook Types (First 100 Words)</h3>
+            <div class="topic-bars" id="hookBars">
+                <div class="loading">Loading hooks...</div>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">📋 Video Formats</h3>
+            <div class="topic-bars" id="formatBars">
+                <div class="loading">Loading formats...</div>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">🔥 Best Hook Examples</h3>
+            <div class="transcript-videos" id="bestHooks">
+                <div class="loading">Loading hooks...</div>
             </div>
         </div>
         
@@ -1070,21 +1085,35 @@
         
         // Transcript Analysis Functions
         let transcriptData = null;
+        let hooksData = null;
+        let formatsData = null;
         
         async function loadTranscripts() {
             try {
-                const res = await fetch('youtube-transcripts.json');
-                if (!res.ok) return;
-                transcriptData = await res.json();
+                // Load all three data files in parallel
+                const [transcriptRes, hooksRes, formatsRes] = await Promise.all([
+                    fetch('youtube-transcripts.json').catch(() => null),
+                    fetch('youtube-hooks.json').catch(() => null),
+                    fetch('youtube-formats.json').catch(() => null)
+                ]);
+                
+                if (transcriptRes?.ok) transcriptData = await transcriptRes.json();
+                if (hooksRes?.ok) hooksData = await hooksRes.json();
+                if (formatsRes?.ok) formatsData = await formatsRes.json();
+                
+                if (!transcriptData && !hooksData && !formatsData) return;
                 
                 // Show section
                 document.getElementById('transcriptSection').style.display = 'block';
                 
                 renderTranscriptStats();
                 renderTopicBars();
-                renderTranscriptVideos();
+                renderWordCloud();
+                renderHookBars();
+                renderFormatBars();
+                renderBestHooks();
             } catch (err) {
-                console.log('No transcript data available');
+                console.log('No transcript data available:', err);
             }
         }
         
@@ -1098,32 +1127,32 @@
             if (!transcriptData) return;
             
             const meta = transcriptData.meta;
-            const totalChars = transcriptData.transcripts.reduce((s, t) => s + t.charCount, 0);
-            const techAI = transcriptData.categories['tech-ai'] || 0;
-            const successRate = Math.round((meta.success / meta.total) * 100);
+            const sentiment = transcriptData.sentimentOverall || {};
+            const total = (sentiment.positive || 0) + (sentiment.negative || 0) + (sentiment.hype || 0);
+            const positivePct = total > 0 ? Math.round((sentiment.positive / total) * 100) : 0;
+            const successRate = Math.round((meta.analyzed / meta.total) * 100);
             
-            document.getElementById('tsTotal').textContent = meta.success;
+            document.getElementById('tsTotal').textContent = meta.analyzed;
             document.getElementById('tsSuccess').textContent = successRate + '%';
-            document.getElementById('tsTechAI').textContent = techAI;
-            document.getElementById('tsChars').textContent = formatChars(totalChars);
+            document.getElementById('tsSentiment').textContent = positivePct + '%';
+            document.getElementById('tsHype').textContent = sentiment.hype || 0;
         }
         
         function renderTopicBars() {
             if (!transcriptData) return;
             
             const container = document.getElementById('topicBars');
-            const topics = Object.entries(transcriptData.topicCounts || {})
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8);
+            const topics = transcriptData.topicDistribution || [];
             
             if (!topics.length) {
                 container.innerHTML = '<p style="color: var(--muted)">No topic data</p>';
                 return;
             }
             
-            const maxCount = topics[0][1];
+            const maxCount = topics[0]?.[1] || 1;
             const topicLabels = {
                 'energy': '⚡ Energy/Power',
+                'coding': '💻 Coding',
                 'data-centers': '🏢 Data Centers',
                 'chips': '💾 Chips/GPUs',
                 'ai-agents': '🤖 AI Agents',
@@ -1131,10 +1160,11 @@
                 'space': '🚀 Space',
                 'llm': '💬 LLMs',
                 'humanoid-robots': '🦾 Humanoids',
+                'business': '💼 Business',
                 'general': '📚 General'
             };
             
-            container.innerHTML = topics.map(([topic, count]) => {
+            container.innerHTML = topics.slice(0, 8).map(([topic, count]) => {
                 const pct = Math.round((count / maxCount) * 100);
                 const label = topicLabels[topic] || topic;
                 return `
@@ -1148,30 +1178,127 @@
             }).join('');
         }
         
-        function renderTranscriptVideos() {
+        function renderWordCloud() {
             if (!transcriptData) return;
             
-            const container = document.getElementById('transcriptVideos');
-            const videos = transcriptData.transcripts.slice(0, 8);
+            const container = document.getElementById('wordCloud');
+            const words = transcriptData.topWords || [];
             
-            if (!videos.length) {
-                container.innerHTML = '<p style="color: var(--muted)">No transcripts</p>';
+            // Filter out generic words, keep interesting ones
+            const skipWords = new Set(['which', 'little', 'them', 'something', 'other', 'need', 'first', 'using', 'called', 'work', 'name', 'three', 'sort', 'next', 'doing', 'make', 'want', 'look', 'going', 'come', 'back', 'take', 'give', 'know', 'think', 'like', 'just', 'really', 'right', 'actually', 'even', 'still', 'much', 'thing', 'things', 'kind', 'well', 'okay', 'yeah', 'gonna', 'gotta', 'wanna']);
+            
+            const filteredWords = words
+                .filter(w => !skipWords.has(w.word.toLowerCase()) && w.word.length > 3)
+                .slice(0, 25);
+            
+            if (!filteredWords.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No word data</p>';
                 return;
             }
             
-            container.innerHTML = videos.map(v => `
+            const maxCount = filteredWords[0].count;
+            
+            container.innerHTML = filteredWords.map((w, i) => {
+                const size = Math.max(0.7, Math.min(1.8, (w.count / maxCount) * 1.8));
+                const opacity = Math.max(0.5, w.count / maxCount);
+                return `
+                    <span style="
+                        background: linear-gradient(135deg, rgba(139, 92, 246, ${opacity * 0.3}), rgba(168, 85, 247, ${opacity * 0.3}));
+                        border: 1px solid rgba(139, 92, 246, ${opacity * 0.5});
+                        padding: 6px 14px;
+                        border-radius: 20px;
+                        font-size: ${size}rem;
+                        font-weight: ${i < 5 ? '600' : '400'};
+                        white-space: nowrap;
+                    ">
+                        ${escapeHtml(w.word)}
+                        <span style="color: var(--muted); font-size: 0.7rem; margin-left: 4px;">${formatChars(w.count)}</span>
+                    </span>
+                `;
+            }).join('');
+        }
+        
+        function renderHookBars() {
+            if (!hooksData) {
+                document.getElementById('hookBars').innerHTML = '<p style="color: var(--muted)">No hook data</p>';
+                return;
+            }
+            
+            const container = document.getElementById('hookBars');
+            const hooks = hooksData.hookDistribution || [];
+            
+            if (!hooks.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No hook data</p>';
+                return;
+            }
+            
+            const maxCount = hooks[0]?.count || 1;
+            
+            container.innerHTML = hooks.slice(0, 6).map(h => {
+                const pct = Math.round((h.count / maxCount) * 100);
+                return `
+                    <div class="topic-bar">
+                        <div class="topic-name">${h.label}</div>
+                        <div class="topic-bar-container">
+                            <div class="topic-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #f59e0b, #fbbf24);">${h.count} (${h.pct}%)</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderFormatBars() {
+            if (!formatsData) {
+                document.getElementById('formatBars').innerHTML = '<p style="color: var(--muted)">No format data</p>';
+                return;
+            }
+            
+            const container = document.getElementById('formatBars');
+            const formats = formatsData.formatDistribution || [];
+            
+            if (!formats.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No format data</p>';
+                return;
+            }
+            
+            const maxCount = formats[0]?.count || 1;
+            
+            container.innerHTML = formats.slice(0, 6).map(f => {
+                const pct = Math.round((f.count / maxCount) * 100);
+                return `
+                    <div class="topic-bar">
+                        <div class="topic-name">${f.label}</div>
+                        <div class="topic-bar-container">
+                            <div class="topic-bar-fill" style="width: ${pct}%; background: linear-gradient(90deg, #22c55e, #4ade80);">${f.count} (${f.pct}%)</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderBestHooks() {
+            if (!hooksData) {
+                document.getElementById('bestHooks').innerHTML = '<p style="color: var(--muted)">No hook examples</p>';
+                return;
+            }
+            
+            const container = document.getElementById('bestHooks');
+            const hooks = hooksData.bestHooks || [];
+            
+            if (!hooks.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No hook examples</p>';
+                return;
+            }
+            
+            container.innerHTML = hooks.slice(0, 6).map(h => `
                 <div class="transcript-video-card">
                     <div class="tv-header">
-                        <span class="tv-category">${escapeHtml(v.category)}</span>
-                        <span class="tv-chars">${formatChars(v.charCount)} chars</span>
-                    </div>
-                    <div class="tv-preview">${escapeHtml(v.preview)}...</div>
-                    ${v.topics.length ? `
-                        <div class="tv-topics">
-                            ${v.topics.slice(0, 4).map(t => `<span class="tv-topic">${escapeHtml(t)}</span>`).join('')}
+                        <div class="tv-topics" style="margin: 0;">
+                            ${(h.hooks || []).slice(0, 3).map(hook => `<span class="tv-topic" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24;">${escapeHtml(hook)}</span>`).join('')}
                         </div>
-                    ` : ''}
-                    <a href="https://youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">Watch →</a>
+                    </div>
+                    <div class="tv-preview" style="margin-top: 10px; font-style: italic;">"${escapeHtml(h.preview)}"</div>
+                    <a href="https://youtube.com/watch?v=${h.videoId}" target="_blank" rel="noopener">Watch Video →</a>
                 </div>
             `).join('');
         }

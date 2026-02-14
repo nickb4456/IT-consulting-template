@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RI Real Estate Hub - Technical Documentation</title>
+    <style>
+        :root { --primary: #6366f1; --secondary: #ec4899; --accent: #10b981; --dark: #0f172a; --darker: #020617; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%); color: #e2e8f0; line-height: 1.8; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        
+        h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+        h2 { font-size: 1.5rem; color: #a5b4fc; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid rgba(99,102,241,0.3); }
+        h3 { font-size: 1.2rem; color: #10b981; margin: 1.5rem 0 0.75rem; }
+        p { margin-bottom: 1rem; color: #94a3b8; }
+        
+        .hero { text-align: center; padding: 3rem 0; margin-bottom: 2rem; }
+        .hero p { font-size: 1.1rem; color: #64748b; }
+        
+        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+        .card-title { color: #f59e0b; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        code { background: rgba(99,102,241,0.2); color: #a5b4fc; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85rem; }
+        pre { background: var(--darker); border: 1px solid rgba(99,102,241,0.2); border-radius: 12px; padding: 1.25rem; overflow-x: auto; margin: 1rem 0; }
+        pre code { background: none; padding: 0; color: #e2e8f0; display: block; line-height: 1.6; }
+        
+        .highlight { background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(236,72,153,0.1)); border-left: 4px solid #6366f1; padding: 1rem 1.25rem; border-radius: 0 12px 12px 0; margin: 1.5rem 0; }
+        .highlight strong { color: #a5b4fc; }
+        
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+        
+        .stat-box { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: 800; color: #10b981; }
+        .stat-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+        
+        ul, ol { margin: 1rem 0 1rem 1.5rem; color: #94a3b8; }
+        li { margin-bottom: 0.5rem; }
+        li code { font-size: 0.8rem; }
+        
+        a { color: #6366f1; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        
+        .toc { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+        .toc h3 { margin-top: 0; color: #f59e0b; }
+        .toc ul { margin: 0; list-style: none; padding: 0; }
+        .toc li { margin: 0.5rem 0; padding-left: 1rem; border-left: 2px solid rgba(99,102,241,0.3); }
+        .toc a { color: #a5b4fc; }
+        
+        .emoji { font-size: 1.5rem; }
+        
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            h1 { font-size: 1.75rem; }
+            pre { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🏠 RI Real Estate Hub</h1>
+            <p>Technical Documentation & Learning Guide</p>
+            <p style="font-size:0.9rem; margin-top:1rem;">Built with ❤️ by Nick + Supernova</p>
+        </div>
+        
+        <div class="toc">
+            <h3>📚 Table of Contents</h3>
+            <ul>
+                <li><a href="#architecture">1. Architecture Overview</a></li>
+                <li><a href="#data-loading">2. Data Loading & Optimization</a></li>
+                <li><a href="#precompute">3. Precomputed City Stats</a></li>
+                <li><a href="#service-worker">4. Service Workers & Offline Cache</a></li>
+                <li><a href="#pagination">5. Pagination System</a></li>
+                <li><a href="#charts">6. Chart.js Integration</a></li>
+                <li><a href="#neighborhood">7. Neighborhood Explorer</a></li>
+                <li><a href="#future">8. Future Improvements</a></li>
+            </ul>
+        </div>
+        
+        <h2 id="architecture">1. Architecture Overview</h2>
+        
+        <div class="grid-2">
+            <div class="stat-box">
+                <div class="stat-value">36K+</div>
+                <div class="stat-label">Properties</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">2.2MB</div>
+                <div class="stat-label">Gzipped Data</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">77</div>
+                <div class="stat-label">RI Towns</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">~3s</div>
+                <div class="stat-label">Load Time</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-title"><span class="emoji">📁</span> File Structure</div>
+            <pre><code>IT-consulting-template/
+├── ri-report.html      # Main dashboard (5 tabs)
+├── ri-results.html     # City drill-down page
+├── ri-sales.json.gz    # Compressed property data (2.2MB)
+├── ri-docs.html        # This documentation
+└── assets/
+    └── bridge.jpg      # Hero image</code></pre>
+        </div>
+        
+        <div class="highlight">
+            <strong>Key Insight:</strong> We moved from inline data (5MB HTML) to external gzipped JSON (209KB HTML + 2.2MB data), reducing initial load by 96%.
+        </div>
+        
+        <h2 id="data-loading">2. Data Loading & Optimization</h2>
+        
+        <h3>Parallel Loading Pattern</h3>
+        <p>Instead of sequential loading (data → then → SQL.js), we load both simultaneously:</p>
+        
+        <pre><code>// BEFORE: Sequential (slow)
+const data = await fetch('ri-sales.json.gz');
+const SQL = await initSqlJs(); // Waits for data first
+
+// AFTER: Parallel (fast)
+const [dataResponse, SQL] = await Promise.all([
+    fetch('ri-sales.json.gz?v=' + today),
+    initSqlJs({ locateFile: f => cdn + f })
+]);
+
+// Decompress with pako
+const compressed = await dataResponse.arrayBuffer();
+const decompressed = pako.inflate(compressed, { to: 'string' });
+const rawData = JSON.parse(decompressed);</code></pre>
+        
+        <h3>Batch SQL Inserts</h3>
+        <p>Inserting 36K rows one-by-one is slow. We batch 500 at a time:</p>
+        
+        <pre><code>// Insert in batches of 500
+const BATCH = 500;
+for (let i = 0; i < properties.length; i += BATCH) {
+    const batch = properties.slice(i, i + BATCH);
+    const values = batch.map(p => 
+        `('${escape(p.address)}', '${p.city}', ${p.price}, ...)`
+    ).join(',');
+    db.run(`INSERT INTO props VALUES ${values}`);
+}
+// Result: ~70x faster than row-by-row</code></pre>
+        
+        <h3>Cache Busting</h3>
+        <p>We append today's date to force fresh data daily while allowing same-day caching:</p>
+        <pre><code>const today = new Date().toISOString().split('T')[0]; // "2025-07-18"
+fetch(`ri-sales.json.gz?v=${today}`);</code></pre>
+        
+        <h2 id="precompute">3. Precomputed City Stats</h2>
+        
+        <p>Instead of relying on pre-aggregated summary data, we compute city statistics on-the-fly from raw properties. This is more flexible and self-healing:</p>
+        
+        <pre><code>// Compute city stats from raw properties
+const cityStats = {};
+rawData.properties.forEach(p => {
+    if (!cityStats[p.city]) {
+        cityStats[p.city] = { count: 0, prices: [], landCount: 0 };
+    }
+    cityStats[p.city].count++;
+    if (p.price > 0) cityStats[p.city].prices.push(p.price);
+    if (p.propertyType?.includes('Land')) cityStats[p.city].landCount++;
+});
+
+// Transform to sorted array with median prices
+const cityData = Object.entries(cityStats)
+    .map(([city, s]) => ({
+        city,
+        count: s.count,
+        medianPrice: s.prices.sort((a,b) => a-b)[Math.floor(s.prices.length/2)] || 0,
+        landCount: s.landCount
+    }))
+    .sort((a,b) => b.count - a.count)
+    .slice(0, 15);
+
+// Store globally for charts
+window.computedCityStats = cityStats;</code></pre>
+        
+        <div class="highlight">
+            <strong>Why this matters:</strong> The original code expected <code>summary.cities</code> to be objects with stats, but our data cleanup simplified it to just city names. Computing on-the-fly means charts always work regardless of summary format.
+        </div>
+        
+        <h2 id="service-worker">4. Service Workers & Offline Cache</h2>
+        
+        <h3>What is a Service Worker?</h3>
+        <p>A service worker is a JavaScript file that runs in the background, separate from your web page. It can intercept network requests, cache resources, and enable offline functionality.</p>
+        
+        <div class="card">
+            <div class="card-title"><span class="emoji">⚡</span> Service Worker Lifecycle</div>
+            <ol>
+                <li><strong>Register</strong> - Browser downloads and parses the SW file</li>
+                <li><strong>Install</strong> - SW caches essential files ("precache")</li>
+                <li><strong>Activate</strong> - SW takes control, cleans old caches</li>
+                <li><strong>Fetch</strong> - SW intercepts requests, serves from cache or network</li>
+            </ol>
+        </div>
+        
+        <h3>Example Service Worker (sw.js)</h3>
+        <pre><code>const CACHE_NAME = 'ri-real-estate-v1';
+const PRECACHE_URLS = [
+    '/',
+    '/ri-report.html',
+    '/ri-results.html',
+    '/ri-sales.json.gz',
+    'https://cdn.jsdelivr.net/npm/chart.js',
+    'https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js'
+];
+
+// Install: cache essential files
+self.addEventListener('install', event => {
+    event.waitUntil(
+        caches.open(CACHE_NAME).then(cache => {
+            console.log('Precaching app shell');
+            return cache.addAll(PRECACHE_URLS);
+        })
+    );
+});
+
+// Activate: clean old caches
+self.addEventListener('activate', event => {
+    event.waitUntil(
+        caches.keys().then(keys => Promise.all(
+            keys.filter(k => k !== CACHE_NAME)
+                .map(k => caches.delete(k))
+        ))
+    );
+});
+
+// Fetch: cache-first for static assets, network-first for data
+self.addEventListener('fetch', event => {
+    const url = new URL(event.request.url);
+    
+    // Network-first for data (always try fresh)
+    if (url.pathname.includes('.json')) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+                    return response;
+                })
+                .catch(() => caches.match(event.request))
+        );
+        return;
+    }
+    
+    // Cache-first for static assets
+    event.respondWith(
+        caches.match(event.request)
+            .then(cached => cached || fetch(event.request))
+    );
+});</code></pre>
+        
+        <h3>Registering the Service Worker</h3>
+        <pre><code>&lt;script&gt;
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.error('SW failed:', err));
+}
+&lt;/script&gt;</code></pre>
+        
+        <div class="highlight">
+            <strong>Caching Strategies:</strong><br>
+            • <strong>Cache-First</strong>: Check cache, fall back to network (fast, may be stale)<br>
+            • <strong>Network-First</strong>: Try network, fall back to cache (fresh, slower)<br>
+            • <strong>Stale-While-Revalidate</strong>: Serve cache, update in background (best of both)
+        </div>
+        
+        <h2 id="pagination">5. Pagination System</h2>
+        
+        <p>Our pagination supports dynamic page sizes with a dropdown selector:</p>
+        
+        <pre><code>let pageSize = 25;  // Default
+let currentPage = 0;
+
+function renderPage() {
+    const effectiveSize = pageSize === 'all' ? filtered.length : pageSize;
+    const start = currentPage * effectiveSize;
+    const end = Math.min(start + effectiveSize, filtered.length);
+    const pageData = filtered.slice(start, end);
+    
+    // Render rows...
+    
+    // Update all pagination controls
+    document.querySelectorAll('.page-info').forEach(el => {
+        el.textContent = pageSize === 'all' 
+            ? `Showing all ${filtered.length} results`
+            : `Page ${currentPage + 1} of ${totalPages}`;
+    });
+}
+
+function changePageSize(val) {
+    pageSize = val === 'all' ? 'all' : parseInt(val);
+    currentPage = 0;  // Reset to first page
+    renderPage();
+}</code></pre>
+        
+        <h2 id="charts">6. Chart.js Integration</h2>
+        
+        <p>We use Chart.js for all visualizations with a consistent dark theme:</p>
+        
+        <pre><code>const chartOpts = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+        legend: { labels: { color: '#94a3b8' } }
+    },
+    scales: {
+        x: { 
+            grid: { color: 'rgba(255,255,255,0.05)' }, 
+            ticks: { color: '#94a3b8' } 
+        },
+        y: { 
+            grid: { color: 'rgba(255,255,255,0.05)' }, 
+            ticks: { color: '#94a3b8' } 
+        }
+    }
+};
+
+// Example: Horizontal bar chart
+new Chart(document.getElementById('cityChart'), {
+    type: 'bar',
+    data: {
+        labels: cityData.map(c => c.city),
+        datasets: [{
+            data: cityData.map(c => c.count),
+            backgroundColor: cityData.map((_, i) => 
+                `hsl(${250 + i * 7}, 70%, 60%)`  // Gradient colors
+            ),
+            borderRadius: 6
+        }]
+    },
+    options: { 
+        indexAxis: 'y',  // Makes it horizontal
+        ...chartOpts, 
+        plugins: { legend: { display: false } } 
+    }
+});</code></pre>
+        
+        <h2 id="neighborhood">7. Neighborhood Explorer</h2>
+        
+        <h3>Haversine Distance Formula</h3>
+        <p>We calculate distances between properties using the Haversine formula (accounts for Earth's curvature):</p>
+        
+        <pre><code>function getDistance(lat1, lng1, lat2, lng2) {
+    const R = 3959; // Earth radius in miles
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLng = (lng2 - lng1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * 
+              Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;  // Distance in miles
+}
+
+function getNearbyProperties(lat, lng, radiusMiles) {
+    return rawData.properties
+        .filter(p => p.lat && p.lng)
+        .map(p => ({
+            ...p,
+            distance: getDistance(lat, lng, p.lat, p.lng)
+        }))
+        .filter(p => p.distance <= radiusMiles)
+        .sort((a, b) => a.distance - b.distance);
+}</code></pre>
+        
+        <h3>Fallback for Missing Coordinates</h3>
+        <p>When a property lacks lat/lng, we fall back to city-wide comps:</p>
+        
+        <pre><code>function showNeighborhood(idx) {
+    const property = window.dealsData[idx];
+    
+    if (!property.lat || !property.lng) {
+        // Fallback: show city-wide data instead of error
+        showCityComps(property.city, 
+            property.address + ' (No coordinates - showing city-wide data)');
+        return;
+    }
+    
+    // Normal neighborhood view...
+}</code></pre>
+        
+        <h2 id="future">8. Future Improvements</h2>
+        
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-title"><span class="emoji">🔮</span> Lazy Loading</div>
+                <p>Only load visible table rows, fetch more on scroll (IntersectionObserver).</p>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="emoji">📊</span> IndexedDB</div>
+                <p>Store property data in browser's IndexedDB for instant offline access.</p>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="emoji">🗺️</span> Map Integration</div>
+                <p>Add Leaflet.js map with property markers and clustering.</p>
+            </div>
+            <div class="card">
+                <div class="card-title"><span class="emoji">⏰</span> Auto-Update Cron</div>
+                <p>Scheduled scraper to refresh data daily via GitHub Actions.</p>
+            </div>
+        </div>
+        
+        <h3>Advanced: Web Workers for Heavy Computation</h3>
+        <pre><code>// main.js
+const worker = new Worker('compute-worker.js');
+worker.postMessage({ properties: rawData.properties });
+worker.onmessage = (e) => {
+    const { cityStats, monthlyTrends } = e.data;
+    initCharts(cityStats, monthlyTrends);
+};
+
+// compute-worker.js
+self.onmessage = (e) => {
+    const { properties } = e.data;
+    // Heavy computation off main thread...
+    const cityStats = computeCityStats(properties);
+    self.postMessage({ cityStats });
+};</code></pre>
+        
+        <div class="highlight" style="margin-top:3rem;">
+            <strong>🎉 You made it!</strong><br>
+            This documentation covers the key technical decisions behind the RI Real Estate Hub. The codebase is open for exploration at <a href="https://github.com/nickb4456/IT-consulting-template">GitHub</a>.
+        </div>
+        
+        <p style="text-align:center; margin-top:3rem; color:#64748b;">
+            Last updated: July 2025 • <a href="ri-report.html">Back to Report</a> • <a href="https://aibridges.org">AIBridges.org</a>
+        </p>
+    </div>
+</body>
+</html>

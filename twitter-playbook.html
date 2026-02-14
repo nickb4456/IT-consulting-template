@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter/X Algorithm Playbook | AIBridges</title>
+    <style>
+        :root {
+            --bg: #15202b;
+            --card: #192734;
+            --border: #38444d;
+            --text: #ffffff;
+            --muted: #8899a6;
+            --accent: #1da1f2;
+            --green: #17bf63;
+            --red: #e0245e;
+            --orange: #ffad1f;
+            --purple: #794bc4;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        header {
+            text-align: center;
+            padding: 50px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        header p { color: var(--muted); font-size: 1.1rem; }
+        
+        .cta-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(29, 161, 242, 0.4);
+        }
+        
+        section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+        }
+        
+        section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        section h3 {
+            font-size: 1.2rem;
+            margin: 25px 0 15px;
+            color: var(--accent);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--accent);
+        }
+        
+        tr:hover { background: rgba(29, 161, 242, 0.05); }
+        
+        .boost { color: var(--green); font-weight: bold; }
+        .penalty { color: var(--red); font-weight: bold; }
+        .neutral { color: var(--muted); }
+        
+        .tip-box {
+            background: rgba(23, 191, 99, 0.1);
+            border: 1px solid rgba(23, 191, 99, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+        }
+        
+        .tip-box.warning {
+            background: rgba(224, 36, 94, 0.1);
+            border-color: rgba(224, 36, 94, 0.3);
+        }
+        
+        .tip-box.info {
+            background: rgba(29, 161, 242, 0.1);
+            border-color: rgba(29, 161, 242, 0.3);
+        }
+        
+        .tip-box strong { display: block; margin-bottom: 5px; }
+        
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        .template-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .template-card h4 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+        
+        .template-card .template-text {
+            color: var(--muted);
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+        
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .schedule-time {
+            background: var(--accent);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .schedule-action {
+            background: var(--bg);
+            padding: 8px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .pillar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .pillar-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .pillar-card .pillar-pct {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        
+        .pillar-card .pillar-name {
+            font-weight: 600;
+            margin: 8px 0;
+        }
+        
+        .pillar-card .pillar-desc {
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+        
+        .rules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        
+        .rule-item {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .rule-number {
+            background: var(--accent);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        
+        .accounts-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .account-tag {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .account-tag:hover {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.1);
+        }
+        
+        .account-tag a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .checklist {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .checklist li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .checklist li:last-child { border-bottom: none; }
+        
+        .checklist .check {
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
+            border-top: 1px solid var(--border);
+        }
+        
+        footer a { color: var(--accent); }
+        
+        @media (max-width: 600px) {
+            header h1 { font-size: 1.8rem; }
+            section { padding: 20px; }
+            .schedule-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🐦 Twitter/X Algorithm Playbook</h1>
+        <p>Based on the open-sourced algorithm + proven tactics</p>
+        <a href="tweet-deck.html" class="cta-btn">Open Tweet Deck Tool →</a>
+    </header>
+    
+    <div class="container">
+        <!-- Algorithm Section -->
+        <section>
+            <h2>🧮 The Algorithm: What Actually Matters</h2>
+            <p style="color: var(--muted); margin-bottom: 20px;">From Twitter's open-sourced code, here are the <strong>real multipliers</strong>:</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Weight</th>
+                        <th>What It Means</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Reply</strong></td>
+                        <td class="boost">27x</td>
+                        <td>HUGE — replies are king</td>
+                    </tr>
+                    <tr>
+                        <td>Retweet</td>
+                        <td class="neutral">1x</td>
+                        <td>Baseline amplification</td>
+                    </tr>
+                    <tr>
+                        <td>Like</td>
+                        <td class="neutral">0.5x</td>
+                        <td>Lowest engagement signal</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bookmark</strong></td>
+                        <td class="boost">High (secret)</td>
+                        <td>Quality signal (they hide this)</td>
+                    </tr>
+                    <tr>
+                        <td>Profile click</td>
+                        <td class="boost">High</td>
+                        <td>Shows genuine interest</td>
+                    </tr>
+                    <tr>
+                        <td>Time on tweet</td>
+                        <td class="boost">High</td>
+                        <td>Dwell time = quality</td>
+                    </tr>
+                    <tr>
+                        <td>Blue checkmark</td>
+                        <td class="boost">~4x</td>
+                        <td>Verified accounts get boosted</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <h3>🚫 Penalty Factors (AVOID)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action</th>
+                        <th>Penalty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>External links in tweet</strong></td>
+                        <td class="penalty">-50% reach (or worse)</td>
+                    </tr>
+                    <tr>
+                        <td>Mute/block</td>
+                        <td class="penalty">-74x</td>
+                    </tr>
+                    <tr>
+                        <td>Report</td>
+                        <td class="penalty">Massive penalty</td>
+                    </tr>
+                    <tr>
+                        <td>"Not interested"</td>
+                        <td class="penalty">-74x</td>
+                    </tr>
+                    <tr>
+                        <td>Unfollow after seeing</td>
+                        <td class="penalty">Negative signal</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+        
+        <!-- Core Strategy -->
+        <section>
+            <h2>🎯 The Core Strategy</h2>
+            
+            <h3>1️⃣ The 15-Minute Rule</h3>
+            <p>The algorithm weighs engagement in the <strong>first 15-30 minutes</strong> HEAVILY.</p>
+            
+            <div class="tip-box">
+                <strong>Tactics:</strong>
+                • Tweet when YOUR audience is online (not generic "best times")<br>
+                • Have 3-5 accounts ready to engage immediately<br>
+                • Reply to your own tweet with additional context<br>
+                • Pin best-performing tweets
+            </div>
+            
+            <h3>2️⃣ The Link Trick</h3>
+            <p><strong>NEVER put links in the main tweet.</strong> The algorithm crushes external links.</p>
+            
+            <div class="code-block">Main tweet: "I just wrote about why AI agents will replace SaaS.
+
+Here's what 99% of founders are missing:"
+
+[Thread or value content]
+
+Reply to yourself: "Full article: [link]"</div>
+            
+            <h3>3️⃣ Reply Game > Posting Game</h3>
+            <p>Replies get <strong>27x weight</strong> vs likes at 0.5x.</p>
+            
+            <div class="tip-box info">
+                <strong>Strategy:</strong>
+                • Reply to 10-20 big accounts in your niche daily<br>
+                • Add genuine value (not "great post!")<br>
+                • If they reply back → your tweet gets boosted to THEIR audience<br>
+                • Quote tweets > retweets (you get the engagement)
+            </div>
+            
+            <h3>4️⃣ Thread Architecture</h3>
+            <p>Threads get algorithmic preference because of dwell time.</p>
+            
+            <div class="code-block">Tweet 1: Hook (curiosity gap, bold claim, or question)
+Tweet 2-5: Deliver value (each tweet should standalone)
+Tweet 6: Call to action (follow, bookmark, reply)
+Final reply: Link if you have one</div>
+        </section>
+        
+        <!-- Daily Schedule -->
+        <section>
+            <h2>📅 Daily Posting Schedule</h2>
+            
+            <h3>Minimum Viable Twitter (30 min/day)</h3>
+            <div class="schedule-grid">
+                <div class="schedule-time">Morning</div>
+                <div class="schedule-action">1 original tweet + 5 quality replies to big accounts</div>
+                <div class="schedule-time">Afternoon</div>
+                <div class="schedule-action">1 engagement session (reply to replies on your tweets)</div>
+                <div class="schedule-time">Evening</div>
+                <div class="schedule-action">1 original tweet or thread + 5 more replies</div>
+            </div>
+            
+            <h3>Growth Mode (1 hr/day)</h3>
+            <div class="schedule-grid">
+                <div class="schedule-time">8 AM</div>
+                <div class="schedule-action">Thread or value post</div>
+                <div class="schedule-time">10 AM</div>
+                <div class="schedule-action">Reply to 10 accounts</div>
+                <div class="schedule-time">12 PM</div>
+                <div class="schedule-action">Engagement check + replies</div>
+                <div class="schedule-time">3 PM</div>
+                <div class="schedule-action">Quote tweet something relevant</div>
+                <div class="schedule-time">6 PM</div>
+                <div class="schedule-action">Spicy take or observation</div>
+                <div class="schedule-time">8 PM</div>
+                <div class="schedule-action">Reply session (10 accounts)</div>
+            </div>
+        </section>
+        
+        <!-- Hook Formulas -->
+        <section>
+            <h2>🎣 Hook Formulas That Work</h2>
+            
+            <div class="template-card">
+                <h4>🔥 The Contrarian</h4>
+                <div class="template-text">Unpopular opinion: [thing everyone does] is actually [opposite result]
+
+Here's why:</div>
+            </div>
+            
+            <div class="template-card">
+                <h4>🧵 The Curiosity Gap</h4>
+                <div class="template-text">I spent [time] researching [topic].
+
+What I found changed everything I thought I knew.
+
+Thread 🧵</div>
+            </div>
+            
+            <div class="template-card">
+                <h4>📋 The List</h4>
+                <div class="template-text">10 [things] that [benefit]:
+
+(#7 is the one nobody talks about)</div>
+            </div>
+            
+            <div class="template-card">
+                <h4>📖 The Story</h4>
+                <div class="template-text">In [year], I [failed at something].
+
+Here's what I learned:</div>
+            </div>
+            
+            <div class="template-card">
+                <h4>⚡ The Bold Claim</h4>
+                <div class="template-text">[Specific prediction] will happen by [date].
+
+Here's the evidence:</div>
+            </div>
+            
+            <div class="template-card">
+                <h4>🎓 The Tutorial</h4>
+                <div class="template-text">How to [achieve result] in [time]:
+
+Step 1: [Action]
+Step 2: [Action]
+Step 3: [Action]
+
+That's it. No [complicated thing] required.</div>
+            </div>
+        </section>
+        
+        <!-- Content Pillars -->
+        <section>
+            <h2>🔥 Content Pillars</h2>
+            <p style="color: var(--muted); margin-bottom: 20px;">Based on your work, here are your 4 pillars:</p>
+            
+            <div class="pillar-grid">
+                <div class="pillar-card">
+                    <div class="pillar-pct">40%</div>
+                    <div class="pillar-name">AI Agents & Automation</div>
+                    <div class="pillar-desc">Colony updates, AI insights, "What I automated this week"</div>
+                </div>
+                <div class="pillar-card">
+                    <div class="pillar-pct">30%</div>
+                    <div class="pillar-name">Indie Hacking / Building</div>
+                    <div class="pillar-desc">DraftBridge, AIBridges, building in public</div>
+                </div>
+                <div class="pillar-card">
+                    <div class="pillar-pct">20%</div>
+                    <div class="pillar-name">Technical Deep Dives</div>
+                    <div class="pillar-desc">Problems solved, architecture, code snippets</div>
+                </div>
+                <div class="pillar-card">
+                    <div class="pillar-pct">10%</div>
+                    <div class="pillar-name">Spicy Takes</div>
+                    <div class="pillar-desc">Industry observations, contrarian views, predictions</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Accounts to Engage -->
+        <section>
+            <h2>🎯 Accounts to Reply To</h2>
+            <p style="color: var(--muted); margin-bottom: 15px;">Turn on notifications, be in the first 5 replies, add genuine insight.</p>
+            
+            <div class="accounts-grid">
+                <div class="account-tag"><a href="https://twitter.com/sama" target="_blank">@sama</a></div>
+                <div class="account-tag"><a href="https://twitter.com/levelsio" target="_blank">@levelsio</a></div>
+                <div class="account-tag"><a href="https://twitter.com/swyx" target="_blank">@swyx</a></div>
+                <div class="account-tag"><a href="https://twitter.com/danshipper" target="_blank">@danshipper</a></div>
+                <div class="account-tag"><a href="https://twitter.com/marc_louvion" target="_blank">@marc_louvion</a></div>
+                <div class="account-tag"><a href="https://twitter.com/tdinh_me" target="_blank">@tdinh_me</a></div>
+                <div class="account-tag"><a href="https://twitter.com/kaboron" target="_blank">@kaboron</a></div>
+                <div class="account-tag"><a href="https://twitter.com/elonmusk" target="_blank">@elonmusk</a></div>
+            </div>
+            
+            <div class="tip-box">
+                <strong>Reply Strategy:</strong>
+                1. Be one of the FIRST 5 replies<br>
+                2. Add genuine insight (not "great post")<br>
+                3. Ask a thoughtful question<br>
+                4. If they reply → you win
+            </div>
+        </section>
+        
+        <!-- Quick Rules -->
+        <section>
+            <h2>⚡ Quick Reference: The Rules</h2>
+            
+            <div class="rules-grid">
+                <div class="rule-item">
+                    <span class="rule-number">1</span>
+                    <div><strong>No links in main tweet</strong> — Put in reply</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">2</span>
+                    <div><strong>First 15 min matter most</strong> — Have engagement ready</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">3</span>
+                    <div><strong>Replies > Likes</strong> — Comment on big accounts</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">4</span>
+                    <div><strong>Threads = Dwell time</strong> — Algorithm loves them</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">5</span>
+                    <div><strong>Images boost engagement</strong> — Screenshots, charts</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">6</span>
+                    <div><strong>Quote tweet > Retweet</strong> — You get the engagement</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">7</span>
+                    <div><strong>Be consistent</strong> — Daily presence beats sporadic viral</div>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-number">8</span>
+                    <div><strong>Reply to your replies</strong> — Conversation = algorithm juice</div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Weekly Goals -->
+        <section>
+            <h2>📈 Weekly Goals</h2>
+            
+            <h3>Week 1-2: Foundation</h3>
+            <ul class="checklist">
+                <li><span class="check"></span> 2 tweets/day minimum</li>
+                <li><span class="check"></span> 20 quality replies/day</li>
+                <li><span class="check"></span> 1 thread per week</li>
+                <li><span class="check"></span> Follow 50 accounts in your niche</li>
+            </ul>
+            
+            <h3>Week 3-4: Momentum</h3>
+            <ul class="checklist">
+                <li><span class="check"></span> 3 tweets/day</li>
+                <li><span class="check"></span> 30 quality replies/day</li>
+                <li><span class="check"></span> 2 threads per week</li>
+                <li><span class="check"></span> Start noting what works</li>
+            </ul>
+            
+            <h3>Month 2+: Scale What Works</h3>
+            <ul class="checklist">
+                <li><span class="check"></span> Double down on top-performing formats</li>
+                <li><span class="check"></span> Build reply relationships</li>
+                <li><span class="check"></span> Create "greatest hits" variations</li>
+                <li><span class="check"></span> Cross-post wins to other platforms</li>
+            </ul>
+        </section>
+        
+        <!-- Tools -->
+        <section>
+            <h2>🔧 Recommended Tools</h2>
+            <table>
+                <tbody>
+                    <tr>
+                        <td><strong>Typefully</strong></td>
+                        <td>Schedule tweets, threads, analytics</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TweetHunter</strong></td>
+                        <td>Find viral tweets to study</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hypefury</strong></td>
+                        <td>Auto-engagement, scheduling</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Black Magic</strong></td>
+                        <td>Analytics deep dive</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+    
+    <footer>
+        <p><a href="tweet-deck.html">Open Tweet Deck Tool</a> • <a href="index.html">AIBridges Home</a></p>
+        <p style="margin-top: 10px; font-size: 0.85rem;">Last updated: February 2026</p>
+    </footer>
+<script src="/ouroboros/nav.js"></script>
+</body>
+</html>

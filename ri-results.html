@@ -487,7 +487,11 @@
             });
             
             // Plotly Scatter Plot - Comp Analysis
-            const withSqftData = filtered.filter(p => p.sqft > 0 && p.price > 0);
+            // Filter out extreme outliers for cleaner visualization
+            const withSqftData = filtered.filter(p => 
+                p.sqft > 0 && p.sqft < 10000 &&  // Reasonable home size
+                p.price > 50000 && p.price < 5000000  // $50K - $5M
+            );
             if (withSqftData.length >= 10) {
                 document.getElementById('scatterHeader').style.display = 'flex';
                 document.getElementById('scatterCard').style.display = 'block';

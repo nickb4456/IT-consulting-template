@@ -345,31 +345,23 @@
     <h2>Key Market Insights</h2>
  <div class="insight-grid">
         <div class="insight-card insight-hover" data-chart="inland">
-            <h3><span style="opacity:0.7">🏔️</span> Top 5 Inland</h3>
- <div style="display:grid;gap:0.4rem;font-size:0.95rem;margin:0.5rem 0">
- <div style="display:flex;justify-content:space-between"><span>East Greenwich</span><span style="color:#10b981;font-weight:600">$799K</span></div>
- <div style="display:flex;justify-content:space-between"><span>Foster</span><span style="color:#10b981;font-weight:600">$521K</span></div>
- <div style="display:flex;justify-content:space-between"><span>Smithfield</span><span style="color:#10b981;font-weight:600">$516K</span></div>
- <div style="display:flex;justify-content:space-between"><span>Lincoln</span><span style="color:#10b981;font-weight:600">$512K</span></div>
- <div style="display:flex;justify-content:space-between"><span>Chepachet</span><span style="color:#10b981;font-weight:600">$467K</span></div>
+            <h3><span style="opacity:0.7">🏔️</span> Top 5 by Median Price</h3>
+ <div id="insightTopCities" style="display:grid;gap:0.4rem;font-size:0.95rem;margin:0.5rem 0">
+ <div style="color:#94a3b8">Loading...</div>
  </div>
  <span class="hover-hint">Hover for trend</span>
  </div>
  <div class="insight-card insight-hover" data-chart="dom">
  <h3>Fastest to Sell</h3>
- <div style="display:grid;gap:0.4rem;font-size:0.95rem;margin:0.5rem 0">
- <div style="display:flex;justify-content:space-between"><span>Hope Valley</span><span style="color:#10b981;font-weight:600">28 days</span></div>
- <div style="display:flex;justify-content:space-between"><span>West Greenwich</span><span style="color:#10b981;font-weight:600">38 days</span></div>
- <div style="display:flex;justify-content:space-between"><span>Warwick</span><span style="color:#10b981;font-weight:600">47 days</span></div>
- <div style="display:flex;justify-content:space-between"><span>N. Providence</span><span style="color:#10b981;font-weight:600">53 days</span></div>
- <div style="display:flex;justify-content:space-between"><span>Cranston</span><span style="color:#10b981;font-weight:600">54 days</span></div>
+ <div id="insightFastestSell" style="display:grid;gap:0.4rem;font-size:0.95rem;margin:0.5rem 0">
+ <div style="color:#94a3b8">Loading...</div>
  </div>
  <span class="hover-hint">Hover for trend</span>
  </div>
  <div class="insight-card insight-hover" data-chart="growth">
  <h3>YoY Appreciation</h3>
- <p><span class="big">+8.3% YoY</span></p>
- <p>2025 median $580K vs 2024 $535K - Strong appreciation continues</p>
+ <p><span id="insightYoY" class="big">...</span></p>
+ <p id="insightYoYDesc">Loading comparison...</p>
  <span class="hover-hint">Hover for chart</span>
  </div>
  </div>
@@ -1012,6 +1004,9 @@ loadPropertyData().then(data => {
   if (typeof initHouseHunter === 'function') initHouseHunter();
   if (typeof initLandDeals === 'function') initLandDeals();
   
+  // Update Key Market Insights
+  updateInsights();
+  
   const statusEl = document.getElementById('dbStatus');
   if (statusEl) {
     statusEl.textContent = 'Database ready (' + rawData.properties.length.toLocaleString() + ' properties)';
@@ -1026,6 +1021,84 @@ loadPropertyData().then(data => {
     statusEl.style.color = '#ec4899';
   }
 });
+
+function updateInsights() {
+  if (!rawData || !rawData.properties) return;
+  
+  // Top 5 cities by median price
+  const cityPrices = {};
+  rawData.properties.filter(p => p.price > 50000).forEach(p => {
+    if (!cityPrices[p.city]) cityPrices[p.city] = [];
+    cityPrices[p.city].push(p.price);
+  });
+  const topCities = Object.entries(cityPrices)
+    .filter(([c, ps]) => ps.length >= 10)
+    .map(([city, prices]) => ({
+      city,
+      median: prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)]
+    }))
+    .sort((a,b) => b.median - a.median)
+    .slice(0, 5);
+  
+  const topCitiesEl = document.getElementById('insightTopCities');
+  if (topCitiesEl && topCities.length > 0) {
+    topCitiesEl.innerHTML = topCities.map(c => 
+      `<div style="display:flex;justify-content:space-between"><span>${c.city}</span><span style="color:#10b981;font-weight:600">$${Math.round(c.median/1000)}K</span></div>`
+    ).join('');
+  }
+  
+  // Fastest to sell (lowest avg DOM)
+  const cityDom = {};
+  rawData.properties.filter(p => p.dom && p.dom > 0 && p.dom < 365).forEach(p => {
+    if (!cityDom[p.city]) cityDom[p.city] = [];
+    cityDom[p.city].push(p.dom);
+  });
+  const fastestCities = Object.entries(cityDom)
+    .filter(([c, doms]) => doms.length >= 5)
+    .map(([city, doms]) => ({
+      city,
+      avgDom: Math.round(doms.reduce((a,b)=>a+b,0) / doms.length)
+    }))
+    .sort((a,b) => a.avgDom - b.avgDom)
+    .slice(0, 5);
+  
+  const fastestEl = document.getElementById('insightFastestSell');
+  if (fastestEl && fastestCities.length > 0) {
+    fastestEl.innerHTML = fastestCities.map(c => 
+      `<div style="display:flex;justify-content:space-between"><span>${c.city}</span><span style="color:#10b981;font-weight:600">${c.avgDom} days</span></div>`
+    ).join('');
+  } else if (fastestEl) {
+    fastestEl.innerHTML = '<div style="color:#94a3b8">No DOM data available</div>';
+  }
+  
+  // YoY Appreciation
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+  const thisYearPrices = [];
+  const lastYearPrices = [];
+  
+  rawData.properties.filter(p => p.soldDate && p.price > 50000).forEach(p => {
+    const year = parseInt(p.soldDate.split('-').pop());
+    if (year === currentYear || year === currentYear - 1) thisYearPrices.push(p.price);
+    if (year === lastYear || year === lastYear - 1) lastYearPrices.push(p.price);
+  });
+  
+  const yoyEl = document.getElementById('insightYoY');
+  const yoyDescEl = document.getElementById('insightYoYDesc');
+  
+  if (thisYearPrices.length >= 10 && lastYearPrices.length >= 10) {
+    const thisMedian = thisYearPrices.sort((a,b)=>a-b)[Math.floor(thisYearPrices.length/2)];
+    const lastMedian = lastYearPrices.sort((a,b)=>a-b)[Math.floor(lastYearPrices.length/2)];
+    const change = ((thisMedian - lastMedian) / lastMedian * 100).toFixed(1);
+    const sign = change >= 0 ? '+' : '';
+    
+    if (yoyEl) yoyEl.textContent = `${sign}${change}% YoY`;
+    if (yoyDescEl) yoyDescEl.textContent = `${currentYear} median $${Math.round(thisMedian/1000)}K vs ${lastYear} $${Math.round(lastMedian/1000)}K`;
+  } else {
+    if (yoyEl) yoyEl.textContent = 'N/A';
+    if (yoyDescEl) yoyDescEl.textContent = 'Insufficient data for comparison';
+  }
+}
 
  function buildQuery() {
  const city = document.getElementById('filterCity').value;

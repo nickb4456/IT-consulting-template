@@ -102,8 +102,9 @@
         </table>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script>
-        const DATA_URL = 'https://engagement-hooks-site.s3.amazonaws.com/ri-sql-full.json';
+        const DATA_URL = 'ri-sales.json.gz';
         
         // Parse URL params
         const params = new URLSearchParams(window.location.search);
@@ -124,7 +125,9 @@
         async function loadData() {
             try {
                 const res = await fetch(DATA_URL);
-                const data = await res.json();
+                const buffer = await res.arrayBuffer();
+                const decompressed = pako.ungzip(new Uint8Array(buffer), {to: 'string'});
+                const data = JSON.parse(decompressed);
                 
                 let filtered = data.properties;
                 let titleText = 'All Properties';

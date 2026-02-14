@@ -964,10 +964,12 @@ let rawData = null;
 let db, lastResults = [];
 
 // Parallel load: fetch gzip data AND SQL.js WASM at the same time
+// Cache-bust with daily version to ensure fresh data
+const dataVersion = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 const t0 = performance.now();
 Promise.all([
   // Load data
-  fetch('ri-sales.json.gz').then(r => r.arrayBuffer()).then(buf => {
+  fetch('ri-sales.json.gz?v=' + dataVersion).then(r => r.arrayBuffer()).then(buf => {
     const decompressed = pako.ungzip(new Uint8Array(buf), {to: 'string'});
     return JSON.parse(decompressed);
   }),

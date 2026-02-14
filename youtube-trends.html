@@ -409,6 +409,152 @@
         
         footer a { color: var(--accent); }
         
+        /* Transcript Analysis Section */
+        .transcript-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .transcript-stat {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1));
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .transcript-stat .ts-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #a855f7;
+        }
+        
+        .transcript-stat .ts-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+        
+        .topic-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .topic-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .topic-bar .topic-name {
+            width: 130px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+        
+        .topic-bar .topic-bar-container {
+            flex: 1;
+            height: 24px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .topic-bar .topic-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            min-width: 50px;
+        }
+        
+        .transcript-videos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .transcript-video-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .transcript-video-card:hover {
+            border-color: #a855f7;
+        }
+        
+        .transcript-video-card .tv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .transcript-video-card .tv-category {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a855f7;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .transcript-video-card .tv-chars {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        
+        .transcript-video-card .tv-preview {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .transcript-video-card .tv-topics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .transcript-video-card .tv-topic {
+            background: var(--border);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            color: var(--muted);
+        }
+        
+        .transcript-video-card a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .transcript-video-card a:hover {
+            text-decoration: underline;
+        }
+        
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
             .pattern-bar .name { width: 80px; font-size: 0.8rem; }
@@ -440,6 +586,41 @@
             <div class="stat-card">
                 <div class="value" id="avgViews">-</div>
                 <div class="label">Avg Views (Top 100)</div>
+            </div>
+        </div>
+        
+        <!-- Transcript Analysis Section -->
+        <div class="section" id="transcriptSection" style="display: none;">
+            <h2>📝 Transcript Analysis</h2>
+            <p style="color: var(--muted); margin-bottom: 15px;">Deep content analysis from 165 video transcripts (242 attempted)</p>
+            
+            <div class="transcript-stats" id="transcriptStats">
+                <div class="transcript-stat">
+                    <div class="ts-value" id="tsTotal">-</div>
+                    <div class="ts-label">Transcripts</div>
+                </div>
+                <div class="transcript-stat">
+                    <div class="ts-value" id="tsSuccess">-</div>
+                    <div class="ts-label">Success Rate</div>
+                </div>
+                <div class="transcript-stat">
+                    <div class="ts-value" id="tsTechAI">-</div>
+                    <div class="ts-label">Tech/AI Videos</div>
+                </div>
+                <div class="transcript-stat">
+                    <div class="ts-value" id="tsChars">-</div>
+                    <div class="ts-label">Total Characters</div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin: 20px 0 15px;">🔬 Topic Distribution</h3>
+            <div class="topic-bars" id="topicBars">
+                <div class="loading">Loading topic data...</div>
+            </div>
+            
+            <h3 style="font-size: 1.1rem; margin: 25px 0 15px;">🎬 Longest Transcripts (Most In-Depth Content)</h3>
+            <div class="transcript-videos" id="transcriptVideos">
+                <div class="loading">Loading transcripts...</div>
             </div>
         </div>
         
@@ -887,6 +1068,114 @@
             `).join('');
         }
         
+        // Transcript Analysis Functions
+        let transcriptData = null;
+        
+        async function loadTranscripts() {
+            try {
+                const res = await fetch('youtube-transcripts.json');
+                if (!res.ok) return;
+                transcriptData = await res.json();
+                
+                // Show section
+                document.getElementById('transcriptSection').style.display = 'block';
+                
+                renderTranscriptStats();
+                renderTopicBars();
+                renderTranscriptVideos();
+            } catch (err) {
+                console.log('No transcript data available');
+            }
+        }
+        
+        function formatChars(n) {
+            if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+            if (n >= 1e3) return (n/1e3).toFixed(0) + 'K';
+            return n.toString();
+        }
+        
+        function renderTranscriptStats() {
+            if (!transcriptData) return;
+            
+            const meta = transcriptData.meta;
+            const totalChars = transcriptData.transcripts.reduce((s, t) => s + t.charCount, 0);
+            const techAI = transcriptData.categories['tech-ai'] || 0;
+            const successRate = Math.round((meta.success / meta.total) * 100);
+            
+            document.getElementById('tsTotal').textContent = meta.success;
+            document.getElementById('tsSuccess').textContent = successRate + '%';
+            document.getElementById('tsTechAI').textContent = techAI;
+            document.getElementById('tsChars').textContent = formatChars(totalChars);
+        }
+        
+        function renderTopicBars() {
+            if (!transcriptData) return;
+            
+            const container = document.getElementById('topicBars');
+            const topics = Object.entries(transcriptData.topicCounts || {})
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+            
+            if (!topics.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No topic data</p>';
+                return;
+            }
+            
+            const maxCount = topics[0][1];
+            const topicLabels = {
+                'energy': '⚡ Energy/Power',
+                'data-centers': '🏢 Data Centers',
+                'chips': '💾 Chips/GPUs',
+                'ai-agents': '🤖 AI Agents',
+                'autonomy': '🚗 Autonomy',
+                'space': '🚀 Space',
+                'llm': '💬 LLMs',
+                'humanoid-robots': '🦾 Humanoids',
+                'general': '📚 General'
+            };
+            
+            container.innerHTML = topics.map(([topic, count]) => {
+                const pct = Math.round((count / maxCount) * 100);
+                const label = topicLabels[topic] || topic;
+                return `
+                    <div class="topic-bar">
+                        <div class="topic-name">${label}</div>
+                        <div class="topic-bar-container">
+                            <div class="topic-bar-fill" style="width: ${pct}%;">${count} videos</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function renderTranscriptVideos() {
+            if (!transcriptData) return;
+            
+            const container = document.getElementById('transcriptVideos');
+            const videos = transcriptData.transcripts.slice(0, 8);
+            
+            if (!videos.length) {
+                container.innerHTML = '<p style="color: var(--muted)">No transcripts</p>';
+                return;
+            }
+            
+            container.innerHTML = videos.map(v => `
+                <div class="transcript-video-card">
+                    <div class="tv-header">
+                        <span class="tv-category">${escapeHtml(v.category)}</span>
+                        <span class="tv-chars">${formatChars(v.charCount)} chars</span>
+                    </div>
+                    <div class="tv-preview">${escapeHtml(v.preview)}...</div>
+                    ${v.topics.length ? `
+                        <div class="tv-topics">
+                            ${v.topics.slice(0, 4).map(t => `<span class="tv-topic">${escapeHtml(t)}</span>`).join('')}
+                        </div>
+                    ` : ''}
+                    <a href="https://youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">Watch →</a>
+                </div>
+            `).join('');
+        }
+        
         async function loadData() {
             try {
                 const res = await fetch('youtube-trends-data.json');
@@ -901,6 +1190,9 @@
                 renderConnections();
                 renderNicheTabs();
                 renderVideos();
+                
+                // Also load transcript data
+                loadTranscripts();
             } catch (err) {
                 console.error('Failed to load trends data:', err);
                 document.querySelectorAll('.loading').forEach(el => {

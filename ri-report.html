@@ -1007,6 +1007,11 @@ loadPropertyData().then(data => {
   document.getElementById('statTowns').textContent = s.citiesCovered;
   document.getElementById('heroSubtitle').textContent = (s.total / 1000).toFixed(0) + ',000+ Properties • ' + s.citiesCovered + ' Towns • Updated Daily';
   
+  // Initialize charts now that data is loaded
+  if (typeof initCharts === 'function') initCharts();
+  if (typeof initHouseHunter === 'function') initHouseHunter();
+  if (typeof initLandDeals === 'function') initLandDeals();
+  
   const statusEl = document.getElementById('dbStatus');
   if (statusEl) {
     statusEl.textContent = 'Database ready (' + rawData.properties.length.toLocaleString() + ' properties)';
@@ -3316,12 +3321,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  new Chart(document.getElementById('landChart'), { type: 'bar', data: { labels: landCities.map(c => c.city), datasets: [{ data: landCities.map(c => c.landCount), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
  } catch(e) { console.error('Chart init error:', e); }
  }
- // Initialize charts when DOM is ready
- if (document.readyState === 'loading') {
- document.addEventListener('DOMContentLoaded', initCharts);
- } else {
- initCharts();
- }
+ // Charts initialized after data loads (see loadPropertyData().then())
  </script>
  <script>
  // Add click handlers to existing charts after page loads

@@ -3524,7 +3524,9 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  canvas.style.cursor = 'pointer';
  
- canvas.addEventListener('click', function(evt) {
+ function handleChartClick(evt) {
+ // Handle both mouse and touch events
+ const event = evt.touches ? evt.touches[0] : evt;
  const points = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
  if (points.length === 0) return;
  
@@ -3549,9 +3551,15 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  if (filterType) {
- window.open(`ri-results.html?type=${encodeURIComponent(filterType)}&value=${encodeURIComponent(filterValue)}`, '_blank');
+ window.location.href = `ri-results.html?type=${encodeURIComponent(filterType)}&value=${encodeURIComponent(filterValue)}`;
  }
- });
+ }
+ 
+ canvas.addEventListener('click', handleChartClick);
+ canvas.addEventListener('touchend', function(evt) {
+ evt.preventDefault();
+ handleChartClick(evt);
+ }, { passive: false });
  });
  
  console.log(' Click handlers added to charts');

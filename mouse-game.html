@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Trap!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #1a0e05;
+            font-family: 'Nunito', sans-serif;
+            cursor: none;
+        }
+        canvas { display: block; }
+
+        /* Custom cursor */
+        #custom-cursor {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 24px;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .hud-card {
+            background: linear-gradient(145deg, rgba(62, 39, 18, 0.92), rgba(42, 24, 8, 0.95));
+            border: 3px solid #c8913a;
+            border-radius: 18px;
+            padding: 12px 22px;
+            color: #ffe4a8;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,220,140,0.15);
+        }
+
+        .hud-label {
+            font-family: 'Fredoka One', cursive;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #c8913a;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-family: 'Fredoka One', cursive;
+            font-size: 28px;
+            color: #ffe4a8;
+            text-shadow: 0 2px 8px rgba(255,180,40,0.3);
+        }
+
+        #lives-display {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+        }
+        .life-heart {
+            font-size: 22px;
+            transition: all 0.3s;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+        }
+        .life-heart.lost {
+            opacity: 0.2;
+            transform: scale(0.8);
+        }
+
+        #cheese-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Danger overlay */
+        #danger-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 90;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        #danger-overlay.active {
+            opacity: 1;
+            animation: dangerPulse 0.4s ease-in-out infinite alternate;
+        }
+        @keyframes dangerPulse {
+            from { box-shadow: inset 0 0 80px rgba(255,40,20,0.3); }
+            to { box-shadow: inset 0 0 120px rgba(255,40,20,0.5); }
+        }
+
+        #danger-text {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Fredoka One', cursive;
+            font-size: 4rem;
+            color: #ff3322;
+            text-shadow: 0 0 30px rgba(255,50,20,0.8), 0 4px 8px rgba(0,0,0,0.5);
+            z-index: 95;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        #danger-text.show {
+            opacity: 1;
+            animation: dangerShake 0.1s ease-in-out infinite alternate;
+        }
+        @keyframes dangerShake {
+            from { transform: translate(-50%, -50%) rotate(-1deg); }
+            to { transform: translate(-50%, -50%) rotate(1deg); }
+        }
+
+        /* Score popup */
+        .cheese-popup {
+            position: fixed;
+            pointer-events: none;
+            z-index: 200;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.8rem;
+            text-shadow: 0 0 15px currentColor, 0 3px 6px rgba(0,0,0,0.6);
+            animation: cheeseFloat 1.4s ease-out forwards;
+        }
+        @keyframes cheeseFloat {
+            0% { opacity: 0; transform: scale(0.3) translateY(0) rotate(-10deg); }
+            20% { opacity: 1; transform: scale(1.5) translateY(-15px) rotate(5deg); }
+            40% { transform: scale(1.0) translateY(-30px) rotate(0deg); }
+            100% { opacity: 0; transform: scale(0.7) translateY(-130px) rotate(-5deg); }
+        }
+
+        /* Screens */
+        #start-screen, #game-over-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #ffe4a8;
+        }
+
+        #start-screen {
+            background: radial-gradient(ellipse at 50% 40%, #3d2510 0%, #1a0e05 70%);
+        }
+
+        .title-mouse {
+            font-size: 7rem;
+            animation: mouseBounce 1.5s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.5));
+        }
+        @keyframes mouseBounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-12px) rotate(-5deg); }
+            75% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        .game-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 4.5rem;
+            color: #ffcc44;
+            text-shadow: 0 4px 0 #b8771a, 0 8px 20px rgba(0,0,0,0.4);
+            margin: 10px 0 5px;
+            letter-spacing: 3px;
+        }
+
+        .game-subtitle {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.2rem;
+            color: #c8913a;
+            letter-spacing: 6px;
+            margin-bottom: 25px;
+        }
+
+        .controls-box {
+            background: rgba(255,220,140,0.08);
+            border: 2px solid rgba(200,145,58,0.3);
+            border-radius: 16px;
+            padding: 18px 32px;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .controls-box p {
+            font-size: 0.95rem;
+            color: #c8913a;
+            margin: 6px 0;
+        }
+        .ctrl-key {
+            display: inline-block;
+            background: rgba(255,200,80,0.15);
+            border: 1px solid rgba(255,200,80,0.3);
+            border-radius: 6px;
+            padding: 2px 10px;
+            color: #ffcc44;
+            font-weight: 900;
+            font-family: 'Fredoka One', cursive;
+        }
+
+        .start-btn {
+            margin-top: 28px;
+            padding: 18px 65px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6rem;
+            background: linear-gradient(145deg, #ffcc44, #e8a020);
+            border: none;
+            border-radius: 50px;
+            color: #3d2510;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 0 #b8771a, 0 8px 24px rgba(0,0,0,0.4);
+            transition: all 0.15s;
+            text-transform: uppercase;
+        }
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #b8771a, 0 12px 30px rgba(0,0,0,0.4);
+        }
+        .start-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #b8771a, 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        #game-over-screen {
+            background: radial-gradient(ellipse at 50% 40%, rgba(60,20,10,0.95) 0%, rgba(20,8,2,0.98) 70%);
+        }
+
+        #level-up-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 350;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(ellipse at 50% 40%, rgba(40,35,10,0.95) 0%, rgba(15,10,2,0.98) 70%);
+            color: #ffe4a8;
+        }
+
+        .go-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.8rem;
+            color: #ff6644;
+            text-shadow: 0 4px 0 #992200, 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .final-score {
+            font-family: 'Fredoka One', cursive;
+            font-size: 5rem;
+            color: #ffcc44;
+            text-shadow: 0 0 20px rgba(255,200,60,0.5);
+            margin: 15px 0;
+        }
+
+        .final-label {
+            font-size: 1rem;
+            color: #c8913a;
+            letter-spacing: 4px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="danger-overlay"></div>
+    <div id="danger-text">RUN!</div>
+
+    <div id="hud" class="hidden">
+        <div class="hud-card">
+            <div class="hud-label">Cheese</div>
+            <div id="cheese-counter">
+                <span style="font-size:24px">&#x1F9C0;</span>
+                <span class="hud-value" id="score">0</span>
+                <span style="font-size:12px; color:#c8913a;" id="level-progress"></span>
+            </div>
+        </div>
+        <div class="hud-card" id="level-card">
+            <div class="hud-label">Level</div>
+            <div class="hud-value" id="level-display">1</div>
+        </div>
+        <div class="hud-card">
+            <div class="hud-label">Lives</div>
+            <div id="lives-display"></div>
+        </div>
+    </div>
+
+    <div id="level-up-screen" class="hidden">
+        <div style="font-size:5rem; animation: mouseBounce 1s ease-in-out infinite;">&#x2B50;</div>
+        <div class="game-title" style="font-size:3rem;">LEVEL UP!</div>
+        <p id="level-up-text" style="color:#c8913a; font-size:1.2rem; margin:10px;">Welcome to the Kitchen!</p>
+        <button class="start-btn" onclick="nextLevel()">NEXT LEVEL</button>
+    </div>
+
+    <div id="start-screen">
+        <div class="title-mouse">&#x1F42D;</div>
+        <div class="game-title">MOUSE TRAP!</div>
+        <div class="game-subtitle">A MOUSE ADVENTURE</div>
+        <div class="controls-box">
+            <p><span class="ctrl-key">ARROWS</span> or <span class="ctrl-key">W A S D</span> &mdash; Move the mouse</p>
+            <p>Grab the cheese &#x1F9C0; &mdash; Avoid the traps! &#x1FAA4;</p>
+        </div>
+        <button class="start-btn" onclick="startGame()">PLAY!</button>
+    </div>
+
+    <div id="game-over-screen" class="hidden">
+        <div style="font-size:5rem; margin-bottom:10px;">&#x1F42D;&#x1F4A8;</div>
+        <div class="go-title">OH NO!</div>
+        <div class="final-label">CHEESE COLLECTED</div>
+        <div class="final-score" id="final-score">0</div>
+        <p style="color:#c8913a; font-size:1rem; margin-bottom:5px;">Great job, little mouse!</p>
+        <button class="start-btn" onclick="restartGame()">TRY AGAIN</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+    let scene, camera, renderer, clock;
+    let mouse3D, mouseGroup;
+    let cheeses = [], traps = [], particles = [];
+    let score = 0, lives = 5;
+    let level = 1;
+    let cheeseForNextLevel = 10; // cheese needed to advance
+    let isPlaying = false;
+    let keys = {};
+    let invincibleTimer = 0;
+    let dangerActive = false;
+    let activeTrap = null;
+    let trapTimer = 0;
+    let furniture = []; // collidable furniture
+    let environmentGroup = null; // so we can swap levels
+    let ants = []; // ant enemies for Level 3
+    const FLOOR_SIZE = 28;
+    const MOUSE_SPEED = 0.25;
+
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a0e05);
+        scene.fog = new THREE.Fog(0x1a0e05, 20, 45);
+
+        camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 22, 18);
+        camera.lookAt(0, 0, -2);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.3;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        setupLighting();
+        buildEnvironment(1);
+        buildMouse();
+
+        clock = new THREE.Clock();
+
+        window.addEventListener('resize', onResize);
+        window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        animate();
+    }
+
+    function setupLighting() {
+        // Warm ambient (kitchen at night)
+        scene.add(new THREE.AmbientLight(0x554430, 0.6));
+
+        // Overhead warm light (like kitchen lamp)
+        const mainLight = new THREE.DirectionalLight(0xffddaa, 1.2);
+        mainLight.position.set(5, 20, 8);
+        mainLight.castShadow = true;
+        mainLight.shadow.mapSize.width = 2048;
+        mainLight.shadow.mapSize.height = 2048;
+        mainLight.shadow.camera.near = 1;
+        mainLight.shadow.camera.far = 50;
+        mainLight.shadow.camera.left = -20;
+        mainLight.shadow.camera.right = 20;
+        mainLight.shadow.camera.top = 20;
+        mainLight.shadow.camera.bottom = -20;
+        mainLight.shadow.radius = 4;
+        scene.add(mainLight);
+
+        // Secondary warm fill
+        const fillLight = new THREE.DirectionalLight(0xffaa66, 0.4);
+        fillLight.position.set(-8, 10, -5);
+        scene.add(fillLight);
+
+        // Cool rim light for contrast
+        const rimLight = new THREE.DirectionalLight(0x6688aa, 0.25);
+        rimLight.position.set(0, 5, -15);
+        scene.add(rimLight);
+
+        // Point light following mouse area (warm glow)
+        const mouseLight = new THREE.PointLight(0xffcc88, 0.5, 15);
+        mouseLight.position.set(0, 5, 0);
+        mouseLight.name = 'mouseLight';
+        scene.add(mouseLight);
+    }
+
+    function buildEnvironment(lvl) {
+        // Remove old environment
+        if (environmentGroup) {
+            scene.remove(environmentGroup);
+            environmentGroup = null;
+        }
+        furniture = [];
+
+        environmentGroup = new THREE.Group();
+
+        if (lvl === 1) {
+            buildLevel1Floor(environmentGroup);
+        } else if (lvl === 2) {
+            buildLevel2Kitchen(environmentGroup);
+        } else {
+            buildLevel3Picnic(environmentGroup);
+        }
+
+        scene.add(environmentGroup);
+    }
+
+    function buildLevel1Floor(group) {
+        // Terracotta & cream checkerboard
+        const tileSize = 2;
+        const tiles = Math.ceil(FLOOR_SIZE / tileSize);
+
+        for (let x = -tiles; x <= tiles; x++) {
+            for (let z = -tiles; z <= tiles; z++) {
+                const isDark = (Math.abs(x) + Math.abs(z)) % 2 === 0;
+                const baseColor = isDark ? 0xb8734a : 0xf0dcc0;
+                const color = new THREE.Color(baseColor);
+                color.offsetHSL(0, 0, (Math.random() - 0.5) * 0.04);
+
+                const tileGeo = new THREE.BoxGeometry(tileSize - 0.04, 0.15, tileSize - 0.04);
+                const tileMat = new THREE.MeshPhongMaterial({
+                    color, shininess: isDark ? 40 : 20, specular: 0x443322
+                });
+                const tile = new THREE.Mesh(tileGeo, tileMat);
+                tile.position.set(x * tileSize, -0.075, z * tileSize);
+                tile.receiveShadow = true;
+                group.add(tile);
+            }
+        }
+
+        addFloorBase(group, 0x4a3020);
+        addWalls(group, 0x5c3d28, 3);
+    }
+
+    function buildLevel2Kitchen(group) {
+        // White/gray kitchen tiles
+        const tileSize = 2;
+        const tiles = Math.ceil(FLOOR_SIZE / tileSize);
+
+        for (let x = -tiles; x <= tiles; x++) {
+            for (let z = -tiles; z <= tiles; z++) {
+                const isDark = (Math.abs(x) + Math.abs(z)) % 2 === 0;
+                const baseColor = isDark ? 0xc8c8c8 : 0xf0eeea;
+                const color = new THREE.Color(baseColor);
+                color.offsetHSL(0, 0, (Math.random() - 0.5) * 0.03);
+
+                const tileGeo = new THREE.BoxGeometry(tileSize - 0.04, 0.15, tileSize - 0.04);
+                const tileMat = new THREE.MeshPhongMaterial({
+                    color, shininess: 60, specular: 0x888888
+                });
+                const tile = new THREE.Mesh(tileGeo, tileMat);
+                tile.position.set(x * tileSize, -0.075, z * tileSize);
+                tile.receiveShadow = true;
+                group.add(tile);
+            }
+        }
+
+        addFloorBase(group, 0x555555);
+        addWalls(group, 0xe8e0d0, 4);
+
+        // === KITCHEN FURNITURE ===
+        const woodMat = new THREE.MeshPhongMaterial({ color: 0x8b6543, shininess: 30, specular: 0x443322 });
+        const darkWood = new THREE.MeshPhongMaterial({ color: 0x5a3d2b, shininess: 20 });
+        const metalMat = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 120, specular: 0xffffff });
+        const whiteMat = new THREE.MeshPhongMaterial({ color: 0xf0f0f0, shininess: 40 });
+
+        // --- Kitchen Table (center-ish, with legs) ---
+        const tableTop = new THREE.Mesh(new THREE.BoxGeometry(5, 0.2, 3.5), woodMat);
+        tableTop.position.set(4, 3.2, -3);
+        tableTop.castShadow = true; tableTop.receiveShadow = true;
+        group.add(tableTop);
+
+        // Table legs
+        for (const [lx, lz] of [[-2.2, -1.5], [2.2, -1.5], [-2.2, 1.5], [2.2, 1.5]]) {
+            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 3.2, 8), woodMat);
+            leg.position.set(4 + lx, 1.6, -3 + lz);
+            leg.castShadow = true;
+            group.add(leg);
+        }
+        furniture.push({ x: 4, z: -3, rx: 3.2, rz: 2.3 }); // collision box
+
+        // --- Fridge (back wall) ---
+        const fridgeBody = new THREE.Mesh(new THREE.BoxGeometry(3, 7, 2.5), whiteMat);
+        fridgeBody.position.set(-10, 3.5, -12.5);
+        fridgeBody.castShadow = true; fridgeBody.receiveShadow = true;
+        group.add(fridgeBody);
+
+        // Fridge handle
+        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.5, 8), metalMat);
+        handle.position.set(-8.6, 4.5, -11.3);
+        group.add(handle);
+
+        // Fridge top freezer line
+        const fLine = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.05, 0.1), new THREE.MeshPhongMaterial({ color: 0xcccccc }));
+        fLine.position.set(-10, 5.5, -11.26);
+        group.add(fLine);
+
+        furniture.push({ x: -10, z: -12.5, rx: 2, rz: 1.8 });
+
+        // --- Kitchen Counter (along back wall) ---
+        const counterTop = new THREE.Mesh(new THREE.BoxGeometry(10, 0.25, 2.5), new THREE.MeshPhongMaterial({
+            color: 0xd4c4a8, shininess: 80, specular: 0x666666
+        }));
+        counterTop.position.set(3, 3.5, -12.5);
+        counterTop.castShadow = true;
+        group.add(counterTop);
+
+        // Counter base (cabinets)
+        const cabinetMat = new THREE.MeshPhongMaterial({ color: 0xe8dcc8, shininess: 25 });
+        const cabinetBase = new THREE.Mesh(new THREE.BoxGeometry(10, 3.4, 2.4), cabinetMat);
+        cabinetBase.position.set(3, 1.7, -12.5);
+        cabinetBase.castShadow = true; cabinetBase.receiveShadow = true;
+        group.add(cabinetBase);
+
+        // Cabinet door lines
+        for (let cx = -3.5; cx <= 6.5; cx += 2.5) {
+            const doorLine = new THREE.Mesh(new THREE.BoxGeometry(0.04, 2.8, 0.05), new THREE.MeshPhongMaterial({ color: 0xc8b89a }));
+            doorLine.position.set(cx, 1.7, -11.3);
+            group.add(doorLine);
+
+            // Door knobs
+            const knob = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), metalMat);
+            knob.position.set(cx + 0.8, 2.0, -11.26);
+            group.add(knob);
+        }
+
+        furniture.push({ x: 3, z: -12.5, rx: 5.5, rz: 1.8 });
+
+        // --- Stove (on counter) ---
+        const stoveTop = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.08, 2.2), new THREE.MeshPhongMaterial({
+            color: 0x222222, shininess: 100, specular: 0x888888
+        }));
+        stoveTop.position.set(6, 3.68, -12.5);
+        group.add(stoveTop);
+
+        // Burners
+        for (const [bx, bz] of [[-0.6, -0.4], [0.6, -0.4], [-0.6, 0.4], [0.6, 0.4]]) {
+            const burner = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.04, 8, 20), new THREE.MeshPhongMaterial({
+                color: 0x444444, shininess: 60
+            }));
+            burner.rotation.x = -Math.PI / 2;
+            burner.position.set(6 + bx, 3.73, -12.5 + bz);
+            group.add(burner);
+        }
+
+        // --- Chair (near table) ---
+        for (const chairX of [2, 6]) {
+            const seat = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.15, 1.5), darkWood);
+            seat.position.set(chairX, 1.8, -0.5);
+            seat.castShadow = true;
+            group.add(seat);
+
+            const back = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2, 0.15), darkWood);
+            back.position.set(chairX, 2.8, -1.2);
+            back.castShadow = true;
+            group.add(back);
+
+            for (const [lx, lz] of [[-0.55, -0.55], [0.55, -0.55], [-0.55, 0.55], [0.55, 0.55]]) {
+                const cLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.8, 6), darkWood);
+                cLeg.position.set(chairX + lx, 0.9, -0.5 + lz);
+                group.add(cLeg);
+            }
+
+            furniture.push({ x: chairX, z: -0.5, rx: 1.0, rz: 1.0 });
+        }
+
+        // --- Cat Bowl (danger decoration!) ---
+        const bowlGeo = new THREE.CylinderGeometry(0.6, 0.45, 0.3, 16);
+        const bowl = new THREE.Mesh(bowlGeo, new THREE.MeshPhongMaterial({
+            color: 0xcc4444, shininess: 60
+        }));
+        bowl.position.set(-8, 0.15, 5);
+        group.add(bowl);
+
+        // Water in bowl
+        const water = new THREE.Mesh(
+            new THREE.CircleGeometry(0.55, 16),
+            new THREE.MeshPhongMaterial({ color: 0x4488cc, shininess: 200, specular: 0xffffff, transparent: true, opacity: 0.7 })
+        );
+        water.rotation.x = -Math.PI / 2;
+        water.position.set(-8, 0.3, 5);
+        group.add(water);
+
+        // --- Rug under table ---
+        const rugGeo = new THREE.PlaneGeometry(7, 5);
+        const rugMat = new THREE.MeshPhongMaterial({
+            color: 0x885533, shininess: 5, specular: 0x222222
+        });
+        const rug = new THREE.Mesh(rugGeo, rugMat);
+        rug.rotation.x = -Math.PI / 2;
+        rug.position.set(4, 0.02, -3);
+        rug.receiveShadow = true;
+        group.add(rug);
+
+        // Rug border
+        const rugBorder = new THREE.Mesh(new THREE.PlaneGeometry(7.4, 5.4), new THREE.MeshPhongMaterial({
+            color: 0x664422, shininess: 5
+        }));
+        rugBorder.rotation.x = -Math.PI / 2;
+        rugBorder.position.set(4, 0.01, -3);
+        group.add(rugBorder);
+
+        // --- Baseboard trim ---
+        const trimMat = new THREE.MeshPhongMaterial({ color: 0xd8d0c0 });
+        const half = FLOOR_SIZE / 2;
+        for (const [tx, tz, tlen, try_] of [[0, -half + 0.2, FLOOR_SIZE, 0], [0, half - 0.2, FLOOR_SIZE, 0],
+            [-half + 0.2, 0, FLOOR_SIZE, Math.PI/2], [half - 0.2, 0, FLOOR_SIZE, Math.PI/2]]) {
+            const trim = new THREE.Mesh(new THREE.BoxGeometry(tlen, 0.4, 0.12), trimMat);
+            trim.position.set(tx, 0.2, tz);
+            trim.rotation.y = try_;
+            group.add(trim);
+        }
+
+        // --- Overhead kitchen light ---
+        const lightFixture = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.8, 1.0, 0.3, 16),
+            new THREE.MeshPhongMaterial({ color: 0xeeeeee, emissive: 0xffeecc, emissiveIntensity: 0.3 })
+        );
+        lightFixture.position.set(0, 8, 0);
+        group.add(lightFixture);
+
+        const kitchenSpot = new THREE.PointLight(0xffeecc, 1.0, 25);
+        kitchenSpot.position.set(0, 7.5, 0);
+        group.add(kitchenSpot);
+    }
+
+    function buildLevel3Picnic(group) {
+        // Grass floor
+        const grassColors = [0x4a8c3f, 0x55a040, 0x3d7a32, 0x62b050];
+        const tileSize = 2;
+        const tiles = Math.ceil(FLOOR_SIZE / tileSize);
+
+        for (let x = -tiles; x <= tiles; x++) {
+            for (let z = -tiles; z <= tiles; z++) {
+                const color = new THREE.Color(grassColors[Math.floor(Math.random() * grassColors.length)]);
+                color.offsetHSL((Math.random() - 0.5) * 0.03, (Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.04);
+
+                const tileGeo = new THREE.BoxGeometry(tileSize, 0.15, tileSize);
+                const tileMat = new THREE.MeshPhongMaterial({ color, shininess: 8, specular: 0x224422 });
+                const tile = new THREE.Mesh(tileGeo, tileMat);
+                tile.position.set(x * tileSize, -0.075, z * tileSize);
+                tile.receiveShadow = true;
+                group.add(tile);
+            }
+        }
+
+        // Grass tufts
+        const tuftMat = new THREE.MeshPhongMaterial({ color: 0x5aaa40, shininess: 5 });
+        for (let i = 0; i < 60; i++) {
+            const tuft = new THREE.Mesh(new THREE.ConeGeometry(0.12, 0.4, 4), tuftMat.clone());
+            tuft.material.color.setHex([0x5aaa40, 0x4d9035, 0x68b848][Math.floor(Math.random() * 3)]);
+            tuft.position.set((Math.random() - 0.5) * FLOOR_SIZE, 0.2, (Math.random() - 0.5) * FLOOR_SIZE);
+            tuft.rotation.y = Math.random() * Math.PI;
+            group.add(tuft);
+        }
+
+        // Sky dome (light blue hemisphere)
+        const skyGeo = new THREE.SphereGeometry(50, 20, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+        const skyMat = new THREE.MeshBasicMaterial({ color: 0x87ceeb, side: THREE.BackSide });
+        const sky = new THREE.Mesh(skyGeo, skyMat);
+        sky.position.y = -1;
+        group.add(sky);
+
+        // Sun
+        const sunGeo = new THREE.SphereGeometry(3, 16, 16);
+        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffee44 });
+        const sun = new THREE.Mesh(sunGeo, sunMat);
+        sun.position.set(20, 30, -20);
+        group.add(sun);
+        const sunGlow = new THREE.PointLight(0xffee88, 1.5, 80);
+        sunGlow.position.copy(sun.position);
+        group.add(sunGlow);
+
+        // Fluffy clouds
+        for (let i = 0; i < 5; i++) {
+            const cloudGroup = new THREE.Group();
+            const cloudMat = new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.3 });
+            for (let j = 0; j < 5; j++) {
+                const puff = new THREE.Mesh(new THREE.SphereGeometry(1.5 + Math.random(), 10, 8), cloudMat);
+                puff.position.set(j * 1.8 - 3.5, Math.random() * 0.6, Math.random() * 1.5 - 0.75);
+                puff.scale.y = 0.5;
+                cloudGroup.add(puff);
+            }
+            cloudGroup.position.set((Math.random() - 0.5) * 60, 22 + Math.random() * 8, -20 + Math.random() * 15);
+            group.add(cloudGroup);
+        }
+
+        // Picnic blanket (red/white checkered)
+        const blanketSize = 6;
+        const blanketGroup = new THREE.Group();
+        const checkSize = 1;
+        for (let bx = 0; bx < blanketSize; bx++) {
+            for (let bz = 0; bz < blanketSize; bz++) {
+                const isRed = (bx + bz) % 2 === 0;
+                const cGeo = new THREE.PlaneGeometry(checkSize, checkSize);
+                const cMat = new THREE.MeshPhongMaterial({
+                    color: isRed ? 0xcc3333 : 0xf0e8e0,
+                    shininess: 5
+                });
+                const check = new THREE.Mesh(cGeo, cMat);
+                check.rotation.x = -Math.PI / 2;
+                check.position.set(bx * checkSize - blanketSize / 2 + 0.5, 0.02, bz * checkSize - blanketSize / 2 + 0.5);
+                check.receiveShadow = true;
+                blanketGroup.add(check);
+            }
+        }
+        blanketGroup.position.set(-5, 0, -4);
+        group.add(blanketGroup);
+        furniture.push({ x: -5, z: -4, rx: 3.5, rz: 3.5 });
+
+        // Picnic basket
+        const basketMat = new THREE.MeshPhongMaterial({ color: 0xb8864a, shininess: 20 });
+        const basket = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1, 1), basketMat);
+        basket.position.set(-6.5, 0.5, -5);
+        basket.castShadow = true;
+        group.add(basket);
+        const basketLid = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.15, 1.2), basketMat);
+        basketLid.position.set(-6.5, 1.05, -5);
+        basketLid.rotation.z = 0.15;
+        group.add(basketLid);
+        const basketHandle = new THREE.Mesh(
+            new THREE.TorusGeometry(0.5, 0.05, 8, 16, Math.PI),
+            basketMat
+        );
+        basketHandle.position.set(-6.5, 1.3, -5);
+        basketHandle.rotation.y = Math.PI / 2;
+        group.add(basketHandle);
+
+        // Trees
+        const trunkMat = new THREE.MeshPhongMaterial({ color: 0x6b4226, shininess: 15 });
+        const leafMat = new THREE.MeshPhongMaterial({ color: 0x2d8a2d, shininess: 10 });
+        const treePositions = [
+            { x: -10, z: -10 }, { x: 10, z: -8 }, { x: -8, z: 8 },
+            { x: 11, z: 6 }, { x: 0, z: -12 }
+        ];
+        treePositions.forEach(tp => {
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.5, 4, 8), trunkMat);
+            trunk.position.set(tp.x, 2, tp.z);
+            trunk.castShadow = true;
+            group.add(trunk);
+
+            // Leafy canopy (stacked spheres)
+            for (let ly = 0; ly < 3; ly++) {
+                const leaf = new THREE.Mesh(
+                    new THREE.SphereGeometry(2.2 - ly * 0.5, 10, 8),
+                    leafMat.clone()
+                );
+                leaf.material.color.setHex([0x2d8a2d, 0x3a9a3a, 0x248024][ly]);
+                leaf.position.set(tp.x + (Math.random() - 0.5) * 0.5, 4.5 + ly * 1.2, tp.z + (Math.random() - 0.5) * 0.5);
+                leaf.castShadow = true;
+                group.add(leaf);
+            }
+
+            furniture.push({ x: tp.x, z: tp.z, rx: 0.8, rz: 0.8 });
+        });
+
+        // Flowers scattered around
+        const flowerColors = [0xff6688, 0xffaa33, 0xff44aa, 0x8855ff, 0xffff44];
+        for (let i = 0; i < 25; i++) {
+            const fx = (Math.random() - 0.5) * FLOOR_SIZE * 0.8;
+            const fz = (Math.random() - 0.5) * FLOOR_SIZE * 0.8;
+            // Stem
+            const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.5, 4),
+                new THREE.MeshPhongMaterial({ color: 0x338833 }));
+            stem.position.set(fx, 0.25, fz);
+            group.add(stem);
+            // Petals
+            const fc = flowerColors[Math.floor(Math.random() * flowerColors.length)];
+            const petal = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 6),
+                new THREE.MeshPhongMaterial({ color: fc, emissive: fc, emissiveIntensity: 0.15 }));
+            petal.position.set(fx, 0.55, fz);
+            petal.scale.y = 0.5;
+            group.add(petal);
+        }
+
+        // Watermelon slice on blanket
+        const melonGeo = new THREE.SphereGeometry(0.6, 12, 8, 0, Math.PI);
+        const melon = new THREE.Mesh(melonGeo, new THREE.MeshPhongMaterial({ color: 0xff4455, shininess: 40 }));
+        melon.position.set(-4, 0.3, -3.5);
+        melon.rotation.x = -Math.PI / 2;
+        group.add(melon);
+        const rind = new THREE.Mesh(
+            new THREE.TorusGeometry(0.6, 0.08, 6, 16, Math.PI),
+            new THREE.MeshPhongMaterial({ color: 0x44aa44 })
+        );
+        rind.position.set(-4, 0.3, -3.5);
+        rind.rotation.x = -Math.PI / 2;
+        group.add(rind);
+
+        // Sandwich on blanket
+        const breadMat = new THREE.MeshPhongMaterial({ color: 0xe8c870, shininess: 15 });
+        const bread1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.12, 0.8), breadMat);
+        bread1.position.set(-5.5, 0.1, -3);
+        group.add(bread1);
+        const filling = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.08, 0.75),
+            new THREE.MeshPhongMaterial({ color: 0x88cc44 }));
+        filling.position.set(-5.5, 0.2, -3);
+        group.add(filling);
+        const bread2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.12, 0.8), breadMat);
+        bread2.position.set(-5.5, 0.3, -3);
+        group.add(bread2);
+
+        // Juice box
+        const juiceBox = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.7, 0.4),
+            new THREE.MeshPhongMaterial({ color: 0xff8800, shininess: 40 }));
+        juiceBox.position.set(-3.5, 0.35, -5);
+        juiceBox.castShadow = true;
+        group.add(juiceBox);
+        const straw = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6, 4),
+            new THREE.MeshPhongMaterial({ color: 0xffffff }));
+        straw.position.set(-3.5, 0.9, -5);
+        straw.rotation.z = 0.3;
+        group.add(straw);
+
+        // Override scene background & fog for outdoors
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 30, 60);
+    }
+
+    // ============ ANT ENEMIES (Level 3) ============
+    function buildAnt() {
+        const antGroup = new THREE.Group();
+        const antBlack = new THREE.MeshPhongMaterial({ color: 0x1a1a1a, shininess: 60, specular: 0x444444 });
+        const antBrown = new THREE.MeshPhongMaterial({ color: 0x3a2010, shininess: 40 });
+
+        // Abdomen (large back segment)
+        const abdomen = new THREE.Mesh(new THREE.SphereGeometry(0.25, 10, 8), antBlack);
+        abdomen.scale.set(1, 0.8, 1.3);
+        abdomen.position.set(0, 0.2, -0.35);
+        antGroup.add(abdomen);
+
+        // Thorax (middle)
+        const thorax = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 6), antBrown);
+        thorax.position.set(0, 0.22, 0);
+        antGroup.add(thorax);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), antBlack);
+        head.position.set(0, 0.22, 0.3);
+        antGroup.add(head);
+
+        // Eyes (tiny red dots)
+        for (const side of [-1, 1]) {
+            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.04, 6, 4),
+                new THREE.MeshBasicMaterial({ color: 0xff2200 }));
+            eye.position.set(side * 0.1, 0.26, 0.4);
+            antGroup.add(eye);
+        }
+
+        // Antennae
+        for (const side of [-1, 1]) {
+            const antennaGeo = new THREE.CylinderGeometry(0.01, 0.01, 0.35, 4);
+            const antenna = new THREE.Mesh(antennaGeo, antBlack);
+            antenna.position.set(side * 0.08, 0.38, 0.38);
+            antenna.rotation.z = side * 0.4;
+            antenna.rotation.x = -0.6;
+            antGroup.add(antenna);
+            // Antenna tip
+            const tip = new THREE.Mesh(new THREE.SphereGeometry(0.025, 4, 4), antBlack);
+            tip.position.set(side * 0.22, 0.5, 0.55);
+            antGroup.add(tip);
+        }
+
+        // Legs (6 total, 3 per side)
+        for (const side of [-1, 1]) {
+            for (let i = 0; i < 3; i++) {
+                const legGeo = new THREE.CylinderGeometry(0.012, 0.01, 0.35, 4);
+                const leg = new THREE.Mesh(legGeo, antBlack);
+                leg.position.set(side * 0.18, 0.1, -0.15 + i * 0.2);
+                leg.rotation.z = side * 1.0;
+                leg.rotation.y = (i - 1) * 0.3;
+                antGroup.add(leg);
+            }
+        }
+
+        // Mandibles
+        for (const side of [-1, 1]) {
+            const mandible = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.12, 4),
+                new THREE.MeshPhongMaterial({ color: 0x332200 }));
+            mandible.position.set(side * 0.06, 0.18, 0.45);
+            mandible.rotation.x = Math.PI / 2;
+            mandible.rotation.z = side * 0.3;
+            antGroup.add(mandible);
+        }
+
+        antGroup.scale.set(1.4, 1.4, 1.4);
+        return antGroup;
+    }
+
+    function spawnAnt() {
+        const ant = buildAnt();
+
+        // Spawn from edges
+        const edge = Math.floor(Math.random() * 4);
+        const half = FLOOR_SIZE / 2 - 1;
+        switch (edge) {
+            case 0: ant.position.set(-half, 0, (Math.random() - 0.5) * half * 2); break;
+            case 1: ant.position.set(half, 0, (Math.random() - 0.5) * half * 2); break;
+            case 2: ant.position.set((Math.random() - 0.5) * half * 2, 0, -half); break;
+            case 3: ant.position.set((Math.random() - 0.5) * half * 2, 0, half); break;
+        }
+
+        ant.userData = {
+            speed: 0.06 + Math.random() * 0.03,
+            wobblePhase: Math.random() * Math.PI * 2,
+            alive: true
+        };
+
+        scene.add(ant);
+        ants.push(ant);
+    }
+
+    function updateAnts(delta) {
+        if (level < 3) return;
+
+        // Spawn ants periodically (max 6 on screen)
+        if (Math.random() < 0.008 && ants.length < 6) {
+            spawnAnt();
+        }
+
+        ants.forEach(ant => {
+            if (!ant.userData.alive || !mouse3D) return;
+
+            // Chase the mouse
+            const dx = mouse3D.position.x - ant.position.x;
+            const dz = mouse3D.position.z - ant.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+
+            if (dist > 0.1) {
+                const nx = dx / dist;
+                const nz = dz / dist;
+
+                // Wobble movement
+                ant.userData.wobblePhase += delta * 8;
+                const wobble = Math.sin(ant.userData.wobblePhase) * 0.02;
+
+                ant.position.x += nx * ant.userData.speed + wobble;
+                ant.position.z += nz * ant.userData.speed;
+
+                // Face the mouse
+                ant.rotation.y = Math.atan2(nx, nz);
+
+                // Walking animation (bob up and down)
+                ant.position.y = Math.abs(Math.sin(ant.userData.wobblePhase * 2)) * 0.05;
+            }
+
+            // Check collision with mouse
+            if (dist < 1.0 && invincibleTimer <= 0) {
+                lives--;
+                invincibleTimer = 2.0;
+                updateLivesDisplay();
+                createExplosion(mouse3D.position.clone(), 0xff2200);
+
+                // Flash
+                const flash = document.getElementById('danger-overlay');
+                flash.style.background = 'none';
+                flash.style.boxShadow = 'inset 0 0 100px rgba(255,0,0,0.6)';
+                flash.classList.add('active');
+                setTimeout(() => {
+                    flash.classList.remove('active');
+                    flash.style.background = '';
+                    flash.style.boxShadow = '';
+                }, 400);
+
+                // Remove the ant that hit
+                ant.userData.alive = false;
+                scene.remove(ant);
+
+                if (lives <= 0) gameOver();
+            }
+        });
+
+        // Clean dead ants
+        ants = ants.filter(a => a.userData.alive);
+    }
+
+    function addFloorBase(group, color) {
+        const baseGeo = new THREE.PlaneGeometry(FLOOR_SIZE * 2.5, FLOOR_SIZE * 2.5);
+        const baseMat = new THREE.MeshPhongMaterial({ color });
+        const base = new THREE.Mesh(baseGeo, baseMat);
+        base.rotation.x = -Math.PI / 2;
+        base.position.y = -0.16;
+        base.receiveShadow = true;
+        group.add(base);
+    }
+
+    function addWalls(group, color, wallH) {
+        const wallMat = new THREE.MeshPhongMaterial({ color, shininess: 15 });
+        const wallPositions = [
+            { x: 0, z: -FLOOR_SIZE / 2, sx: FLOOR_SIZE, rx: 0 },
+            { x: 0, z: FLOOR_SIZE / 2, sx: FLOOR_SIZE, rx: 0 },
+            { x: -FLOOR_SIZE / 2, z: 0, sx: FLOOR_SIZE, rx: Math.PI / 2 },
+            { x: FLOOR_SIZE / 2, z: 0, sx: FLOOR_SIZE, rx: Math.PI / 2 },
+        ];
+        wallPositions.forEach(w => {
+            const geo = new THREE.BoxGeometry(w.sx, wallH, 0.3);
+            const wall = new THREE.Mesh(geo, wallMat);
+            wall.position.set(w.x, wallH / 2, w.z);
+            wall.rotation.y = w.rx;
+            wall.castShadow = true;
+            wall.receiveShadow = true;
+            group.add(wall);
+        });
+    }
+
+    // ============ MOUSE CHARACTER ============
+    function buildMouse() {
+        mouseGroup = new THREE.Group();
+
+        const fur = (color, opts = {}) => new THREE.MeshPhongMaterial({
+            color, shininess: 30, specular: 0x333333, ...opts
+        });
+
+        const BODY_COLOR = 0x8a8a8a;
+        const BELLY_COLOR = 0xccbbaa;
+        const EAR_INNER = 0xf0a0a0;
+        const NOSE_COLOR = 0xf08080;
+
+        // Body (round egg shape)
+        const bodyGeo = new THREE.SphereGeometry(0.7, 24, 20);
+        bodyGeo.scale(1, 0.85, 1.2);
+        const body = new THREE.Mesh(bodyGeo, fur(BODY_COLOR));
+        body.position.y = 0.55;
+        body.castShadow = true;
+        mouseGroup.add(body);
+
+        // Belly (lighter patch)
+        const bellyGeo = new THREE.SphereGeometry(0.5, 20, 16);
+        bellyGeo.scale(0.8, 0.7, 0.6);
+        const belly = new THREE.Mesh(bellyGeo, fur(BELLY_COLOR));
+        belly.position.set(0, 0.4, 0.35);
+        mouseGroup.add(belly);
+
+        // Head
+        const headGeo = new THREE.SphereGeometry(0.55, 24, 20);
+        headGeo.scale(1, 0.95, 1.05);
+        const head = new THREE.Mesh(headGeo, fur(BODY_COLOR));
+        head.position.set(0, 0.9, 0.65);
+        head.castShadow = true;
+        mouseGroup.add(head);
+
+        // Snout
+        const snoutGeo = new THREE.SphereGeometry(0.22, 16, 12);
+        snoutGeo.scale(1, 0.8, 1.3);
+        const snout = new THREE.Mesh(snoutGeo, fur(BELLY_COLOR));
+        snout.position.set(0, 0.78, 1.1);
+        mouseGroup.add(snout);
+
+        // Nose (pink ball)
+        const noseGeo = new THREE.SphereGeometry(0.08, 12, 10);
+        const nose = new THREE.Mesh(noseGeo, new THREE.MeshPhongMaterial({
+            color: NOSE_COLOR, emissive: NOSE_COLOR, emissiveIntensity: 0.2, shininess: 100
+        }));
+        nose.position.set(0, 0.82, 1.28);
+        mouseGroup.add(nose);
+
+        // Eyes (big, cute)
+        for (const side of [-1, 1]) {
+            // White
+            const eyeWhiteGeo = new THREE.SphereGeometry(0.14, 14, 12);
+            const eyeWhite = new THREE.Mesh(eyeWhiteGeo, new THREE.MeshPhongMaterial({
+                color: 0xffffff, shininess: 200, specular: 0xffffff
+            }));
+            eyeWhite.position.set(side * 0.22, 1.0, 1.0);
+            mouseGroup.add(eyeWhite);
+
+            // Pupil
+            const pupilGeo = new THREE.SphereGeometry(0.08, 12, 10);
+            const pupil = new THREE.Mesh(pupilGeo, new THREE.MeshPhongMaterial({
+                color: 0x111111, shininess: 300, specular: 0x444444
+            }));
+            pupil.position.set(side * 0.22, 1.0, 1.12);
+            mouseGroup.add(pupil);
+
+            // Eye shine
+            const shineGeo = new THREE.SphereGeometry(0.035, 8, 8);
+            const shine = new THREE.Mesh(shineGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+            shine.position.set(side * 0.19, 1.04, 1.15);
+            mouseGroup.add(shine);
+        }
+
+        // Ears (big round)
+        for (const side of [-1, 1]) {
+            // Outer ear
+            const earGeo = new THREE.SphereGeometry(0.35, 18, 14);
+            earGeo.scale(0.3, 1, 1);
+            const ear = new THREE.Mesh(earGeo, fur(BODY_COLOR));
+            ear.position.set(side * 0.42, 1.35, 0.45);
+            ear.rotation.z = side * 0.3;
+            ear.rotation.x = -0.15;
+            ear.castShadow = true;
+            mouseGroup.add(ear);
+
+            // Inner ear (pink)
+            const innerGeo = new THREE.SphereGeometry(0.25, 14, 10);
+            innerGeo.scale(0.25, 1, 1);
+            const inner = new THREE.Mesh(innerGeo, fur(EAR_INNER, { shininess: 10 }));
+            inner.position.set(side * 0.44, 1.35, 0.47);
+            inner.rotation.z = side * 0.3;
+            inner.rotation.x = -0.15;
+            mouseGroup.add(inner);
+        }
+
+        // Whiskers (thin cylinders)
+        const whiskerMat = new THREE.MeshBasicMaterial({ color: 0xdddddd });
+        for (const side of [-1, 1]) {
+            for (let i = -1; i <= 1; i++) {
+                const wGeo = new THREE.CylinderGeometry(0.008, 0.005, 0.6, 4);
+                const w = new THREE.Mesh(wGeo, whiskerMat);
+                w.position.set(side * 0.28, 0.82 + i * 0.06, 1.15);
+                w.rotation.z = side * (0.8 + i * 0.15);
+                w.rotation.x = i * 0.1;
+                mouseGroup.add(w);
+            }
+        }
+
+        // Tail (curved tube)
+        const tailCurve = new THREE.CubicBezierCurve3(
+            new THREE.Vector3(0, 0.4, -0.7),
+            new THREE.Vector3(0, 0.8, -1.4),
+            new THREE.Vector3(0.3, 1.2, -1.8),
+            new THREE.Vector3(-0.2, 1.5, -2.0)
+        );
+        const tailGeo = new THREE.TubeGeometry(tailCurve, 20, 0.04, 8, false);
+        const tail = new THREE.Mesh(tailGeo, fur(0xd4a0a0, { shininess: 50 }));
+        tail.name = 'tail';
+        mouseGroup.add(tail);
+
+        // Feet (small pink ovals)
+        for (const side of [-1, 1]) {
+            const footGeo = new THREE.SphereGeometry(0.15, 12, 8);
+            footGeo.scale(0.7, 0.4, 1);
+            const foot = new THREE.Mesh(footGeo, fur(NOSE_COLOR));
+            foot.position.set(side * 0.35, 0.08, 0.15);
+            mouseGroup.add(foot);
+        }
+
+        // Shadow disc under mouse
+        const shadowGeo = new THREE.CircleGeometry(0.8, 24);
+        const shadowMat = new THREE.MeshBasicMaterial({
+            color: 0x000000, transparent: true, opacity: 0.25
+        });
+        const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = 0.02;
+        mouseGroup.add(shadow);
+
+        mouseGroup.scale.set(1.1, 1.1, 1.1);
+        scene.add(mouseGroup);
+
+        mouse3D = mouseGroup;
+    }
+
+    // ============ CHEESE ============
+    function spawnCheese() {
+        const cheese = new THREE.Group();
+
+        // Wedge shape using custom geometry
+        const wedgeShape = new THREE.Shape();
+        wedgeShape.moveTo(0, 0);
+        wedgeShape.lineTo(0.8, 0);
+        wedgeShape.lineTo(0.6, 0.5);
+        wedgeShape.lineTo(0, 0.5);
+        wedgeShape.closePath();
+
+        const extrudeSettings = { depth: 0.7, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3 };
+        const wedgeGeo = new THREE.ExtrudeGeometry(wedgeShape, extrudeSettings);
+        const cheeseMat = new THREE.MeshPhongMaterial({
+            color: 0xffc832,
+            shininess: 60,
+            specular: 0x886622,
+            emissive: 0xffaa00,
+            emissiveIntensity: 0.08
+        });
+        const wedge = new THREE.Mesh(wedgeGeo, cheeseMat);
+        wedge.position.set(-0.4, 0, -0.35);
+        wedge.castShadow = true;
+        cheese.add(wedge);
+
+        // Cheese holes (dark spheres recessed in)
+        const holeMat = new THREE.MeshPhongMaterial({
+            color: 0xe8a818, shininess: 10
+        });
+        const holes = [
+            { x: 0, y: 0.25, z: 0.02, s: 0.08 },
+            { x: 0.2, y: 0.15, z: -0.15, s: 0.06 },
+            { x: -0.1, y: 0.35, z: -0.08, s: 0.05 },
+            { x: 0.15, y: 0.4, z: 0.1, s: 0.07 },
+        ];
+        holes.forEach(h => {
+            const hGeo = new THREE.SphereGeometry(h.s, 10, 8);
+            const hMesh = new THREE.Mesh(hGeo, holeMat);
+            hMesh.position.set(h.x, h.y, h.z);
+            cheese.add(hMesh);
+        });
+
+        // Glow light
+        const cheeseLight = new THREE.PointLight(0xffcc44, 0.6, 5);
+        cheeseLight.position.set(0, 0.5, 0);
+        cheese.add(cheeseLight);
+
+        // Position randomly on floor
+        const margin = 3;
+        const half = FLOOR_SIZE / 2 - margin;
+        cheese.position.set(
+            (Math.random() - 0.5) * half * 2,
+            0,
+            (Math.random() - 0.5) * half * 2
+        );
+
+        // Avoid spawning too close to mouse
+        if (mouse3D) {
+            const dist = cheese.position.distanceTo(mouse3D.position);
+            if (dist < 5) {
+                cheese.position.x += 6;
+                cheese.position.z += 6;
+            }
+        }
+
+        // Avoid spawning inside furniture
+        for (const f of furniture) {
+            const dx = Math.abs(cheese.position.x - f.x);
+            const dz = Math.abs(cheese.position.z - f.z);
+            if (dx < f.rx + 1 && dz < f.rz + 1) {
+                cheese.position.x += (f.rx + 2) * (Math.random() > 0.5 ? 1 : -1);
+                cheese.position.z += (f.rz + 2) * (Math.random() > 0.5 ? 1 : -1);
+            }
+        }
+        // Re-clamp
+        cheese.position.x = Math.max(-half, Math.min(half, cheese.position.x));
+        cheese.position.z = Math.max(-half, Math.min(half, cheese.position.z));
+
+        cheese.userData = { bobPhase: Math.random() * Math.PI * 2 };
+        scene.add(cheese);
+        cheeses.push(cheese);
+    }
+
+    // ============ MOUSE TRAP ============
+    function spawnTrap(nearPos) {
+        const trap = new THREE.Group();
+
+        const wood = new THREE.MeshPhongMaterial({ color: 0xa0704a, shininess: 20, specular: 0x443322 });
+        const metal = new THREE.MeshPhongMaterial({ color: 0xaaaaaa, shininess: 100, specular: 0xffffff });
+
+        // Base (wooden board)
+        const baseGeo = new THREE.BoxGeometry(1.2, 0.12, 2.0);
+        const baseMesh = new THREE.Mesh(baseGeo, wood);
+        baseMesh.position.y = 0.06;
+        baseMesh.castShadow = true;
+        baseMesh.receiveShadow = true;
+        trap.add(baseMesh);
+
+        // Spring bar (metal wire — the snapping part)
+        const barGroup = new THREE.Group();
+
+        // Wire shape (U-shaped bar)
+        const wireCurve = new THREE.CubicBezierCurve3(
+            new THREE.Vector3(-0.4, 0, 0),
+            new THREE.Vector3(-0.4, 0, -0.9),
+            new THREE.Vector3(0.4, 0, -0.9),
+            new THREE.Vector3(0.4, 0, 0)
+        );
+        const wireGeo = new THREE.TubeGeometry(wireCurve, 16, 0.025, 8, false);
+        const wire = new THREE.Mesh(wireGeo, metal);
+        wire.castShadow = true;
+        barGroup.add(wire);
+
+        // Cross bar
+        const crossGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.8, 8);
+        const cross = new THREE.Mesh(crossGeo, metal);
+        cross.rotation.z = Math.PI / 2;
+        cross.position.z = -0.9;
+        barGroup.add(cross);
+
+        barGroup.position.set(0, 0.14, 0.6);
+        barGroup.name = 'snapBar';
+        trap.add(barGroup);
+
+        // Spring coil (decorative)
+        const coilGeo = new THREE.TorusGeometry(0.1, 0.02, 6, 12);
+        const coil = new THREE.Mesh(coilGeo, metal);
+        coil.position.set(0, 0.14, 0.6);
+        coil.rotation.x = Math.PI / 2;
+        trap.add(coil);
+
+        // Trigger plate (small metal plate)
+        const trigGeo = new THREE.BoxGeometry(0.3, 0.02, 0.25);
+        const trig = new THREE.Mesh(trigGeo, new THREE.MeshPhongMaterial({
+            color: 0xddaa44, shininess: 80
+        }));
+        trig.position.set(0, 0.14, -0.3);
+        trap.add(trig);
+
+        // Danger glow (red warning)
+        const dangerLight = new THREE.PointLight(0xff2200, 0, 8);
+        dangerLight.position.set(0, 1, 0);
+        dangerLight.name = 'dangerLight';
+        trap.add(dangerLight);
+
+        // Position near cheese pickup spot (offset randomly)
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 2.5 + Math.random() * 2;
+        trap.position.set(
+            nearPos.x + Math.cos(angle) * dist,
+            0,
+            nearPos.z + Math.sin(angle) * dist
+        );
+
+        // Clamp to floor bounds
+        const half = FLOOR_SIZE / 2 - 2;
+        trap.position.x = Math.max(-half, Math.min(half, trap.position.x));
+        trap.position.z = Math.max(-half, Math.min(half, trap.position.z));
+
+        // Random rotation
+        trap.rotation.y = Math.random() * Math.PI * 2;
+
+        trap.userData = {
+            state: 'idle',    // idle, warning, snapping, snapped
+            snapTimer: 0,
+            warningTime: 2.5, // seconds of warning before snap
+            snapSpeed: 0
+        };
+
+        trap.castShadow = true;
+        scene.add(trap);
+        traps.push(trap);
+    }
+
+    function activateTrap(trap) {
+        trap.userData.state = 'warning';
+        trap.userData.snapTimer = trap.userData.warningTime;
+
+        // Show danger
+        dangerActive = true;
+        document.getElementById('danger-overlay').classList.add('active');
+        document.getElementById('danger-text').classList.add('show');
+
+        activeTrap = trap;
+    }
+
+    function snapTrap(trap) {
+        trap.userData.state = 'snapping';
+        trap.userData.snapSpeed = 0;
+
+        // Hide danger
+        dangerActive = false;
+        document.getElementById('danger-overlay').classList.remove('active');
+        document.getElementById('danger-text').classList.remove('show');
+        activeTrap = null;
+    }
+
+    function updateTraps(delta) {
+        traps.forEach(trap => {
+            const dl = trap.getObjectByName('dangerLight');
+
+            if (trap.userData.state === 'warning') {
+                trap.userData.snapTimer -= delta;
+
+                // Pulsing danger light
+                if (dl) {
+                    dl.intensity = 2 + Math.sin(Date.now() * 0.015) * 1.5;
+                }
+
+                // Vibrate trap
+                trap.position.y = Math.sin(Date.now() * 0.03) * 0.03;
+
+                if (trap.userData.snapTimer <= 0) {
+                    snapTrap(trap);
+                }
+
+                // Check if mouse is too close when snapping
+                if (mouse3D) {
+                    const dist = trap.position.distanceTo(mouse3D.position);
+                    if (dist < 1.8 && trap.userData.snapTimer <= 0.3) {
+                        // Caught!
+                        hitByTrap(trap);
+                    }
+                }
+            }
+
+            if (trap.userData.state === 'snapping') {
+                const bar = trap.getObjectByName('snapBar');
+                if (bar) {
+                    trap.userData.snapSpeed += delta * 15;
+                    bar.rotation.x -= trap.userData.snapSpeed;
+                    if (bar.rotation.x <= -Math.PI * 0.8) {
+                        bar.rotation.x = -Math.PI * 0.8;
+                        trap.userData.state = 'snapped';
+
+                        // Check collision one more time
+                        if (mouse3D) {
+                            const dist = trap.position.distanceTo(mouse3D.position);
+                            if (dist < 1.5 && invincibleTimer <= 0) {
+                                hitByTrap(trap);
+                            }
+                        }
+                    }
+                }
+                if (dl) dl.intensity *= 0.95;
+            }
+
+            if (trap.userData.state === 'snapped') {
+                if (dl) dl.intensity *= 0.95;
+            }
+
+            // Bob cheese-like animation for idle traps
+            if (trap.userData.state === 'idle') {
+                trap.position.y = 0;
+            }
+        });
+    }
+
+    function hitByTrap(trap) {
+        if (invincibleTimer > 0) return;
+
+        lives--;
+        invincibleTimer = 2.0;
+        updateLivesDisplay();
+        createExplosion(mouse3D.position.clone(), 0xff4444);
+
+        // Flash
+        const flash = document.getElementById('danger-overlay');
+        flash.style.background = 'none';
+        flash.style.boxShadow = 'inset 0 0 100px rgba(255,0,0,0.6)';
+        flash.classList.add('active');
+        setTimeout(() => {
+            flash.classList.remove('active');
+            flash.style.background = '';
+            flash.style.boxShadow = '';
+        }, 400);
+
+        if (lives <= 0) {
+            gameOver();
+        }
+    }
+
+    // ============ EFFECTS ============
+    function createExplosion(pos, color) {
+        const colors = [color, 0xffff44, 0xffaa00, 0xff6622, 0xffffff];
+        for (let i = 0; i < 20; i++) {
+            const size = 0.06 + Math.random() * 0.15;
+            const c = colors[Math.floor(Math.random() * colors.length)];
+            const geo = new THREE.SphereGeometry(size, 6, 6);
+            const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 1 });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(pos);
+            p.position.y += 0.5;
+            p.userData = {
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.4,
+                    Math.random() * 0.3 + 0.1,
+                    (Math.random() - 0.5) * 0.4
+                ),
+                life: 1
+            };
+            scene.add(p);
+            particles.push(p);
+        }
+    }
+
+    function createCheeseParticles(pos) {
+        const colors = [0xffcc44, 0xffdd66, 0xffee88, 0xffffff, 0xffaa22];
+        for (let i = 0; i < 15; i++) {
+            const size = 0.05 + Math.random() * 0.12;
+            const c = colors[Math.floor(Math.random() * colors.length)];
+            const geo = i < 5
+                ? new THREE.OctahedronGeometry(size)
+                : new THREE.SphereGeometry(size, 6, 6);
+            const mat = new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 1 });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(pos);
+            p.position.y += 0.3;
+            p.userData = {
+                velocity: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.35,
+                    Math.random() * 0.35 + 0.15,
+                    (Math.random() - 0.5) * 0.35
+                ),
+                life: 1
+            };
+            scene.add(p);
+            particles.push(p);
+        }
+    }
+
+    function showCheesePopup(worldPos) {
+        const vec = worldPos.clone();
+        vec.y += 1;
+        vec.project(camera);
+        const x = (vec.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-vec.y * 0.5 + 0.5) * window.innerHeight;
+
+        const el = document.createElement('div');
+        el.className = 'cheese-popup';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.color = '#ffcc44';
+        el.innerHTML = '+1 &#x1F9C0;';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+    }
+
+    // ============ UPDATES ============
+    function updateMouse(delta) {
+        if (!mouse3D) return;
+
+        let mx = 0, mz = 0;
+        if (keys['ArrowLeft'] || keys['KeyA']) mx = -MOUSE_SPEED;
+        if (keys['ArrowRight'] || keys['KeyD']) mx = MOUSE_SPEED;
+        if (keys['ArrowUp'] || keys['KeyW']) mz = -MOUSE_SPEED;
+        if (keys['ArrowDown'] || keys['KeyS']) mz = MOUSE_SPEED;
+
+        const newX = mouse3D.position.x + mx;
+        const newZ = mouse3D.position.z + mz;
+
+        // Furniture collision check
+        let blocked = false;
+        for (const f of furniture) {
+            const dx = Math.abs(newX - f.x);
+            const dz = Math.abs(newZ - f.z);
+            if (dx < f.rx + 0.5 && dz < f.rz + 0.5) {
+                blocked = true;
+                break;
+            }
+        }
+
+        if (!blocked) {
+            mouse3D.position.x = newX;
+            mouse3D.position.z = newZ;
+        }
+
+        // Clamp to floor
+        const half = FLOOR_SIZE / 2 - 1.5;
+        mouse3D.position.x = Math.max(-half, Math.min(half, mouse3D.position.x));
+        mouse3D.position.z = Math.max(-half, Math.min(half, mouse3D.position.z));
+
+        // Face direction of movement
+        if (Math.abs(mx) > 0.01 || Math.abs(mz) > 0.01) {
+            const targetAngle = Math.atan2(mx, mz);
+            // Smooth rotation
+            let diff = targetAngle - mouse3D.rotation.y;
+            while (diff > Math.PI) diff -= Math.PI * 2;
+            while (diff < -Math.PI) diff += Math.PI * 2;
+            mouse3D.rotation.y += diff * 0.15;
+
+            // Bob animation when moving
+            mouse3D.position.y = Math.abs(Math.sin(Date.now() * 0.012)) * 0.12;
+        } else {
+            // Idle breathing
+            mouse3D.position.y = Math.sin(Date.now() * 0.003) * 0.03;
+        }
+
+        // Invincibility flash
+        if (invincibleTimer > 0) {
+            invincibleTimer -= delta;
+            mouse3D.visible = Math.sin(Date.now() * 0.025) > 0;
+        } else {
+            mouse3D.visible = true;
+        }
+
+        // Move light to follow mouse
+        const ml = scene.getObjectByName('mouseLight');
+        if (ml) {
+            ml.position.x = mouse3D.position.x;
+            ml.position.z = mouse3D.position.z;
+        }
+
+        // Camera follows mouse loosely
+        const camTargetX = mouse3D.position.x * 0.3;
+        const camTargetZ = mouse3D.position.z * 0.2 + 18;
+        camera.position.x += (camTargetX - camera.position.x) * 0.04;
+        camera.position.z += (camTargetZ - camera.position.z) * 0.04;
+        camera.lookAt(mouse3D.position.x * 0.5, 0, mouse3D.position.z * 0.5 - 2);
+    }
+
+    function updateCheeses(delta) {
+        cheeses.forEach(cheese => {
+            // Bobbing
+            cheese.userData.bobPhase += delta * 2;
+            cheese.position.y = 0.15 + Math.sin(cheese.userData.bobPhase) * 0.08;
+            cheese.rotation.y += delta * 0.8;
+        });
+
+        // Check collection
+        if (mouse3D) {
+            for (let i = cheeses.length - 1; i >= 0; i--) {
+                const c = cheeses[i];
+                const dist = c.position.distanceTo(mouse3D.position);
+                if (dist < 1.5) {
+                    const cPos = c.position.clone();
+
+                    // Collected!
+                    score++;
+                    document.getElementById('score').textContent = score;
+                    updateLevelProgress();
+                    showCheesePopup(cPos);
+                    createCheeseParticles(cPos);
+
+                    // Check for level up
+                    if (score >= cheeseForNextLevel && level < 3) {
+                        showLevelUp();
+                        return;
+                    }
+
+                    // Spawn a trap nearby
+                    spawnTrap(cPos);
+
+                    // Activate the trap after a short delay
+                    const newTrap = traps[traps.length - 1];
+                    setTimeout(() => {
+                        if (newTrap.userData.state === 'idle') {
+                            activateTrap(newTrap);
+                        }
+                    }, 300);
+
+                    scene.remove(c);
+                    cheeses.splice(i, 1);
+
+                    // Spawn new cheese
+                    setTimeout(() => {
+                        if (isPlaying) spawnCheese();
+                    }, 800);
+                }
+            }
+        }
+
+        // Ensure minimum cheese count
+        while (cheeses.length < 3 && isPlaying) {
+            spawnCheese();
+        }
+    }
+
+    function updateParticles(delta) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.position.add(p.userData.velocity);
+            p.userData.velocity.y -= 0.012; // gravity
+            p.userData.life -= 0.02;
+            p.material.opacity = Math.max(0, p.userData.life);
+            p.scale.multiplyScalar(0.97);
+
+            if (p.userData.life <= 0 || p.position.y < -1) {
+                scene.remove(p);
+                particles.splice(i, 1);
+            }
+        }
+    }
+
+    function cleanupOldTraps() {
+        // Remove snapped traps after a while
+        for (let i = traps.length - 1; i >= 0; i--) {
+            if (traps[i].userData.state === 'snapped') {
+                traps[i].userData.removeTimer = (traps[i].userData.removeTimer || 0) + 1;
+                if (traps[i].userData.removeTimer > 300) {
+                    // Fade out
+                    traps[i].children.forEach(c => {
+                        if (c.material) {
+                            c.material.transparent = true;
+                            c.material.opacity -= 0.02;
+                        }
+                    });
+                    if (traps[i].userData.removeTimer > 350) {
+                        scene.remove(traps[i]);
+                        traps.splice(i, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    function updateLivesDisplay() {
+        const el = document.getElementById('lives-display');
+        let html = '';
+        for (let i = 0; i < 5; i++) {
+            html += '<span class="life-heart ' + (i >= lives ? 'lost' : '') + '">&#x1F42D;</span>';
+        }
+        el.innerHTML = html;
+    }
+
+    // ============ GAME LOOP ============
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = clock.getDelta();
+
+        if (isPlaying) {
+            updateMouse(delta);
+            updateCheeses(delta);
+            updateTraps(delta);
+            updateAnts(delta);
+            updateParticles(delta);
+            cleanupOldTraps();
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('level-up-screen').classList.add('hidden');
+        document.getElementById('hud').classList.remove('hidden');
+
+        score = 0; lives = 5; invincibleTimer = 0; level = 1; cheeseForNextLevel = 10;
+        dangerActive = false;
+        activeTrap = null;
+        document.getElementById('score').textContent = 0;
+        document.getElementById('level-display').textContent = 1;
+        document.getElementById('danger-overlay').classList.remove('active');
+        document.getElementById('danger-text').classList.remove('show');
+        updateLivesDisplay();
+        updateLevelProgress();
+        document.querySelectorAll('.cheese-popup').forEach(el => el.remove());
+
+        // Clear old objects
+        cheeses.forEach(c => scene.remove(c));
+        traps.forEach(t => scene.remove(t));
+        particles.forEach(p => scene.remove(p));
+        ants.forEach(a => scene.remove(a));
+        cheeses = []; traps = []; particles = []; ants = [];
+
+        // Reset scene colors for indoor levels
+        scene.background = new THREE.Color(0x1a0e05);
+        scene.fog = new THREE.Fog(0x1a0e05, 20, 45);
+
+        // Build level 1
+        buildEnvironment(1);
+
+        // Reset mouse position
+        if (mouse3D) {
+            mouse3D.position.set(0, 0, 0);
+            mouse3D.rotation.y = 0;
+            mouse3D.visible = true;
+        }
+
+        // Spawn initial cheese
+        for (let i = 0; i < 4; i++) spawnCheese();
+
+        isPlaying = true;
+    }
+
+    function updateLevelProgress() {
+        const needed = cheeseForNextLevel - score;
+        if (level < 3 && needed > 0) {
+            document.getElementById('level-progress').textContent = '(' + needed + ' to next level)';
+        } else {
+            document.getElementById('level-progress').textContent = '';
+        }
+    }
+
+    function showLevelUp() {
+        isPlaying = false;
+        const levelNames = ['', 'Empty Room', 'The Kitchen', 'The Picnic'];
+        const nextName = levelNames[level + 1] || 'New Area';
+        let extraText = '';
+        if (level + 1 === 3) extraText = ' Watch out for ants!';
+        document.getElementById('level-up-text').textContent = 'Next: ' + nextName + '!' + extraText;
+        document.getElementById('level-up-screen').classList.remove('hidden');
+    }
+
+    function nextLevel() {
+        level++;
+        cheeseForNextLevel = level * 10 + 10;
+        document.getElementById('level-up-screen').classList.add('hidden');
+        document.getElementById('level-display').textContent = level;
+
+        // Clear traps/cheese/particles
+        cheeses.forEach(c => scene.remove(c));
+        traps.forEach(t => scene.remove(t));
+        particles.forEach(p => scene.remove(p));
+        ants.forEach(a => scene.remove(a));
+        cheeses = []; traps = []; particles = []; ants = [];
+        document.querySelectorAll('.cheese-popup').forEach(el => el.remove());
+
+        // Build new environment
+        buildEnvironment(level);
+
+        // Reset mouse position
+        if (mouse3D) {
+            mouse3D.position.set(0, 0, 5);
+            mouse3D.rotation.y = 0;
+        }
+
+        // Spawn cheese
+        for (let i = 0; i < 4; i++) spawnCheese();
+        updateLevelProgress();
+
+        dangerActive = false;
+        activeTrap = null;
+        document.getElementById('danger-overlay').classList.remove('active');
+        document.getElementById('danger-text').classList.remove('show');
+
+        isPlaying = true;
+    }
+
+    function gameOver() {
+        isPlaying = false;
+        dangerActive = false;
+        document.getElementById('danger-overlay').classList.remove('active');
+        document.getElementById('danger-text').classList.remove('show');
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-score').innerHTML = score + ' &#x1F9C0;';
+    }
+
+    function restartGame() {
+        document.getElementById('game-over-screen').classList.add('hidden');
+        startGame();
+    }
+
+    window.onload = init;
+    </script>
+</body>
+</html>

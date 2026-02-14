@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade | AIBridges</title>
+    <meta name="description" content="Free browser games by AIBridges - fun for kids and families!">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%236366f1'/%3E%3Cstop offset='100%25' style='stop-color:%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0f'/%3E%3Cpath d='M8 22L16 8L24 22H8Z' fill='url(%23g)' opacity='0.9'/%3E%3Ccircle cx='16' cy='18' r='3' fill='%230a0a0f'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #22d3ee;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 30, 0.6);
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-effects {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-effects::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(34,211,238,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 60% 80%, rgba(168,85,247,0.05) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite alternate;
+        }
+        @keyframes bgFloat {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-3%, -3%) rotate(2deg); }
+        }
+
+        /* Nav */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10,10,15,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .back-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        /* Content */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 24px 60px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .page-header h1 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            background: linear-gradient(135deg, #ffcc44, #ff6644, #ff44aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+            letter-spacing: 2px;
+        }
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+        }
+
+        /* Game Cards */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 32px;
+        }
+
+        .game-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4), 0 0 40px rgba(99,102,241,0.1);
+        }
+
+        .game-preview {
+            height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-preview-mouse {
+            background: linear-gradient(135deg, #2d5a1e 0%, #1a3d12 40%, #0f2a0a 100%);
+        }
+        .game-preview-mouse::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 30% 60%, rgba(255,204,68,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 70% 30%, rgba(255,100,50,0.15) 0%, transparent 40%);
+        }
+
+        .game-preview-rocket {
+            background: linear-gradient(135deg, #0a0a2e 0%, #1a1040 40%, #0d0820 100%);
+        }
+        .game-preview-rocket::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 50% 40%, rgba(99,102,241,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 20% 70%, rgba(34,211,238,0.15) 0%, transparent 40%);
+        }
+
+        .game-emoji {
+            font-size: 6rem;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+            animation: cardBounce 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+        @keyframes cardBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        .game-card:nth-child(2) .game-emoji {
+            animation-delay: 0.5s;
+        }
+
+        .game-info {
+            padding: 28px;
+        }
+        .game-info h2 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        .game-card:nth-child(1) .game-info h2 { color: #ffcc44; }
+        .game-card:nth-child(2) .game-info h2 { color: var(--accent); }
+        .game-card:nth-child(3) .game-info h2 { color: #ff44aa; }
+        .game-card:nth-child(3) .game-emoji { animation-delay: 1s; }
+
+        .game-info p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .game-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .tag {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .play-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 14px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.15rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .play-btn:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .play-btn-mouse {
+            background: linear-gradient(135deg, #ffcc44, #e8a020);
+            color: #3d2510;
+            box-shadow: 0 4px 0 #b8771a, 0 8px 20px rgba(255,180,40,0.3);
+        }
+        .play-btn-rocket {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            box-shadow: 0 4px 0 #4338ca, 0 8px 20px rgba(99,102,241,0.3);
+        }
+        .play-btn-hover {
+            background: linear-gradient(135deg, #ff44aa, #aa22ff);
+            color: white;
+            box-shadow: 0 4px 0 #881166, 0 8px 20px rgba(255,68,170,0.3);
+        }
+        .game-preview-hover {
+            background: linear-gradient(135deg, #1a0030 0%, #2d1050 40%, #0d0020 100%);
+        }
+        .game-preview-hover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 40% 50%, rgba(255,68,170,0.2) 0%, transparent 40%),
+                radial-gradient(circle at 70% 30%, rgba(170,34,255,0.15) 0%, transparent 40%);
+        }
+
+        .play-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
+        }
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Stars background */
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @media (max-width: 500px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            .page-header h1 {
+                font-size: 2.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-effects"></div>
+
+    <nav>
+        <a href="index.html" class="logo">AIBridges</a>
+        <a href="index.html" class="back-link">&larr; Back to Home</a>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>ARCADE</h1>
+            <p>Free browser games &mdash; fun for kids and families!</p>
+        </div>
+
+        <div class="games-grid">
+            <div class="game-card">
+                <div class="game-preview game-preview-mouse">
+                    <div class="game-emoji">&#x1F42D;</div>
+                </div>
+                <div class="game-info">
+                    <h2>Mouse Trap!</h2>
+                    <p>Guide a cute 3D mouse through rooms grabbing cheese while dodging traps and ants! 3 levels of adventure &mdash; kitchen, picnic, and more.</p>
+                    <div class="game-tags">
+                        <span class="tag">3D</span>
+                        <span class="tag">Kids Friendly</span>
+                        <span class="tag">3 Levels</span>
+                        <span class="tag">Arrow Keys / WASD</span>
+                    </div>
+                    <a href="mouse-game.html" class="play-btn play-btn-mouse">
+                        <span class="play-icon">&#x25B6;</span> PLAY NOW
+                    </a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-preview game-preview-rocket">
+                    <div class="game-emoji">&#x1F680;</div>
+                </div>
+                <div class="game-info">
+                    <h2>Rocket Blaster</h2>
+                    <p>Pilot a detailed 3D rocketship through an asteroid field! Dodge and blast your way to a high score with combo multipliers.</p>
+                    <div class="game-tags">
+                        <span class="tag">3D</span>
+                        <span class="tag">Kids Friendly</span>
+                        <span class="tag">Spacebar to Shoot</span>
+                        <span class="tag">Arrow Keys / WASD</span>
+                    </div>
+                    <a href="rocket-voxel.html" class="play-btn play-btn-rocket">
+                        <span class="play-icon">&#x25B6;</span> PLAY NOW
+                    </a>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <div class="game-preview game-preview-hover">
+                    <div class="game-emoji">&#x1F3CE;</div>
+                </div>
+                <div class="game-info">
+                    <h2>HoverCruise</h2>
+                    <p>Race through neon-lit tracks in a futuristic hovercraft! High-speed 3D racing with glowing visuals and tight turns.</p>
+                    <div class="game-tags">
+                        <span class="tag">3D Racing</span>
+                        <span class="tag">Neon</span>
+                        <span class="tag">Arrow Keys</span>
+                    </div>
+                    <a href="games/hovercruise/" class="play-btn play-btn-hover">
+                        <span class="play-icon">&#x25B6;</span> PLAY NOW
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Built with &#x2764; by <a href="index.html">AIBridges</a> &mdash; Cranston, RI</p>
+    </div>
+
+    <canvas class="stars" id="stars"></canvas>
+    <script>
+    // Tiny star field
+    const c = document.getElementById('stars');
+    const ctx = c.getContext('2d');
+    function resizeStars() { c.width = window.innerWidth; c.height = window.innerHeight; drawStars(); }
+    function drawStars() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        for (let i = 0; i < 80; i++) {
+            const x = Math.random() * c.width;
+            const y = Math.random() * c.height;
+            const r = Math.random() * 1.2;
+            const a = 0.2 + Math.random() * 0.4;
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255,255,255,${a})`;
+            ctx.fill();
+        }
+    }
+    resizeStars();
+    window.addEventListener('resize', resizeStars);
+    </script>
+</body>
+</html>

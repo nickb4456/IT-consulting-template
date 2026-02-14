@@ -182,6 +182,16 @@
             </div>
         </div>
         
+        <!-- Comp Analysis Scatter (Plotly) -->
+        <div class="section-header" id="scatterHeader" style="display:none;">
+            <h2>🎯 Comp Analysis</h2>
+        </div>
+        <div class="chart-card full-width" id="scatterCard" style="display:none;">
+            <div class="chart-title"><span class="emoji">📊</span> Price vs Square Footage <span style="font-weight:400;color:#64748b;margin-left:0.5rem">(hover for details)</span></div>
+            <div id="scatterPlot" style="height:400px;"></div>
+            <div class="chart-insight" id="scatterInsight"></div>
+        </div>
+        
         <!-- Loading -->
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
@@ -217,6 +227,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <script>
         const DATA_URL = 'ri-sales.json.gz?v=' + new Date().toISOString().split('T')[0];
         
@@ -474,6 +485,76 @@
                     }
                 }
             });
+            
+            // Plotly Scatter Plot - Comp Analysis
+            const withSqftData = filtered.filter(p => p.sqft > 0 && p.price > 0);
+            if (withSqftData.length >= 10) {
+                document.getElementById('scatterHeader').style.display = 'flex';
+                document.getElementById('scatterCard').style.display = 'block';
+                
+                const sold = withSqftData.filter(p => p.soldDate);
+                const forSale = withSqftData.filter(p => !p.soldDate && p.status === 'For Sale');
+                
+                const traces = [];
+                
+                if (sold.length > 0) {
+                    traces.push({
+                        x: sold.map(p => p.sqft),
+                        y: sold.map(p => p.price),
+                        mode: 'markers',
+                        type: 'scatter',
+                        name: 'Sold',
+                        marker: { color: '#6366f1', size: 8, opacity: 0.7 },
+                        text: sold.map(p => `<b>${p.address}</b><br>${p.beds}bd/${p.baths}ba • ${p.sqft?.toLocaleString()} sqft<br>$${p.price?.toLocaleString()} • $${Math.round(p.price/p.sqft)}/sqft<br>${p.soldDate || ''}`),
+                        hoverinfo: 'text'
+                    });
+                }
+                
+                if (forSale.length > 0) {
+                    traces.push({
+                        x: forSale.map(p => p.sqft),
+                        y: forSale.map(p => p.price),
+                        mode: 'markers',
+                        type: 'scatter',
+                        name: 'For Sale',
+                        marker: { color: '#10b981', size: 10, symbol: 'diamond', opacity: 0.9 },
+                        text: forSale.map(p => `<b>${p.address}</b><br>${p.beds}bd/${p.baths}ba • ${p.sqft?.toLocaleString()} sqft<br>$${p.price?.toLocaleString()} • $${Math.round(p.price/p.sqft)}/sqft<br>🟢 Active • ${p.dom || 0} days`),
+                        hoverinfo: 'text'
+                    });
+                }
+                
+                // Add trendline
+                if (sold.length > 5) {
+                    const avgPpsf = sold.reduce((a, p) => a + p.price/p.sqft, 0) / sold.length;
+                    const minSqft = Math.min(...sold.map(p => p.sqft));
+                    const maxSqft = Math.max(...sold.map(p => p.sqft));
+                    traces.push({
+                        x: [minSqft, maxSqft],
+                        y: [minSqft * avgPpsf, maxSqft * avgPpsf],
+                        mode: 'lines',
+                        name: `Avg $${Math.round(avgPpsf)}/sqft`,
+                        line: { color: '#f59e0b', width: 2, dash: 'dash' }
+                    });
+                }
+                
+                const layout = {
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0.2)',
+                    font: { color: '#94a3b8' },
+                    xaxis: { title: 'Square Footage', gridcolor: 'rgba(255,255,255,0.1)', tickformat: ',d' },
+                    yaxis: { title: 'Price', gridcolor: 'rgba(255,255,255,0.1)', tickprefix: '$', tickformat: ',d' },
+                    legend: { x: 0, y: 1.1, orientation: 'h' },
+                    margin: { t: 30, r: 20, b: 50, l: 70 },
+                    hovermode: 'closest'
+                };
+                
+                Plotly.newPlot('scatterPlot', traces, layout, { responsive: true, displayModeBar: false });
+                
+                // Scatter insight
+                const avgPpsf = withSqftData.reduce((a, p) => a + p.price/p.sqft, 0) / withSqftData.length;
+                const outliers = withSqftData.filter(p => p.price/p.sqft > avgPpsf * 1.5 || p.price/p.sqft < avgPpsf * 0.5).length;
+                document.getElementById('scatterInsight').innerHTML = `<strong>${withSqftData.length}</strong> properties plotted. Avg <strong>$${Math.round(avgPpsf)}/sqft</strong>. ${outliers > 0 ? `<strong>${outliers} outliers</strong> may indicate unique features or pricing opportunities.` : 'Pricing appears consistent across sizes.'}`;
+            }
         }
         
         function setupPagination(filtered) {

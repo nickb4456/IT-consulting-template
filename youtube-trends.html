@@ -877,13 +877,18 @@
                 return;
             }
             
-            const maxViews = patterns[0]?.avgViews || 1;
+            // Handle outliers: if top is 3x+ bigger than #2, use #2 as reference
+            const sorted = [...patterns].sort((a, b) => b.avgViews - a.avgViews);
+            let maxViews = sorted[0]?.avgViews || 1;
+            if (sorted.length > 1 && sorted[0].avgViews > sorted[1].avgViews * 3) {
+                maxViews = sorted[1].avgViews * 1.2; // Use 2nd highest + 20% headroom
+            }
             
             container.innerHTML = patterns.slice(0, 8).map(p => `
                 <div class="pattern-bar">
                     <span class="name">${escapeHtml(p.name)}</span>
                     <div class="bar-container">
-                        <div class="bar" style="width: ${Math.max(10, (p.avgViews / maxViews) * 100)}%">
+                        <div class="bar" style="width: ${Math.min(100, Math.max(10, (p.avgViews / maxViews) * 100))}%">
                             ${formatViews(p.avgViews)} avg · ${p.count} videos
                         </div>
                     </div>

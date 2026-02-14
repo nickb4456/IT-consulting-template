@@ -3670,8 +3670,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  let hoverTimeout = null;
  let currentHoverCard = null;
  
+ let insightHoverInitialized = false;
+ 
  function initInsightHover() {
  if (window.innerWidth <= 768) return; // Desktop only
+ if (insightHoverInitialized) return; // Prevent duplicate listeners
+ insightHoverInitialized = true;
  
  const cards = document.querySelectorAll('.insight-hover');
  
@@ -3699,7 +3703,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  function showInsightChart(data, cardEl) {
- if (!data) return;
+ if (!data || !data.labels || data.labels.length === 0) return;
  
  const modal = document.getElementById('insightChartModal');
  const canvas = document.getElementById('insightChart');
@@ -3792,8 +3796,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  if (modal) modal.classList.remove('active');
  }
  
- // Initialize on load
- document.addEventListener('DOMContentLoaded', initInsightHover);
+ // Note: initInsightHover() is called from updateInsights() after data loads
 
  // Property Details Search (VGSI data - no owner names)
  let propertyData = null;

@@ -999,10 +999,11 @@ loadPropertyData().then(data => {
   document.getElementById('statTowns').textContent = s.citiesCovered;
   document.getElementById('heroSubtitle').textContent = (s.total / 1000).toFixed(0) + ',000+ Properties • ' + s.citiesCovered + ' Towns • Updated Daily';
   
-  // Initialize charts now that data is loaded
+  // Initialize everything now that data is loaded
   if (typeof initCharts === 'function') initCharts();
   if (typeof initHouseHunter === 'function') initHouseHunter();
-  if (typeof initLandDeals === 'function') initLandDeals();
+  if (typeof initLandDealFinder === 'function') initLandDealFinder();
+  if (typeof initCityHeatmap === 'function') initCityHeatmap();
   
   // Update Key Market Insights
   updateInsights();
@@ -3237,12 +3238,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  a.click();
  }
  
- // Initialize land deal finder on DOM ready
- document.addEventListener('DOMContentLoaded', function() {
- setTimeout(initLandDealFinder, 500);
- setTimeout(initHouseHunter, 600);
- setTimeout(initCityHeatmap, 700);
- });
+ // Land deals, house hunter, and heatmap initialized after data loads (see loadPropertyData().then())
  
  // City Price Heatmap
  function initCityHeatmap() {

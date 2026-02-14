@@ -46,7 +46,24 @@
         
         .nav-buttons { display: flex; gap: 1rem; }
         
+        .charts-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+        .chart-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; }
+        .chart-title { color: #94a3b8; font-size: 0.85rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .boxplot-container { display: flex; flex-direction: column; gap: 0.5rem; }
+        .boxplot { height: 40px; position: relative; background: rgba(255,255,255,0.02); border-radius: 8px; }
+        .boxplot-whisker { position: absolute; top: 50%; height: 2px; background: #64748b; }
+        .boxplot-box { position: absolute; top: 10%; height: 80%; background: rgba(99,102,241,0.4); border: 2px solid #6366f1; border-radius: 4px; }
+        .boxplot-median { position: absolute; top: 5%; height: 90%; width: 3px; background: #ec4899; border-radius: 2px; }
+        .boxplot-label { font-size: 0.75rem; color: #94a3b8; display: flex; justify-content: space-between; padding: 0 0.5rem; }
+        
+        .quartile-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-top: 1rem; }
+        .quartile-stat { text-align: center; padding: 0.5rem; background: rgba(255,255,255,0.02); border-radius: 6px; }
+        .quartile-value { font-weight: 700; color: #6366f1; }
+        .quartile-label { font-size: 0.7rem; color: #64748b; }
+        
         @media (max-width: 768px) {
+            .charts-section { grid-template-columns: 1fr; }
             .header { flex-direction: column; gap: 1rem; align-items: flex-start; }
             .stats { flex-wrap: wrap; gap: 1rem; }
             .results-table { font-size: 0.8rem; display: block; overflow-x: auto; }
@@ -72,6 +89,27 @@
             <div class="stat"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Properties</div></div>
             <div class="stat"><div class="stat-value" id="medianPrice">$0</div><div class="stat-label">Median Price</div></div>
             <div class="stat"><div class="stat-value" id="avgPrice">$0</div><div class="stat-label">Average Price</div></div>
+        </div>
+        
+        <div class="charts-section" id="chartsSection" style="display: none;">
+            <div class="chart-card">
+                <div class="chart-title">📊 Price Distribution (Box Plot)</div>
+                <div class="boxplot-container">
+                    <div class="boxplot" id="boxplot"></div>
+                    <div class="boxplot-label"><span id="minLabel">$0</span><span id="maxLabel">$0</span></div>
+                </div>
+                <div class="quartile-stats">
+                    <div class="quartile-stat"><div class="quartile-value" id="q0">$0</div><div class="quartile-label">Min</div></div>
+                    <div class="quartile-stat"><div class="quartile-value" id="q1">$0</div><div class="quartile-label">Q1 (25%)</div></div>
+                    <div class="quartile-stat"><div class="quartile-value" id="q2">$0</div><div class="quartile-label">Median</div></div>
+                    <div class="quartile-stat"><div class="quartile-value" id="q3">$0</div><div class="quartile-label">Q3 (75%)</div></div>
+                    <div class="quartile-stat"><div class="quartile-value" id="q4">$0</div><div class="quartile-label">Max</div></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-title">📈 Price Histogram</div>
+                <canvas id="histogramChart" height="150"></canvas>
+            </div>
         </div>
         
         <div id="loading" class="loading">
@@ -103,6 +141,7 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const DATA_URL = 'ri-sales.json.gz';
         
@@ -200,6 +239,12 @@
                 document.getElementById('medianPrice').textContent = '$' + Math.round(median / 1000) + 'K';
                 document.getElementById('avgPrice').textContent = '$' + Math.round(avg / 1000) + 'K';
                 
+                // Render charts if enough data
+                if (prices.length >= 5) {
+                    renderCharts(prices);
+                    document.getElementById('chartsSection').style.display = 'grid';
+                }
+                
                 // Render table
                 const tbody = document.getElementById('resultsBody');
                 tbody.innerHTML = filtered.map(p => `
@@ -228,6 +273,74 @@
         }
         
         loadData();
+        
+        function renderCharts(prices) {
+            // Calculate quartiles
+            const n = prices.length;
+            const q0 = prices[0];
+            const q1 = prices[Math.floor(n * 0.25)];
+            const q2 = prices[Math.floor(n * 0.5)];
+            const q3 = prices[Math.floor(n * 0.75)];
+            const q4 = prices[n - 1];
+            
+            const fmt = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
+            
+            // Update quartile stats
+            document.getElementById('q0').textContent = fmt(q0);
+            document.getElementById('q1').textContent = fmt(q1);
+            document.getElementById('q2').textContent = fmt(q2);
+            document.getElementById('q3').textContent = fmt(q3);
+            document.getElementById('q4').textContent = fmt(q4);
+            document.getElementById('minLabel').textContent = fmt(q0);
+            document.getElementById('maxLabel').textContent = fmt(q4);
+            
+            // Render box plot
+            const boxplot = document.getElementById('boxplot');
+            const range = q4 - q0;
+            const toPercent = (v) => ((v - q0) / range * 100);
+            
+            boxplot.innerHTML = `
+                <div class="boxplot-whisker" style="left: 0; width: ${toPercent(q1)}%"></div>
+                <div class="boxplot-whisker" style="left: ${toPercent(q3)}%; width: ${100 - toPercent(q3)}%"></div>
+                <div class="boxplot-box" style="left: ${toPercent(q1)}%; width: ${toPercent(q3) - toPercent(q1)}%"></div>
+                <div class="boxplot-median" style="left: ${toPercent(q2)}%"></div>
+            `;
+            
+            // Render histogram
+            const buckets = Array(10).fill(0);
+            const bucketSize = range / 10;
+            prices.forEach(p => {
+                const idx = Math.min(9, Math.floor((p - q0) / bucketSize));
+                buckets[idx]++;
+            });
+            
+            const labels = buckets.map((_, i) => {
+                const low = q0 + i * bucketSize;
+                return fmt(low);
+            });
+            
+            new Chart(document.getElementById('histogramChart'), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        data: buckets,
+                        backgroundColor: 'rgba(99,102,241,0.6)',
+                        borderColor: '#6366f1',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', maxRotation: 45 } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>

@@ -10,16 +10,6 @@
         body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(180deg, var(--dark) 0%, #1e293b 50%, var(--dark) 100%); color: #e2e8f0; line-height: 1.6; min-height: 100vh; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
         
-        /* Header with gradient border */
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(99,102,241,0.2); border-radius: 16px; }
-        .home-btn { display: inline-flex; align-items: center; gap: 0.5rem; background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(99,102,241,0.1)); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc; padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none; font-weight: 600; transition: all 0.3s; }
-        .home-btn:hover { background: linear-gradient(135deg, rgba(99,102,241,0.4), rgba(99,102,241,0.2)); transform: translateY(-2px); box-shadow: 0 4px 20px rgba(99,102,241,0.3); }
-        .back-btn { background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.1)); border-color: rgba(16,185,129,0.4); color: #6ee7b7; }
-        .back-btn:hover { background: linear-gradient(135deg, rgba(16,185,129,0.4), rgba(16,185,129,0.2)); box-shadow: 0 4px 20px rgba(16,185,129,0.3); }
-        
-        h1 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .subtitle { color: #64748b; font-size: 0.95rem; margin-top: 0.25rem; }
-        
         /* Stats Cards - matching main page style */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
         .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.25rem; text-align: center; }
@@ -98,13 +88,15 @@
     <!-- Nav Bar (matches main page) -->
     <nav style="position:fixed;top:0;left:0;right:0;background:rgba(15,23,42,0.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.08);z-index:1000;padding:0.75rem 2rem;">
         <div style="max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;">
-            <a href="ri-report.html" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="32" height="32" rx="6" fill="#6366f1"/>
-                    <path d="M6 22h20M9 22v-6l7-8 7 8v6M13 22v-5h6v5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>
-                <span style="font-weight:700;font-size:1.1rem;color:#f8fafc">RI Real Estate</span>
-            </a>
+            <div style="display:flex;align-items:center;gap:1.5rem;">
+                <a href="ri-report.html" style="display:flex;align-items:center;gap:0.5rem;text-decoration:none;">
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="32" height="32" rx="6" fill="#6366f1"/>
+                        <path d="M6 22h20M9 22v-6l7-8 7 8v6M13 22v-5h6v5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    </svg>
+                </a>
+                <h1 id="title" style="font-size:1.25rem;font-weight:700;color:#f8fafc;margin:0;">Loading...</h1>
+            </div>
             <div style="display:flex;gap:1.5rem;align-items:center;">
                 <a href="ri-report.html" style="color:#10b981;text-decoration:none;font-size:0.9rem;font-weight:600;transition:color 0.2s;">← Back to Report</a>
                 <a href="ri-report.html#house-hunter" style="color:#a1afc4;text-decoration:none;font-size:0.9rem;transition:color 0.2s;">House Hunter</a>
@@ -116,14 +108,7 @@
     </nav>
     
     <div class="container" style="padding-top:5rem;">
-        <div class="header">
-            <div>
-                <h1 id="title">Loading Results...</h1>
-                <p class="subtitle" id="subtitle"></p>
-            </div>
-        </div>
-        
-        <!-- Stats Cards -->
+        <!-- Stats Cards (moved up, no header box) -->
         <div class="stats-grid" id="statsGrid" style="display:none;">
             <div class="stat-card"><div class="stat-value" id="totalCount">0</div><div class="stat-label">Properties</div></div>
             <div class="stat-card"><div class="stat-value" id="medianPrice">$0</div><div class="stat-label">Median Price</div></div>
@@ -259,7 +244,6 @@
                 
                 let filtered = data.properties;
                 let titleText = 'All Properties';
-                let subtitleText = '';
                 
                 if (filterType && filterValue) {
                     titleText = titles[filterType]?.(filterValue) || filterValue;
@@ -267,7 +251,6 @@
                     switch (filterType) {
                         case 'city':
                             filtered = filtered.filter(p => p.city === filterValue);
-                            subtitleText = `All properties in ${filterValue}, RI`;
                             break;
                         case 'price':
                             const priceRanges = {
@@ -280,7 +263,6 @@
                                 '$1M+': p => p.price >= 1000000
                             };
                             filtered = filtered.filter(priceRanges[filterValue] || (() => true));
-                            subtitleText = `Properties in the ${filterValue} price range`;
                             break;
                         case 'beds':
                             const beds = filterValue === '6+' ? 6 : parseInt(filterValue);
@@ -302,7 +284,6 @@
                 filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
                 
                 document.getElementById('title').textContent = titleText;
-                document.getElementById('subtitle').textContent = subtitleText;
                 document.getElementById('loading').style.display = 'none';
                 
                 if (filtered.length === 0) {

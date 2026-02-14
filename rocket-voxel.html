@@ -116,7 +116,7 @@
     
     <div id="hud" class="hidden">
         <div>SCORE: <span id="score">0</span></div>
-        <div>FUEL: <span id="fuel">100</span>%</div>
+        <div>WAVE: <span id="wave">1</span></div>
         <div>LIVES: <span id="lives">♥♥♥</span></div>
     </div>
     
@@ -125,7 +125,7 @@
         <p style="color:#f0f; margin:10px;">[ BLOCKY SPACE ADVENTURE ]</p>
         <div class="controls">
             <p>WASD or ARROWS = MOVE</p>
-            <p>SPACE = BOOST</p>
+            <p>SPACE = SHOOT</p>
             <p>SHIFT = BARREL ROLL</p>
         </div>
         <button class="pixel-btn" onclick="startGame()">START MISSION</button>
@@ -145,6 +145,8 @@
         let score = 0, lives = 3, fuel = 100;
         let gameSpeed = 1, isPlaying = false, isRolling = false;
         let keys = {};
+        let canShoot = true;
+        let shootCooldown = 150; // ms between shots
         
         const BOUNDS = { x: 12, y: 8 };
         const COLORS = {
@@ -419,6 +421,71 @@
             }
         }
         
+        function shootProjectile() {
+            if (!rocket) return;
+            
+            // Create projectile (laser bolt)
+            const projectile = new THREE.Group();
+            
+            // Core
+            const core = createBox(0.15, 0.15, 0.8, 0x00ffff);
+            core.material.emissive = new THREE.Color(0x00ffff);
+            core.material.emissiveIntensity = 1;
+            projectile.add(core);
+            
+            // Glow
+            const glow = createBox(0.25, 0.25, 0.6, 0x00ffff);
+            glow.material.transparent = true;
+            glow.material.opacity = 0.4;
+            glow.material.emissive = new THREE.Color(0x00ffff);
+            glow.material.emissiveIntensity = 0.5;
+            projectile.add(glow);
+            
+            projectile.position.copy(rocket.position);
+            projectile.position.z -= 2; // Start in front of ship
+            
+            projectile.userData = {
+                speed: 1.2
+            };
+            
+            scene.add(projectile);
+            projectiles.push(projectile);
+        }
+        
+        function updateProjectiles() {
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const proj = projectiles[i];
+                proj.position.z -= proj.userData.speed;
+                
+                // Check collision with asteroids
+                for (let j = obstacles.length - 1; j >= 0; j--) {
+                    const obs = obstacles[j];
+                    const dist = proj.position.distanceTo(obs.position);
+                    if (dist < obs.userData.size + 0.5) {
+                        // Destroy asteroid
+                        createExplosion(obs.position, 0xff8800);
+                        scene.remove(obs);
+                        obstacles.splice(j, 1);
+                        
+                        // Destroy projectile
+                        scene.remove(proj);
+                        projectiles.splice(i, 1);
+                        
+                        // Score
+                        score += 25;
+                        document.getElementById('score').textContent = score;
+                        break;
+                    }
+                }
+                
+                // Remove if too far
+                if (proj.position.z < -100) {
+                    scene.remove(proj);
+                    projectiles.splice(i, 1);
+                }
+            }
+        }
+        
         function updateRocket(delta) {
             if (!rocket || !isPlaying) return;
             
@@ -430,22 +497,11 @@
             if (keys['ArrowUp'] || keys['KeyW']) my = speed;
             if (keys['ArrowDown'] || keys['KeyS']) my = -speed;
             
-            // Boost
-            if (keys['Space'] && fuel > 0) {
-                mx *= 1.8;
-                my *= 1.8;
-                fuel -= 0.3;
-                document.getElementById('fuel').textContent = Math.floor(fuel);
-                
-                // Boost particles
-                if (Math.random() < 0.3) {
-                    const particle = createBox(0.15, 0.15, 0.15, 0xffff00);
-                    particle.position.copy(rocket.position);
-                    particle.position.z += 2;
-                    particle.userData = { velocity: new THREE.Vector3(0, 0, 0.3), life: 0.5 };
-                    scene.add(particle);
-                    particles.push(particle);
-                }
+            // Shoot
+            if (keys['Space'] && canShoot) {
+                shootProjectile();
+                canShoot = false;
+                setTimeout(() => canShoot = true, shootCooldown);
             }
             
             // Barrel roll
@@ -510,8 +566,10 @@
                 }
             }
             
-            // Spawn
-            if (Math.random() < 0.04 * gameSpeed) {
+            // Spawn - starts very slow, ramps up with progress
+            // Base rate: 0.5% at start, scales to ~4% as gameSpeed increases
+            const spawnChance = 0.005 + (gameSpeed - 1) * 0.015;
+            if (Math.random() < spawnChance) {
                 createVoxelAsteroid();
             }
         }
@@ -528,8 +586,8 @@
                     if (dist < 1.5) {
                         switch(pu.userData.type) {
                             case 'fuel':
-                                fuel = Math.min(100, fuel + 30);
-                                document.getElementById('fuel').textContent = Math.floor(fuel);
+                                score += 50;
+                                document.getElementById('score').textContent = score;
                                 break;
                             case 'crystal':
                                 score += 100;
@@ -602,12 +660,17 @@
             if (isPlaying) {
                 updateRocket(delta);
                 updateObstacles(delta);
+                updateProjectiles();
                 updatePowerups(delta);
                 updateParticles();
                 updateStars();
                 
-                gameSpeed += 0.0002;
-                fuel = Math.min(100, fuel + 0.02); // Slow regen
+                // Difficulty ramps up over time
+                gameSpeed += 0.0003;
+                
+                // Update wave display
+                const wave = Math.floor(gameSpeed);
+                document.getElementById('wave').textContent = wave;
             }
             
             renderer.render(scene, camera);
@@ -623,14 +686,14 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('hud').classList.remove('hidden');
             
-            score = 0; lives = 3; fuel = 100; gameSpeed = 1;
+            score = 0; lives = 3; gameSpeed = 1;
             document.getElementById('score').textContent = score;
-            document.getElementById('fuel').textContent = fuel;
+            document.getElementById('wave').textContent = 1;
             updateLivesDisplay();
             
             // Clear objects
-            [...obstacles, ...powerups, ...particles].forEach(obj => scene.remove(obj));
-            obstacles = []; powerups = []; particles = [];
+            [...obstacles, ...powerups, ...particles, ...projectiles].forEach(obj => scene.remove(obj));
+            obstacles = []; powerups = []; particles = []; projectiles = [];
             
             if (rocket) {
                 rocket.position.set(0, 0, 0);

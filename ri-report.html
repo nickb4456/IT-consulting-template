@@ -345,7 +345,7 @@
     <h2>Key Market Insights</h2>
  <div class="insight-grid">
         <div class="insight-card insight-hover" data-chart="inland">
-            <h3><span style="opacity:0.7">🏔️</span> Top 5 by Median Price</h3>
+            <h3><span style="opacity:0.7">🏔️</span> Top 5 Inland</h3>
  <div id="insightTopCities" style="display:grid;gap:0.4rem;font-size:0.95rem;margin:0.5rem 0">
  <div style="color:#94a3b8">Loading...</div>
  </div>
@@ -1026,14 +1026,21 @@ loadPropertyData().then(data => {
 function updateInsights() {
   if (!rawData || !rawData.properties) return;
   
-  // Top 5 cities by median price
+  // Price formatter - use M for millions
+  const fmtPrice = (v) => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + Math.round(v/1000) + 'K';
+  
+  // Coastal cities to exclude for "inland" top 5
+  const coastalCities = ['Newport', 'Narragansett', 'Westerly', 'Jamestown', 'Block Island', 'New Shoreham', 
+    'Little Compton', 'Middletown', 'Portsmouth', 'Tiverton', 'Bristol', 'Warren', 'Barrington', 'Charlestown'];
+  
+  // Top 5 NON-COASTAL cities by median price
   const cityPrices = {};
   rawData.properties.filter(p => p.price > 50000).forEach(p => {
     if (!cityPrices[p.city]) cityPrices[p.city] = [];
     cityPrices[p.city].push(p.price);
   });
   const topCities = Object.entries(cityPrices)
-    .filter(([c, ps]) => ps.length >= 10)
+    .filter(([c, ps]) => ps.length >= 10 && !coastalCities.includes(c))
     .map(([city, prices]) => ({
       city,
       median: prices.sort((a,b)=>a-b)[Math.floor(prices.length/2)]
@@ -1044,7 +1051,7 @@ function updateInsights() {
   const topCitiesEl = document.getElementById('insightTopCities');
   if (topCitiesEl && topCities.length > 0) {
     topCitiesEl.innerHTML = topCities.map(c => 
-      `<div style="display:flex;justify-content:space-between"><span>${c.city}</span><span style="color:#10b981;font-weight:600">$${Math.round(c.median/1000)}K</span></div>`
+      `<div style="display:flex;justify-content:space-between"><span>${c.city}</span><span style="color:#10b981;font-weight:600">${fmtPrice(c.median)}</span></div>`
     ).join('');
   }
   
@@ -1094,11 +1101,17 @@ function updateInsights() {
     const sign = change >= 0 ? '+' : '';
     
     if (yoyEl) yoyEl.textContent = `${sign}${change}% YoY`;
-    if (yoyDescEl) yoyDescEl.textContent = `${currentYear} median $${Math.round(thisMedian/1000)}K vs ${lastYear} $${Math.round(lastMedian/1000)}K`;
+    if (yoyDescEl) yoyDescEl.textContent = `${currentYear} median ${fmtPrice(thisMedian)} vs ${lastYear} ${fmtPrice(lastMedian)}`;
   } else {
     if (yoyEl) yoyEl.textContent = 'N/A';
     if (yoyDescEl) yoyDescEl.textContent = 'Insufficient data for comparison';
   }
+  
+  // Update hover chart data dynamically
+  updateInsightChartData(topCities, fastestCities);
+  
+  // Initialize hover functionality
+  if (typeof initInsightHover === 'function') initInsightHover();
 }
 
  function buildQuery() {
@@ -3476,39 +3489,77 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Insight Card Hover Charts (Desktop Only)
  let insightChart = null;
- const insightChartData = {
- inland: {
- title: 'Top 5 Inland - Median Price Trend ($K)',
- labels: ['2021', '2022', '2023', '2024', '2025'],
- multiLine: true,
- datasets: [
- { label: 'East Greenwich', data: [580, 650, 720, 760, 799], color: '#10b981' },
- { label: 'Foster', data: [380, 430, 470, 495, 521], color: '#6366f1' },
- { label: 'Smithfield', data: [370, 420, 460, 490, 516], color: '#f59e0b' },
- { label: 'Lincoln', data: [365, 415, 455, 485, 512], color: '#ec4899' },
- { label: 'Chepachet', data: [340, 380, 420, 445, 467], color: '#8b5cf6' }
- ]
- },
- dom: {
- title: 'Fastest to Sell - Days on Market Trend',
- labels: ['2021', '2022', '2023', '2024', '2025'],
- multiLine: true,
- datasets: [
- { label: 'Hope Valley', data: [42, 38, 35, 30, 28], color: '#10b981' },
- { label: 'West Greenwich', data: [55, 48, 45, 40, 38], color: '#6366f1' },
- { label: 'Warwick', data: [62, 55, 52, 50, 47], color: '#f59e0b' },
- { label: 'N. Providence', data: [68, 62, 58, 55, 53], color: '#ec4899' },
- { label: 'Cranston', data: [70, 65, 60, 56, 54], color: '#8b5cf6' }
- ]
- },
- growth: {
- title: 'RI Median Home Price ($K)',
- labels: ['2020', '2021', '2022', '2023', '2024', '2025'],
- data: [320, 385, 465, 510, 535, 580],
- color: '#10b981',
- type: 'line'
+ let insightChartData = {};
+ 
+ function updateInsightChartData(topCities, fastestCities) {
+   const colors = ['#10b981', '#6366f1', '#f59e0b', '#ec4899', '#8b5cf6'];
+   
+   // Build yearly price data for top cities
+   const yearlyData = {};
+   const currentYear = new Date().getFullYear();
+   const years = [currentYear-4, currentYear-3, currentYear-2, currentYear-1, currentYear];
+   
+   topCities.forEach(c => {
+     yearlyData[c.city] = {};
+     years.forEach(y => yearlyData[c.city][y] = []);
+   });
+   
+   rawData.properties.filter(p => p.soldDate && p.price > 50000).forEach(p => {
+     const year = parseInt(p.soldDate.split('-').pop());
+     if (yearlyData[p.city] && yearlyData[p.city][year]) {
+       yearlyData[p.city][year].push(p.price);
+     }
+   });
+   
+   // Calculate median for each year
+   const priceDatasets = topCities.map((c, i) => ({
+     label: c.city,
+     data: years.map(y => {
+       const ps = yearlyData[c.city][y];
+       if (ps.length === 0) return null;
+       ps.sort((a,b) => a-b);
+       return Math.round(ps[Math.floor(ps.length/2)] / 1000);
+     }),
+     color: colors[i]
+   }));
+   
+   // Build DOM data for fastest cities (simpler - just use current avg)
+   const domDatasets = fastestCities.map((c, i) => ({
+     label: c.city,
+     data: [null, null, null, null, c.avgDom], // Only current data available
+     color: colors[i]
+   }));
+   
+   // YoY growth data
+   const yearlyMedians = years.map(y => {
+     const ps = rawData.properties.filter(p => p.soldDate && parseInt(p.soldDate.split('-').pop()) === y && p.price > 50000).map(p => p.price);
+     if (ps.length === 0) return null;
+     ps.sort((a,b) => a-b);
+     return Math.round(ps[Math.floor(ps.length/2)] / 1000);
+   });
+   
+   insightChartData = {
+     inland: {
+       title: 'Top 5 Inland - Median Price Trend ($K)',
+       labels: years.map(String),
+       multiLine: true,
+       datasets: priceDatasets
+     },
+     dom: {
+       title: 'Fastest to Sell - Avg Days on Market',
+       labels: years.map(String),
+       multiLine: true,
+       datasets: domDatasets
+     },
+     growth: {
+       title: 'RI Median Home Price ($K)',
+       labels: years.map(String),
+       data: yearlyMedians,
+       color: '#10b981',
+       type: 'line'
+     }
+   };
  }
- };
  
  let hoverTimeout = null;
  let currentHoverCard = null;

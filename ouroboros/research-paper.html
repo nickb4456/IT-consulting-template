@@ -362,20 +362,25 @@ Industrial Layer Impact:
                 <strong>Design Principle:</strong> No direct agent-to-agent messaging. All coordination happens through pheromone deposits that other agents sense. Strength = priority. The environment IS the message bus.
             </div>
             
-            <h3>8.1 Structured Pheromones (64-Byte Encoding)</h3>
-            <p>Traditional pheromones carry only strength and type. The ANT PROTOCOL extends this to a fixed 64-byte binary format:</p>
+            <h3>8.1 Binary Pheromone Language</h3>
+            <p>Ants don't speak English. The pheromone language uses binary tokens with numeric parameters:</p>
             
-            <div class="formula">StructuredPheromone (64 bytes):
-├─ embedding[0:32]     // 32-byte binary embedding (truncated)
-├─ token_code[32]      // 1 byte: vocabulary token (DATA_SPORE=0, etc.)
-├─ confidence[33]      // 1 byte: 0-255 → 0.0-1.0
-├─ novelty[34]         // 1 byte: 0-255 → 0.0-1.0
-├─ metadata[35]        // 1 byte: colony_origin(4b) | ant_type(4b)
-├─ parent_ref[36:38]   // 2 bytes: hierarchical parent reference
-├─ citations[38:42]    // 4 bytes: downstream citation count
-└─ reserved[42:64]     // 22 bytes: future use</div>
+            <div class="formula">Signal Format: [token:1byte][param_count:1byte][params:Nbytes]
 
-            <p>This encoding enables constant-time similarity comparisons using XNOR+POPCOUNT while preserving semantic meaning through the embedded vocabulary token.</p>
+Example - Scout Summary (15 new, 3 queries, depth 2):
+  English: "Research scout: 15 new from 3 queries (depth 2)" = 47 bytes
+  Binary:  0x20 0x03 0x0F 0x03 0x02 = 5 bytes
+  Savings: 89%
+
+Token Dictionary:
+  0x00 DATA_SPORE    [count]
+  0x01 BREAKTHROUGH  [strength_pct]
+  0x02 VOID_PATH     [reason_code]
+  0x20 SCOUT_SUMMARY [new, queries, depth]
+  0x30 PREFILTER     [skipped, passed]
+  ...</div>
+
+            <p>This encoding is 89% more efficient than English claims while remaining fully decodable for debugging. Ants sense binary, humans read the toHuman() translation.</p>
             
             <h3>8.2 Vocabulary Tokens (The Ant Dictionary)</h3>
             <p>The protocol defines 8 core tokens with semantic intent:</p>

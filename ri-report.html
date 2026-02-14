@@ -3624,29 +3624,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
      color: colors[i]
    }));
    
-   // Build yearly DOM data for fastest cities
-   const yearlyDomData = {};
-   fastestCities.forEach(c => {
-     yearlyDomData[c.city] = {};
-     years.forEach(y => yearlyDomData[c.city][y] = []);
-   });
-   
-   rawData.properties.filter(p => p.soldDate && p.dom > 0 && p.dom < 365).forEach(p => {
-     const year = parseInt(p.soldDate.split('-').pop());
-     if (yearlyDomData[p.city] && yearlyDomData[p.city][year]) {
-       yearlyDomData[p.city][year].push(p.dom);
-     }
-   });
-   
-   const domDatasets = fastestCities.map((c, i) => ({
-     label: c.city,
-     data: years.map(y => {
-       const doms = yearlyDomData[c.city][y];
-       if (doms.length === 0) return null;
-       return Math.round(doms.reduce((a,b) => a+b, 0) / doms.length);
-     }),
-     color: colors[i]
-   }));
+   // DOM data for fastest cities - bar chart of current active listings
+   // Note: DOM only exists for active listings, not sold properties
+   const domLabels = fastestCities.map(c => c.city);
+   const domValues = fastestCities.map(c => Math.round(c.avgDom));
+   const domColors = fastestCities.map((_, i) => colors[i]);
    
    // YoY growth data
    const yearlyMedians = years.map(y => {
@@ -3664,10 +3646,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
        datasets: priceDatasets
      },
      dom: {
-       title: 'Fastest to Sell - Avg Days on Market',
-       labels: years.map(String),
-       multiLine: true,
-       datasets: domDatasets
+       title: 'Avg Days on Market (Active Listings)',
+       labels: domLabels,
+       data: domValues,
+       colors: domColors,
+       type: 'bar'
      },
      growth: {
        title: 'RI Median Home Price ($K)',
@@ -3761,11 +3744,14 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  pointHoverRadius: 7
  }));
  } else {
+ // Support per-bar colors via data.colors array
+ const bgColors = data.colors ? data.colors.map(c => c + '80') : (isLine ? 'transparent' : data.color + '80');
+ const borderColors = data.colors || data.color;
  datasets = [{
  label: data.title,
  data: data.data,
- backgroundColor: isLine ? 'transparent' : data.color + '80',
- borderColor: data.color,
+ backgroundColor: bgColors,
+ borderColor: borderColors,
  borderWidth: isLine ? 3 : 2,
  borderRadius: isLine ? 0 : 6,
  fill: false,

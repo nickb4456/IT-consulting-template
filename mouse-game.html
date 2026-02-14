@@ -402,6 +402,46 @@
             cursor: pointer;
         }
 
+        /* Virtual Joystick */
+        .joystick-zone {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 50%;
+            height: 40%;
+            z-index: 150;
+            pointer-events: auto;
+            touch-action: none;
+        }
+        .joystick-base {
+            position: fixed;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255,220,140,0.12);
+            border: 3px solid rgba(200,145,58,0.35);
+            display: none;
+            z-index: 151;
+            pointer-events: none;
+        }
+        .joystick-thumb {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,204,68,0.6), rgba(200,145,58,0.4));
+            border: 2px solid rgba(255,220,140,0.5);
+            display: none;
+            z-index: 152;
+            pointer-events: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .joystick-zone { display: none; }
+        }
+        @media (hover: none) {
+            body { cursor: auto; }
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -465,6 +505,10 @@
         <button class="start-btn" onclick="restartGame()" style="margin-top:16px;">TRY AGAIN</button>
     </div>
 
+    <div class="joystick-zone" id="joystick-zone"></div>
+    <div class="joystick-base" id="joystick-base"></div>
+    <div class="joystick-thumb" id="joystick-thumb"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
     let scene, camera, renderer, clock;
@@ -484,6 +528,10 @@
     let ants = []; // ant enemies for Level 3
     const FLOOR_SIZE = 28;
     const MOUSE_SPEED = 0.21;
+
+    // Touch joystick state
+    let touchJoystick = { active: false, dx: 0, dz: 0 };
+    let joystickTouchId = null;
 
     function init() {
         scene = new THREE.Scene();
@@ -513,6 +561,7 @@
         window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
+        setupTouchControls();
         animate();
     }
 
@@ -1171,6 +1220,77 @@
         });
     }
 
+    // ============ TOUCH CONTROLS ============
+    function setupTouchControls() {
+        const zone = document.getElementById('joystick-zone');
+        const base = document.getElementById('joystick-base');
+        const thumb = document.getElementById('joystick-thumb');
+        if (!zone) return;
+
+        const maxDist = 50;
+        let originX = 0, originY = 0;
+
+        zone.addEventListener('touchstart', (e) => {
+            if (joystickTouchId !== null) return;
+            const t = e.changedTouches[0];
+            joystickTouchId = t.identifier;
+            originX = t.clientX;
+            originY = t.clientY;
+
+            base.style.display = 'block';
+            base.style.left = (originX - 60) + 'px';
+            base.style.top = (originY - 60) + 'px';
+
+            thumb.style.display = 'block';
+            thumb.style.left = (originX - 25) + 'px';
+            thumb.style.top = (originY - 25) + 'px';
+
+            touchJoystick.active = true;
+            e.preventDefault();
+        }, { passive: false });
+
+        zone.addEventListener('touchmove', (e) => {
+            for (const t of e.changedTouches) {
+                if (t.identifier !== joystickTouchId) continue;
+                let dx = t.clientX - originX;
+                let dy = t.clientY - originY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist > maxDist) {
+                    dx = (dx / dist) * maxDist;
+                    dy = (dy / dist) * maxDist;
+                }
+
+                thumb.style.left = (originX + dx - 25) + 'px';
+                thumb.style.top = (originY + dy - 25) + 'px';
+
+                touchJoystick.dx = dx / maxDist;
+                touchJoystick.dz = dy / maxDist;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        const endTouch = (e) => {
+            for (const t of e.changedTouches) {
+                if (t.identifier !== joystickTouchId) continue;
+                joystickTouchId = null;
+                touchJoystick.active = false;
+                touchJoystick.dx = 0;
+                touchJoystick.dz = 0;
+                base.style.display = 'none';
+                thumb.style.display = 'none';
+            }
+        };
+
+        zone.addEventListener('touchend', endTouch);
+        zone.addEventListener('touchcancel', endTouch);
+
+        // Prevent default on canvas to stop scrolling
+        document.addEventListener('touchmove', (e) => {
+            if (isPlaying) e.preventDefault();
+        }, { passive: false });
+    }
+
     // ============ MOUSE CHARACTER ============
     function buildMouse() {
         mouseGroup = new THREE.Group();
@@ -1677,6 +1797,12 @@
         if (keys['ArrowRight'] || keys['KeyD']) mx = MOUSE_SPEED;
         if (keys['ArrowUp'] || keys['KeyW']) mz = -MOUSE_SPEED;
         if (keys['ArrowDown'] || keys['KeyS']) mz = MOUSE_SPEED;
+
+        // Touch joystick input
+        if (touchJoystick.active) {
+            mx = touchJoystick.dx * MOUSE_SPEED;
+            mz = touchJoystick.dz * MOUSE_SPEED;
+        }
 
         const newX = mouse3D.position.x + mx;
         const newZ = mouse3D.position.z + mz;

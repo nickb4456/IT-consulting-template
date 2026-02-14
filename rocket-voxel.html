@@ -133,11 +133,85 @@
                 transparent 2px
             );
         }
+
+        /* Touch controls */
+        .touch-joystick-zone {
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 45%;
+            height: 45%;
+            z-index: 500;
+            touch-action: none;
+        }
+        .touch-fire-zone {
+            position: fixed;
+            bottom: 0; right: 0;
+            width: 45%;
+            height: 45%;
+            z-index: 500;
+            touch-action: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .fire-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,0,0,0.5), rgba(255,50,0,0.3));
+            border: 3px solid rgba(255,100,0,0.5);
+            color: #ff4400;
+            font-family: 'Press Start 2P', 'Courier New', monospace;
+            font-size: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .fire-btn:active {
+            background: radial-gradient(circle, rgba(255,100,0,0.8), rgba(255,50,0,0.5));
+            transform: scale(0.92);
+        }
+        .joy-base {
+            position: fixed;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: rgba(0,255,255,0.08);
+            border: 2px solid rgba(0,255,255,0.25);
+            display: none;
+            z-index: 501;
+            pointer-events: none;
+        }
+        .joy-thumb {
+            position: fixed;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,255,0.5), rgba(0,200,255,0.3));
+            border: 2px solid rgba(0,255,255,0.5);
+            display: none;
+            z-index: 502;
+            pointer-events: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .touch-joystick-zone, .touch-fire-zone { display: none; }
+        }
     </style>
 </head>
 <body>
     <a href="games.html" class="back-btn">&#x2190; BACK</a>
     <div id="scanlines"></div>
+
+    <div class="touch-joystick-zone" id="rkt-joy-zone"></div>
+    <div class="joy-base" id="rkt-joy-base"></div>
+    <div class="joy-thumb" id="rkt-joy-thumb"></div>
+    <div class="touch-fire-zone" id="rkt-fire-zone">
+        <div class="fire-btn" id="rkt-fire-btn">FIRE</div>
+    </div>
     
     <div id="hud" class="hidden">
         <div>SCORE: <span id="score">0</span></div>
@@ -172,6 +246,9 @@
         let keys = {};
         let canShoot = true;
         let shootCooldown = 150; // ms between shots
+        let touchJoy = { active: false, dx: 0, dy: 0 };
+        let joyTouchId = null;
+        let touchFiring = false;
         
         const BOUNDS = { x: 12, y: 8 };
         const COLORS = {
@@ -224,10 +301,76 @@
             window.addEventListener('resize', onResize);
             window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
             window.addEventListener('keyup', e => keys[e.code] = false);
-            
+
+            setupRocketTouch();
             animate();
         }
         
+        function setupRocketTouch() {
+            const zone = document.getElementById('rkt-joy-zone');
+            const base = document.getElementById('rkt-joy-base');
+            const thumb = document.getElementById('rkt-joy-thumb');
+            const fireZone = document.getElementById('rkt-fire-zone');
+            if (!zone) return;
+
+            const maxDist = 45;
+            let ox = 0, oy = 0;
+
+            zone.addEventListener('touchstart', (e) => {
+                if (joyTouchId !== null) return;
+                const t = e.changedTouches[0];
+                joyTouchId = t.identifier;
+                ox = t.clientX; oy = t.clientY;
+                base.style.display = 'block';
+                base.style.left = (ox - 55) + 'px';
+                base.style.top = (oy - 55) + 'px';
+                thumb.style.display = 'block';
+                thumb.style.left = (ox - 23) + 'px';
+                thumb.style.top = (oy - 23) + 'px';
+                touchJoy.active = true;
+                e.preventDefault();
+            }, { passive: false });
+
+            zone.addEventListener('touchmove', (e) => {
+                for (const t of e.changedTouches) {
+                    if (t.identifier !== joyTouchId) continue;
+                    let dx = t.clientX - ox, dy = t.clientY - oy;
+                    const d = Math.sqrt(dx * dx + dy * dy);
+                    if (d > maxDist) { dx = dx / d * maxDist; dy = dy / d * maxDist; }
+                    thumb.style.left = (ox + dx - 23) + 'px';
+                    thumb.style.top = (oy + dy - 23) + 'px';
+                    touchJoy.dx = dx / maxDist;
+                    touchJoy.dy = -dy / maxDist;
+                }
+                e.preventDefault();
+            }, { passive: false });
+
+            const endJoy = (e) => {
+                for (const t of e.changedTouches) {
+                    if (t.identifier !== joyTouchId) continue;
+                    joyTouchId = null;
+                    touchJoy.active = false;
+                    touchJoy.dx = 0; touchJoy.dy = 0;
+                    base.style.display = 'none';
+                    thumb.style.display = 'none';
+                }
+            };
+            zone.addEventListener('touchend', endJoy);
+            zone.addEventListener('touchcancel', endJoy);
+
+            // Fire button
+            fireZone.addEventListener('touchstart', (e) => {
+                touchFiring = true;
+                e.preventDefault();
+            }, { passive: false });
+            fireZone.addEventListener('touchend', () => { touchFiring = false; });
+            fireZone.addEventListener('touchcancel', () => { touchFiring = false; });
+
+            document.addEventListener('touchmove', (e) => {
+                if (isPlaying) e.preventDefault();
+            }, { passive: false });
+        }
+
         function createBox(w, h, d, color, x = 0, y = 0, z = 0) {
             const geo = new THREE.BoxGeometry(w, h, d);
             const mat = new THREE.MeshLambertMaterial({ color });
@@ -521,9 +664,15 @@
             if (keys['ArrowRight'] || keys['KeyD']) mx = speed;
             if (keys['ArrowUp'] || keys['KeyW']) my = speed;
             if (keys['ArrowDown'] || keys['KeyS']) my = -speed;
-            
+
+            // Touch joystick
+            if (touchJoy.active) {
+                mx = touchJoy.dx * speed;
+                my = touchJoy.dy * speed;
+            }
+
             // Shoot
-            if (keys['Space'] && canShoot) {
+            if ((keys['Space'] || touchFiring) && canShoot) {
                 shootProjectile();
                 canShoot = false;
                 setTimeout(() => canShoot = true, shootCooldown);

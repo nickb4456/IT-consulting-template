@@ -447,7 +447,51 @@ if (SF < 25) {
                 <tr><td>Federation (Mech)</td><td>The Loom</td><td>Cross-domain weaving</td><td>Daily / on breakthrough</td></tr>
                 <tr><td>Federation (Mech)</td><td>Industrial Scout</td><td>k-Spindle strip-mining</td><td>Pheromone spike ≥ 0.85</td></tr>
                 <tr><td>Infrastructure</td><td>The Governor</td><td>Dynamic backpressure</td><td>Continuous SF monitoring</td></tr>
+                <tr><td>Infrastructure</td><td>Coupler Guards</td><td>Anti-model-collapse middleware</td><td>Pre-coupling validation</td></tr>
             </table>
+            
+            <h3>7.7 Empirical Validation: Coupler Guards in Production</h3>
+            <p>On February 14, 2026, we deployed anti-model-collapse middleware ("Coupler Guards") to the production Ouroboros Colony. The guards implement five structural integrity checks before allowing any automatic coupling:</p>
+            
+            <table>
+                <tr><th>Guard</th><th>Function</th><th>Blocked</th></tr>
+                <tr><td><strong>Hub Prevention</strong></td><td>Max 15 edges per node</td><td>57</td></tr>
+                <tr><td><strong>Ant Mill Detection</strong></td><td>BFS to detect ≤3-hop cycles</td><td>713</td></tr>
+                <tr><td><strong>Cycle Penalty</strong></td><td>50% penalty for 4-6 hop cycles</td><td>4,499</td></tr>
+                <tr><td><strong>Novelty Requirement</strong></td><td>Min 25% distance from existing edges</td><td>3,584</td></tr>
+                <tr><td><strong>External Grounding</strong></td><td>Flag synthetic↔synthetic connections</td><td>621 flagged</td></tr>
+            </table>
+            
+            <p><strong>Results:</strong> Of 9,431 potential couples identified, only 578 (6.1%) passed all guards and created edges. The 93.9% rejection rate demonstrates aggressive structural protection.</p>
+            
+            <h4>7.7.1 The "Ant Mill" Detection Algorithm</h4>
+            <p>Named after the biological phenomenon where army ants follow each other in a death spiral, Ant Mill detection uses breadth-first search to identify circular reasoning patterns:</p>
+            
+<pre>function wouldCreateCycle(nodeA, nodeB, maxDepth = 3):
+    // BFS: does B→A path exist?
+    if pathExists(B → A, depth ≤ maxDepth):
+        return BLOCK  // Would create hallucination loop
+    
+    if pathExists(B → A, depth ≤ 6):
+        return PENALIZE(0.5)  // Apply 50% similarity penalty
+    
+    return ALLOW</pre>
+            
+            <p>This guard blocked 713 connections that would have created 3-hop cycles (A→B→C→A), the structural signature of circular hallucination where concepts reinforce each other without external validation.</p>
+            
+            <h4>7.7.2 System Perplexity as Echo Chamber Early Warning</h4>
+            <p>The guards also track system-wide "perplexity"—the variance in connection similarity across recent edges. Low perplexity indicates the colony is converging on similar patterns, an early warning of echo chamber formation:</p>
+            
+            <p style="text-align: center; font-style: italic;">
+                P(t) = σ(sim(e₁...eₙ)) × 5 &nbsp;&nbsp;|&nbsp;&nbsp; if P(t) < 0.3, trigger exploration scout
+            </p>
+            
+            <p>At deployment, system perplexity measured <strong>43.9%</strong>—moderate, indicating some uniformity but not critical. The Governor can trigger high-temperature exploration scouts when perplexity drops below 30%.</p>
+            
+            <h4>7.7.3 The Brakeman's Lesson</h4>
+            <p>Before automatic air brakes, railroad brakemen possessed sensory data the engineer couldn't access: smells, sounds, vibrations indicating imminent failure. When we automate the "boring" parts of connection-making, we lose these early warning signals.</p>
+            
+            <p>The Coupler Guards restore the Brakeman's function: structural sensors that detect when the system "feels wrong" before catastrophic failure. The 8,853 blocked connections weren't errors—they were the guards smelling smoke.</p>
         </section>
 
         <section id="s8">

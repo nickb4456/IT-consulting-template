@@ -91,6 +91,18 @@
         .score.high { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
         .source { color: #64748b; }
         .date { color: #64748b; }
+        
+        /* Rich breakthrough cards */
+        .bt-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; margin-bottom: 0.5rem; }
+        .bt-title { font-weight: 600; color: #f1f5f9; text-decoration: none; flex: 1; }
+        .bt-title:hover { color: #a78bfa; text-decoration: underline; }
+        .bt-insight { color: #22d3ee; font-size: 0.9rem; margin-bottom: 0.5rem; background: rgba(34, 211, 238, 0.1); padding: 0.5rem; border-radius: 4px; }
+        .bt-metrics { display: flex; gap: 1rem; font-size: 0.8rem; color: #64748b; }
+        .bt-connections { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        .bt-connection { font-size: 0.85rem; color: #94a3b8; padding: 0.25rem 0; }
+        .breakthrough-card.expanded .bt-connections { display: block; }
+        .breakthrough-card:not(.expanded) .bt-connections { display: none; }
+        .breakthrough-card.expanded .expand-hint { display: none; }
         .trend-tag {
             display: inline-block;
             background: rgba(236, 72, 153, 0.2);
@@ -226,24 +238,29 @@
                     return `<span class="trend-tag">${topic}</span>`;
                 }).join('');
 
-                // Breakthroughs - expandable with TLDR
+                // Breakthroughs - rich cards with links, metrics, connections
+                const sourceIcons = { arxiv: '📑', github: '🔗', neurips: '🎓', openreview: '📝', paper: '📄' };
                 document.getElementById('breakthroughs').innerHTML = data.breakthroughs.slice(0, 10).map(b => {
-                    const content = (b.content || '');
-                    // Extract TLDR from content or generate short summary
-                    const tldrMatch = content.match(/PURPOSE:?\s*([^\\n]+)/i) || content.match(/^([^.]+\.)/);
-                    const tldr = tldrMatch ? tldrMatch[1].trim().substring(0, 150) : content.substring(0, 100);
-                    const fullContent = content.replace(/\n/g, '<br>');
+                    const icon = sourceIcons[b.sourceType] || '📄';
+                    const connectionsHtml = (b.connections || []).slice(0, 2).map(c => 
+                        `<div class="bt-connection">↔ ${c.similarity}%: ${c.paper || 'Related paper'}</div>`
+                    ).join('');
                     return `
                     <div class="finding breakthrough-card" onclick="this.classList.toggle('expanded')">
-                        <div class="finding-title">${b.title.replace('[BREAKTHROUGH] ', '').substring(0, 100)}</div>
-                        <div class="tldr">💡 ${tldr}${tldr.length >= 100 ? '...' : ''}</div>
-                        <div class="finding-content collapsed">${fullContent}</div>
-                        <div class="expand-hint">tap to expand ↓</div>
-                        <div class="finding-meta">
+                        <div class="bt-header">
+                            <a href="${b.url}" target="_blank" class="bt-title" onclick="event.stopPropagation()">
+                                ${icon} ${(b.title || '').substring(0, 100)}
+                            </a>
                             <span class="score high">${b.score}</span>
-                            <span class="source">${b.source}</span>
-                            <span class="date">${new Date(b.created_at).toLocaleDateString()}</span>
                         </div>
+                        ${b.insight ? `<div class="bt-insight">💡 ${b.insight}</div>` : ''}
+                        <div class="bt-metrics">
+                            <span title="Connected papers">🔗 ${b.edgeCount || 0} edges</span>
+                            <span title="Source">${b.source}</span>
+                            <span>${new Date(b.date).toLocaleDateString()}</span>
+                        </div>
+                        ${connectionsHtml ? `<div class="bt-connections collapsed">${connectionsHtml}</div>` : ''}
+                        <div class="expand-hint">tap to see connections ↓</div>
                     </div>
                 `}).join('');
 

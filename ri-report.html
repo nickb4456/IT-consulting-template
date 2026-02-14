@@ -260,7 +260,7 @@
  <!-- HERO / HOMEPAGE -->
  <div class="hero" style="padding:2rem 2rem 1.5rem">
  <h1>RI Real Estate Hub</h1>
- <p class="subtitle">207,000+ Properties • 27 Towns • Updated Daily</p>
+ <p class="subtitle" id="heroSubtitle">207,000+ Properties • 27 Towns • Updated Daily</p>
  </div>
  
  <!-- TOOL NAVIGATION CARDS -->
@@ -322,11 +322,11 @@
 
  <!-- QUICK STATS BAR -->
  <div id="market-stats" style="display:flex;flex-wrap:wrap;justify-content:center;gap:2rem;padding:1rem 2rem;background:rgba(99,102,241,0.1);border-radius:12px;margin-bottom:2rem;border:1px solid rgba(99,102,241,0.2)">
-        <div style="text-align:center"><span style="color:#f8fafc;font-size:1.5rem;font-weight:700">207K+</span><br><span style="color:#94a3b8;font-size:0.75rem">PROPERTIES</span></div>
-        <div style="text-align:center"><span style="color:#10b981;font-size:1.5rem;font-weight:700">1,300</span><br><span style="color:#94a3b8;font-size:0.75rem">FOR SALE NOW</span></div>
-        <div style="text-align:center"><span style="color:#f8fafc;font-size:1.5rem;font-weight:700">10K+</span><br><span style="color:#94a3b8;font-size:0.75rem">SOLD (2 YRS)</span></div>
-        <div style="text-align:center"><span style="color:#f8fafc;font-size:1.5rem;font-weight:700">$518K</span><br><span style="color:#94a3b8;font-size:0.75rem">MEDIAN PRICE</span></div>
-        <div style="text-align:center"><span style="color:#f8fafc;font-size:1.5rem;font-weight:700">27</span><br><span style="color:#94a3b8;font-size:0.75rem">TOWNS</span></div>
+        <div style="text-align:center"><span id="statTotal" style="color:#f8fafc;font-size:1.5rem;font-weight:700">...</span><br><span style="color:#94a3b8;font-size:0.75rem">PROPERTIES</span></div>
+        <div style="text-align:center"><span id="statActive" style="color:#10b981;font-size:1.5rem;font-weight:700">...</span><br><span style="color:#94a3b8;font-size:0.75rem">FOR SALE NOW</span></div>
+        <div style="text-align:center"><span id="statSold" style="color:#f8fafc;font-size:1.5rem;font-weight:700">...</span><br><span style="color:#94a3b8;font-size:0.75rem">SOLD (2 YRS)</span></div>
+        <div style="text-align:center"><span id="statMedian" style="color:#f8fafc;font-size:1.5rem;font-weight:700">...</span><br><span style="color:#94a3b8;font-size:0.75rem">MEDIAN PRICE</span></div>
+        <div style="text-align:center"><span id="statTowns" style="color:#f8fafc;font-size:1.5rem;font-weight:700">...</span><br><span style="color:#94a3b8;font-size:0.75rem">TOWNS</span></div>
     </div>
 
     <!-- Hero Image Section -->
@@ -997,6 +997,16 @@ loadPropertyData().then(data => {
   const sel = document.getElementById('filterCity');
   cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
   buildQuery();
+  
+  // Update hero stats from data
+  const s = rawData.summary;
+  document.getElementById('statTotal').textContent = (s.total / 1000).toFixed(0) + 'K+';
+  document.getElementById('statActive').textContent = s.activeCount.toLocaleString();
+  document.getElementById('statSold').textContent = (s.soldCount / 1000).toFixed(0) + 'K+';
+  document.getElementById('statMedian').textContent = '$' + Math.round(s.medianPrice / 1000) + 'K';
+  document.getElementById('statTowns').textContent = s.citiesCovered;
+  document.getElementById('heroSubtitle').textContent = (s.total / 1000).toFixed(0) + ',000+ Properties • ' + s.citiesCovered + ' Towns • Updated Daily';
+  
   const statusEl = document.getElementById('dbStatus');
   if (statusEl) {
     statusEl.textContent = 'Database ready (' + rawData.properties.length.toLocaleString() + ' properties)';

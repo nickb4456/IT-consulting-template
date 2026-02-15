@@ -667,6 +667,7 @@
         <div class="hud-right">
             <div class="hud-box" id="score-box">★ 0</div>
             <div class="hud-box" id="speed-box">0 <span>MPH</span></div>
+            <div class="hud-box" id="sound-toggle" onclick="toggleSound()" style="cursor:pointer;font-size:20px;padding:4px 10px;">🔊</div>
         </div>
     </div>
     
@@ -724,6 +725,7 @@
         let engineOscillator = null;
         let engineGain = null;
         let engineFilter = null;
+        let audioMuted = false;
         let lastEmergencySpawn = 0; // Distance since last emergency spawn
         
         // === PERFORMANCE OPTIMIZATION SYSTEMS ===
@@ -2440,7 +2442,7 @@
             } else {
                 roadMat = getRoadMaterial(currentCountry);
             }
-            const road = new THREE.Mesh(new THREE.PlaneGeometry(roadW, segLen), roadMat);
+            const road = new THREE.Mesh(new THREE.PlaneGeometry(roadW, segLen, 1, 4), roadMat);
             road.rotation.x = -Math.PI / 2;
             road.rotation.z = bankAngle;
             road.position.set(0, segmentElevation, segZ);
@@ -2450,6 +2452,8 @@
             road.userData.segmentElevation = segmentElevation;
             road.userData.banking = bankAngle;
             road.userData.spawnCurve = roadCurve;  // Remember curve at spawn
+            road.userData.isRoadSurface = true; // Flag for vertex curving
+            road.userData.segLen = segLen;
             scene.add(road);
             roadSegments.push(road);
             
@@ -12597,21 +12601,17 @@
                 const distFromPlayer = -seg.position.z;
                 const absDistance = Math.abs(distFromPlayer);
                 
-                // Use segment's spawn curve for offset (prevents all segments shifting when curve changes)
-                const segCurve = seg.userData.spawnCurve !== undefined ? seg.userData.spawnCurve : roadCurve;
+                // Curve offset: parabolic x = curve * d² * strength
+                // All segments use current roadCurve so they form one continuous parabola
+                const curveStrength = 0.00015;
                 let curveOffset = 0;
-                if (Math.abs(segCurve) > 0.001) {
-                    // Quadratic curve formula - creates smooth parabolic road bends
-                    // Small distances = subtle offset, large distances = dramatic curve
-                    const curveStrength = 0.00015; // Tuned for natural feel
-                    curveOffset = segCurve * absDistance * absDistance * curveStrength;
-                    // Cap maximum offset to prevent extreme warping
+                if (Math.abs(roadCurve) > 0.001) {
+                    curveOffset = roadCurve * absDistance * absDistance * curveStrength;
                     curveOffset = Math.sign(curveOffset) * Math.min(Math.abs(curveOffset), 80);
                 }
-                // Apply curve offset with baseX if available (for lane elements)
                 const baseX = seg.userData.baseX !== undefined ? seg.userData.baseX : 0;
                 seg.position.x = baseX - curveOffset;
-                
+
                 // Elevation - use segment's spawn elevation as base, smooth transition for distant segments
                 const segElevation = seg.userData.segmentElevation !== undefined ? seg.userData.segmentElevation : 0;
                 const baseYOffset = seg.userData.baseY !== undefined ? (seg.userData.baseY - segElevation) : 0;
@@ -12639,12 +12639,45 @@
                 const blendedElevation = segElevation * (1 - elevLerp) + elevation * 0.1 * elevLerp;
                 seg.position.y = blendedElevation + baseYOffset;
                 
-                // Rotation scales with distance for perspective effect (uses spawn curve)
-                // Near segments rotate less, far segments rotate more for depth illusion
-                const rotationScale = Math.min(1, absDistance / 100);
-                seg.rotation.y = segCurve * 0.2 * rotationScale;
-                
-                // Banking on curves - use enhanced formula for dramatic tilt
+                // Rotate non-road elements to match curve tangent
+                // Road surfaces use vertex warping instead (smoother)
+                if (!seg.userData.isRoadSurface) {
+                    const tangent = 2 * roadCurve * curveStrength * distFromPlayer;
+                    seg.rotation.y = Math.atan(tangent);
+                } else {
+                    seg.rotation.y = 0;
+                }
+
+                // Warp road surface vertices so the segment bends along the curve
+                // PlaneGeometry(w, h, 1, 4) rotated -PI/2 on X:
+                //   local X = world X (left/right)
+                //   local Y = world -Z (along road, Y+ = toward player)
+                // With widthSegments=1, heightSegments=4: 2 columns × 5 rows = 10 verts
+                // Row order: local Y from +segLen/2 (near) to -segLen/2 (far)
+                if (seg.userData.isRoadSurface) {
+                    const posAttr = seg.geometry.attributes.position;
+                    const halfW = seg.geometry.parameters.width / 2;
+                    if (Math.abs(roadCurve) > 0.001) {
+                        for (let v = 0; v < posAttr.count; v++) {
+                            const origX = (v % 2 === 0) ? -halfW : halfW;
+                            const localY = posAttr.getY(v);
+                            const vertWorldZ = seg.position.z - localY;
+                            const vertDist = -vertWorldZ;
+                            const vertAbsDist = Math.abs(vertDist);
+                            let vertCurve = roadCurve * vertAbsDist * vertAbsDist * curveStrength;
+                            vertCurve = Math.sign(vertCurve) * Math.min(Math.abs(vertCurve), 80);
+                            posAttr.setX(v, origX - (vertCurve - curveOffset));
+                        }
+                    } else {
+                        // Reset to flat when straight
+                        for (let v = 0; v < posAttr.count; v++) {
+                            posAttr.setX(v, (v % 2 === 0) ? -halfW : halfW);
+                        }
+                    }
+                    posAttr.needsUpdate = true;
+                }
+
+                // Banking on curves
                 if (seg.userData.banking !== undefined) {
                     const currentBankAngle = banking * Math.sign(roadCurve) * Math.min(1, Math.abs(roadCurve) * 1.5);
                     seg.rotation.z = seg.userData.banking * (1 - elevLerp) + currentBankAngle * elevLerp;
@@ -13468,7 +13501,7 @@
         }
         
         function updateAudio() {
-            if (!audioContext || !audioInitialized || !gameRunning) {
+            if (!audioContext || !audioInitialized || !gameRunning || audioMuted) {
                 // Silence when not playing
                 if (engineGain && audioContext) {
                     engineGain.gain.setTargetAtTime(0, audioContext.currentTime, 0.1);
@@ -13494,7 +13527,15 @@
             
             engineGain.gain.setTargetAtTime(targetGain, audioContext.currentTime, 0.1);
         }
-        
+
+        function toggleSound() {
+            audioMuted = !audioMuted;
+            document.getElementById('sound-toggle').textContent = audioMuted ? '🔇' : '🔊';
+            if (audioMuted && engineGain && audioContext) {
+                engineGain.gain.setTargetAtTime(0, audioContext.currentTime, 0.05);
+            }
+        }
+
         function onKeyDown(e) {
             // Initialize audio on first user interaction (browser requirement)
             if (!audioInitialized) initAudio();

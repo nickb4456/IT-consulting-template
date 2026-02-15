@@ -3,604 +3,665 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚀 Space Rocket - 3D Game</title>
+    <title>🚀 Space Rocket</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            overflow: hidden; 
-            background: #000;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        #game-container { 
-            width: 100vw; 
-            height: 100vh; 
-            position: relative;
-        }
+        body { background: #000; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
         canvas { display: block; }
-        
-        #hud {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: #0ff;
-            font-size: 18px;
-            text-shadow: 0 0 10px #0ff;
-            z-index: 100;
-        }
-        #hud div { margin: 8px 0; }
-        
-        #start-screen, #game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            color: white;
-        }
-        
-        #start-screen h1, #game-over h1 {
-            font-size: 4rem;
-            background: linear-gradient(135deg, #00ffff, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
-            margin-bottom: 20px;
-        }
-        
-        #start-screen p, #game-over p {
-            font-size: 1.2rem;
-            color: #aaa;
-            margin: 10px 0;
-        }
-        
-        .btn {
-            margin-top: 30px;
-            padding: 15px 50px;
-            font-size: 1.5rem;
-            background: linear-gradient(135deg, #00ffff, #0088ff);
-            border: none;
-            border-radius: 30px;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-        }
-        .btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
-        }
-        
-        #final-score {
-            font-size: 3rem;
-            color: #0ff;
-            margin: 20px 0;
-        }
-        
-        .controls {
-            margin-top: 40px;
-            padding: 20px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-        }
-        .controls h3 { color: #0ff; margin-bottom: 10px; }
-        .controls p { font-size: 0.9rem; }
-        
-        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <div id="hud" class="hidden">
-            <div>🚀 SCORE: <span id="score">0</span></div>
-            <div>❤️ LIVES: <span id="lives">3</span></div>
-            <div>⚡ SPEED: <span id="speed">1.0</span>x</div>
-        </div>
-        
-        <div id="start-screen">
-            <h1>🚀 SPACE ROCKET</h1>
-            <p>Navigate through the asteroid field!</p>
-            <p>Collect power-ups • Avoid asteroids • Survive!</p>
-            <div class="controls">
-                <h3>Controls</h3>
-                <p>⬅️➡️ Arrow Keys or A/D - Move Left/Right</p>
-                <p>⬆️⬇️ Arrow Keys or W/S - Move Up/Down</p>
-                <p>SPACE - Boost</p>
-            </div>
-            <button class="btn" onclick="startGame()">LAUNCH</button>
-        </div>
-        
-        <div id="game-over" class="hidden">
-            <h1>💥 GAME OVER</h1>
-            <div id="final-score">0</div>
-            <p>You traveled through the cosmos...</p>
-            <button class="btn" onclick="restartGame()">TRY AGAIN</button>
-        </div>
-    </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script>
-        // Game state
-        let scene, camera, renderer;
-        let rocket, rocketGroup;
-        let asteroids = [];
-        let stars = [];
-        let powerups = [];
-        let particles = [];
-        let score = 0;
-        let lives = 3;
-        let gameSpeed = 1;
-        let isPlaying = false;
-        let keys = {};
-        let clock;
-        
-        // Rocket movement bounds
-        const BOUNDS = { x: 8, y: 5 };
-        const ROCKET_SPEED = 0.2;
-        
-        // Initialize Three.js
-        function init() {
-            // Scene
-            scene = new THREE.Scene();
-            scene.fog = new THREE.FogExp2(0x000020, 0.02);
-            
-            // Camera
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2, 10);
-            camera.lookAt(0, 0, -10);
-            
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('game-container').appendChild(renderer.domElement);
-            
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(5, 10, 5);
-            scene.add(directionalLight);
-            
-            const pointLight = new THREE.PointLight(0x00ffff, 1, 20);
-            pointLight.position.set(0, 0, 5);
-            scene.add(pointLight);
-            
-            // Create rocket
-            createRocket();
-            
-            // Create starfield
-            createStarfield();
-            
-            // Clock
-            clock = new THREE.Clock();
-            
-            // Event listeners
-            window.addEventListener('resize', onWindowResize);
-            window.addEventListener('keydown', (e) => keys[e.code] = true);
-            window.addEventListener('keyup', (e) => keys[e.code] = false);
-            
-            // Start render loop
-            animate();
+    // ============ SOUND ENGINE ============
+    let audioCtx = null;
+    function ensureAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+    function playTone(freq, dur, type, vol) {
+        if (!audioCtx) return;
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type || 'sine';
+        o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        g.gain.setValueAtTime(vol || 0.12, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + dur);
+    }
+    function playNoise(dur, vol) {
+        if (!audioCtx) return;
+        const buf = audioCtx.createBuffer(1, audioCtx.sampleRate * dur, audioCtx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+        const src = audioCtx.createBufferSource();
+        const g = audioCtx.createGain();
+        src.buffer = buf;
+        g.gain.setValueAtTime(vol || 0.08, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        src.connect(g); g.connect(audioCtx.destination);
+        src.start();
+    }
+    const SFX = {
+        hit() { playNoise(0.2, 0.15); playTone(120, 0.2, 'sawtooth', 0.1); },
+        powerup() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => playTone(f, 0.12, 'sine', 0.1), i * 70)); },
+        gameOver() { [400, 350, 300, 200].forEach((f, i) => setTimeout(() => playTone(f, 0.3, 'triangle', 0.1), i * 150)); },
+        dodge() { playTone(900, 0.04, 'sine', 0.06); }
+    };
+
+    const W = Math.min(window.innerWidth, 480);
+    const H = window.innerHeight;
+
+    // ============ 3D ROCKET OVERLAY (Three.js) ============
+    let rocketScene, rocketCamera, rocketRenderer, rocketModel;
+    let rocketLoaded = false;
+    let rocketOverlayVisible = false;
+
+    function init3DRocket() {
+        rocketScene = new THREE.Scene();
+
+        rocketCamera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
+        rocketCamera.position.set(0, 2, 5);
+        rocketCamera.lookAt(0, 0, 0);
+
+        rocketRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        rocketRenderer.setSize(W, H);
+        rocketRenderer.setPixelRatio(window.devicePixelRatio);
+        rocketRenderer.setClearColor(0x000000, 0);
+        rocketRenderer.domElement.style.position = 'absolute';
+        rocketRenderer.domElement.style.top = '0';
+        rocketRenderer.domElement.style.left = '50%';
+        rocketRenderer.domElement.style.transform = 'translateX(-50%)';
+        rocketRenderer.domElement.style.pointerEvents = 'none';
+        rocketRenderer.domElement.style.zIndex = '5';
+        document.body.appendChild(rocketRenderer.domElement);
+
+        // Lighting
+        rocketScene.add(new THREE.AmbientLight(0x606080, 0.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+        dirLight.position.set(2, 5, 4);
+        rocketScene.add(dirLight);
+        const rimLight = new THREE.DirectionalLight(0x00ccff, 0.5);
+        rimLight.position.set(-3, 0, -2);
+        rocketScene.add(rimLight);
+
+        // Engine glow light (moves with rocket)
+        const engineLight = new THREE.PointLight(0xff6600, 1.5, 4);
+        engineLight.position.set(0, -1.5, 0);
+        engineLight.name = 'engineLight';
+        rocketScene.add(engineLight);
+
+        // Load GLB
+        const loader = new THREE.GLTFLoader();
+        loader.load('rocket-model.glb', (gltf) => {
+            rocketModel = gltf.scene;
+
+            // Auto-scale: fit model to ~2 units tall
+            const box = new THREE.Box3().setFromObject(rocketModel);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 2 / maxDim;
+            rocketModel.scale.set(scale, scale, scale);
+
+            // Center the model
+            const center = box.getCenter(new THREE.Vector3());
+            rocketModel.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+            // Wrap in a group for easy positioning
+            const wrapper = new THREE.Group();
+            wrapper.add(rocketModel);
+            rocketModel = wrapper;
+            rocketScene.add(rocketModel);
+
+            rocketLoaded = true;
+            console.log('3D rocket loaded, size:', size);
+        }, undefined, (err) => {
+            console.warn('Failed to load rocket GLB:', err);
+        });
+    }
+
+    function update3DRocket(screenX, screenY, rotation, alpha, boost) {
+        if (!rocketLoaded || !rocketModel) return;
+
+        // Convert screen position to Three.js world coords
+        // Map screenX (0..W) to camera frustum X, screenY to Y
+        const ndcX = (screenX / W) * 2 - 1;
+        const ndcY = -(screenY / H) * 2 + 1;
+
+        // Project NDC to world position at a fixed Z distance from camera
+        const worldZ = -3; // distance in front of camera
+        const fovRad = rocketCamera.fov * Math.PI / 180;
+        const halfH = Math.abs(worldZ) * Math.tan(fovRad / 2);
+        const halfW = halfH * rocketCamera.aspect;
+
+        rocketModel.position.x = ndcX * halfW;
+        rocketModel.position.y = ndcY * halfH + (worldZ + rocketCamera.position.y);
+        rocketModel.position.z = worldZ;
+
+        // Tilt with movement
+        rocketModel.rotation.z = rotation * 3;
+        // Slight wobble
+        rocketModel.rotation.x = Math.sin(Date.now() * 0.003) * 0.03;
+
+        // Engine glow intensity with boost
+        const engineLight = rocketScene.getObjectByName('engineLight');
+        if (engineLight) {
+            engineLight.position.copy(rocketModel.position);
+            engineLight.position.y -= 1.5;
+            engineLight.intensity = boost ? 3 : 1.5;
+            engineLight.color.setHex(boost ? 0x00aaff : 0xff6600);
         }
-        
-        function createRocket() {
-            rocketGroup = new THREE.Group();
-            
-            // Rocket body (cylinder)
-            const bodyGeometry = new THREE.CylinderGeometry(0.3, 0.4, 2, 8);
-            const bodyMaterial = new THREE.MeshPhongMaterial({ 
-                color: 0x3388ff,
-                shininess: 100
+
+        // Visibility
+        rocketModel.visible = alpha > 0.5;
+
+        rocketRenderer.render(rocketScene, rocketCamera);
+    }
+
+    function show3DRocket(visible) {
+        rocketOverlayVisible = visible;
+        if (rocketRenderer) {
+            rocketRenderer.domElement.style.display = visible ? 'block' : 'none';
+        }
+    }
+
+    class MenuScene extends Phaser.Scene {
+        constructor() { super('MenuScene'); }
+
+        create() {
+            // Starfield background
+            for (let i = 0; i < 120; i++) {
+                const s = this.add.circle(
+                    Phaser.Math.Between(0, W), Phaser.Math.Between(0, H),
+                    Math.random() < 0.1 ? 2 : 1,
+                    0xffffff, 0.4 + Math.random() * 0.6
+                );
+                this.tweens.add({ targets: s, alpha: 0.2, duration: 1000 + Math.random() * 2000, yoyo: true, repeat: -1 });
+            }
+
+            // Title
+            this.add.text(W / 2, H * 0.22, '🚀', { fontSize: '72px' }).setOrigin(0.5);
+            this.add.text(W / 2, H * 0.32, 'SPACE ROCKET', {
+                fontSize: '36px', fontFamily: 'Segoe UI, sans-serif', fontStyle: 'bold',
+                color: '#00ffff',
+                shadow: { offsetX: 0, offsetY: 0, color: '#00ffff', blur: 20, fill: true }
+            }).setOrigin(0.5);
+
+            this.add.text(W / 2, H * 0.40, 'Fly upward through the asteroid field!\nDodge obstacles • Collect power-ups', {
+                fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', color: '#888', align: 'center', lineSpacing: 6
+            }).setOrigin(0.5);
+
+            // Controls
+            const ctrlY = H * 0.54;
+            const ctrlBg = this.add.rectangle(W / 2, ctrlY, W * 0.75, 90, 0xffffff, 0.08).setStrokeStyle(1, 0x0088ff, 0.3);
+            this.add.text(W / 2, ctrlY - 28, 'CONTROLS', { fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', color: '#0ff', fontStyle: 'bold' }).setOrigin(0.5);
+            this.add.text(W / 2, ctrlY, '⬅️ ➡️  Arrow Keys or A/D — Move', { fontSize: '13px', fontFamily: 'Segoe UI, sans-serif', color: '#aaa' }).setOrigin(0.5);
+            this.add.text(W / 2, ctrlY + 22, 'SPACE — Boost', { fontSize: '13px', fontFamily: 'Segoe UI, sans-serif', color: '#aaa' }).setOrigin(0.5);
+
+            // Launch button
+            const btn = this.add.rectangle(W / 2, H * 0.72, 200, 55, 0x0088ff).setInteractive({ useHandCursor: true });
+            const btnGlow = this.add.rectangle(W / 2, H * 0.72, 210, 65, 0x00ccff, 0.15);
+            this.add.text(W / 2, H * 0.72, 'LAUNCH', {
+                fontSize: '22px', fontFamily: 'Segoe UI, sans-serif', fontStyle: 'bold', color: '#fff', letterSpacing: 4
+            }).setOrigin(0.5);
+
+            this.tweens.add({ targets: btnGlow, scaleX: 1.15, scaleY: 1.15, alpha: 0, duration: 1200, repeat: -1 });
+
+            btn.on('pointerover', () => btn.setFillStyle(0x00aaff));
+            btn.on('pointerout', () => btn.setFillStyle(0x0088ff));
+            btn.on('pointerdown', () => {
+                ensureAudio();
+                this.scene.start('GameScene');
             });
-            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-            body.rotation.x = Math.PI / 2;
-            rocketGroup.add(body);
-            
+
+            // Keyboard start
+            this.input.keyboard.on('keydown-SPACE', () => {
+                ensureAudio();
+                this.scene.start('GameScene');
+            });
+
+            // Initialize 3D rocket overlay
+            if (!rocketRenderer) init3DRocket();
+            show3DRocket(false);
+        }
+    }
+
+    class GameScene extends Phaser.Scene {
+        constructor() { super('GameScene'); }
+
+        create() {
+            this.score = 0;
+            this.lives = 3;
+            this.altitude = 0;
+            this.gameSpeed = 1;
+            this.isOver = false;
+            this.invincible = 0;
+
+            // Background stars
+            this.bgStars = [];
+            for (let i = 0; i < 100; i++) {
+                const s = this.add.circle(
+                    Phaser.Math.Between(0, W), Phaser.Math.Between(0, H),
+                    Math.random() < 0.08 ? 2 : 1, 0xffffff, 0.3 + Math.random() * 0.5
+                );
+                s.speed = 0.3 + Math.random() * 1.2;
+                this.bgStars.push(s);
+            }
+
+            // Draw rocket using graphics
+            this.rocketX = W / 2;
+            this.rocketY = H - 100;
+            this.rocketContainer = this.add.container(this.rocketX, this.rocketY);
+
+            const g = this.add.graphics();
+            // Flame
+            g.fillStyle(0xff6600, 0.7);
+            g.fillTriangle(-8, 22, 8, 22, 0, 42);
+            g.fillStyle(0xffaa00, 0.9);
+            g.fillTriangle(-5, 22, 5, 22, 0, 35);
+            // Body
+            g.fillStyle(0x3388ff);
+            g.fillRoundedRect(-12, -20, 24, 42, 4);
             // Nose cone
-            const noseGeometry = new THREE.ConeGeometry(0.3, 0.8, 8);
-            const noseMaterial = new THREE.MeshPhongMaterial({ 
-                color: 0xff3333,
-                shininess: 100
-            });
-            const nose = new THREE.Mesh(noseGeometry, noseMaterial);
-            nose.rotation.x = -Math.PI / 2;
-            nose.position.z = -1.4;
-            rocketGroup.add(nose);
-            
+            g.fillStyle(0xff3333);
+            g.fillTriangle(-12, -20, 12, -20, 0, -38);
             // Fins
-            const finGeometry = new THREE.BoxGeometry(0.6, 0.1, 0.5);
-            const finMaterial = new THREE.MeshPhongMaterial({ color: 0xff6600 });
-            
-            for (let i = 0; i < 4; i++) {
-                const fin = new THREE.Mesh(finGeometry, finMaterial);
-                fin.position.z = 0.8;
-                fin.rotation.z = (Math.PI / 2) * i;
-                fin.position.x = Math.cos((Math.PI / 2) * i) * 0.4;
-                fin.position.y = Math.sin((Math.PI / 2) * i) * 0.4;
-                rocketGroup.add(fin);
+            g.fillStyle(0xff6600);
+            g.fillTriangle(-12, 18, -22, 26, -12, 8);
+            g.fillTriangle(12, 18, 22, 26, 12, 8);
+            // Window
+            g.fillStyle(0x88ddff);
+            g.fillCircle(0, -8, 5);
+            g.fillStyle(0xaaeeff, 0.5);
+            g.fillCircle(-1, -9, 2);
+
+            this.rocketContainer.add(g);
+            this.rocketGfx = g;
+
+            // Hide 2D rocket graphics if 3D model loaded
+            if (rocketLoaded) g.setVisible(false);
+            show3DRocket(true);
+
+            // Flame flicker
+            this.flameTimer = 0;
+
+            // Obstacle group
+            this.obstacles = [];
+            this.powerups = [];
+            this.particles = [];
+
+            // Spawn timers
+            this.obstacleTimer = 0;
+            this.powerupTimer = 0;
+
+            // HUD
+            this.scoreText = this.add.text(12, 12, '🚀 SCORE: 0', {
+                fontSize: '16px', fontFamily: 'Segoe UI, sans-serif', color: '#0ff',
+                shadow: { offsetX: 0, offsetY: 0, color: '#0ff', blur: 8, fill: true }
+            });
+            this.livesText = this.add.text(12, 36, '❤️ LIVES: 3', {
+                fontSize: '16px', fontFamily: 'Segoe UI, sans-serif', color: '#0ff',
+                shadow: { offsetX: 0, offsetY: 0, color: '#0ff', blur: 8, fill: true }
+            });
+            this.altText = this.add.text(W - 12, 12, 'ALT: 0m', {
+                fontSize: '16px', fontFamily: 'Segoe UI, sans-serif', color: '#f0a',
+                shadow: { offsetX: 0, offsetY: 0, color: '#f0a', blur: 8, fill: true }
+            }).setOrigin(1, 0);
+            this.speedText = this.add.text(W - 12, 36, '⚡ 1.0x', {
+                fontSize: '14px', fontFamily: 'Segoe UI, sans-serif', color: '#888'
+            }).setOrigin(1, 0);
+
+            // Input
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.keyA = this.input.keyboard.addKey('A');
+            this.keyD = this.input.keyboard.addKey('D');
+
+            // Touch
+            this.touchDragging = false;
+            this.input.on('pointerdown', (p) => { this.touchDragging = true; this.touchStartX = p.x; this.touchRocketStartX = this.rocketX; });
+            this.input.on('pointermove', (p) => {
+                if (!this.touchDragging) return;
+                this.rocketX = Phaser.Math.Clamp(this.touchRocketStartX + (p.x - this.touchStartX), 25, W - 25);
+            });
+            this.input.on('pointerup', () => this.touchDragging = false);
+        }
+
+        update(time, delta) {
+            if (this.isOver) return;
+
+            const dt = delta / 16.67; // normalize to ~60fps
+
+            // Scroll background stars
+            this.bgStars.forEach(s => {
+                s.y += s.speed * this.gameSpeed * dt;
+                if (s.y > H + 5) {
+                    s.y = -5;
+                    s.x = Phaser.Math.Between(0, W);
+                }
+            });
+
+            // Rocket movement
+            const speed = 5 * dt;
+            const boost = this.cursors.space.isDown ? 1.6 : 1;
+            let moveX = 0;
+            if (this.cursors.left.isDown || this.keyA.isDown) moveX = -speed * boost;
+            if (this.cursors.right.isDown || this.keyD.isDown) moveX = speed * boost;
+
+            this.rocketX = Phaser.Math.Clamp(this.rocketX + moveX, 25, W - 25);
+            this.rocketContainer.x = this.rocketX;
+
+            // Tilt
+            this.rocketContainer.rotation = Phaser.Math.Linear(this.rocketContainer.rotation, -moveX * 0.04, 0.15);
+
+            // Flame flicker
+            this.flameTimer += delta;
+            const flameScale = 1 + Math.sin(this.flameTimer * 0.015) * 0.15 + (boost > 1 ? 0.3 : 0);
+            this.rocketContainer.scaleY = 1;
+
+            // Invincibility
+            if (this.invincible > 0) {
+                this.invincible -= delta;
+                this.rocketContainer.alpha = Math.sin(time * 0.02) > 0 ? 1 : 0.3;
+            } else {
+                this.rocketContainer.alpha = 1;
             }
-            
-            // Engine glow
-            const glowGeometry = new THREE.SphereGeometry(0.25, 16, 16);
-            const glowMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xff4400,
-                transparent: true,
-                opacity: 0.8
-            });
-            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-            glow.position.z = 1.1;
-            glow.name = 'engineGlow';
-            rocketGroup.add(glow);
-            
-            // Thruster particles
-            const thrusterGeometry = new THREE.ConeGeometry(0.2, 1, 8);
-            const thrusterMaterial = new THREE.MeshBasicMaterial({
-                color: 0xff6600,
-                transparent: true,
-                opacity: 0.6
-            });
-            const thruster = new THREE.Mesh(thrusterGeometry, thrusterMaterial);
-            thruster.rotation.x = Math.PI / 2;
-            thruster.position.z = 1.6;
-            thruster.name = 'thruster';
-            rocketGroup.add(thruster);
-            
-            rocket = rocketGroup;
-            scene.add(rocket);
-        }
-        
-        function createStarfield() {
-            const starGeometry = new THREE.BufferGeometry();
-            const starCount = 2000;
-            const positions = new Float32Array(starCount * 3);
-            
-            for (let i = 0; i < starCount; i++) {
-                positions[i * 3] = (Math.random() - 0.5) * 100;
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 200 - 50;
+
+            // Spawn obstacles
+            this.obstacleTimer += delta;
+            const spawnInterval = Math.max(250, 800 - this.gameSpeed * 80);
+            if (this.obstacleTimer > spawnInterval) {
+                this.obstacleTimer = 0;
+                this.spawnObstacle();
             }
-            
-            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            const starMaterial = new THREE.PointsMaterial({
-                color: 0xffffff,
-                size: 0.1,
-                transparent: true,
-                opacity: 0.8
-            });
-            
-            const starField = new THREE.Points(starGeometry, starMaterial);
-            starField.name = 'starfield';
-            scene.add(starField);
+
+            // Spawn powerups
+            this.powerupTimer += delta;
+            if (this.powerupTimer > 5000) {
+                this.powerupTimer = 0;
+                this.spawnPowerup();
+            }
+
+            // Update obstacles
+            for (let i = this.obstacles.length - 1; i >= 0; i--) {
+                const ob = this.obstacles[i];
+                ob.y += ob.speed * this.gameSpeed * dt;
+                ob.gfx.x = ob.x;
+                ob.gfx.y = ob.y;
+                ob.gfx.rotation += ob.rotSpeed * dt;
+
+                // Collision
+                if (this.invincible <= 0) {
+                    const dx = ob.x - this.rocketX;
+                    const dy = ob.y - this.rocketY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < ob.radius + 18) {
+                        SFX.hit();
+                        this.spawnExplosion(ob.x, ob.y, ob.color);
+                        ob.gfx.destroy();
+                        this.obstacles.splice(i, 1);
+                        this.lives--;
+                        this.livesText.setText('❤️ LIVES: ' + this.lives);
+                        this.invincible = 1500;
+                        if (this.lives <= 0) { this.endGame(); return; }
+                        continue;
+                    }
+                }
+
+                // Off screen
+                if (ob.y > H + 40) {
+                    ob.gfx.destroy();
+                    this.obstacles.splice(i, 1);
+                    this.score += 5;
+                }
+            }
+
+            // Update powerups
+            for (let i = this.powerups.length - 1; i >= 0; i--) {
+                const pu = this.powerups[i];
+                pu.y += 1.5 * this.gameSpeed * dt;
+                pu.gfx.x = pu.x;
+                pu.gfx.y = pu.y;
+                pu.gfx.rotation += 0.02 * dt;
+
+                const dx = pu.x - this.rocketX;
+                const dy = pu.y - this.rocketY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 28) {
+                    SFX.powerup();
+                    this.spawnExplosion(pu.x, pu.y, 0x00ff88);
+                    if (pu.type === 'score') this.score += 100;
+                    else if (pu.type === 'life') { this.lives = Math.min(5, this.lives + 1); this.livesText.setText('❤️ LIVES: ' + this.lives); }
+                    else if (pu.type === 'slow') this.gameSpeed = Math.max(0.6, this.gameSpeed - 0.15);
+                    pu.gfx.destroy();
+                    this.powerups.splice(i, 1);
+                    continue;
+                }
+
+                if (pu.y > H + 30) {
+                    pu.gfx.destroy();
+                    this.powerups.splice(i, 1);
+                }
+            }
+
+            // Update particles
+            for (let i = this.particles.length - 1; i >= 0; i--) {
+                const p = this.particles[i];
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                p.life -= 0.03 * dt;
+                p.gfx.x = p.x;
+                p.gfx.y = p.y;
+                p.gfx.alpha = Math.max(0, p.life);
+                if (p.life <= 0) {
+                    p.gfx.destroy();
+                    this.particles.splice(i, 1);
+                }
+            }
+
+            // Score & altitude
+            this.altitude += this.gameSpeed * 1.5 * dt;
+            this.gameSpeed += 0.00005 * dt;
+            this.scoreText.setText('🚀 SCORE: ' + this.score);
+            this.altText.setText('ALT: ' + Math.floor(this.altitude) + 'm');
+            this.speedText.setText('⚡ ' + this.gameSpeed.toFixed(1) + 'x');
+
+            // Sync 3D rocket overlay
+            if (rocketLoaded) {
+                this.rocketGfx.setVisible(false);
+                update3DRocket(
+                    this.rocketX, this.rocketY,
+                    this.rocketContainer.rotation,
+                    this.rocketContainer.alpha,
+                    this.cursors.space.isDown
+                );
+            }
         }
-        
-        function createAsteroid() {
-            const size = 0.3 + Math.random() * 0.8;
-            const geometry = new THREE.DodecahedronGeometry(size, 0);
-            
-            // Random brownish/gray color
-            const hue = 0.05 + Math.random() * 0.1;
-            const color = new THREE.Color().setHSL(hue, 0.3, 0.3 + Math.random() * 0.2);
-            
-            const material = new THREE.MeshPhongMaterial({
-                color: color,
-                flatShading: true
+
+        spawnObstacle() {
+            const isAsteroid = Math.random() > 0.3;
+            const x = Phaser.Math.Between(20, W - 20);
+            const g = this.add.graphics();
+            let radius, color;
+
+            if (isAsteroid) {
+                radius = 12 + Math.random() * 18;
+                const shade = Phaser.Math.Between(60, 100);
+                color = Phaser.Display.Color.GetColor(shade + 40, shade, shade - 20);
+                // Draw irregular asteroid
+                g.fillStyle(color);
+                g.beginPath();
+                const pts = 7 + Math.floor(Math.random() * 4);
+                for (let i = 0; i < pts; i++) {
+                    const angle = (i / pts) * Math.PI * 2;
+                    const r = radius * (0.7 + Math.random() * 0.3);
+                    const px = Math.cos(angle) * r;
+                    const py = Math.sin(angle) * r;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
+                }
+                g.closePath();
+                g.fillPath();
+                // Crater
+                g.fillStyle(0x000000, 0.2);
+                g.fillCircle(radius * 0.2, -radius * 0.15, radius * 0.25);
+            } else {
+                // Glowing star
+                radius = 8 + Math.random() * 10;
+                const starColors = [0xffee44, 0xffaa00, 0xff6644, 0x44aaff, 0xff44ff];
+                color = starColors[Math.floor(Math.random() * starColors.length)];
+                // Glow
+                g.fillStyle(color, 0.15);
+                g.fillCircle(0, 0, radius * 3);
+                g.fillStyle(color, 0.3);
+                g.fillCircle(0, 0, radius * 1.8);
+                // Star shape
+                g.fillStyle(color);
+                g.beginPath();
+                for (let i = 0; i < 10; i++) {
+                    const angle = (i / 10) * Math.PI * 2 - Math.PI / 2;
+                    const r = i % 2 === 0 ? radius : radius * 0.4;
+                    const px = Math.cos(angle) * r;
+                    const py = Math.sin(angle) * r;
+                    if (i === 0) g.moveTo(px, py);
+                    else g.lineTo(px, py);
+                }
+                g.closePath();
+                g.fillPath();
+                // Bright center
+                g.fillStyle(0xffffff, 0.8);
+                g.fillCircle(0, 0, radius * 0.2);
+            }
+
+            g.x = x;
+            g.y = -40;
+
+            this.obstacles.push({
+                x, y: -40, gfx: g,
+                speed: 1.5 + Math.random() * 2,
+                radius,
+                rotSpeed: (Math.random() - 0.5) * 0.04,
+                color
             });
-            
-            const asteroid = new THREE.Mesh(geometry, material);
-            asteroid.position.x = (Math.random() - 0.5) * BOUNDS.x * 2;
-            asteroid.position.y = (Math.random() - 0.5) * BOUNDS.y * 2;
-            asteroid.position.z = -50 - Math.random() * 30;
-            
-            asteroid.rotation.x = Math.random() * Math.PI;
-            asteroid.rotation.y = Math.random() * Math.PI;
-            
-            asteroid.userData = {
-                rotationSpeed: {
-                    x: (Math.random() - 0.5) * 0.05,
-                    y: (Math.random() - 0.5) * 0.05,
-                    z: (Math.random() - 0.5) * 0.05
-                },
-                speed: 0.1 + Math.random() * 0.15,
-                size: size
-            };
-            
-            scene.add(asteroid);
-            asteroids.push(asteroid);
         }
-        
-        function createPowerup() {
-            const types = ['score', 'life', 'speed'];
+
+        spawnPowerup() {
+            const types = ['score', 'life', 'slow'];
             const type = types[Math.floor(Math.random() * types.length)];
-            
-            let color;
-            switch(type) {
-                case 'score': color = 0xffff00; break;
-                case 'life': color = 0xff0000; break;
-                case 'speed': color = 0x00ff00; break;
-            }
-            
-            const geometry = new THREE.OctahedronGeometry(0.4, 0);
-            const material = new THREE.MeshPhongMaterial({
-                color: color,
-                emissive: color,
-                emissiveIntensity: 0.5
-            });
-            
-            const powerup = new THREE.Mesh(geometry, material);
-            powerup.position.x = (Math.random() - 0.5) * BOUNDS.x * 2;
-            powerup.position.y = (Math.random() - 0.5) * BOUNDS.y * 2;
-            powerup.position.z = -60;
-            
-            powerup.userData = { type: type };
-            
-            scene.add(powerup);
-            powerups.push(powerup);
+            const colors = { score: 0xffff00, life: 0xff4488, slow: 0x00ff88 };
+            const labels = { score: '$', life: '♥', slow: '⚡' };
+            const x = Phaser.Math.Between(30, W - 30);
+            const g = this.add.graphics();
+            const col = colors[type];
+
+            // Glowing diamond
+            g.fillStyle(col, 0.15);
+            g.fillCircle(0, 0, 20);
+            g.fillStyle(col, 0.8);
+            g.beginPath();
+            g.moveTo(0, -12); g.lineTo(10, 0); g.lineTo(0, 12); g.lineTo(-10, 0);
+            g.closePath();
+            g.fillPath();
+            g.lineStyle(1.5, 0xffffff, 0.6);
+            g.beginPath();
+            g.moveTo(0, -12); g.lineTo(10, 0); g.lineTo(0, 12); g.lineTo(-10, 0);
+            g.closePath();
+            g.strokePath();
+
+            // Label
+            const label = this.add.text(0, 0, labels[type], {
+                fontSize: '14px', fontFamily: 'Segoe UI', color: '#fff', fontStyle: 'bold'
+            }).setOrigin(0.5);
+
+            const container = this.add.container(x, -30, [g, label]);
+
+            this.powerups.push({ x, y: -30, gfx: container, type });
         }
-        
-        function createExplosion(position) {
-            const particleCount = 20;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const geometry = new THREE.SphereGeometry(0.05, 8, 8);
-                const material = new THREE.MeshBasicMaterial({
-                    color: new THREE.Color().setHSL(Math.random() * 0.1 + 0.05, 1, 0.5),
-                    transparent: true,
-                    opacity: 1
-                });
-                
-                const particle = new THREE.Mesh(geometry, material);
-                particle.position.copy(position);
-                
-                particle.userData = {
-                    velocity: new THREE.Vector3(
-                        (Math.random() - 0.5) * 0.3,
-                        (Math.random() - 0.5) * 0.3,
-                        (Math.random() - 0.5) * 0.3
-                    ),
+
+        spawnExplosion(x, y, color) {
+            for (let i = 0; i < 10; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const spd = 1 + Math.random() * 3;
+                const size = 2 + Math.random() * 3;
+                const pg = this.add.circle(x, y, size, color || 0xff8800, 1);
+                this.particles.push({
+                    x, y, gfx: pg,
+                    vx: Math.cos(angle) * spd,
+                    vy: Math.sin(angle) * spd,
                     life: 1
-                };
-                
-                scene.add(particle);
-                particles.push(particle);
+                });
             }
         }
-        
-        function updateRocket(delta) {
-            if (!rocket) return;
-            
-            // Movement
-            let moveX = 0, moveY = 0;
-            
-            if (keys['ArrowLeft'] || keys['KeyA']) moveX = -ROCKET_SPEED;
-            if (keys['ArrowRight'] || keys['KeyD']) moveX = ROCKET_SPEED;
-            if (keys['ArrowUp'] || keys['KeyW']) moveY = ROCKET_SPEED;
-            if (keys['ArrowDown'] || keys['KeyS']) moveY = -ROCKET_SPEED;
-            
-            // Boost
-            let boost = keys['Space'] ? 1.5 : 1;
-            
-            rocket.position.x += moveX * boost;
-            rocket.position.y += moveY * boost;
-            
-            // Clamp position
-            rocket.position.x = Math.max(-BOUNDS.x, Math.min(BOUNDS.x, rocket.position.x));
-            rocket.position.y = Math.max(-BOUNDS.y, Math.min(BOUNDS.y, rocket.position.y));
-            
-            // Tilt based on movement
-            rocket.rotation.z = -moveX * 0.5;
-            rocket.rotation.x = moveY * 0.3;
-            
-            // Engine effects
-            const thruster = rocket.getObjectByName('thruster');
-            const glow = rocket.getObjectByName('engineGlow');
-            if (thruster) {
-                thruster.scale.y = 0.8 + Math.sin(Date.now() * 0.01) * 0.3 + (boost - 1) * 0.5;
-            }
-            if (glow) {
-                glow.material.opacity = 0.5 + Math.sin(Date.now() * 0.02) * 0.3;
-            }
+
+        endGame() {
+            this.isOver = true;
+            SFX.gameOver();
+            show3DRocket(false);
+            this.scene.start('GameOverScene', { score: this.score, altitude: Math.floor(this.altitude) });
         }
-        
-        function updateAsteroids(delta) {
-            const speed = gameSpeed * 0.5;
-            
-            for (let i = asteroids.length - 1; i >= 0; i--) {
-                const asteroid = asteroids[i];
-                
-                // Move towards camera
-                asteroid.position.z += asteroid.userData.speed * speed;
-                
-                // Rotate
-                asteroid.rotation.x += asteroid.userData.rotationSpeed.x;
-                asteroid.rotation.y += asteroid.userData.rotationSpeed.y;
-                
-                // Check collision with rocket
-                if (rocket) {
-                    const distance = asteroid.position.distanceTo(rocket.position);
-                    if (distance < asteroid.userData.size + 0.5) {
-                        // Collision!
-                        createExplosion(asteroid.position);
-                        scene.remove(asteroid);
-                        asteroids.splice(i, 1);
-                        
-                        lives--;
-                        document.getElementById('lives').textContent = lives;
-                        
-                        if (lives <= 0) {
-                            gameOver();
-                        }
-                        continue;
-                    }
-                }
-                
-                // Remove if past camera
-                if (asteroid.position.z > 15) {
-                    scene.remove(asteroid);
-                    asteroids.splice(i, 1);
-                    score += 10;
-                    document.getElementById('score').textContent = score;
-                }
+    }
+
+    class GameOverScene extends Phaser.Scene {
+        constructor() { super('GameOverScene'); }
+
+        create(data) {
+            // Stars
+            for (let i = 0; i < 80; i++) {
+                this.add.circle(
+                    Phaser.Math.Between(0, W), Phaser.Math.Between(0, H),
+                    1, 0xffffff, 0.3 + Math.random() * 0.4
+                );
             }
-            
-            // Spawn new asteroids
-            if (Math.random() < 0.03 * gameSpeed) {
-                createAsteroid();
-            }
+
+            this.add.text(W / 2, H * 0.25, '💥 GAME OVER', {
+                fontSize: '34px', fontFamily: 'Segoe UI, sans-serif', fontStyle: 'bold', color: '#ff4466',
+                shadow: { offsetX: 0, offsetY: 0, color: '#ff4466', blur: 20, fill: true }
+            }).setOrigin(0.5);
+
+            this.add.text(W / 2, H * 0.38, `Score: ${data.score}`, {
+                fontSize: '28px', fontFamily: 'Segoe UI, sans-serif', fontStyle: 'bold', color: '#0ff',
+                shadow: { offsetX: 0, offsetY: 0, color: '#0ff', blur: 15, fill: true }
+            }).setOrigin(0.5);
+
+            this.add.text(W / 2, H * 0.46, `Altitude: ${data.altitude}m`, {
+                fontSize: '20px', fontFamily: 'Segoe UI, sans-serif', color: '#f0a',
+                shadow: { offsetX: 0, offsetY: 0, color: '#f0a', blur: 10, fill: true }
+            }).setOrigin(0.5);
+
+            // Retry button
+            const btn = this.add.rectangle(W / 2, H * 0.62, 200, 55, 0x0088ff).setInteractive({ useHandCursor: true });
+            const btnGlow = this.add.rectangle(W / 2, H * 0.62, 210, 65, 0x00ccff, 0.15);
+            this.add.text(W / 2, H * 0.62, 'TRY AGAIN', {
+                fontSize: '20px', fontFamily: 'Segoe UI, sans-serif', fontStyle: 'bold', color: '#fff', letterSpacing: 3
+            }).setOrigin(0.5);
+
+            this.tweens.add({ targets: btnGlow, scaleX: 1.15, scaleY: 1.15, alpha: 0, duration: 1200, repeat: -1 });
+
+            btn.on('pointerover', () => btn.setFillStyle(0x00aaff));
+            btn.on('pointerout', () => btn.setFillStyle(0x0088ff));
+            btn.on('pointerdown', () => this.scene.start('GameScene'));
+
+            this.input.keyboard.on('keydown-SPACE', () => this.scene.start('GameScene'));
         }
-        
-        function updatePowerups(delta) {
-            for (let i = powerups.length - 1; i >= 0; i--) {
-                const powerup = powerups[i];
-                
-                powerup.position.z += 0.3;
-                powerup.rotation.y += 0.05;
-                powerup.rotation.x += 0.03;
-                
-                // Check collision
-                if (rocket) {
-                    const distance = powerup.position.distanceTo(rocket.position);
-                    if (distance < 1) {
-                        // Collected!
-                        switch(powerup.userData.type) {
-                            case 'score':
-                                score += 100;
-                                break;
-                            case 'life':
-                                lives = Math.min(5, lives + 1);
-                                document.getElementById('lives').textContent = lives;
-                                break;
-                            case 'speed':
-                                gameSpeed = Math.min(3, gameSpeed + 0.2);
-                                document.getElementById('speed').textContent = gameSpeed.toFixed(1);
-                                break;
-                        }
-                        document.getElementById('score').textContent = score;
-                        
-                        scene.remove(powerup);
-                        powerups.splice(i, 1);
-                        continue;
-                    }
-                }
-                
-                if (powerup.position.z > 15) {
-                    scene.remove(powerup);
-                    powerups.splice(i, 1);
-                }
-            }
-            
-            // Spawn powerups rarely
-            if (Math.random() < 0.005) {
-                createPowerup();
-            }
-        }
-        
-        function updateParticles(delta) {
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const particle = particles[i];
-                
-                particle.position.add(particle.userData.velocity);
-                particle.userData.life -= 0.02;
-                particle.material.opacity = particle.userData.life;
-                
-                if (particle.userData.life <= 0) {
-                    scene.remove(particle);
-                    particles.splice(i, 1);
-                }
-            }
-        }
-        
-        function updateStarfield(delta) {
-            const starfield = scene.getObjectByName('starfield');
-            if (starfield) {
-                const positions = starfield.geometry.attributes.position.array;
-                for (let i = 0; i < positions.length; i += 3) {
-                    positions[i + 2] += 0.2 * gameSpeed;
-                    if (positions[i + 2] > 50) {
-                        positions[i + 2] = -150;
-                    }
-                }
-                starfield.geometry.attributes.position.needsUpdate = true;
-            }
-        }
-        
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            const delta = clock.getDelta();
-            
-            if (isPlaying) {
-                updateRocket(delta);
-                updateAsteroids(delta);
-                updatePowerups(delta);
-                updateParticles(delta);
-                updateStarfield(delta);
-                
-                // Gradually increase difficulty
-                gameSpeed += 0.0001;
-                document.getElementById('speed').textContent = gameSpeed.toFixed(1);
-            }
-            
-            renderer.render(scene, camera);
-        }
-        
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-        
-        function startGame() {
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('hud').classList.remove('hidden');
-            
-            // Reset game state
-            score = 0;
-            lives = 3;
-            gameSpeed = 1;
-            
-            document.getElementById('score').textContent = score;
-            document.getElementById('lives').textContent = lives;
-            document.getElementById('speed').textContent = gameSpeed.toFixed(1);
-            
-            // Clear existing objects
-            asteroids.forEach(a => scene.remove(a));
-            powerups.forEach(p => scene.remove(p));
-            particles.forEach(p => scene.remove(p));
-            asteroids = [];
-            powerups = [];
-            particles = [];
-            
-            // Reset rocket position
-            if (rocket) {
-                rocket.position.set(0, 0, 0);
-                rocket.rotation.set(0, 0, 0);
-            }
-            
-            isPlaying = true;
-        }
-        
-        function gameOver() {
-            isPlaying = false;
-            document.getElementById('game-over').classList.remove('hidden');
-            document.getElementById('final-score').textContent = `Score: ${score}`;
-        }
-        
-        function restartGame() {
-            document.getElementById('game-over').classList.add('hidden');
-            startGame();
-        }
-        
-        // Initialize on load
-        window.onload = init;
+    }
+
+    const config = {
+        type: Phaser.AUTO,
+        width: W,
+        height: H,
+        backgroundColor: '#050510',
+        parent: document.body,
+        scene: [MenuScene, GameScene, GameOverScene],
+        scale: {
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        physics: { default: 'arcade' }
+    };
+
+    const game = new Phaser.Game(config);
     </script>
 </body>
 </html>

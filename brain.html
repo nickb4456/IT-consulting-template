@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brain Research Explorer | Eta Colony | AIBridges</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Lato', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+    }
+    
+    .header {
+      background: rgba(15, 23, 42, 0.95);
+      border-bottom: 1px solid rgba(236, 72, 153, 0.3);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #ec4899, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header a { color: #ec4899; text-decoration: none; }
+    .header a:hover { text-decoration: underline; }
+    
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: linear-gradient(180deg, rgba(236, 72, 153, 0.1) 0%, transparent 100%);
+    }
+    .hero h2 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #f472b6, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p { color: #94a3b8; font-size: 1.1rem; }
+    
+    .stats-row {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .stat-box {
+      background: rgba(236, 72, 153, 0.1);
+      border: 1px solid rgba(236, 72, 153, 0.3);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+    }
+    .stat-box .number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f472b6;
+    }
+    .stat-box .label { color: #94a3b8; font-size: 0.9rem; }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .search-section {
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(236, 72, 153, 0.2);
+    }
+    .search-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid rgba(236, 72, 153, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #ec4899;
+    }
+    select {
+      padding: 0.75rem 1rem;
+      border: 2px solid rgba(236, 72, 153, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+    
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1rem;
+    }
+    
+    .card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(236, 72, 153, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+      transition: all 0.2s;
+    }
+    .card:hover {
+      border-color: #ec4899;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(236, 72, 153, 0.15);
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.4;
+      margin-bottom: 0.75rem;
+    }
+    .card-meta {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      background: rgba(139, 92, 246, 0.2);
+      color: #c4b5fd;
+    }
+    .badge.high { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge.med { background: rgba(251, 191, 36, 0.2); color: #fcd34d; }
+    .badge.low { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+    .card-summary {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .card-link {
+      display: inline-block;
+      margin-top: 0.75rem;
+      color: #ec4899;
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .card-link:hover { text-decoration: underline; }
+    
+    .topics {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .topic-pill {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      background: rgba(236, 72, 153, 0.15);
+      color: #f9a8d4;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .topic-pill:hover { background: rgba(236, 72, 153, 0.3); }
+    .topic-pill.active { background: #ec4899; color: white; }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+    
+    @media (max-width: 768px) {
+      .hero h2 { font-size: 1.75rem; }
+      .results-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🧠 Brain Research Explorer</h1>
+    <a href="/">← AIBridges</a>
+  </header>
+  
+  <section class="hero">
+    <h2>Eta Colony: Neuroscience Research</h2>
+    <p>AI-curated brain & memory research from PubMed, bioRxiv, and arXiv</p>
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="number" id="totalCount">0</div>
+        <div class="label">Research Papers</div>
+      </div>
+      <div class="stat-box">
+        <div class="number" id="highCount">0</div>
+        <div class="label">Brain↔AI Relevant</div>
+      </div>
+      <div class="stat-box">
+        <div class="number" id="topicsCount">0</div>
+        <div class="label">Topic Categories</div>
+      </div>
+    </div>
+  </section>
+  
+  <div class="container">
+    <section class="search-section">
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search neuroscience research...">
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="research">Research</option>
+          <option value="edge">Connections</option>
+          <option value="BREAKTHROUGH">Breakthroughs</option>
+        </select>
+        <select id="scoreFilter">
+          <option value="">All Scores</option>
+          <option value="high">High Relevance (0.7+)</option>
+          <option value="med">Medium (0.5-0.7)</option>
+          <option value="low">Lower (&lt;0.5)</option>
+        </select>
+      </div>
+      <div class="topics" id="topicPills"></div>
+    </section>
+    
+    <div class="results-grid" id="resultsGrid">
+      <div class="empty-state">
+        <div class="emoji">🔄</div>
+        <p>Loading research...</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    let data = null;
+    let entries = [];
+    
+    async function loadData() {
+      try {
+        const res = await fetch('eta-data.json');
+        data = await res.json();
+        entries = data.entries;
+        
+        document.getElementById('totalCount').textContent = entries.length;
+        
+        // Count high-relevance papers
+        const highRelevance = entries.filter(e => e.score >= 0.7 || e.strength >= 0.8).length;
+        document.getElementById('highCount').textContent = highRelevance;
+        
+        // Get unique categories
+        const categories = [...new Set(entries.map(e => e.category).filter(Boolean))];
+        document.getElementById('topicsCount').textContent = categories.length;
+        
+        renderTopics(categories);
+        renderResults(entries);
+      } catch (e) {
+        console.error(e);
+        document.getElementById('resultsGrid').innerHTML = `
+          <div class="empty-state">
+            <div class="emoji">⚠️</div>
+            <p>Failed to load research data</p>
+          </div>
+        `;
+      }
+    }
+    
+    function renderTopics(categories) {
+      const container = document.getElementById('topicPills');
+      const counts = {};
+      entries.forEach(e => {
+        const cat = e.category || 'other';
+        counts[cat] = (counts[cat] || 0) + 1;
+      });
+      
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      container.innerHTML = sorted.map(([cat, count]) => 
+        `<span class="topic-pill" data-cat="${cat}" onclick="filterByTopic('${cat}')">${cat.replace(/-/g, ' ')} (${count})</span>`
+      ).join('');
+    }
+    
+    function filterByTopic(cat) {
+      document.querySelectorAll('.topic-pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.cat === cat);
+      });
+      filterResults();
+    }
+    
+    function filterResults() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const type = document.getElementById('typeFilter').value;
+      const scoreFilter = document.getElementById('scoreFilter').value;
+      const activeTopic = document.querySelector('.topic-pill.active')?.dataset.cat;
+      
+      let results = entries;
+      
+      if (type) results = results.filter(e => e.type === type);
+      
+      if (activeTopic) results = results.filter(e => e.category === activeTopic);
+      
+      if (scoreFilter === 'high') results = results.filter(e => (e.score || e.strength) >= 0.7);
+      else if (scoreFilter === 'med') results = results.filter(e => {
+        const s = e.score || e.strength;
+        return s >= 0.5 && s < 0.7;
+      });
+      else if (scoreFilter === 'low') results = results.filter(e => (e.score || e.strength) < 0.5);
+      
+      if (query) {
+        results = results.filter(e => 
+          (e.title + ' ' + (e.summary || '')).toLowerCase().includes(query)
+        );
+      }
+      
+      renderResults(results);
+    }
+    
+    function renderResults(results) {
+      const grid = document.getElementById('resultsGrid');
+      
+      if (results.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><p>No research matches your filters</p></div>`;
+        return;
+      }
+      
+      grid.innerHTML = results.slice(0, 50).map(entry => {
+        const score = entry.score || entry.strength || 0;
+        const scoreClass = score >= 0.7 ? 'high' : score >= 0.5 ? 'med' : 'low';
+        const scoreLabel = score >= 0.7 ? 'High Relevance' : score >= 0.5 ? 'Medium' : 'Lower';
+        
+        return `
+          <div class="card">
+            <div class="card-title">${escapeHtml(entry.title || 'Untitled')}</div>
+            <div class="card-meta">
+              <span class="badge ${scoreClass}">${scoreLabel}</span>
+              <span class="badge">${entry.category?.replace(/-/g, ' ') || 'general'}</span>
+            </div>
+            ${entry.summary ? `<div class="card-summary">${escapeHtml(entry.summary)}</div>` : ''}
+            ${entry.url ? `<a href="${entry.url}" target="_blank" class="card-link">View Paper →</a>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    document.getElementById('searchInput').addEventListener('input', filterResults);
+    document.getElementById('typeFilter').addEventListener('change', filterResults);
+    document.getElementById('scoreFilter').addEventListener('change', filterResults);
+    
+    loadData();
+  </script>
+</body>
+</html>

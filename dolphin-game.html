@@ -621,61 +621,6 @@
             b.name = 'bubble';
             scene.add(b);
         }
-
-        // Coral reef decorations (closely packed)
-        const coralColors = [0xffaa88, 0xff8866, 0xffcc99, 0xee9977, 0xddbbaa, 0xff9988, 0xffbb99];
-        for (let i = 0; i < 25; i++) {
-            const coral = new THREE.Group();
-            const baseColor = coralColors[Math.floor(Math.random() * coralColors.length)];
-            const coralMat = new THREE.MeshPhongMaterial({ 
-                color: baseColor, shininess: 30, specular: 0x442222 
-            });
-            
-            // Main stem
-            const height = 1.5 + Math.random() * 2;
-            const stemGeo = new THREE.CylinderGeometry(0.15, 0.25, height, 8);
-            const stem = new THREE.Mesh(stemGeo, coralMat);
-            stem.position.y = height / 2;
-            coral.add(stem);
-            
-            // Bulbous top
-            const topGeo = new THREE.SphereGeometry(0.35 + Math.random() * 0.2, 10, 8);
-            const top = new THREE.Mesh(topGeo, coralMat);
-            top.position.y = height + 0.1;
-            top.scale.y = 0.7;
-            coral.add(top);
-            
-            // Small branches
-            for (let j = 0; j < 2 + Math.floor(Math.random() * 3); j++) {
-                const branchHeight = 0.5 + Math.random() * 0.8;
-                const branchGeo = new THREE.CylinderGeometry(0.06, 0.1, branchHeight, 6);
-                const branch = new THREE.Mesh(branchGeo, coralMat);
-                const angle = Math.random() * Math.PI * 2;
-                branch.position.set(
-                    Math.cos(angle) * 0.2,
-                    height * (0.3 + Math.random() * 0.4),
-                    Math.sin(angle) * 0.2
-                );
-                branch.rotation.z = (Math.random() - 0.5) * 0.5;
-                branch.rotation.x = (Math.random() - 0.5) * 0.5;
-                coral.add(branch);
-            }
-            
-            // Position coral in clusters (closer together)
-            const clusterX = (Math.floor(i / 5) - 2) * 6;
-            coral.position.set(
-                clusterX + (Math.random() - 0.5) * 4,
-                -10,
-                2 + (i % 5) * 1.5 + (Math.random() - 0.5) * 1
-            );
-            coral.userData = { 
-                baseX: coral.position.x,
-                swayPhase: Math.random() * Math.PI * 2,
-                swaySpeed: 2 + Math.random() * 1.5
-            };
-            coral.name = 'coral';
-            scene.add(coral);
-        }
     }
 
     function buildCloud() {
@@ -1295,17 +1240,14 @@
     }
 
     function updateEnvironment(delta) {
-        // Animate water - bigger, faster waves
+        // Animate water
         if (waterSurface) {
             const verts = waterSurface.geometry.attributes.position;
             const t = Date.now() * 0.001;
             for (let i = 0; i < verts.count; i++) {
                 const x = verts.getX(i);
                 const z = verts.getZ(i);
-                // More pronounced waves with multiple frequencies
-                const y = Math.sin(x * 0.3 + t * 4) * 0.35 + 
-                          Math.sin(z * 0.5 + t * 3) * 0.25 +
-                          Math.sin(x * 0.8 + z * 0.4 + t * 5) * 0.15;
+                const y = Math.sin(x * 0.5 + t * 2) * 0.15 + Math.sin(z * 0.8 + t * 1.5) * 0.1;
                 verts.setY(i, y);
             }
             verts.needsUpdate = true;
@@ -1326,16 +1268,6 @@
                 obj.position.y = obj.userData.baseY + Math.sin(obj.userData.phase) * 0.5;
                 obj.position.x -= obj.userData.speed;
                 if (obj.position.x < -18) obj.position.x = 18;
-            }
-        });
-
-        // Coral swaying (faster, more visible)
-        const t = Date.now() * 0.001;
-        scene.children.forEach(obj => {
-            if (obj.name === 'coral') {
-                const sway = Math.sin(t * obj.userData.swaySpeed + obj.userData.swayPhase) * 0.08;
-                obj.rotation.x = sway;
-                obj.rotation.z = sway * 0.5;
             }
         });
     }

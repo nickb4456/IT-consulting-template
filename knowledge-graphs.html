@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Are Knowledge Graphs? Interactive Explainer | AIBridges</title>
+    <meta name="description" content="Learn how knowledge graphs work with interactive visualizations. Understand how AI systems connect data, infer relationships, and discover hidden patterns.">
+    <meta name="keywords" content="knowledge graphs, graph databases, AI knowledge representation, semantic web, Neo4j, entity relationships, graph neural networks">
+
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://aibridges.org/knowledge-graphs">
+    <meta property="og:title" content="What Are Knowledge Graphs? Interactive Explainer">
+    <meta property="og:description" content="Learn how knowledge graphs work with interactive visualizations. See how AI connects data and infers relationships.">
+    <meta property="article:published_time" content="2026-02-15">
+
+    <link rel="canonical" href="https://aibridges.org/knowledge-graphs">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --accent: #22d3ee;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 30, 0.6);
+            --text: #f8fafc;
+            --text-muted: #a1afc4;
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-dark); color: var(--text); line-height: 1.8; }
+        
+        /* Navigation */
+        .nav { position: fixed; top: 0; width: 100%; padding: 1rem 2rem; background: rgba(10, 10, 15, 0.9); backdrop-filter: blur(20px); z-index: 1000; border-bottom: 1px solid var(--border); }
+        .nav-container { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; transition: color 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+        
+        /* Article Header */
+        .article-header { padding: 8rem 2rem 4rem; text-align: center; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.05)); }
+        .article-header h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; margin-bottom: 1rem; background: linear-gradient(135deg, var(--text), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .article-meta { color: var(--text-muted); font-size: 0.9rem; }
+        .article-meta span { margin: 0 1rem; }
+        
+        /* Article Content */
+        .article-content { max-width: 900px; margin: 0 auto; padding: 3rem 2rem; }
+        .article-content h2 { font-size: 1.75rem; margin: 2.5rem 0 1rem; color: var(--accent); }
+        .article-content h3 { font-size: 1.25rem; margin: 2rem 0 0.75rem; color: var(--primary-light); }
+        .article-content p { margin-bottom: 1.5rem; color: var(--text-muted); }
+        .article-content ul, .article-content ol { margin: 1rem 0 1.5rem 2rem; color: var(--text-muted); }
+        .article-content li { margin-bottom: 0.5rem; }
+        .article-content strong { color: var(--text); }
+        .article-content code { font-family: 'JetBrains Mono', monospace; background: rgba(99, 102, 241, 0.2); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.9em; }
+        
+        /* Interactive Graph Container */
+        .graph-container { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            margin: 2rem 0; 
+            overflow: hidden;
+        }
+        .graph-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .graph-header h3 { color: var(--text); margin: 0; font-size: 1rem; }
+        .graph-controls { display: flex; gap: 0.5rem; }
+        .graph-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .graph-btn:hover { background: var(--primary-light); transform: translateY(-1px); }
+        .graph-btn.secondary { background: rgba(255,255,255,0.1); }
+        .graph-btn.secondary:hover { background: rgba(255,255,255,0.2); }
+        #graph-svg { width: 100%; height: 400px; display: block; }
+        .graph-legend {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.85rem; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+        
+        /* Highlight Boxes */
+        .highlight-box { background: var(--bg-card); border-left: 4px solid var(--accent); padding: 1.5rem; margin: 2rem 0; border-radius: 0 8px 8px 0; }
+        .highlight-box p { margin: 0; }
+        .highlight-box.warning { border-left-color: var(--warning); }
+        .highlight-box.success { border-left-color: var(--success); }
+        
+        /* Comparison Table */
+        .comparison-table { width: 100%; border-collapse: collapse; margin: 2rem 0; }
+        .comparison-table th, .comparison-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .comparison-table th { color: var(--accent); font-weight: 600; }
+        .comparison-table td { color: var(--text-muted); }
+        .comparison-table tr:hover { background: rgba(99, 102, 241, 0.05); }
+        
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.6;
+        }
+        .code-block .comment { color: #6b7280; }
+        .code-block .keyword { color: var(--primary-light); }
+        .code-block .string { color: var(--success); }
+        .code-block .function { color: var(--accent); }
+        
+        /* Inference Demo */
+        .inference-demo {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .inference-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            color: var(--text-muted);
+        }
+        .inference-step .step-num {
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .inference-step .arrow { color: var(--accent); }
+        .inference-result {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(34, 211, 238, 0.1));
+            border: 1px solid var(--success);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            color: var(--success);
+            font-weight: 500;
+        }
+        
+        /* Use Case Cards */
+        .use-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0; }
+        .use-case-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        .use-case-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+        .use-case-card h4 { color: var(--text); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .use-case-card h4 i { color: var(--accent); }
+        .use-case-card p { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+        
+        /* Footer */
+        .footer { background: rgba(20, 20, 30, 0.8); padding: 3rem 2rem; text-align: center; border-top: 1px solid var(--border); }
+        .footer p { color: var(--text-muted); }
+        .footer a { color: var(--accent); text-decoration: none; }
+        
+        /* Responsive */
+        @media (max-width: 768px) { 
+            .nav-links { display: none; } 
+            .article-header { padding: 6rem 1rem 2rem; } 
+            .article-content { padding: 2rem 1rem; }
+            .graph-header { flex-direction: column; gap: 1rem; }
+            .comparison-table { font-size: 0.9rem; }
+        }
+        
+        /* D3 Tooltip */
+        .graph-tooltip {
+            position: absolute;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            font-size: 0.85rem;
+            pointer-events: none;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "What Are Knowledge Graphs? Interactive Explainer",
+        "author": { "@type": "Organization", "name": "AIBridges" },
+        "publisher": { "@type": "Organization", "name": "AIBridges", "url": "https://aibridges.org" },
+        "datePublished": "2026-02-15",
+        "description": "Learn how knowledge graphs work with interactive visualizations."
+    }
+    </script>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="logo">AIBridges</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/service-ai">AI Services</a></li>
+                <li><a href="/blog">Blog</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <header class="article-header">
+        <h1>What Are Knowledge Graphs?</h1>
+        <p class="article-meta">
+            <span><i class="far fa-calendar"></i> February 15, 2026</span>
+            <span><i class="far fa-clock"></i> 8 min read</span>
+            <span><i class="far fa-folder"></i> AI Fundamentals</span>
+        </p>
+    </header>
+
+    <article class="article-content">
+        <p>Knowledge graphs solve the <strong>"islands of data" problem</strong> — they connect information that would otherwise sit in isolated tables, documents, or databases. Instead of storing data in rows and columns, knowledge graphs represent information as <em>entities</em> (nodes) connected by <em>relationships</em> (edges).</p>
+
+        <div class="highlight-box">
+            <p><strong>The core insight:</strong> Relational databases answer "what do I have?" — knowledge graphs answer "how is everything connected and what does that imply?"</p>
+        </div>
+
+        <h2>Interactive Knowledge Graph</h2>
+        <p>Click and drag nodes to explore. Hover over connections to see relationships. This graph shows a simple corporate ownership structure:</p>
+
+        <div class="graph-container">
+            <div class="graph-header">
+                <h3><i class="fas fa-project-diagram"></i> Corporate Ownership Graph</h3>
+                <div class="graph-controls">
+                    <button class="graph-btn secondary" onclick="resetGraph()">Reset View</button>
+                    <button class="graph-btn" onclick="showInference()">Show Inference</button>
+                </div>
+            </div>
+            <svg id="graph-svg"></svg>
+            <div class="graph-legend">
+                <div class="legend-item"><div class="legend-dot" style="background: #6366f1;"></div> Company</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #22d3ee;"></div> Person</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #10b981;"></div> Product</div>
+                <div class="legend-item"><div class="legend-dot" style="background: #f59e0b;"></div> Location</div>
+            </div>
+        </div>
+
+        <h2>How Inference Works</h2>
+        <p>The magic of knowledge graphs is <strong>inference</strong> — deriving new facts from existing relationships without explicitly storing them.</p>
+
+        <div class="inference-demo">
+            <h4 style="color: var(--text); margin-bottom: 1rem;">Example: Ownership Chain</h4>
+            <div class="inference-step">
+                <span class="step-num">1</span>
+                <span>Company A <span class="arrow">→</span> <code>OWNS</code> <span class="arrow">→</span> Company B</span>
+            </div>
+            <div class="inference-step">
+                <span class="step-num">2</span>
+                <span>Company B <span class="arrow">→</span> <code>OWNS</code> <span class="arrow">→</span> Company C</span>
+            </div>
+            <div class="inference-step">
+                <span class="step-num">3</span>
+                <span>Query: "What does Company A control?"</span>
+            </div>
+            <div class="inference-result">
+                <i class="fas fa-lightbulb"></i> Inferred: Company A controls Company C (via transitive ownership)
+            </div>
+        </div>
+
+        <p>The graph doesn't store "A controls C" explicitly. But when you query it, the engine <strong>walks the ownership edges transitively</strong> and returns C — even though there's no direct A→C connection.</p>
+
+        <h3>The Mechanics</h3>
+        <div class="code-block">
+<pre><span class="comment">// Neo4j Cypher: Find all entities Company A controls (1-3 hops)</span>
+<span class="keyword">MATCH</span> (a:Company)-[<span class="string">:OWNS</span>*1..3]->(target)
+<span class="keyword">WHERE</span> a.name = <span class="string">"Company A"</span>
+<span class="keyword">RETURN</span> target
+
+<span class="comment">// The *1..3 means "follow OWNS edges 1 to 3 times"</span>
+<span class="comment">// This is where inference emerges — traversal + rules</span></pre>
+        </div>
+
+        <h2>Knowledge Graphs vs. Relational Databases</h2>
+
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Relational Database</th>
+                    <th>Knowledge Graph</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Data Model</strong></td>
+                    <td>Tables, rows, columns</td>
+                    <td>Nodes, edges, properties</td>
+                </tr>
+                <tr>
+                    <td><strong>Relationships</strong></td>
+                    <td>Foreign keys (implicit)</td>
+                    <td>First-class citizens (explicit)</td>
+                </tr>
+                <tr>
+                    <td><strong>Schema</strong></td>
+                    <td>Rigid, predefined</td>
+                    <td>Flexible, evolving</td>
+                </tr>
+                <tr>
+                    <td><strong>Multi-hop Queries</strong></td>
+                    <td>Complex JOINs, slow</td>
+                    <td>Natural traversal, fast</td>
+                </tr>
+                <tr>
+                    <td><strong>Inference</strong></td>
+                    <td>Not built-in</td>
+                    <td>Ontologies + path traversal</td>
+                </tr>
+                <tr>
+                    <td><strong>Best For</strong></td>
+                    <td>Structured transactions</td>
+                    <td>Connected data, discovery</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>How Inference Actually Happens</h2>
+        
+        <p>There are four main mechanisms for deriving new knowledge:</p>
+
+        <h3>1. Path Traversal</h3>
+        <p>Follow edges N hops deep. "Find all people connected to John within 3 degrees" just walks the graph.</p>
+
+        <h3>2. Ontology Rules</h3>
+        <p>Define rules in advance: "If X owns Y and Y owns Z, then X controls Z." The graph applies these automatically.</p>
+
+        <h3>3. Type Inheritance</h3>
+        <p>"Fido is a Dog. Dogs are Mammals. Therefore Fido is a Mammal." The type hierarchy enables automatic classification.</p>
+
+        <h3>4. Pattern Matching</h3>
+        <p>SPARQL and Cypher let you describe patterns and find all matches. "Find all triangles where Person→worksAt→Company→locatedIn→City."</p>
+
+        <div class="highlight-box success">
+            <p><strong>Key insight:</strong> Inference = Traversal + Rules. The graph structure <em>is</em> the reasoning engine.</p>
+        </div>
+
+        <h2>Real-World Use Cases</h2>
+
+        <div class="use-cases">
+            <div class="use-case-card">
+                <h4><i class="fas fa-search"></i> Google Knowledge Panel</h4>
+                <p>Those info boxes in search results ("Barack Obama → married to → Michelle Obama") are powered by Google's Knowledge Graph.</p>
+            </div>
+            <div class="use-case-card">
+                <h4><i class="fas fa-shield-alt"></i> Fraud Detection</h4>
+                <p>Banks use graphs to find suspicious patterns: accounts that share addresses, phone numbers, or transaction chains with known fraudsters.</p>
+            </div>
+            <div class="use-case-card">
+                <h4><i class="fas fa-pills"></i> Drug Discovery</h4>
+                <p>Pharmaceutical companies map protein-compound interactions to find new drug candidates based on relationship patterns.</p>
+            </div>
+            <div class="use-case-card">
+                <h4><i class="fas fa-thumbs-up"></i> Recommendations</h4>
+                <p>Netflix and Spotify: "Users who liked X also liked Y" is a graph query connecting users through shared preferences.</p>
+            </div>
+            <div class="use-case-card">
+                <h4><i class="fas fa-bug"></i> AI Research (Our Colonies)</h4>
+                <p>Our <a href="/ouroboros/" style="color: var(--accent);">Ouroboros Colony</a> uses pheromone edges to connect AI research findings — a stigmergic knowledge graph!</p>
+            </div>
+            <div class="use-case-card">
+                <h4><i class="fas fa-balance-scale"></i> Legal Discovery</h4>
+                <p>Law firms map relationships between people, companies, and events to find relevant documents and connections in litigation.</p>
+            </div>
+        </div>
+
+        <h2>Getting Started</h2>
+
+        <p>Want to experiment with knowledge graphs? Here are the top tools:</p>
+
+        <ul>
+            <li><strong>Neo4j</strong> — The most popular graph database. Free community edition, great tutorials.</li>
+            <li><strong>Amazon Neptune</strong> — Managed graph database on AWS. Supports both property graphs and RDF.</li>
+            <li><strong>NetworkX (Python)</strong> — In-memory graph library. Great for prototyping and analysis.</li>
+            <li><strong>Apache Jena</strong> — RDF/SPARQL framework for semantic web applications.</li>
+        </ul>
+
+        <div class="highlight-box">
+            <p><strong>Pro tip:</strong> Start with NetworkX in a Jupyter notebook. Model your domain as nodes and edges, run some traversals, then migrate to Neo4j when you need persistence and scale.</p>
+        </div>
+
+        <h2>When to Use a Knowledge Graph</h2>
+
+        <p><strong>Use a knowledge graph when:</strong></p>
+        <ul>
+            <li>Relationships are as important as the data itself</li>
+            <li>You need multi-hop queries ("friends of friends who work at...")</li>
+            <li>Data comes from multiple sources and needs connection</li>
+            <li>You want to discover patterns you didn't know to look for</li>
+            <li>Explainability matters (trace why a conclusion was reached)</li>
+        </ul>
+
+        <p><strong>Stick with relational databases when:</strong></p>
+        <ul>
+            <li>Data is highly structured and tabular</li>
+            <li>Transactions and ACID compliance are critical</li>
+            <li>Relationships are simple (mostly foreign keys)</li>
+            <li>You need mature tooling and SQL expertise</li>
+        </ul>
+
+    </article>
+
+    <footer class="footer">
+        <p>© 2026 AIBridges · <a href="/blog">More Articles</a> · <a href="/contact">Contact Us</a></p>
+    </footer>
+
+    <!-- D3.js Graph Visualization -->
+    <script>
+        // Graph data
+        const nodes = [
+            { id: "Company A", type: "company", x: 150, y: 150 },
+            { id: "Company B", type: "company", x: 350, y: 100 },
+            { id: "Company C", type: "company", x: 550, y: 150 },
+            { id: "Alice", type: "person", x: 100, y: 300 },
+            { id: "Bob", type: "person", x: 300, y: 280 },
+            { id: "Product X", type: "product", x: 500, y: 300 },
+            { id: "New York", type: "location", x: 700, y: 200 },
+            { id: "Tokyo", type: "location", x: 650, y: 320 }
+        ];
+
+        const links = [
+            { source: "Company A", target: "Company B", relation: "OWNS" },
+            { source: "Company B", target: "Company C", relation: "OWNS" },
+            { source: "Alice", target: "Company A", relation: "CEO_OF" },
+            { source: "Bob", target: "Company B", relation: "WORKS_AT" },
+            { source: "Company C", target: "Product X", relation: "MAKES" },
+            { source: "Company A", target: "New York", relation: "HQ_IN" },
+            { source: "Company C", target: "Tokyo", relation: "HQ_IN" },
+            { source: "Alice", target: "Bob", relation: "MANAGES" }
+        ];
+
+        const typeColors = {
+            company: "#6366f1",
+            person: "#22d3ee",
+            product: "#10b981",
+            location: "#f59e0b"
+        };
+
+        // Set up SVG
+        const svg = d3.select("#graph-svg");
+        const width = svg.node().getBoundingClientRect().width || 800;
+        const height = 400;
+        svg.attr("viewBox", `0 0 ${width} ${height}`);
+
+        // Create tooltip
+        const tooltip = d3.select("body").append("div")
+            .attr("class", "graph-tooltip")
+            .style("opacity", 0);
+
+        // Create arrow marker
+        svg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "-0 -5 10 10")
+            .attr("refX", 25)
+            .attr("refY", 0)
+            .attr("orient", "auto")
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .append("path")
+            .attr("d", "M 0,-5 L 10,0 L 0,5")
+            .attr("fill", "#4b5563");
+
+        // Create links
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("stroke", "#4b5563")
+            .attr("stroke-width", 2)
+            .attr("marker-end", "url(#arrowhead)")
+            .on("mouseover", function(event, d) {
+                d3.select(this).attr("stroke", "#22d3ee").attr("stroke-width", 3);
+                tooltip.transition().duration(200).style("opacity", 1);
+                tooltip.html(`<strong>${d.source.id || d.source}</strong> → ${d.relation} → <strong>${d.target.id || d.target}</strong>`)
+                    .style("left", (event.pageX + 10) + "px")
+                    .style("top", (event.pageY - 20) + "px");
+            })
+            .on("mouseout", function() {
+                d3.select(this).attr("stroke", "#4b5563").attr("stroke-width", 2);
+                tooltip.transition().duration(500).style("opacity", 0);
+            });
+
+        // Link labels
+        const linkLabel = svg.append("g")
+            .selectAll("text")
+            .data(links)
+            .enter().append("text")
+            .attr("font-size", "10px")
+            .attr("fill", "#6b7280")
+            .attr("text-anchor", "middle")
+            .text(d => d.relation);
+
+        // Create nodes
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(nodes)
+            .enter().append("g")
+            .attr("cursor", "grab")
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("circle")
+            .attr("r", 20)
+            .attr("fill", d => typeColors[d.type])
+            .attr("stroke", "#1f2937")
+            .attr("stroke-width", 2);
+
+        node.append("text")
+            .attr("dy", 35)
+            .attr("text-anchor", "middle")
+            .attr("fill", "#e5e7eb")
+            .attr("font-size", "11px")
+            .attr("font-weight", "500")
+            .text(d => d.id);
+
+        // Force simulation
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-300))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(40))
+            .on("tick", ticked);
+
+        function ticked() {
+            // Keep nodes within bounds
+            nodes.forEach(d => {
+                d.x = Math.max(30, Math.min(width - 30, d.x));
+                d.y = Math.max(30, Math.min(height - 30, d.y));
+            });
+
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            linkLabel
+                .attr("x", d => (d.source.x + d.target.x) / 2)
+                .attr("y", d => (d.source.y + d.target.y) / 2 - 5);
+
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function resetGraph() {
+            simulation.alpha(1).restart();
+        }
+
+        let inferenceShown = false;
+        function showInference() {
+            if (inferenceShown) {
+                // Remove inference line
+                svg.selectAll(".inference-line").remove();
+                svg.selectAll(".inference-label").remove();
+                inferenceShown = false;
+                return;
+            }
+
+            // Add dashed line showing inferred relationship
+            const companyA = nodes.find(n => n.id === "Company A");
+            const companyC = nodes.find(n => n.id === "Company C");
+
+            svg.append("line")
+                .attr("class", "inference-line")
+                .attr("x1", companyA.x)
+                .attr("y1", companyA.y)
+                .attr("x2", companyC.x)
+                .attr("y2", companyC.y)
+                .attr("stroke", "#10b981")
+                .attr("stroke-width", 3)
+                .attr("stroke-dasharray", "8,4")
+                .attr("opacity", 0)
+                .transition()
+                .duration(500)
+                .attr("opacity", 1);
+
+            svg.append("text")
+                .attr("class", "inference-label")
+                .attr("x", (companyA.x + companyC.x) / 2)
+                .attr("y", (companyA.y + companyC.y) / 2 + 25)
+                .attr("text-anchor", "middle")
+                .attr("fill", "#10b981")
+                .attr("font-size", "12px")
+                .attr("font-weight", "600")
+                .attr("opacity", 0)
+                .text("INFERRED: CONTROLS")
+                .transition()
+                .duration(500)
+                .attr("opacity", 1);
+
+            inferenceShown = true;
+        }
+    </script>
+</body>
+</html>

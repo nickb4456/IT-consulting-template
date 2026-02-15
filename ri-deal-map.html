@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rhode Island Deal Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; }
+    #map { width: 100%; height: 100vh; }
+    .deal-popup { font-size: 13px; line-height: 1.5; }
+    .deal-popup h3 { color: #1e40af; margin-bottom: 5px; font-size: 14px; }
+    .deal-popup .price { color: #059669; font-weight: bold; font-size: 16px; }
+    .deal-popup .predicted { color: #6b7280; font-size: 12px; }
+    .deal-popup .score { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 2px 8px; border-radius: 12px; font-weight: bold; display: inline-block; margin-top: 5px; }
+    .deal-popup .details { color: #374151; margin-top: 5px; }
+    .deal-popup a { color: #2563eb; text-decoration: none; display: block; margin-top: 8px; }
+    .deal-popup a:hover { text-decoration: underline; }
+    .legend { position: absolute; bottom: 30px; right: 10px; background: rgba(15,23,42,0.95); padding: 12px 16px; border-radius: 8px; z-index: 1000; color: #e2e8f0; font-size: 12px; border: 1px solid #334155; }
+    .legend h4 { margin-bottom: 8px; color: #f8fafc; }
+    .legend-item { display: flex; align-items: center; margin: 4px 0; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend">
+    <h4>🎯 Deal Score</h4>
+    <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div> 90+ Incredible</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div> 80-89 Great</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div> 70-79 Good</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> 60-69 Fair</div>
+  </div>
+  
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Rhode Island center
+    const map = L.map('map').setView([41.68, -71.51], 10);
+    
+    // Dark tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap &copy; CARTO',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Deal data (will be injected)
+    const deals = [{"address": "3 Jencks Rd", "city": "Foster", "price": 19752, "predicted_price": 251975.76087316754, "deal_score": 92.2, "beds": 4.0, "baths": 2.0, "sqft": 1986.0, "yearBuilt": 1979.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Foster/3-Jencks-Rd-02825/home/51944571", "lat": 41.736861, "lng": -71.786593}, {"address": "38 Burroughs St", "city": "East Providence", "price": 42000, "predicted_price": 533762.0785970301, "deal_score": 92.1, "beds": 4.0, "baths": 3.5, "sqft": 3132.0, "yearBuilt": 2021.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/East-Providence/38-Burroughs-St-02914/home/51956465", "lat": 41.8082306, "lng": -71.3536847}, {"address": "120 Blodgett Ave", "city": "Pawtucket", "price": 38000, "predicted_price": 432887.6490811661, "deal_score": 91.2, "beds": 4.0, "baths": 1.0, "sqft": 1335.0, "yearBuilt": 1940.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Pawtucket/120-Blodgett-Ave-02860/home/52017893", "lat": 41.8607054, "lng": -71.3921654}, {"address": "104 Brinton Ave", "city": "Warwick", "price": 40000, "predicted_price": 327973.2366370732, "deal_score": 87.8, "beds": 3.0, "baths": 1.0, "sqft": 950.0, "yearBuilt": 1930.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Warwick/104-Brinton-Ave-02889/home/51758087", "lat": 41.6960464, "lng": -71.3692031}, {"address": "64 Kenway Ave", "city": "Warwick", "price": 33000, "predicted_price": 268033.17700750753, "deal_score": 87.7, "beds": 2.0, "baths": 1.0, "sqft": 560.0, "yearBuilt": 1935.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Warwick/64-Kenway-Ave-02889/home/51774296", "lat": 41.691725, "lng": -71.3990308}, {"address": "425 Kingstown Rd", "city": "Wakefield", "price": 30000, "predicted_price": 231137.50761856747, "deal_score": 87.0, "beds": 4.0, "baths": 2.0, "sqft": 2850.0, "yearBuilt": 1975.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Wakefield/425-Kingstown-Rd-02879/home/173247511", "lat": 41.4386424, "lng": -71.4864565}, {"address": "16 Verndale Dr", "city": "East Greenwich", "price": 60000, "predicted_price": 449351.5542677302, "deal_score": 86.6, "beds": 3.0, "baths": 1.0, "sqft": 1258.0, "yearBuilt": 1957.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/East-Greenwich/16-Verndale-Dr-02818/home/51734316", "lat": 41.6592622, "lng": -71.4684598}, {"address": "25 Vermont Ave", "city": "Rumford", "price": 50143, "predicted_price": 362854.5053289384, "deal_score": 86.2, "beds": 3.0, "baths": 1.0, "sqft": 1060.0, "yearBuilt": 1956.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Rumford/25-Vermont-Ave-02916/home/51949244", "lat": 41.8575247, "lng": -71.357259}, {"address": "45 E Central Ave", "city": "Charlestown", "price": 92500, "predicted_price": 654395.39, "deal_score": 85.9, "beds": 4.0, "baths": 1.0, "sqft": 1260.0, "yearBuilt": 1967.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Charlestown/45-E-Central-Ave-02813/home/51792402", "lat": 41.3447336, "lng": -71.6977962}, {"address": "20 North Dr", "city": "Portsmouth", "price": 70000, "predicted_price": 450203.7247375854, "deal_score": 84.5, "beds": 2.0, "baths": 2.0, "sqft": 1150.0, "yearBuilt": 1979.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Portsmouth/20-North-Dr-02871/home/51909232", "lat": 41.6196624, "lng": -71.2528581}, {"address": "15 Lowell Ave", "city": "Pawtucket", "price": 15000, "predicted_price": 94468.9441285941, "deal_score": 84.1, "beds": 2.0, "baths": 1.0, "sqft": 540.0, "yearBuilt": 1967.0, "propertyType": "Mobile/Manufactured Home", "url": "https://www.redfin.com/RI/Pawtucket/15-Lowell-Ave-02861/home/52022857", "lat": 41.8624206, "lng": -71.3526129}, {"address": "690 Killingly St", "city": "Johnston", "price": 50000, "predicted_price": 306938.06135946786, "deal_score": 83.7, "beds": 2.0, "baths": 1.5, "sqft": 1418.0, "yearBuilt": 1941.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Johnston/690-Killingly-St-02919/home/51894143", "lat": 41.8325268, "lng": -71.4741997}, {"address": "21 Clarion St", "city": "Cranston", "price": 39000, "predicted_price": 239828.02583905717, "deal_score": 83.7, "beds": 2.0, "baths": 1.0, "sqft": 744.0, "yearBuilt": 1945.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Cranston/21-Clarion-St-02920/home/51844218", "lat": 41.7743371, "lng": -71.4711472}, {"address": "629 Warren Ave", "city": "East Providence", "price": 189900, "predicted_price": 1125446.6744150294, "deal_score": 83.1, "beds": 2.0, "baths": 3.5, "sqft": 5272.0, "yearBuilt": 1940.0, "propertyType": "Other", "url": "https://www.redfin.com/RI/East-Providence/629-Warren-Ave-02914/home/51950784", "lat": 41.8111848, "lng": -71.3603493}, {"address": "1551 Diamond Hill Rd", "city": "Cumberland", "price": 144000, "predicted_price": 824109.9266666668, "deal_score": 82.5, "beds": 3.0, "baths": 3.5, "sqft": 1508.0, "yearBuilt": 2025.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Cumberland/1551-Diamond-Hill-Rd-02864/home/51917474", "lat": 41.933182, "lng": -71.401589}, {"address": "7 Mayflower Ave", "city": "Warwick", "price": 40000, "predicted_price": 228082.24842200414, "deal_score": 82.5, "beds": 1.0, "baths": 1.0, "sqft": 720.0, "yearBuilt": 1915.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Warwick/7-Mayflower-Ave-02889/home/51785793", "lat": 41.698258, "lng": -71.366852}, {"address": "30 E Wallum Lake Rd", "city": "Pascoag", "price": 60000, "predicted_price": 331566.9603020467, "deal_score": 81.9, "beds": 3.0, "baths": 2.0, "sqft": 1627.0, "yearBuilt": 1900.0, "propertyType": "Single Family Residential", "url": "https://www.redfin.com/RI/Pascoag/30-E-Wallum-Lake-Rd-02859/home/51742374", "lat": 41.9648795, "lng": -71.7158031}];
+
+    function getColor(score) {
+      if (score >= 90) return '#22c55e';
+      if (score >= 80) return '#eab308';
+      if (score >= 70) return '#f97316';
+      return '#ef4444';
+    }
+
+    function formatPrice(p) {
+      return '$' + p.toLocaleString();
+    }
+
+    deals.forEach(d => {
+      if (!d.lat || !d.lng) return;
+      
+      const color = getColor(d.deal_score);
+      const marker = L.circleMarker([d.lat, d.lng], {
+        radius: Math.max(8, d.deal_score / 10),
+        fillColor: color,
+        color: '#fff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map);
+
+      const popup = `
+        <div class="deal-popup">
+          <h3>${d.address}</h3>
+          <div>${d.city}</div>
+          <div class="price">${formatPrice(d.price)}</div>
+          <div class="predicted">Predicted: ${formatPrice(Math.round(d.predicted_price))}</div>
+          <span class="score">${d.deal_score.toFixed(1)} Deal Score</span>
+          <div class="details">
+            ${d.beds || '?'} bed · ${d.baths || '?'} bath · ${d.sqft ? d.sqft.toLocaleString() + ' sqft' : 'N/A'}<br>
+            Built ${d.yearBuilt || 'N/A'} · ${d.propertyType || 'N/A'}
+          </div>
+          <a href="${d.url}" target="_blank">View on Redfin →</a>
+        </div>
+      `;
+      marker.bindPopup(popup);
+    });
+  </script>
+</body>
+</html>

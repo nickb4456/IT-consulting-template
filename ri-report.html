@@ -375,7 +375,7 @@
 
  <h2 id="house-hunter">🏠 House Hunter</h2>
  <div class="sql-section">
- <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes by comparing asking prices to recent sales. Instant equity = buy below market value.</p>
+ <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes by comparing to <strong style="color:#a5b4fc">nearby sales within 0.5 miles</strong> (not city-wide averages). Uses 25th percentile $/sqft from similar-sized homes that actually sold nearby. Conservative estimates — real equity may be higher.</p>
  
  <!-- Filters -->
  <div class="filters" style="margin-bottom:1.5rem">
@@ -2882,20 +2882,27 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function initHouseHunter() {
  if (!rawData || !rawData.properties) return;
  
- // Build city comps from SOLD properties
+ // Build city comps from SOLD properties (include lat/lng for proximity matching)
  const soldProps = rawData.properties.filter(p => (p.status === 'Sold' || p.saleType === 'PAST SALE') && p.sqft > 500 && p.price > 50000);
  window.houseCityComps = {};
+ window.allSoldComps = []; // For proximity-based matching
  soldProps.forEach(p => {
- if (!window.houseCityComps[p.city]) window.houseCityComps[p.city] = [];
- window.houseCityComps[p.city].push({
+ const comp = {
  price: p.price,
  sqft: p.sqft,
  ppsf: p.price / p.sqft,
  beds: p.beds,
  baths: p.baths,
  address: p.address,
- url: p.url
- });
+ url: p.url,
+ lat: p.lat,
+ lng: p.lng,
+ city: p.city,
+ propertyType: p.propertyType
+ };
+ if (!window.houseCityComps[p.city]) window.houseCityComps[p.city] = [];
+ window.houseCityComps[p.city].push(comp);
+ if (p.lat && p.lng) window.allSoldComps.push(comp);
  });
  
  // Populate city dropdown
@@ -2937,12 +2944,28 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Calculate market value and discount for each house
  const deals = houses.map(h => {
- const comps = window.houseCityComps[h.city] || [];
+ // IMPROVED: Use nearby comps (within 0.5 mi) instead of city-wide
+ let comps = [];
+ if (h.lat && h.lng && window.allSoldComps) {
+ // Find sold homes within 0.5 miles, same property type preferred
+ const nearbyComps = window.allSoldComps.filter(c => {
+ if (!c.lat || !c.lng) return false;
+ const dist = getDistance(h.lat, h.lng, c.lat, c.lng);
+ return dist <= 0.5; // 0.5 miles
+ });
+ // Prefer same property type
+ const sameType = nearbyComps.filter(c => c.propertyType === h.propertyType);
+ comps = sameType.length >= 5 ? sameType : nearbyComps;
+ }
+ // Fallback to city comps if not enough nearby
+ if (comps.length < 5) {
+ comps = window.houseCityComps[h.city] || [];
+ }
  if (comps.length < 3) return null;
  
- // Filter comps to similar size (+/- 30%)
+ // Filter comps to similar size (+/- 25% tighter than before)
  const similarComps = comps.filter(c => 
- c.sqft >= h.sqft * 0.7 && c.sqft <= h.sqft * 1.3
+ c.sqft >= h.sqft * 0.75 && c.sqft <= h.sqft * 1.25
  );
  const useComps = similarComps.length >= 3 ? similarComps : comps;
  

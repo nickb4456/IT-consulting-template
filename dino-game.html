@@ -295,8 +295,8 @@
         <div class="subtitle">EXPLORE THE PREHISTORIC WORLD</div>
         <button class="start-btn" onclick="startGame()">EXPLORE!</button>
         <div class="controls-info">
-            <span>W</span><span>A</span><span>S</span><span>D</span> or <span>&#x2190;</span><span>&#x2191;</span><span>&#x2192;</span><span>&#x2193;</span> to move<br>
-            <span>SPACE</span> to ROAR! &nbsp; <span>SHIFT</span> to sprint<br>
+            <span>SPACE</span> or <span>&#x2191;</span> to move forward &nbsp; <span>&#x2190;</span><span>&#x2192;</span> to turn<br>
+            <span>R</span> to ROAR! &nbsp; <span>SHIFT</span> to sprint<br>
             Mouse to look around
         </div>
     </div>
@@ -985,7 +985,7 @@
                     x: offsetX,
                     z: offsetZ,
                     angle: raptor.rotation.y,
-                    speed: 6 + Math.random() * 3,
+                    speed: 4 + Math.random() * 2.5,
                     phase: Math.random() * Math.PI * 2,
                     walkMeshes: raptorWalkMeshes
                 });
@@ -1508,16 +1508,16 @@
 
     // ============ CONTROLS ============
     function onKeyDown(e) {
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); moveForward = true; }
+        if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); moveForward = true; }
         if (e.code === 'ArrowDown' || e.code === 'KeyS') { e.preventDefault(); moveBack = true; }
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); moveLeft = true; }
         if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); moveRight = true; }
         if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') isSprinting = true;
-        if (e.code === 'Space') { e.preventDefault(); tryRoar(); }
+        if (e.code === 'KeyR') { e.preventDefault(); tryRoar(); }
     }
 
     function onKeyUp(e) {
-        if (e.code === 'ArrowUp' || e.code === 'KeyW') moveForward = false;
+        if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') moveForward = false;
         if (e.code === 'ArrowDown' || e.code === 'KeyS') moveBack = false;
         if (e.code === 'ArrowLeft' || e.code === 'KeyA') moveLeft = false;
         if (e.code === 'ArrowRight' || e.code === 'KeyD') moveRight = false;

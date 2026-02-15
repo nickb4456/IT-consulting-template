@@ -260,7 +260,7 @@
  
  <!-- HERO / HOMEPAGE -->
  <div class="hero" style="padding:2rem 2rem 1.5rem">
- <h1>RI Real Estate Hub</h1>
+ <h1>Rhode Island Real Estate Hub</h1>
  <p class="subtitle" id="heroSubtitle">207,000+ Properties • 27 Towns • Updated Daily</p>
  </div>
  
@@ -2936,18 +2936,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  return;
  }
  
+ const sortKey = window.houseSortKey || 'dealScore';
+ const sortDir = window.houseSortDir || 'desc';
+ const arrow = (k) => sortKey === k ? (sortDir === 'desc' ? ' ▼' : ' ▲') : '';
+ const thStyle = 'padding:0.75rem;cursor:pointer;user-select:none;transition:background 0.2s';
+ 
  let html = '<table style="width:100%;border-collapse:collapse;font-size:0.85rem">';
  html += '<thead><tr style="background:rgba(99,102,241,0.2)">';
- html += '<th style="padding:0.75rem;text-align:left">Score</th>';
- html += '<th style="padding:0.75rem;text-align:left">Address</th>';
- html += '<th style="padding:0.75rem;text-align:left">City</th>';
- html += '<th style="padding:0.75rem;text-align:right">Ask Price</th>';
- html += '<th style="padding:0.75rem;text-align:right">Market Value</th>';
- html += '<th style="padding:0.75rem;text-align:right">Instant Equity</th>';
- html += '<th style="padding:0.75rem;text-align:center">Discount</th>';
- html += '<th style="padding:0.75rem;text-align:center">DOM</th>';
+ html += '<th onclick="sortHouseDeals(\'dealScore\')" style="' + thStyle + ';text-align:left">Score' + arrow('dealScore') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'address\')" style="' + thStyle + ';text-align:left">Address' + arrow('address') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'city\')" style="' + thStyle + ';text-align:left">City' + arrow('city') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'price\')" style="' + thStyle + ';text-align:right">Ask Price' + arrow('price') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'marketValue\')" style="' + thStyle + ';text-align:right">Market Value' + arrow('marketValue') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'instantEquity\')" style="' + thStyle + ';text-align:right">Instant Equity' + arrow('instantEquity') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'discount\')" style="' + thStyle + ';text-align:center">Discount' + arrow('discount') + '</th>';
+ html += '<th onclick="sortHouseDeals(\'dom\')" style="' + thStyle + ';text-align:center">DOM' + arrow('dom') + '</th>';
  html += '<th style="padding:0.75rem;text-align:center">Beds/Bath</th>';
- html += '<th style="padding:0.75rem;text-align:center">SqFt</th>';
+ html += '<th onclick="sortHouseDeals(\'sqft\')" style="' + thStyle + ';text-align:center">SqFt' + arrow('sqft') + '</th>';
  html += '<th style="padding:0.75rem;text-align:center">Action</th>';
  html += '</tr></thead><tbody>';
  
@@ -2980,6 +2985,25 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  // Show contextual FSBO CTA when deals found
  const fsboCta = document.getElementById('houseFsboCta');
  if (fsboCta && deals.length > 0) fsboCta.style.display = 'block';
+ }
+ 
+ function sortHouseDeals(key) {
+ if (!window.houseDealsData || window.houseDealsData.length === 0) return;
+ if (window.houseSortKey === key) {
+   window.houseSortDir = window.houseSortDir === 'desc' ? 'asc' : 'desc';
+ } else {
+   window.houseSortKey = key;
+   window.houseSortDir = 'desc';
+ }
+ const dir = window.houseSortDir === 'desc' ? -1 : 1;
+ window.houseDealsData.sort((a, b) => {
+   const aVal = typeof a[key] === 'string' ? a[key].toLowerCase() : a[key];
+   const bVal = typeof b[key] === 'string' ? b[key].toLowerCase() : b[key];
+   if (aVal < bVal) return -1 * dir;
+   if (aVal > bVal) return 1 * dir;
+   return 0;
+ });
+ renderHouseDeals(window.houseDealsData);
  }
  
  function showHouseEval(idx) {

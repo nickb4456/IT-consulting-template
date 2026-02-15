@@ -410,6 +410,7 @@
         state = 'playing';
         score = 0; lives = 3; altitude = 0; gameSpeed = 1;
         invincible = 0; rocketX = 0; rocketTargetX = 0; rocketZ = 0; rocketTargetZ = 0;
+        obstacleTimer = -1.5; // 1.5s grace period before first asteroid
         obstacleTimer = 0; powerupTimer = 0;
 
         // Clear old obstacles/powerups
@@ -577,7 +578,7 @@
 
             // Spawn obstacles
             obstacleTimer += dt;
-            const spawnInterval = Math.max(0.1, 0.25 - gameSpeed * 0.02);
+            const spawnInterval = Math.max(0.4, 0.8 - gameSpeed * 0.04);
             if (obstacleTimer > spawnInterval) {
                 obstacleTimer = 0;
                 const isAsteroid = Math.random() > 0.2;

@@ -55,117 +55,68 @@
     const W = Math.min(window.innerWidth, 480);
     const H = window.innerHeight;
 
-    // ============ 3D ROCKET OVERLAY (Three.js) ============
-    let rocketScene, rocketCamera, rocketRenderer, rocketModel;
+    // ============ 3D ROCKET (renders to Phaser texture) ============
+    const ROCKET_TEX_SIZE = 128;
+    let rocketScene3D, rocketCam3D, rocketRenderer3D, rocketModel3D;
     let rocketLoaded = false;
-    let rocketOverlayVisible = false;
+    let rocketCanvas3D;
 
     function init3DRocket() {
-        rocketScene = new THREE.Scene();
+        rocketScene3D = new THREE.Scene();
+        rocketCam3D = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+        rocketCam3D.position.set(0, 1.5, 4.5);
+        rocketCam3D.lookAt(0, 0, 0);
 
-        rocketCamera = new THREE.PerspectiveCamera(40, W / H, 0.1, 100);
-        rocketCamera.position.set(0, 2, 5);
-        rocketCamera.lookAt(0, 0, 0);
-
-        rocketRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-        rocketRenderer.setSize(W, H);
-        rocketRenderer.setPixelRatio(window.devicePixelRatio);
-        rocketRenderer.setClearColor(0x000000, 0);
-        rocketRenderer.domElement.style.position = 'absolute';
-        rocketRenderer.domElement.style.top = '0';
-        rocketRenderer.domElement.style.left = '50%';
-        rocketRenderer.domElement.style.transform = 'translateX(-50%)';
-        rocketRenderer.domElement.style.pointerEvents = 'none';
-        rocketRenderer.domElement.style.zIndex = '5';
-        document.body.appendChild(rocketRenderer.domElement);
+        // Offscreen canvas — never added to DOM
+        rocketCanvas3D = document.createElement('canvas');
+        rocketCanvas3D.width = ROCKET_TEX_SIZE;
+        rocketCanvas3D.height = ROCKET_TEX_SIZE;
+        rocketRenderer3D = new THREE.WebGLRenderer({ canvas: rocketCanvas3D, alpha: true, antialias: true });
+        rocketRenderer3D.setSize(ROCKET_TEX_SIZE, ROCKET_TEX_SIZE);
+        rocketRenderer3D.setClearColor(0x000000, 0);
 
         // Lighting
-        rocketScene.add(new THREE.AmbientLight(0x606080, 0.8));
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
-        dirLight.position.set(2, 5, 4);
-        rocketScene.add(dirLight);
-        const rimLight = new THREE.DirectionalLight(0x00ccff, 0.5);
-        rimLight.position.set(-3, 0, -2);
-        rocketScene.add(rimLight);
+        rocketScene3D.add(new THREE.AmbientLight(0x808090, 1));
+        const dir = new THREE.DirectionalLight(0xffffff, 1.2);
+        dir.position.set(2, 4, 3);
+        rocketScene3D.add(dir);
+        const rim = new THREE.DirectionalLight(0x00ccff, 0.4);
+        rim.position.set(-2, -1, -2);
+        rocketScene3D.add(rim);
+        const engine = new THREE.PointLight(0xff6600, 2, 5);
+        engine.position.set(0, -1.5, 0);
+        engine.name = 'engineLight';
+        rocketScene3D.add(engine);
 
-        // Engine glow light (moves with rocket)
-        const engineLight = new THREE.PointLight(0xff6600, 1.5, 4);
-        engineLight.position.set(0, -1.5, 0);
-        engineLight.name = 'engineLight';
-        rocketScene.add(engineLight);
-
-        // Load GLB
         const loader = new THREE.GLTFLoader();
         loader.load('rocket-model.glb', (gltf) => {
-            rocketModel = gltf.scene;
-
-            // Auto-scale: fit model to ~2 units tall
-            const box = new THREE.Box3().setFromObject(rocketModel);
+            rocketModel3D = gltf.scene;
+            const box = new THREE.Box3().setFromObject(rocketModel3D);
             const size = box.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
-            const scale = 2 / maxDim;
-            rocketModel.scale.set(scale, scale, scale);
-
-            // Center the model
+            const s = 2.2 / maxDim;
+            rocketModel3D.scale.set(s, s, s);
             const center = box.getCenter(new THREE.Vector3());
-            rocketModel.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-
-            // Wrap in a group for easy positioning
-            const wrapper = new THREE.Group();
-            wrapper.add(rocketModel);
-            rocketModel = wrapper;
-            rocketScene.add(rocketModel);
-
+            rocketModel3D.position.set(-center.x * s, -center.y * s, -center.z * s);
+            const wrap = new THREE.Group();
+            wrap.add(rocketModel3D);
+            rocketModel3D = wrap;
+            rocketScene3D.add(rocketModel3D);
             rocketLoaded = true;
-            console.log('3D rocket loaded, size:', size);
-        }, undefined, (err) => {
-            console.warn('Failed to load rocket GLB:', err);
-        });
+            console.log('3D rocket loaded:', size);
+        }, undefined, (err) => console.warn('Rocket GLB failed:', err));
     }
 
-    function update3DRocket(screenX, screenY, rotation, alpha, boost) {
-        if (!rocketLoaded || !rocketModel) return;
-
-        // Convert screen position to Three.js world coords
-        // Map screenX (0..W) to camera frustum X, screenY to Y
-        const ndcX = (screenX / W) * 2 - 1;
-        const ndcY = -(screenY / H) * 2 + 1;
-
-        // Project NDC to world position at a fixed Z distance from camera
-        const worldZ = -3; // distance in front of camera
-        const fovRad = rocketCamera.fov * Math.PI / 180;
-        const halfH = Math.abs(worldZ) * Math.tan(fovRad / 2);
-        const halfW = halfH * rocketCamera.aspect;
-
-        rocketModel.position.x = ndcX * halfW;
-        rocketModel.position.y = ndcY * halfH + (worldZ + rocketCamera.position.y);
-        rocketModel.position.z = worldZ;
-
-        // Tilt with movement
-        rocketModel.rotation.z = rotation * 3;
-        // Slight wobble
-        rocketModel.rotation.x = Math.sin(Date.now() * 0.003) * 0.03;
-
-        // Engine glow intensity with boost
-        const engineLight = rocketScene.getObjectByName('engineLight');
-        if (engineLight) {
-            engineLight.position.copy(rocketModel.position);
-            engineLight.position.y -= 1.5;
-            engineLight.intensity = boost ? 3 : 1.5;
-            engineLight.color.setHex(boost ? 0x00aaff : 0xff6600);
+    function render3DRocket(rotation, boost) {
+        if (!rocketLoaded || !rocketModel3D) return;
+        rocketModel3D.rotation.z = rotation * 3;
+        rocketModel3D.rotation.x = Math.sin(Date.now() * 0.003) * 0.03;
+        const el = rocketScene3D.getObjectByName('engineLight');
+        if (el) {
+            el.intensity = boost ? 4 : 2;
+            el.color.setHex(boost ? 0x00aaff : 0xff6600);
         }
-
-        // Visibility
-        rocketModel.visible = alpha > 0.5;
-
-        rocketRenderer.render(rocketScene, rocketCamera);
-    }
-
-    function show3DRocket(visible) {
-        rocketOverlayVisible = visible;
-        if (rocketRenderer) {
-            rocketRenderer.domElement.style.display = visible ? 'block' : 'none';
-        }
+        rocketRenderer3D.render(rocketScene3D, rocketCam3D);
     }
 
     class MenuScene extends Phaser.Scene {
@@ -223,9 +174,8 @@
                 this.scene.start('GameScene');
             });
 
-            // Initialize 3D rocket overlay
-            if (!rocketRenderer) init3DRocket();
-            show3DRocket(false);
+            // Initialize 3D rocket
+            if (!rocketRenderer3D) init3DRocket();
         }
     }
 
@@ -281,14 +231,28 @@
             this.rocketContainer.add(g);
             this.rocketGfx = g;
 
-            // Hide 2D rocket graphics if 3D model loaded
-            if (rocketLoaded) g.setVisible(false);
-            show3DRocket(true);
+            // 3D rocket sprite (replaces 2D graphics when loaded)
+            this.rocket3DSprite = null;
+            if (rocketLoaded) {
+                this.setup3DRocketSprite();
+            } else {
+                // Check periodically until loaded
+                this.rocketLoadCheck = this.time.addEvent({
+                    delay: 200, loop: true,
+                    callback: () => {
+                        if (rocketLoaded) {
+                            this.setup3DRocketSprite();
+                            this.rocketLoadCheck.remove();
+                        }
+                    }
+                });
+            }
 
             // Flame flicker
             this.flameTimer = 0;
 
-            // Obstacle group
+            // Obstacle group (must be after rocket setup)
+            // Note: setup3DRocketSprite is defined as a class method below
             this.obstacles = [];
             this.powerups = [];
             this.particles = [];
@@ -468,15 +432,17 @@
             this.altText.setText('ALT: ' + Math.floor(this.altitude) + 'm');
             this.speedText.setText('⚡ ' + this.gameSpeed.toFixed(1) + 'x');
 
-            // Sync 3D rocket overlay
-            if (rocketLoaded) {
+            // Render 3D rocket to Phaser texture each frame
+            if (rocketLoaded && this.rocket3DSprite) {
                 this.rocketGfx.setVisible(false);
-                update3DRocket(
-                    this.rocketX, this.rocketY,
-                    this.rocketContainer.rotation,
-                    this.rocketContainer.alpha,
-                    this.cursors.space.isDown
-                );
+                render3DRocket(this.rocketContainer.rotation, this.cursors.space.isDown);
+                // Copy offscreen 3D canvas to the Phaser texture's source canvas
+                const tex = this.textures.get('rocket3d');
+                const srcCanvas = tex.getSourceImage();
+                const ctx = srcCanvas.getContext('2d');
+                ctx.clearRect(0, 0, ROCKET_TEX_SIZE, ROCKET_TEX_SIZE);
+                ctx.drawImage(rocketCanvas3D, 0, 0);
+                tex.update();
             }
         }
 
@@ -595,10 +561,27 @@
             }
         }
 
+        setup3DRocketSprite() {
+            // Render one frame to initialize the texture
+            render3DRocket(0, false);
+            // Create a Phaser canvas texture from the offscreen 3D canvas
+            const texCanvas = document.createElement('canvas');
+            texCanvas.width = ROCKET_TEX_SIZE;
+            texCanvas.height = ROCKET_TEX_SIZE;
+            texCanvas.getContext('2d').drawImage(rocketCanvas3D, 0, 0);
+            if (this.textures.exists('rocket3d')) this.textures.remove('rocket3d');
+            this.textures.addCanvas('rocket3d', texCanvas);
+            // Create sprite and add to rocket container
+            this.rocket3DSprite = this.add.sprite(0, 0, 'rocket3d');
+            this.rocket3DSprite.setDisplaySize(80, 80);
+            this.rocketContainer.add(this.rocket3DSprite);
+            // Hide the 2D graphics rocket
+            this.rocketGfx.setVisible(false);
+        }
+
         endGame() {
             this.isOver = true;
             SFX.gameOver();
-            show3DRocket(false);
             this.scene.start('GameOverScene', { score: this.score, altitude: Math.floor(this.altitude) });
         }
     }

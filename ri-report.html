@@ -2149,6 +2149,17 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  filterLandDeals();
  }
  
+ // Format prices with M for millions, K for thousands
+ function formatPrice(amount) {
+ const abs = Math.abs(amount);
+ const sign = amount < 0 ? '-' : '';
+ if (abs >= 1000000) {
+ return '$' + sign + (abs / 1000000).toFixed(2) + 'M';
+ } else {
+ return '$' + sign + Math.round(abs / 1000) + 'K';
+ }
+ }
+ 
  function filterLandDeals() {
  console.log('filterLandDeals called');
  if (!rawData || !rawData.properties) {
@@ -2395,15 +2406,15 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  <td style="padding:0.35rem">${land.dealScore}</td>
  <td style="padding:0.35rem"><a href="${land.url}" target="_blank" style="color:#6366f1" onclick="event.stopPropagation()">${land.address?.substring(0,20) || '?'}${land.address?.length > 20 ? '…' : ''}</a></td>
  <td style="padding:0.35rem">${land.city?.substring(0,10) || '?'}</td>
- <td style="padding:0.35rem;text-align:right">$${(land.price/1000).toFixed(0)}K</td>
+ <td style="padding:0.35rem;text-align:right">${formatPrice(land.price)}</td>
  <td style="padding:0.35rem;text-align:right">${land.acres}</td>
  <td style="padding:0.35rem;text-align:center;color:${capacityColor}" title="Max: ${land.maxBuildableSqft?.toLocaleString() || '?'} sf">${buildNote}${land.recommendedRooms || '?'}BR</td>
  <td style="padding:0.35rem;text-align:right;color:#22d3ee">${land.actualBuildSqft?.toLocaleString() || '?'}</td>
- <td style="padding:0.35rem;text-align:right;color:#00E1E6;font-weight:600" title="$${land.adjustedCostPsf || 175}/sf × ${land.actualBuildSqft} sf + soft">$${Math.round(totalBuildCost/1000)}K</td>
+ <td style="padding:0.35rem;text-align:right;color:#00E1E6;font-weight:600" title="$${land.adjustedCostPsf || 175}/sf × ${land.actualBuildSqft} sf + soft">${formatPrice(totalBuildCost)}</td>
  <td style="padding:0.35rem;text-align:right">${land.compsCount}</td>
- <td style="padding:0.35rem;text-align:right">$${(land.estSalePrice/1000).toFixed(0)}K</td>
- <td style="padding:0.35rem;text-align:right;color:${profitColor};font-weight:bold">$${(land.profit/1000).toFixed(0)}K</td>
- <td style="padding:0.35rem;text-align:right;color:#f59e0b;font-weight:bold">$${(land.maxOffer/1000).toFixed(0)}K</td>
+ <td style="padding:0.35rem;text-align:right">${formatPrice(land.estSalePrice)}</td>
+ <td style="padding:0.35rem;text-align:right;color:${profitColor};font-weight:bold">${formatPrice(land.profit)}</td>
+ <td style="padding:0.35rem;text-align:right;color:#f59e0b;font-weight:bold">${formatPrice(land.maxOffer)}</td>
  <td style="padding:0.35rem;text-align:center"><button onclick="event.stopPropagation();showLandEval(${idx})" style="background:#6366f1;border:none;color:white;padding:0.2rem 0.4rem;border-radius:4px;cursor:pointer;font-size:0.6rem">▶</button></td>
  </tr>
  <tr id="land-comps-${idx}" style="display:none;background:rgba(99,102,241,0.1)">
@@ -2510,17 +2521,6 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  container.innerHTML = html;
- }
- 
- // Format price for display: $500K or $1.5M
- function formatPrice(amount) {
- const abs = Math.abs(amount);
- const sign = amount < 0 ? '-' : '';
- if (abs >= 1000000) {
- return '$' + sign + (abs / 1000000).toFixed(1) + 'M';
- } else {
- return '$' + sign + Math.round(abs / 1000) + 'K';
- }
  }
  
  function showLandEval(idx) {

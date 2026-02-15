@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Troubleshooting KB | AIBridges</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Lato', -apple-system, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #e2e8f0;
+    }
+    
+    /* Header */
+    .header {
+      background: rgba(15, 23, 42, 0.9);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header a {
+      color: #6366f1;
+      text-decoration: none;
+    }
+    .header a:hover { text-decoration: underline; }
+    
+    /* Main container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    /* Search section */
+    .search-section {
+      background: rgba(30, 41, 59, 0.8);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .search-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 250px;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+      transition: border-color 0.2s;
+    }
+    .search-input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    .search-input::placeholder { color: #64748b; }
+    
+    select {
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      border: 2px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #e2e8f0;
+      cursor: pointer;
+    }
+    select:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    .stat {
+      font-size: 0.9rem;
+      color: #94a3b8;
+    }
+    .stat strong {
+      color: #22d3ee;
+    }
+    
+    /* Category pills */
+    .category-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+    .pill {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.85rem;
+      border-radius: 20px;
+      background: rgba(99, 102, 241, 0.2);
+      color: #a5b4fc;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .pill:hover {
+      background: rgba(99, 102, 241, 0.4);
+    }
+    .pill.active {
+      background: #6366f1;
+      color: white;
+      border-color: #6366f1;
+    }
+    
+    /* Results grid */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 1rem;
+    }
+    
+    /* Result card */
+    .result-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 10px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .result-card:hover {
+      border-color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      line-height: 1.3;
+    }
+    .card-category {
+      font-size: 0.75rem;
+      color: #6366f1;
+      margin-top: 0.25rem;
+    }
+    .card-summary {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 0.75rem;
+    }
+    .card-keywords {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+    .keyword {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .modal-overlay.active { display: block; }
+    .modal-content {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #1e293b;
+      border-radius: 12px;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .modal-header h2 {
+      font-size: 1.25rem;
+      color: #f1f5f9;
+    }
+    .modal-close {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover { background: rgba(239, 68, 68, 0.4); }
+    .modal-body {
+      padding: 1.5rem;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+    .modal-body pre {
+      background: rgba(15, 23, 42, 0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+    .modal-body code {
+      background: rgba(99, 102, 241, 0.2);
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .modal-body h1, .modal-body h2, .modal-body h3 {
+      color: #f1f5f9;
+      margin: 1.5rem 0 0.75rem;
+    }
+    .modal-body h1 { font-size: 1.5rem; }
+    .modal-body h2 { font-size: 1.25rem; color: #a5b4fc; }
+    .modal-body h3 { font-size: 1.1rem; color: #22d3ee; }
+    .modal-body p { margin: 0.75rem 0; line-height: 1.6; }
+    .modal-body ul, .modal-body ol { margin: 0.75rem 0 0.75rem 1.5rem; }
+    .modal-body li { margin: 0.4rem 0; }
+    .modal-body a { color: #6366f1; }
+    
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #64748b;
+    }
+    .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+    
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      .search-row { flex-direction: column; }
+      .search-input { width: 100%; }
+      .results-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🔍 Tech Troubleshooting KB</h1>
+    <a href="/">← AIBridges</a>
+  </header>
+  
+  <div class="container">
+    <section class="search-section">
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search errors, problems, techniques...">
+        <select id="categoryFilter">
+          <option value="">All Categories</option>
+        </select>
+        <select id="typeFilter">
+          <option value="">All Types</option>
+          <option value="troubleshooting">Troubleshooting</option>
+          <option value="techniques">Techniques</option>
+          <option value="patterns">Patterns</option>
+        </select>
+      </div>
+      
+      <div class="stats-bar">
+        <span class="stat"><strong id="totalCount">0</strong> articles</span>
+        <span class="stat"><strong id="resultCount">0</strong> results</span>
+      </div>
+      
+      <div class="category-pills" id="categoryPills"></div>
+    </section>
+    
+    <div class="results-grid" id="resultsGrid">
+      <div class="empty-state">
+        <div class="emoji">🔄</div>
+        <p>Loading knowledge base...</p>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Article Modal -->
+  <div class="modal-overlay" id="articleModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Article Title</h2>
+        <button class="modal-close" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    let kbData = null;
+    let articles = [];
+    
+    // Load index
+    async function loadIndex() {
+      try {
+        const res = await fetch('kb-index.json');
+        kbData = await res.json();
+        articles = kbData.entries;
+        
+        document.getElementById('totalCount').textContent = articles.length;
+        
+        // Populate category filter
+        const categories = [...new Set(articles.map(a => a.category))].sort();
+        const catSelect = document.getElementById('categoryFilter');
+        categories.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat;
+          opt.textContent = cat;
+          catSelect.appendChild(opt);
+        });
+        
+        // Render category pills
+        renderCategoryPills(categories);
+        
+        // Initial render
+        renderResults(articles);
+      } catch (e) {
+        console.error('Failed to load index:', e);
+        document.getElementById('resultsGrid').innerHTML = `
+          <div class="empty-state">
+            <div class="emoji">⚠️</div>
+            <p>Failed to load knowledge base</p>
+          </div>
+        `;
+      }
+    }
+    
+    function renderCategoryPills(categories) {
+      const container = document.getElementById('categoryPills');
+      const counts = {};
+      articles.forEach(a => {
+        counts[a.category] = (counts[a.category] || 0) + 1;
+      });
+      
+      container.innerHTML = categories.map(cat => {
+        const icon = articles.find(a => a.category === cat)?.icon || '📄';
+        return `<span class="pill" data-category="${cat}" onclick="filterByCategory('${cat}')">${icon} ${cat} (${counts[cat]})</span>`;
+      }).join('');
+    }
+    
+    function filterByCategory(cat) {
+      document.getElementById('categoryFilter').value = cat;
+      
+      // Update pill active state
+      document.querySelectorAll('.pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.category === cat);
+      });
+      
+      filterResults();
+    }
+    
+    function filterResults() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const category = document.getElementById('categoryFilter').value;
+      const type = document.getElementById('typeFilter').value;
+      
+      let results = articles;
+      
+      // Filter by type
+      if (type) {
+        results = results.filter(a => a.path.startsWith(type));
+      }
+      
+      // Filter by category
+      if (category) {
+        results = results.filter(a => a.category === category);
+      }
+      
+      // Filter by search query
+      if (query) {
+        results = results.filter(a => {
+          const searchText = (a.title + ' ' + a.summary + ' ' + a.keywords.join(' ')).toLowerCase();
+          return searchText.includes(query);
+        });
+        
+        // Sort by relevance (title matches first)
+        results.sort((a, b) => {
+          const aTitle = a.title.toLowerCase().includes(query) ? 0 : 1;
+          const bTitle = b.title.toLowerCase().includes(query) ? 0 : 1;
+          return aTitle - bTitle;
+        });
+      }
+      
+      renderResults(results);
+    }
+    
+    function renderResults(results) {
+      const grid = document.getElementById('resultsGrid');
+      document.getElementById('resultCount').textContent = results.length;
+      
+      if (results.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div class="emoji">🔍</div>
+            <p>No articles match your search</p>
+          </div>
+        `;
+        return;
+      }
+      
+      grid.innerHTML = results.map(article => `
+        <div class="result-card" onclick="showArticle(${article.id})">
+          <div class="card-header">
+            <span class="card-icon">${article.icon}</span>
+            <div>
+              <div class="card-title">${escapeHtml(article.title)}</div>
+              <div class="card-category">${article.category}</div>
+            </div>
+          </div>
+          <div class="card-summary">${escapeHtml(article.summary)}</div>
+          ${article.keywords.length > 0 ? `
+            <div class="card-keywords">
+              ${article.keywords.slice(0, 4).map(k => `<span class="keyword">${escapeHtml(k)}</span>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+    
+    function showArticle(id) {
+      const article = articles.find(a => a.id === id);
+      if (!article) return;
+      
+      document.getElementById('modalTitle').textContent = article.title;
+      document.getElementById('articleModal').classList.add('active');
+      
+      // Use embedded content from index
+      if (article.content) {
+        document.getElementById('modalBody').innerHTML = marked.parse(article.content);
+      } else {
+        document.getElementById('modalBody').innerHTML = `
+          <p><strong>Summary:</strong> ${escapeHtml(article.summary)}</p>
+        `;
+      }
+    }
+    
+    function closeModal() {
+      document.getElementById('articleModal').classList.remove('active');
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Event listeners
+    document.getElementById('searchInput').addEventListener('input', filterResults);
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+      document.querySelectorAll('.pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.category === this.value);
+      });
+      filterResults();
+    });
+    document.getElementById('typeFilter').addEventListener('change', filterResults);
+    
+    document.getElementById('articleModal').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+    
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+    
+    // Initialize
+    loadIndex();
+  </script>
+</body>
+</html>

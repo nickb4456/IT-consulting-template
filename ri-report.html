@@ -2982,26 +2982,16 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const optimisticPpsf = sortedPpsf[p75Index]; // 75th percentile
  
  // Tiered haircut: scales inversely with price
- function getHaircut(price) {
- if (price < 200000) return 0.15; // 15% - fixed costs hurt more
- if (price < 350000) return 0.12; // 12%
- if (price < 500000) return 0.10; // 10% - sweet spot
- if (price < 750000) return 0.08; // 8%
- if (price < 1000000) return 0.06; // 6%
- return 0.05; // 5% - luxury has lower % transaction costs
- }
+ // NEW: Use MEDIAN as primary estimate (like Redfin), not 25th percentile
+ // Small 3% haircut for transaction costs, not the aggressive 10-15%
+ const marketValue = Math.round(h.sqft * medianPpsf * 0.97); // Median - 3%
  
- const haircut = getHaircut(h.price);
- const rawMarketValue = h.sqft * conservativePpsf;
- const marketValue = Math.round(rawMarketValue * (1 - haircut)); // Tiered haircut
+ // Range values for display (like Redfin's $X - $Y range)
+ const lowValue = Math.round(h.sqft * conservativePpsf); // 25th percentile, no haircut
+ const highValue = Math.round(h.sqft * optimisticPpsf); // 75th percentile
  
- // Also calculate scenario values for toggle display
- const worstValue = Math.round(h.sqft * conservativePpsf * 0.85); // P25 - 15%
- const expectedValue = Math.round(h.sqft * medianPpsf * (1 - haircut * 0.6)); // Median - smaller haircut
- const bestValue = Math.round(h.sqft * optimisticPpsf * 0.97); // P75 - 3%
- 
- const avgPpsf = conservativePpsf; // For display
- const haircutPct = Math.round(haircut * 100); // For display
+ const avgPpsf = Math.round(medianPpsf); // Show median for display
+ const haircutPct = 3; // Fixed 3% for display
  const discount = Math.round((1 - h.price / marketValue) * 100);
  const instantEquity = marketValue - h.price;
  
@@ -3027,13 +3017,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  dealScore: dealScore,
  compCount: useComps.length,
  url: h.url,
- // Scenario values for toggle
- worstValue: worstValue,
- worstEquity: worstValue - h.price,
- expectedValue: expectedValue,
- expectedEquity: expectedValue - h.price,
- bestValue: bestValue,
- bestEquity: bestValue - h.price,
+ // Range values (like Redfin)
+ lowValue: lowValue,
+ highValue: highValue,
+ lowEquity: lowValue - h.price,
+ highEquity: highValue - h.price,
  haircutPct: haircutPct
  };
  }).filter(d => d && d.discount >= minDiscount);
@@ -3151,21 +3139,15 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="margin-top:0.75rem"><a href="' + house.url + '" target="_blank" style="color:#6366f1">🔗 View on Redfin</a></div>' +
  '</div>' +
  '<div style="background:rgba(99,102,241,0.15);padding:1.5rem;border-radius:12px;text-align:center;margin-bottom:1.5rem;border:2px solid #10b981">' +
- '<div style="display:flex;justify-content:center;gap:0.5rem;margin-bottom:1rem">' +
- '<button onclick="setScenario(' + idx + ',\'worst\')" id="btn-worst-' + idx + '" style="padding:0.4rem 0.8rem;border-radius:6px;border:1px solid #ef4444;background:rgba(239,68,68,0.2);color:#ef4444;cursor:pointer;font-size:0.75rem">😰 Worst</button>' +
- '<button onclick="setScenario(' + idx + ',\'conservative\')" id="btn-conservative-' + idx + '" style="padding:0.4rem 0.8rem;border-radius:6px;border:2px solid #10b981;background:rgba(16,185,129,0.3);color:#10b981;cursor:pointer;font-size:0.75rem;font-weight:bold">🛡️ Conservative</button>' +
- '<button onclick="setScenario(' + idx + ',\'expected\')" id="btn-expected-' + idx + '" style="padding:0.4rem 0.8rem;border-radius:6px;border:1px solid #3b82f6;background:rgba(59,130,246,0.2);color:#3b82f6;cursor:pointer;font-size:0.75rem">📊 Expected</button>' +
- '<button onclick="setScenario(' + idx + ',\'best\')" id="btn-best-' + idx + '" style="padding:0.4rem 0.8rem;border-radius:6px;border:1px solid #f59e0b;background:rgba(245,158,11,0.2);color:#f59e0b;cursor:pointer;font-size:0.75rem">🌟 Best</button>' +
- '</div>' +
- '<div id="scenario-label-' + idx + '" style="color:#94a3b8;font-size:0.9rem">Conservative Value: <strong style="color:#a5b4fc">' + formatPrice(house.marketValue) + '</strong> (25th %ile: $' + house.avgPpsf + '/sqft − ' + house.haircutPct + '%)</div>' +
+ '<div style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.5rem">Estimated Market Value (like Redfin)</div>' +
+ '<div style="color:#a5b4fc;font-size:1.5rem;font-weight:bold;margin-bottom:0.25rem">' + formatPrice(house.lowValue) + ' − ' + formatPrice(house.highValue) + '</div>' +
+ '<div style="color:#64748b;font-size:0.75rem;margin-bottom:1rem">Based on ' + house.compCount + ' nearby sales • Median: $' + house.avgPpsf + '/sqft</div>' +
  '<div id="scenario-equity-' + idx + '" style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0">' + formatPrice(house.instantEquity) + ' Est. Equity</div>' +
- '<div id="scenario-desc-' + idx + '" style="color:#64748b;font-size:0.75rem;margin-top:-0.25rem">(Conservative: 25th percentile comps − ' + house.haircutPct + '% tiered buffer)</div>' +
- '<div style="color:#f59e0b;font-size:1.1rem">' + house.discount + '% below market • ' + house.dom + ' days on market</div>' +
- '<div style="margin-top:0.75rem;display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;font-size:0.7rem;color:#64748b">' +
- '<div>😰 Worst<br><span style="color:#ef4444">' + formatPrice(house.worstEquity) + '</span></div>' +
- '<div>🛡️ Conservative<br><span style="color:#10b981">' + formatPrice(house.instantEquity) + '</span></div>' +
- '<div>📊 Expected<br><span style="color:#3b82f6">' + formatPrice(house.expectedEquity) + '</span></div>' +
- '<div>🌟 Best<br><span style="color:#f59e0b">' + formatPrice(house.bestEquity) + '</span></div>' +
+ '<div style="color:#64748b;font-size:0.75rem">(Using median value ' + formatPrice(house.marketValue) + ' minus asking price)</div>' +
+ '<div style="color:#f59e0b;font-size:1.1rem;margin-top:0.5rem">' + house.discount + '% below market • ' + house.dom + ' days listed</div>' +
+ '<div style="margin-top:0.75rem;display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;font-size:0.8rem">' +
+ '<div style="background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px">Low Estimate<br><span style="color:#f87171">' + formatPrice(house.lowEquity) + ' equity</span></div>' +
+ '<div style="background:rgba(0,0,0,0.2);padding:0.5rem;border-radius:6px">High Estimate<br><span style="color:#10b981">' + formatPrice(house.highEquity) + ' equity</span></div>' +
  '</div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Offer Strategy</h4>' +

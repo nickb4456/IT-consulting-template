@@ -2028,29 +2028,29 @@
             text-shadow: 0 0 20px rgba(0, 225, 230, 0.6);
         }
 
-        /* Most Popular badge with animation */
-        .mini-service.popular::before {
-            content: 'Most Popular';
+        /* Most Popular badge - use a wrapper span injected via JS */
+        .popular-badge {
             position: absolute;
             top: -10px;
             right: 20px;
-            background: var(--warning);
+            background: var(--accent);
             color: var(--bg-dark);
             padding: 0.2rem 0.6rem;
             border-radius: 50px;
             font-size: 0.7rem;
             font-weight: 700;
+            z-index: 10;
             animation: badgePulse 2s ease-in-out infinite;
         }
 
         @keyframes badgePulse {
             0%, 100% { 
                 transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+                box-shadow: 0 0 0 0 rgba(0, 225, 230, 0.4);
             }
             50% { 
                 transform: scale(1.05);
-                box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+                box-shadow: 0 0 0 8px rgba(0, 225, 230, 0);
             }
         }
 
@@ -8280,6 +8280,13 @@
         if (!card.querySelector('b')) {
             const inner = document.createElement('b');
             card.insertBefore(inner, card.firstChild);
+        }
+        // Add "Most Popular" badge to popular cards
+        if (card.classList.contains('popular') && !card.querySelector('.popular-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'popular-badge';
+            badge.textContent = 'Most Popular';
+            card.appendChild(badge);
         }
     });
 

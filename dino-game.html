@@ -576,7 +576,7 @@
 
     function buildTerrain() {
         // Ground plane with vertex colors for grass → sand transition
-        const groundGeo = new THREE.PlaneGeometry(MAP_SIZE * 2.5, MAP_SIZE * 2.5, 100, 100);
+        const groundGeo = new THREE.PlaneGeometry(MAP_SIZE * 2.5, MAP_SIZE * 2.5, 200, 200);
         const verts = groundGeo.attributes.position;
         const colors = new Float32Array(verts.count * 3);
 
@@ -590,12 +590,8 @@
             const y = verts.getY(i);
             const distFromCenter = Math.sqrt(x * x + y * y);
 
-            // Height: flatten toward beach, slope down to water
-            let height = getTerrainHeight(x, y);
-            if (distFromCenter > BEACH_START) {
-                const beachFactor = Math.min(1, (distFromCenter - BEACH_START) / (BEACH_END - BEACH_START));
-                height = height * (1 - beachFactor) + (-0.5 * beachFactor); // slope to water
-            }
+            // Height: getTerrainHeight already includes beach slope
+            const height = getTerrainHeight(x, y);
             verts.setZ(i, height);
 
             // Color: grass → sand blend
@@ -745,7 +741,7 @@
             }
         }
 
-        g.position.set(x, 0, z);
+        g.position.set(x, getTerrainHeight(x, z), z);
         const s = 0.8 + Math.random() * 0.6;
         g.scale.set(s, s, s);
         g.userData = { type: 'tree', radius: 1.5 };
@@ -772,7 +768,7 @@
             g.add(rock);
         }
 
-        g.position.set(x, 0, z);
+        g.position.set(x, getTerrainHeight(x, z), z);
         g.userData = { type: 'rock', radius: 2 };
         scene.add(g);
         rocks.push(g);

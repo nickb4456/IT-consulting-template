@@ -204,7 +204,7 @@
         const box = new THREE.Box3().setFromObject(rocketModel);
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const s = 3.5 / maxDim;
+        const s = 2.5 / maxDim;
         rocketModel.scale.set(s, s, s);
         const center = box.getCenter(new THREE.Vector3());
         rocketModel.position.set(-center.x * s, -center.y * s, -center.z * s);
@@ -565,7 +565,7 @@
 
             // Spawn obstacles
             obstacleTimer += dt;
-            const spawnInterval = Math.max(0.08, 0.2 - gameSpeed * 0.02);
+            const spawnInterval = Math.max(0.15, 0.4 - gameSpeed * 0.03);
             if (obstacleTimer > spawnInterval) {
                 obstacleTimer = 0;
                 const isAsteroid = Math.random() > 0.2;
@@ -573,7 +573,7 @@
                 const x = (Math.random() - 0.5) * LANE_WIDTH;
                 mesh.position.set(x, 0, -80 - Math.random() * 20);
                 scene.add(mesh);
-                obstacles.push({ mesh, speed: 15 + Math.random() * 10 });
+                obstacles.push({ mesh, speed: 8 + Math.random() * 6 });
             }
 
             // Spawn powerups
@@ -585,7 +585,7 @@
                 const mesh = createPowerup(puType);
                 mesh.position.set((Math.random() - 0.5) * LANE_WIDTH, 0, -60);
                 scene.add(mesh);
-                powerups.push({ mesh, puType, speed: 12 + Math.random() * 6 });
+                powerups.push({ mesh, puType, speed: 7 + Math.random() * 4 });
             }
 
             // Update obstacles

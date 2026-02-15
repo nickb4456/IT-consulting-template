@@ -466,21 +466,21 @@
   
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
-    let kbData = null;
-    let articles = [];
+    let publicIndex = null;
+    let displayedResults = [];
+    let searchTimeout = null;
     
-    // Load index
+    // Load slim public index (metadata only, no content)
     async function loadIndex() {
       try {
-        const res = await fetch('kb-index.json');
-        kbData = await res.json();
-        articles = kbData.entries;
+        const res = await fetch('kb-index-public.json');
+        publicIndex = await res.json();
         
-        document.getElementById('totalCount').textContent = articles.length;
+        document.getElementById('totalCount').textContent = publicIndex.count;
         
-        // Populate category filter
-        const categories = [...new Set(articles.map(a => a.category))].sort();
+        // Populate category filter from pre-computed stats
         const catSelect = document.getElementById('categoryFilter');
+        const categories = Object.keys(publicIndex.categories).sort();
         categories.forEach(cat => {
           const opt = document.createElement('option');
           opt.value = cat;
@@ -491,8 +491,9 @@
         // Render category pills
         renderCategoryPills(categories);
         
-        // Initial render
-        renderResults(articles);
+        // Initial render (show all from public index)
+        displayedResults = publicIndex.entries;
+        renderResults(displayedResults);
       } catch (e) {
         console.error('Failed to load index:', e);
         document.getElementById('resultsGrid').innerHTML = `
@@ -506,61 +507,78 @@
     
     function renderCategoryPills(categories) {
       const container = document.getElementById('categoryPills');
-      const counts = {};
-      articles.forEach(a => {
-        counts[a.category] = (counts[a.category] || 0) + 1;
-      });
-      
       container.innerHTML = categories.map(cat => {
-        const icon = articles.find(a => a.category === cat)?.icon || '📄';
-        return `<span class="pill" data-category="${cat}" onclick="filterByCategory('${cat}')">${icon} ${cat} (${counts[cat]})</span>`;
+        const info = publicIndex.categories[cat];
+        return `<span class="pill" data-category="${cat}" onclick="filterByCategory('${cat}')">${info.icon} ${cat} (${info.count})</span>`;
       }).join('');
     }
     
     function filterByCategory(cat) {
       document.getElementById('categoryFilter').value = cat;
-      
-      // Update pill active state
       document.querySelectorAll('.pill').forEach(p => {
         p.classList.toggle('active', p.dataset.category === cat);
       });
-      
-      filterResults();
+      doSearch();
     }
     
-    function filterResults() {
-      const query = document.getElementById('searchInput').value.toLowerCase();
+    // Server-side search via API
+    async function doSearch() {
+      const query = document.getElementById('searchInput').value.trim();
       const category = document.getElementById('categoryFilter').value;
       const type = document.getElementById('typeFilter').value;
       
-      let results = articles;
-      
-      // Filter by type
-      if (type) {
-        results = results.filter(a => a.path.startsWith(type));
+      // If no filters, show all from public index (fast, client-side)
+      if (!query && !category && !type) {
+        displayedResults = publicIndex.entries;
+        renderResults(displayedResults);
+        return;
       }
       
-      // Filter by category
-      if (category) {
-        results = results.filter(a => a.category === category);
+      // For simple category/type filtering without query, use client-side
+      if (!query) {
+        let results = publicIndex.entries;
+        if (type) results = results.filter(a => a.type === type);
+        if (category) results = results.filter(a => a.category === category);
+        displayedResults = results;
+        renderResults(displayedResults);
+        return;
       }
       
-      // Filter by search query
-      if (query) {
-        results = results.filter(a => {
-          const searchText = (a.title + ' ' + a.summary + ' ' + a.keywords.join(' ')).toLowerCase();
-          return searchText.includes(query);
+      // Search query → use server-side API
+      document.getElementById('resultsGrid').innerHTML = `
+        <div class="empty-state">
+          <div class="emoji">🔍</div>
+          <p>Searching...</p>
+        </div>
+      `;
+      
+      try {
+        const res = await fetch('/api/kb/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, category, type, limit: 50 }),
         });
-        
-        // Sort by relevance (title matches first)
-        results.sort((a, b) => {
-          const aTitle = a.title.toLowerCase().includes(query) ? 0 : 1;
-          const bTitle = b.title.toLowerCase().includes(query) ? 0 : 1;
-          return aTitle - bTitle;
+        const data = await res.json();
+        displayedResults = data.results;
+        renderResults(displayedResults);
+      } catch (e) {
+        console.error('Search failed:', e);
+        // Fallback to client-side search on public index
+        let results = publicIndex.entries.filter(a => {
+          const text = (a.title + ' ' + a.summary + ' ' + a.keywords.join(' ')).toLowerCase();
+          return text.includes(query.toLowerCase());
         });
+        if (category) results = results.filter(a => a.category === category);
+        if (type) results = results.filter(a => a.type === type);
+        displayedResults = results;
+        renderResults(displayedResults);
       }
-      
-      renderResults(results);
+    }
+    
+    // Debounced search
+    function filterResults() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(doSearch, 300);
     }
     
     function renderResults(results) {
@@ -586,8 +604,8 @@
               <div class="card-category">${article.category}</div>
             </div>
           </div>
-          <div class="card-summary">${escapeHtml(article.summary)}</div>
-          ${article.keywords.length > 0 ? `
+          <div class="card-summary">${escapeHtml(article.snippet || article.summary)}</div>
+          ${article.keywords && article.keywords.length > 0 ? `
             <div class="card-keywords">
               ${article.keywords.slice(0, 4).map(k => `<span class="keyword">${escapeHtml(k)}</span>`).join('')}
             </div>
@@ -596,20 +614,35 @@
       `).join('');
     }
     
-    function showArticle(id) {
-      const article = articles.find(a => a.id === id);
-      if (!article) return;
-      
-      document.getElementById('modalTitle').textContent = article.title;
+    // Fetch full article content from API
+    async function showArticle(id) {
+      document.getElementById('modalTitle').textContent = 'Loading...';
+      document.getElementById('modalBody').innerHTML = '<p>Loading article...</p>';
       document.getElementById('articleModal').classList.add('active');
       
-      // Use embedded content from index
-      if (article.content) {
+      try {
+        const res = await fetch(`/api/kb/${id}`);
+        const article = await res.json();
+        
+        if (article.error) {
+          document.getElementById('modalTitle').textContent = 'Error';
+          document.getElementById('modalBody').innerHTML = `<p>${article.error}</p>`;
+          return;
+        }
+        
+        document.getElementById('modalTitle').textContent = article.title;
         document.getElementById('modalBody').innerHTML = marked.parse(article.content);
-      } else {
-        document.getElementById('modalBody').innerHTML = `
-          <p><strong>Summary:</strong> ${escapeHtml(article.summary)}</p>
-        `;
+      } catch (e) {
+        console.error('Failed to load article:', e);
+        // Fallback to summary
+        const article = displayedResults.find(a => a.id === id);
+        if (article) {
+          document.getElementById('modalTitle').textContent = article.title;
+          document.getElementById('modalBody').innerHTML = `
+            <p><strong>Summary:</strong> ${escapeHtml(article.summary)}</p>
+            <p><em>Full content unavailable</em></p>
+          `;
+        }
       }
     }
     
@@ -618,6 +651,7 @@
     }
     
     function escapeHtml(text) {
+      if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
@@ -629,9 +663,9 @@
       document.querySelectorAll('.pill').forEach(p => {
         p.classList.toggle('active', p.dataset.category === this.value);
       });
-      filterResults();
+      doSearch();
     });
-    document.getElementById('typeFilter').addEventListener('change', filterResults);
+    document.getElementById('typeFilter').addEventListener('change', doSearch);
     
     document.getElementById('articleModal').addEventListener('click', function(e) {
       if (e.target === this) closeModal();

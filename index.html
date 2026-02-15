@@ -853,63 +853,83 @@
             50% { opacity: 0.5; transform: scale(1.2); }
         }
 
+        /* 3D Ghost Text Effect */
         .hero h1 {
-            font-size: 4.5rem;
+            font-size: clamp(3rem, 10vw, 5.5rem);
             font-weight: 800;
-            line-height: 1.05;
+            line-height: 1.0;
             margin-bottom: 1.5rem;
-            letter-spacing: -3px;
-            opacity: 0;
-            animation: titleEntrance 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            animation-delay: 0.5s;
-            text-shadow: 0 4px 30px rgba(0, 81, 230, 0.3);
+            letter-spacing: -2px;
+            position: relative;
+            perspective: 1000px;
+            transform-style: preserve-3d;
         }
 
-        @keyframes titleEntrance {
-            0% {
-                opacity: 0;
-                transform: translateY(40px) scale(0.95);
-                letter-spacing: 8px;
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                letter-spacing: -3px;
-            }
-        }
-
-        .hero h1 .gradient {
-            background: linear-gradient(135deg, #00E1E6 0%, #0051E6 40%, #4300E6 70%, #019BE6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            background-size: 300% 300%;
-            animation: gradientShift 6s ease infinite;
-            filter: drop-shadow(0 2px 20px rgba(0, 225, 230, 0.4));
-            font-style: italic;
-        }
-
-        .hero h1 br + *:not(.gradient) {
-            background: linear-gradient(90deg, #ffffff 0%, #e0e7ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .hero h1 .hero-main-text {
+        .ghost-text-container {
+            position: relative;
             display: inline-block;
-            background: linear-gradient(180deg, #ffffff 0%, #c7d2fe 50%, #a5b4fc 100%);
+            height: 1.2em;
+            transform-style: preserve-3d;
+        }
+
+        .ghost-layer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            white-space: nowrap;
+            transform-style: preserve-3d;
+            transition: transform 0.4s ease-out;
+        }
+
+        /* Create 12 ghost layers with increasing depth */
+        .ghost-layer:nth-child(1) { 
+            filter: blur(8px); 
+            color: rgba(0, 81, 230, 0.3);
+            transform: translateZ(0px);
+        }
+        .ghost-layer:nth-child(2) { color: hsl(210, 100%, 15%); transform: translateZ(10px); }
+        .ghost-layer:nth-child(3) { color: hsl(210, 100%, 20%); transform: translateZ(20px); }
+        .ghost-layer:nth-child(4) { color: hsl(210, 100%, 25%); transform: translateZ(30px); }
+        .ghost-layer:nth-child(5) { color: hsl(210, 100%, 30%); transform: translateZ(40px); }
+        .ghost-layer:nth-child(6) { color: hsl(210, 100%, 40%); transform: translateZ(50px); }
+        .ghost-layer:nth-child(7) { color: hsl(210, 100%, 50%); transform: translateZ(60px); }
+        .ghost-layer:nth-child(8) { color: hsl(195, 100%, 50%); transform: translateZ(70px); }
+        .ghost-layer:nth-child(9) { color: hsl(185, 100%, 55%); transform: translateZ(80px); }
+        .ghost-layer:nth-child(10) { color: hsl(180, 100%, 60%); transform: translateZ(90px); }
+        .ghost-layer:nth-child(11) { color: hsl(180, 100%, 70%); transform: translateZ(100px); }
+        .ghost-layer:nth-child(12) { 
+            color: #00E1E6; 
+            transform: translateZ(110px);
+            text-shadow: 0 0 30px rgba(0, 225, 230, 0.8), 0 0 60px rgba(0, 225, 230, 0.4);
+        }
+
+        .hero h1:hover .ghost-layer {
+            animation: ghostPulse 0.6s ease-out;
+        }
+
+        @keyframes ghostPulse {
+            0% { transform: translateZ(var(--tz, 0)) rotateX(0); }
+            50% { transform: translateZ(calc(var(--tz, 0) + 20px)) rotateX(5deg); }
+            100% { transform: translateZ(var(--tz, 0)) rotateX(0); }
+        }
+
+        .hero-subtitle-line {
+            display: block;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            background: linear-gradient(180deg, #ffffff 0%, #e0e7ff 50%, #c7d2fe 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: none;
-            filter: drop-shadow(0 4px 25px rgba(255, 255, 255, 0.15));
+            margin-top: 0.1em;
+            animation: fadeSlideIn 1s ease forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        @keyframes fadeSlideIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .hero-subtitle {
@@ -3600,8 +3620,21 @@
                 We Build AI Solutions for Business
             </div>
             <h1>
-                <span class="gradient">AI Solutions for</span><br>
-                <span class="hero-main-text">Rhode Island Businesses</span>
+                <span class="ghost-text-container">
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                    <span class="ghost-layer">AI Solutions</span>
+                </span>
+                <span class="hero-subtitle-line">for Rhode Island</span>
             </h1>
             <p class="hero-subtitle">
                 <span class="typewriter" id="typewriter">
@@ -8053,6 +8086,35 @@
     document.querySelectorAll('video[autoplay]').forEach(function(v) {
         v.play().catch(function() {});
     });
+
+    // 3D Ghost Text Mouse Tracking
+    (function() {
+        const ghostContainer = document.querySelector('.ghost-text-container');
+        if (!ghostContainer) return;
+        
+        const layers = ghostContainer.querySelectorAll('.ghost-layer');
+        const hero = document.querySelector('.hero');
+        
+        hero.addEventListener('mousemove', function(e) {
+            const rect = hero.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            
+            const rotateX = y * -20;
+            const rotateY = x * 20;
+            
+            ghostContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        });
+        
+        hero.addEventListener('mouseleave', function() {
+            ghostContainer.style.transform = 'rotateX(0) rotateY(0)';
+            ghostContainer.style.transition = 'transform 0.5s ease-out';
+        });
+        
+        hero.addEventListener('mouseenter', function() {
+            ghostContainer.style.transition = 'transform 0.1s ease-out';
+        });
+    })();
     </script>
 </body>
 </html>

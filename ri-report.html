@@ -375,7 +375,7 @@
 
  <h2 id="house-hunter">🏠 House Hunter</h2>
  <div class="sql-section">
- <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes using <strong style="color:#a5b4fc">weighted nearby comps</strong> (closest 3-5 sales = 70% weight). <strong>Outliers removed</strong> ($1M+ homes excluded for sub-$500K properties). Uses <strong>10% haircut</strong> for selling costs. <span style="color:#f59e0b">Very conservative</span> — max ~$50K equity.</p>
+ <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes using <strong style="color:#a5b4fc">weighted nearby comps</strong> (closest 3-5 sales = 70% weight). <strong>Outliers removed</strong> ($1M+ homes excluded for sub-$500K properties). Uses <strong>10% haircut</strong> for selling costs. <span style="color:#f59e0b">Conservative methodology</span> — estimates reflect real nearby sales.</p>
  
  <!-- Filters -->
  <div class="filters" style="margin-bottom:1.5rem">
@@ -3052,22 +3052,17 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  let discount = Math.round((1 - h.price / marketValue) * 100);
  let instantEquity = marketValue - h.price;
  
- // CAP ALL equity values at $50K max for realistic first-purchase expectations
- const EQUITY_CAP = 50000;
- if (instantEquity > EQUITY_CAP) {
-   instantEquity = EQUITY_CAP;
-   discount = Math.round((instantEquity / h.price) * 100);
- }
- // Negative equity = overpriced, cap at -$20K display
- if (instantEquity < -20000) {
-   instantEquity = -20000;
+ // Let the conservative methodology (weighted comps, outlier removal) produce natural estimates
+ // Only cap extreme negative equity for display purposes
+ if (instantEquity < -50000) {
+   instantEquity = -50000; // Very overpriced - cap display at -$50K
  }
  
- // Cap low/high equity too (these were showing uncapped $103K, $134K)
+ // Low/high equity from range values
  let lowEquityRaw = lowValue - h.price;
  let highEquityRaw = highValue - h.price;
- const lowEquityCapped = Math.max(-20000, Math.min(EQUITY_CAP, lowEquityRaw));
- const highEquityCapped = Math.max(-20000, Math.min(EQUITY_CAP, highEquityRaw));
+ const lowEquityCapped = Math.max(-50000, lowEquityRaw);
+ const highEquityCapped = highEquityRaw; // No upper cap - let natural estimates show
  
  // Deal score: discount % + DOM factor
  const domBonus = Math.min(20, Math.floor(h.dom / 15));
@@ -3241,17 +3236,17 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px;text-align:center">' +
  '<div style="color:#94a3b8;font-size:0.75rem">Fire Sale (95%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.95)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.95))) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.95)) + ' equity</div>' +
  '</div>' +
  '<div style="background:rgba(245,158,11,0.2);padding:1rem;border-radius:12px;text-align:center;border:2px solid #f59e0b">' +
  '<div style="color:#94a3b8;font-size:0.75rem">As-Is (90%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.90)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.90))) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.90)) + ' equity</div>' +
  '</div>' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px;text-align:center">' +
  '<div style="color:#94a3b8;font-size:0.75rem">Aggressive (85%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.85)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.85))) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.85)) + ' equity</div>' +
  '</div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem">🏘️ Similar Comparable Sales (' + similarComps.length + ')</h4>' +

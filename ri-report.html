@@ -1111,9 +1111,16 @@ Promise.all([
   document.getElementById('heroSubtitle').textContent = (s.total / 1000).toFixed(0) + ',000+ Properties • ' + s.citiesCovered + ' Towns • Updated Daily';
   
   // Initialize everything now that data is loaded
+  console.log('Data loaded, initializing...', rawData.properties.length, 'properties');
   if (typeof initCharts === 'function') initCharts();
-  if (typeof initHouseHunter === 'function') initHouseHunter();
-  if (typeof initLandDealFinder === 'function') initLandDealFinder();
+  if (typeof initHouseHunter === 'function') {
+    console.log('Calling initHouseHunter...');
+    initHouseHunter();
+  }
+  if (typeof initLandDealFinder === 'function') {
+    console.log('Calling initLandDealFinder...');
+    initLandDealFinder();
+  }
   if (typeof initCityHeatmap === 'function') initCityHeatmap();
   
   // Update Key Market Insights
@@ -2916,7 +2923,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  window.houseCityComps = {};
  
  function initHouseHunter() {
- if (!rawData || !rawData.properties) return;
+ console.log('initHouseHunter starting...');
+ if (!rawData || !rawData.properties) {
+   console.log('initHouseHunter: No data!');
+   return;
+ }
  
  // Build city comps from SOLD properties (include lat/lng for proximity matching)
  const soldProps = rawData.properties.filter(p => (p.status === 'Sold' || p.saleType === 'PAST SALE') && p.sqft > 500 && p.price > 50000);
@@ -2957,13 +2968,19 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  function filterHouseDeals() {
- if (!rawData || !rawData.properties) return;
+ console.log('filterHouseDeals called');
+ if (!rawData || !rawData.properties) {
+   console.log('filterHouseDeals: No data');
+   return;
+ }
  
  const city = document.getElementById('houseCity')?.value || '';
  const minDom = parseInt(document.getElementById('houseMinDom')?.value) || 0;
  const maxPrice = parseInt(document.getElementById('houseMaxPrice')?.value) || Infinity;
  const minBeds = parseInt(document.getElementById('houseMinBeds')?.value) || 0;
- const minDiscount = parseInt(document.getElementById('houseMinDiscount')?.value) || 0;
+ const minDiscount = parseInt(document.getElementById('houseMinDiscount')?.value) || -10;
+ 
+ console.log('Filters:', { city, minDom, maxPrice, minBeds, minDiscount });
  
  // Get active (for sale) houses with sqft
  let houses = rawData.properties.filter(p => {
@@ -2977,6 +2994,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  (p.beds || 0) >= minBeds &&
  (!city || p.city === city);
  });
+ 
+ console.log('Houses found for sale:', houses.length);
  
  // Calculate market value and discount for each house
  const deals = houses.map(h => {
@@ -3109,18 +3128,22 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  bestValue: bestValue,
  bestEquity: Math.max(-20000, Math.min(EQUITY_CAP, bestValue - h.price))
  };
- }).filter(d => d && d.discount >= minDiscount);
+ });
+ 
+ console.log('Deals before filter:', deals.length, 'non-null:', deals.filter(d => d !== null).length);
+ const filteredDeals = deals.filter(d => d && d.discount >= minDiscount);
+ console.log('Deals after filter (discount >=', minDiscount, '):', filteredDeals.length);
  
  // Sort by deal score
- deals.sort((a, b) => b.dealScore - a.dealScore);
- window.houseDealsData = deals;
+ filteredDeals.sort((a, b) => b.dealScore - a.dealScore);
+ window.houseDealsData = filteredDeals;
  
  // Update stats
- document.getElementById('houseCount').textContent = deals.length;
- if (deals.length > 0) {
- const avgDiscount = Math.round(deals.reduce((s, d) => s + d.discount, 0) / deals.length);
- const avgEquity = Math.round(deals.reduce((s, d) => s + d.instantEquity, 0) / deals.length);
- const bestEquity = Math.max(...deals.map(d => d.instantEquity));
+ document.getElementById('houseCount').textContent = filteredDeals.length;
+ if (filteredDeals.length > 0) {
+ const avgDiscount = Math.round(filteredDeals.reduce((s, d) => s + d.discount, 0) / filteredDeals.length);
+ const avgEquity = Math.round(filteredDeals.reduce((s, d) => s + d.instantEquity, 0) / filteredDeals.length);
+ const bestEquity = Math.max(...filteredDeals.map(d => d.instantEquity));
  document.getElementById('houseAvgDiscount').textContent = avgDiscount + '%';
  document.getElementById('houseAvgEquity').textContent = formatPrice(avgEquity);
  document.getElementById('houseBestDeal').textContent = formatPrice(bestEquity);
@@ -3131,7 +3154,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  // Render results
- renderHouseDeals(deals);
+ renderHouseDeals(filteredDeals);
  }
  
  function renderHouseDeals(deals) {

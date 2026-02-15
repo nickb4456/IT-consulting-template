@@ -2280,12 +2280,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>' +
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
- '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0"> Build Assumptions</h4>' +
+ '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Assumptions <span style="font-size:0.7rem;font-weight:normal">(editable)</span></h4>' +
  '<div style="font-size:0.85rem">' +
- '<div>Target Home: <strong>' + targetSqft.toLocaleString() + ' sqft</strong></div>' +
- '<div>Build Cost: <strong>$' + buildCostPsf + '/sqft</strong></div>' +
- '<div>Soft Costs: <strong>' + softCostsPct + '%</strong></div>' +
- '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#ec4899">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Target Home: <input type="number" id="modalTargetSqft" value="' + targetSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Build Cost: $<input type="number" id="modalBuildCost" value="' + buildCostPsf + '" style="width:60px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">/sqft</div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Soft Costs: <input type="number" id="modalSoftCosts" value="' + softCostsPct + '" style="width:50px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">%</div>' +
+ '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#ec4899" id="modalBuildTotal">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
  '</div>' +
  '</div>' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
@@ -2307,8 +2307,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Profit at Asking Price</h4>' +
  '<div style="background:rgba(99,102,241,0.15);padding:1.5rem;border-radius:12px;text-align:center;margin-bottom:1.5rem;border:2px solid #10b981">' +
  '<div style="color:#94a3b8;font-size:0.9rem">If you pay asking price of <strong style="color:#ec4899">$' + land.price.toLocaleString() + '</strong></div>' +
- '<div style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0">' + formatPrice(profitAtAsk) + ' Profit</div>' +
- '<div style="color:#a5b4fc;font-size:1.1rem">' + profitPctAtAsk + '% Return on ' + formatPrice(totalAtAsk) + ' investment</div>' +
+ '<div style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0" id="modalProfitAtAsk">' + formatPrice(profitAtAsk) + ' Profit</div>' +
+ '<div style="color:#a5b4fc;font-size:1.1rem"><span id="modalProfitPct">' + profitPctAtAsk + '</span>% Return on <span id="modalTotalInvest">' + formatPrice(totalAtAsk) + '</span> investment</div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Projected Sale Value After Build</h4>' +
  '<div style="background:rgba(99,102,241,0.1);padding:1rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid rgba(99,102,241,0.25)">' +
@@ -2331,7 +2331,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="color:#10b981;font-size:1.1rem;font-weight:bold">' + formatPrice(Math.round(3000 * land.avgPpsf)) + '</div>' +
  '</div>' +
  '</div>' +
- '<div style="color:#64748b;font-size:0.75rem;margin-top:0.75rem;text-align:center">Your target: <strong style="color:#f59e0b">' + targetSqft.toLocaleString() + ' sqft</strong> → Est. sale <strong style="color:#10b981">' + formatPrice(land.estSalePrice) + '</strong></div>' +
+ '<div style="color:#64748b;font-size:0.75rem;margin-top:0.75rem;text-align:center" id="modalTargetLine">Your target: <strong style="color:#f59e0b">' + targetSqft.toLocaleString() + ' sqft</strong> → Est. sale <strong style="color:#10b981">' + formatPrice(land.estSalePrice) + '</strong></div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Suggested Offers</h4>' +
  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem">' +
@@ -2364,6 +2364,35 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>';
  
  document.body.appendChild(modal);
+ }
+ 
+ // Recalculate land modal when build assumptions change
+ function recalcLandModal(idx) {
+ const land = window.landDealsData[idx];
+ const targetSqft = parseInt(document.getElementById('modalTargetSqft')?.value) || 2000;
+ const buildCostPsf = parseInt(document.getElementById('modalBuildCost')?.value) || 175;
+ const softCostsPct = parseInt(document.getElementById('modalSoftCosts')?.value) || 15;
+ const buildTotal = Math.round(buildCostPsf * targetSqft * (1 + softCostsPct/100));
+ 
+ // Recalculate estimated sale price based on new sqft
+ const estSalePrice = land.avgPpsf * targetSqft;
+ 
+ // Recalculate profit at asking price
+ const totalAtAsk = land.price + buildTotal;
+ const profitAtAsk = estSalePrice - totalAtAsk;
+ const profitPctAtAsk = Math.round((profitAtAsk / totalAtAsk) * 100);
+ 
+ // Update display elements
+ document.getElementById('modalBuildTotal').textContent = '$' + Math.round(buildTotal/1000) + 'K';
+ document.getElementById('modalProfitAtAsk').innerHTML = formatPrice(profitAtAsk) + ' Profit';
+ document.getElementById('modalProfitPct').textContent = profitPctAtAsk;
+ document.getElementById('modalTotalInvest').textContent = formatPrice(totalAtAsk);
+ document.getElementById('modalTargetLine').innerHTML = 'Your target: <strong style="color:#f59e0b">' + targetSqft.toLocaleString() + ' sqft</strong> → Est. sale <strong style="color:#10b981">' + formatPrice(estSalePrice) + '</strong>';
+ 
+ // Update the main global inputs too so they stay in sync
+ if (document.getElementById('targetSqft')) document.getElementById('targetSqft').value = targetSqft;
+ if (document.getElementById('buildCostPsf')) document.getElementById('buildCostPsf').value = buildCostPsf;
+ if (document.getElementById('softCosts')) document.getElementById('softCosts').value = softCostsPct;
  }
  
  // Neighborhood exploration for land deals

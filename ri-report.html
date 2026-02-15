@@ -2255,10 +2255,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const medianIndex = Math.floor(sortedPpsf.length * 0.5);
  const marketPpsf = comps.length > 0 ? Math.round(sortedPpsf[medianIndex]) : 260;
  
- // 2. Build size based on lot (sweet spot for RI)
+ // 2. Build size based on lot (tiered for RI market)
  const lotAcres = effectiveLotSize / 43560;
- const actualBuildSqft = lotAcres < 0.5 ? 1600 : 2000; // 3BR vs 4BR
- const actualRooms = lotAcres < 0.5 ? 3 : 4;
+ let actualBuildSqft, actualRooms;
+ 
+ if (lotAcres < 0.25) {
+ actualBuildSqft = 1400; actualRooms = 2; // Tiny lot - small home
+ } else if (lotAcres < 0.5) {
+ actualBuildSqft = 1600; actualRooms = 3; // Standard lot - 3BR
+ } else if (lotAcres < 1.0) {
+ actualBuildSqft = 2200; actualRooms = 4; // Half acre - 4BR
+ } else if (lotAcres < 2.0) {
+ actualBuildSqft = 3000; actualRooms = 5; // 1+ acre - large home
+ } else if (lotAcres < 5.0) {
+ actualBuildSqft = 4000; actualRooms = 5; // 2+ acre - estate
+ } else {
+ actualBuildSqft = 5000; actualRooms = 6; // 5+ acre - luxury estate or subdivide
+ }
  const maxBuildableSqft = buildability.maxBuildableSqft;
  
  // 3. ARV = Build size × Market $/sqft
@@ -2607,7 +2620,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  (land.lotSizeUnknown ? '<div style="background:rgba(245,158,11,0.2);padding:0.4rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;color:#f59e0b">⚠️ Lot size unknown</div>' : '') +
  '<div style="font-size:0.85rem">' +
  '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Build Size: <strong>' + actualBuildSqft.toLocaleString() + ' sqft</strong></div>' +
- '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">(' + (land.acres < 0.5 ? '3BR/2BA for <0.5ac' : '4BR/2.5BA for 0.5ac+') + ')</div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">(' + land.actualRooms + 'BR for ' + land.acres + ' ac lot)</div>' +
  '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Hard Costs: <strong>$' + Math.round(hardCosts/1000) + 'K</strong></div>' +
  '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">(' + actualBuildSqft + ' × $200/sf)</div>' +
  '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Soft Costs: <strong>$' + Math.round(softCostsFlat/1000) + 'K</strong></div>' +

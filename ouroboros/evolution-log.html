@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ouroboros Colony Evolution Log</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono&display=swap">
+  <style>
+    :root {
+      --primary: #4C69F5;
+      --accent: #654CF4;
+      --cyan: #00E1E6;
+      --dark: #0f172a;
+      --darker: #020617;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Lato', sans-serif; 
+      background: var(--darker); 
+      color: var(--text); 
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    
+    h1 { 
+      font-size: 2.5rem; 
+      font-weight: 900;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { text-align: center; color: var(--muted); margin-bottom: 2rem; }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: rgba(76, 105, 245, 0.1);
+      border: 1px solid rgba(76, 105, 245, 0.3);
+      border-radius: 12px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+    .stat-value { font-size: 2rem; font-weight: 900; color: var(--cyan); }
+    .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    
+    .timeline {
+      position: relative;
+      padding-left: 2rem;
+    }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0.5rem;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--accent), var(--cyan));
+    }
+    
+    .version-card {
+      position: relative;
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(76, 105, 245, 0.2);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.2s;
+    }
+    .version-card:hover {
+      border-color: var(--cyan);
+      transform: translateX(4px);
+    }
+    .version-card::before {
+      content: '';
+      position: absolute;
+      left: -1.75rem;
+      top: 1.25rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--darker);
+    }
+    .version-card.milestone::before {
+      background: var(--cyan);
+      box-shadow: 0 0 10px var(--cyan);
+    }
+    
+    .version-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .version-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .version-hash {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--muted);
+      background: rgba(0,0,0,0.3);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+    .version-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .version-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .change-badge {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+    .change-badge.added { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+    .change-badge.modified { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    
+    .legend {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      font-size: 0.85rem;
+    }
+    .legend span { display: flex; align-items: center; gap: 0.5rem; }
+    .legend .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .legend .dot.milestone { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .legend .dot.normal { background: var(--primary); }
+    
+    .code-sample {
+      background: rgba(0,0,0,0.4);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      overflow-x: auto;
+    }
+    .code-sample .comment { color: #6b7280; }
+    .code-sample .keyword { color: #c084fc; }
+    .code-sample .function { color: #60a5fa; }
+    .code-sample .string { color: #34d399; }
+    .code-sample .number { color: #f59e0b; }
+    
+    @media (max-width: 768px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .version-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐍 Colony Evolution Log</h1>
+    <p class="subtitle">Ouroboros Alpha — Self-modifying AI research colony</p>
+    
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">30</div>
+        <div class="stat-label">Versions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">39</div>
+        <div class="stat-label">Ant Scripts</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">+17</div>
+        <div class="stat-label">Ants Added</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">18</div>
+        <div class="stat-label">Unique Hashes</div>
+      </div>
+    </div>
+    
+    <div class="legend">
+      <span><div class="dot milestone"></div> Milestone (structural change)</span>
+      <span><div class="dot normal"></div> Incremental update</span>
+    </div>
+    
+    <div class="timeline">
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v30</span>
+          <span class="version-hash">cab5d8958924</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 39 ants</span>
+          <span>📅 Current</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v29</span>
+          <span class="version-hash">cab5d8958924</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 39 ants</span>
+          <span class="change-badge added">+1 ant</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v28</span>
+          <span class="version-hash">ee0e883b783d</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 38 ants</span>
+          <span class="change-badge modified">selectiveDecay()</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v27</span>
+          <span class="version-hash">9e6cd93341ba</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 38 ants</span>
+          <span class="change-badge added">+1 ant</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v26</span>
+          <span class="version-hash">73b759cdd522</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 37 ants</span>
+          <span class="change-badge added">+4 ants</span>
+          <span>Federation system</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v25</span>
+          <span class="version-hash">621709c340bc</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 33 ants</span>
+          <span class="change-badge added">+5 ants</span>
+          <span>Multi-source scouts</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v24</span>
+          <span class="version-hash">e7cd82f52243</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 28 ants</span>
+          <span class="change-badge modified">Threshold tuning</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v23</span>
+          <span class="version-hash">3544c84e6419</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 28 ants</span>
+          <span class="change-badge modified">hierarchical-pheromones.js</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v22</span>
+          <span class="version-hash">e7578a7c520c</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 28 ants</span>
+          <span class="change-badge added">+2 ants</span>
+          <span>Implementer ant (self-mod)</span>
+        </div>
+      </div>
+      
+      <div class="version-card">
+        <div class="version-header">
+          <span class="version-name">v21</span>
+          <span class="version-hash">ffdb998cab25</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 26 ants</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v11</span>
+          <span class="version-hash">fc09ea1f31b6</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 26 ants</span>
+          <span class="change-badge added">+3 ants</span>
+          <span>Belief system</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v9</span>
+          <span class="version-hash">dc1e8e0d185b</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 23 ants</span>
+          <span class="change-badge added">+1 ant</span>
+          <span>Deep reader</span>
+        </div>
+      </div>
+      
+      <div class="version-card milestone">
+        <div class="version-header">
+          <span class="version-name">v1</span>
+          <span class="version-hash">a62f89b6369d</span>
+        </div>
+        <div class="version-meta">
+          <span>🐜 22 ants</span>
+          <span>Genesis</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="code-sample">
+      <span class="comment">// AUTO-IMPLEMENTED by colony from neuroscience research paper</span><br>
+      <span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {<br>
+      &nbsp;&nbsp;<span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;  <span class="comment">// High decay for mundane</span><br>
+      &nbsp;&nbsp;<span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>; <span class="comment">// Preserve novel findings</span><br>
+      &nbsp;&nbsp;<br>
+      &nbsp;&nbsp;<span class="keyword">if</span> (novelty > <span class="number">0.5</span>) <span class="keyword">return</span> pheromone * executiveDecay;<br>
+      &nbsp;&nbsp;<span class="keyword">else</span> <span class="keyword">return</span> pheromone * salienceDecay;<br>
+      }
+    </div>
+    
+    <p style="text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem;">
+      The snake eats its own tail. 🐍🔄<br>
+      <a href="index.html" style="color: var(--cyan);">← Back to Ouroboros</a>
+    </p>
+  </div>
+</body>
+</html>

@@ -509,6 +509,8 @@
 
         clock = new THREE.Clock();
 
+        const DEBUG = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
         setupLighting();
         buildTerrain();
         buildTrex();
@@ -882,7 +884,7 @@
         const yOffset = -trueMinY;
         model.position.set(-scaledCenter.x, yOffset, -scaledCenter.z);
 
-        console.log('Model prepared: ' + totalVerts + ' verts, trueMinY=' + trueMinY.toFixed(3) +
+        if (DEBUG) console.log('Model prepared: ' + totalVerts + ' verts, trueMinY=' + trueMinY.toFixed(3) +
             ', trueMaxY=' + trueMaxY.toFixed(3) + ', yOffset=' + yOffset.toFixed(3) +
             ', height=' + (trueMaxY - trueMinY).toFixed(3));
 
@@ -903,7 +905,7 @@
             const model = gltf.scene;
 
             raptorYOffset = prepareModelTemplate(model, 2.5);
-            console.log('Raptor template loaded, yOffset:', raptorYOffset);
+            if (DEBUG) console.log('Raptor template loaded, yOffset:', raptorYOffset);
 
             raptorTemplate.add(model);
             spawnRaptorPacks();
@@ -993,6 +995,38 @@
 
             raptorPacks.push(pack);
         }
+
+        // Spawn summary with deep clone verification
+        let totalR = 0;
+        raptorPacks.forEach(function(pack, pi) {
+            pack.members.forEach(function(m, mi) {
+                totalR++;
+                const tY = getTerrainHeight(m.x, m.z);
+                // Check inner model position (yOffset should be baked in)
+                let innerModelY = 'N/A';
+                let worldBBoxMinY = 'N/A';
+                m.group.children.forEach(function(child, ci) {
+                    innerModelY = child.position.y.toFixed(3);
+                });
+                // World-space bounding box of the full clone
+                m.group.updateMatrixWorld(true);
+                const worldBox = new THREE.Box3().setFromObject(m.group);
+                worldBBoxMinY = worldBox.min.y.toFixed(2);
+                const feetAboveTerrain = (worldBox.min.y - tY).toFixed(2);
+
+                if (DEBUG) console.log('[SPAWN Raptor P' + pi + '#' + mi + '] x=' + m.x.toFixed(1) + ' z=' + m.z.toFixed(1) +
+                    ' groupY=' + m.group.position.y.toFixed(2) + ' terrainY=' + tY.toFixed(2) +
+                    ' innerModelY=' + innerModelY +
+                    ' worldBBoxMinY=' + worldBBoxMinY +
+                    ' feetAboveTerrain=' + feetAboveTerrain);
+            });
+        });
+        if (DEBUG) console.log('Total raptors spawned: ' + totalR + ', templateYOffset=' + raptorYOffset.toFixed(3));
+
+        // Log template inner model position for comparison
+        raptorTemplate.children.forEach(function(child, ci) {
+            if (DEBUG) console.log('[TEMPLATE Raptor] child#' + ci + ' position.y=' + child.position.y.toFixed(3));
+        });
     }
 
     function updateRaptorPacks(delta) {
@@ -1074,7 +1108,7 @@
                 } else {
                     const terrainY = getTerrainHeight(member.x, member.z);
                     member.group.position.set(member.x, terrainY, member.z);
-                    member.group.position.y = terrainY + Math.sin(Date.now() * 0.002 + member.phase) * 0.03;
+                    member.group.position.y = terrainY + Math.abs(Math.sin(Date.now() * 0.002 + member.phase)) * 0.03;
                 }
 
                 // Vertex walk animation for this raptor
@@ -1091,7 +1125,7 @@
             const model = gltf.scene;
 
             triceratopsYOffset = prepareModelTemplate(model, 6.0);
-            console.log('Triceratops template loaded, yOffset:', triceratopsYOffset);
+            if (DEBUG) console.log('Triceratops template loaded, yOffset:', triceratopsYOffset);
 
             triceratopsTemplate.add(model);
             spawnTriceratopsHerds();
@@ -1102,7 +1136,7 @@
 
     function spawnTriceratopsHerds() {
         // Log Y offset for debugging
-        console.log('Spawning triceratops herds, yOffset:', triceratopsYOffset);
+        if (DEBUG) console.log('Spawning triceratops herds, yOffset:', triceratopsYOffset);
 
         for (let h = 0; h < 3; h++) {
             const herdAngle = (h / 3) * Math.PI * 2 + Math.random() * 0.5;
@@ -1130,7 +1164,7 @@
                 scene.add(tri);
 
                 const triWalkMeshes = setupRaptorWalkMeshes(tri);
-                console.log('Triceratops #' + (h * 3 + i) + ' at y=' + terrainY + ' walkMeshes=' + triWalkMeshes.length);
+                if (DEBUG) console.log('Triceratops #' + (h * 3 + i) + ' at y=' + terrainY + ' walkMeshes=' + triWalkMeshes.length);
 
                 herd.members.push({
                     group: tri,
@@ -1145,6 +1179,33 @@
 
             triceratopsHerds.push(herd);
         }
+
+        // Spawn summary with deep clone verification
+        let totalT = 0;
+        triceratopsHerds.forEach(function(herd, hi) {
+            herd.members.forEach(function(m, mi) {
+                totalT++;
+                const tY = getTerrainHeight(m.x, m.z);
+                let innerModelY = 'N/A';
+                m.group.children.forEach(function(child) {
+                    innerModelY = child.position.y.toFixed(3);
+                });
+                m.group.updateMatrixWorld(true);
+                const worldBox = new THREE.Box3().setFromObject(m.group);
+                const feetAboveTerrain = (worldBox.min.y - tY).toFixed(2);
+
+                if (DEBUG) console.log('[SPAWN Tri H' + hi + '#' + mi + '] x=' + m.x.toFixed(1) + ' z=' + m.z.toFixed(1) +
+                    ' groupY=' + m.group.position.y.toFixed(2) + ' terrainY=' + tY.toFixed(2) +
+                    ' innerModelY=' + innerModelY +
+                    ' worldBBoxMinY=' + worldBox.min.y.toFixed(2) +
+                    ' feetAboveTerrain=' + feetAboveTerrain);
+            });
+        });
+        if (DEBUG) console.log('Total triceratops spawned: ' + totalT + ', templateYOffset=' + triceratopsYOffset.toFixed(3));
+
+        triceratopsTemplate.children.forEach(function(child, ci) {
+            if (DEBUG) console.log('[TEMPLATE Tri] child#' + ci + ' position.y=' + child.position.y.toFixed(3));
+        });
     }
 
     let triAnimFrame = 0;
@@ -1224,7 +1285,7 @@
                     member.group.rotation.y = member.angle;
                 } else {
                     const terrainY = getTerrainHeight(member.x, member.z);
-                    member.group.position.y = terrainY + Math.sin(Date.now() * 0.0015 + member.phase) * 0.03;
+                    member.group.position.y = terrainY + Math.abs(Math.sin(Date.now() * 0.0015 + member.phase)) * 0.03;
                 }
 
                 // Vertex walk animation — throttled for performance
@@ -1270,7 +1331,7 @@
                 gltf.animations.forEach(clip => {
                     trexMixer.clipAction(clip).play();
                 });
-                console.log('Playing ' + gltf.animations.length + ' embedded animations');
+                if (DEBUG) console.log('Playing ' + gltf.animations.length + ' embedded animations');
             }
 
             // Set up vertex deformation walk animation
@@ -1361,13 +1422,13 @@
                     box: box
                 });
 
-                console.log('Walk mesh: ' + (child.name || 'unnamed') +
+                if (DEBUG) console.log('Walk mesh: ' + (child.name || 'unnamed') +
                     ' verts=' + pos.count +
                     ' bounds y=[' + box.min.y.toFixed(2) + ',' + box.max.y.toFixed(2) + ']' +
                     ' z=[' + box.min.z.toFixed(2) + ',' + box.max.z.toFixed(2) + ']');
             }
         });
-        console.log('Walk animation: ' + walkMeshes.length + ' meshes registered');
+        if (DEBUG) console.log('Walk animation: ' + walkMeshes.length + ' meshes registered');
     }
 
     function animateWalk(moving, isSprinting) {
@@ -1648,7 +1709,7 @@
         } else {
             // Idle breathing / sway
             const idleT = Date.now() * 0.001;
-            trexGroup.position.y = terrainY + Math.sin(idleT * 1.5) * 0.05;
+            trexGroup.position.y = terrainY + Math.abs(Math.sin(idleT * 1.5)) * 0.05;
             trexPivot.rotation.x += (Math.sin(idleT * 0.8) * 0.02 - trexPivot.rotation.x) * 0.05;
             trexPivot.rotation.z += (Math.sin(idleT * 0.6) * 0.01 - trexPivot.rotation.z) * 0.05;
             trexPivot.rotation.y += (Math.sin(idleT * 0.4) * 0.03 - trexPivot.rotation.y) * 0.05;
@@ -1884,6 +1945,80 @@
         setTimeout(() => el.remove(), 1300);
     }
 
+    // ============ DEBUG POSITION LOGGER ============
+    let debugLogTimer = 0;
+    const DEBUG_LOG_INTERVAL = 3; // log every 3 seconds
+
+    function debugLogPositions(delta) {
+        if (!DEBUG) return;
+        debugLogTimer += delta;
+        if (debugLogTimer < DEBUG_LOG_INTERVAL) return;
+        debugLogTimer = 0;
+
+        const now = (Date.now() / 1000).toFixed(1);
+        console.group('🦖 DEBUG t=' + now + 's');
+
+        // T-Rex — world-space bbox
+        const trexTerrainY = getTerrainHeight(trexX, trexZ);
+        if (trexGroup) {
+            trexGroup.updateMatrixWorld(true);
+            const trexWorldBox = new THREE.Box3().setFromObject(trexGroup);
+            const trexFeetY = trexWorldBox.min.y;
+            const feetVsTerrain = (trexFeetY - trexTerrainY).toFixed(2);
+            const status = trexFeetY < trexTerrainY - 0.3 ? '⚠️ FEET UNDERGROUND' : '✅';
+            console.log('[T-Rex] groupY=' + trexGroup.position.y.toFixed(2) +
+                ' terrainY=' + trexTerrainY.toFixed(2) +
+                ' worldFeetY=' + trexFeetY.toFixed(2) +
+                ' feetVsTerrain=' + feetVsTerrain +
+                ' worldTopY=' + trexWorldBox.max.y.toFixed(2) +
+                ' ' + status);
+        }
+
+        // Raptors — every single one, world bbox
+        let raptorUG = 0;
+        raptorPacks.forEach(function(pack, pi) {
+            pack.members.forEach(function(m, mi) {
+                const terrY = getTerrainHeight(m.x, m.z);
+                m.group.updateMatrixWorld(true);
+                const wb = new THREE.Box3().setFromObject(m.group);
+                const feetVsTerrain = (wb.min.y - terrY).toFixed(2);
+                const status = wb.min.y < terrY - 0.3 ? '⚠️ UNDERGROUND' : '';
+                if (status) raptorUG++;
+                console.log('[Raptor P' + pi + '#' + mi + '] groupY=' + m.group.position.y.toFixed(2) +
+                    ' terrY=' + terrY.toFixed(2) +
+                    ' feetY=' + wb.min.y.toFixed(2) +
+                    ' topY=' + wb.max.y.toFixed(2) +
+                    ' feetVsTerrain=' + feetVsTerrain +
+                    ' ' + status);
+            });
+        });
+
+        // Triceratops — every single one, world bbox
+        let triUG = 0;
+        triceratopsHerds.forEach(function(herd, hi) {
+            herd.members.forEach(function(m, mi) {
+                const terrY = getTerrainHeight(m.x, m.z);
+                m.group.updateMatrixWorld(true);
+                const wb = new THREE.Box3().setFromObject(m.group);
+                const feetVsTerrain = (wb.min.y - terrY).toFixed(2);
+                const status = wb.min.y < terrY - 0.3 ? '⚠️ UNDERGROUND' : '';
+                if (status) triUG++;
+                console.log('[Tri H' + hi + '#' + mi + '] groupY=' + m.group.position.y.toFixed(2) +
+                    ' terrY=' + terrY.toFixed(2) +
+                    ' feetY=' + wb.min.y.toFixed(2) +
+                    ' topY=' + wb.max.y.toFixed(2) +
+                    ' feetVsTerrain=' + feetVsTerrain +
+                    ' ' + status);
+            });
+        });
+
+        if (raptorUG > 0 || triUG > 0) {
+            console.warn('⚠️ UNDERGROUND DETECTED: ' + raptorUG + ' raptors, ' + triUG + ' triceratops');
+        }
+
+        console.groupEnd();
+    }
+
     function animate() {
         requestAnimationFrame(animate);
         const delta = Math.min(clock.getDelta(), 0.05);
@@ -1896,6 +2031,7 @@
             updateCamera(delta);
             updateWorld(delta);
             updateMinimap();
+            debugLogPositions(delta);
         } else {
             // Idle rotation on start screen
             if (trexGroup) {

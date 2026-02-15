@@ -466,7 +466,7 @@
  
  <h2 id="land-deals">🏗️ Land Deal Finder</h2>
  <div class="sql-section">
- <p style="color:#94a3b8;margin-bottom:1.5rem">Find motivated land sellers (90+ days on market) and calculate profitable offer prices for new construction.</p>
+ <p style="color:#94a3b8;margin-bottom:1.5rem">Find motivated land sellers (90+ days on market) and calculate build-to-sell ROI using <strong style="color:#22d3ee">median comp $/sqft + 5% new construction premium</strong>. Negative profits mean the land is overpriced for the market — use Max Offer as your negotiating target.</p>
  
  <!-- Filters -->
  <div class="filters" style="margin-bottom:1.5rem">
@@ -2245,12 +2245,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const maxRoomsForLot = buildability.recommendedRooms;
  const actualRooms = canBuildTarget ? targetRooms : Math.min(targetRooms, maxRoomsForLot);
  
- // Use 25th percentile of comps (conservative - new builds compete with existing)
+ // Use MEDIAN $/sqft (new construction commands median+ prices in most markets)
+ // New homes typically sell at 10-20% premium over median comps
  const sortedPpsf = comps.map(c => c.ppsf).sort((a,b) => a - b);
- const p25Index = Math.floor(sortedPpsf.length * 0.25);
+ const medianIndex = Math.floor(sortedPpsf.length * 0.5);
  const avgPpsf = comps.length > 0 
- ? sortedPpsf[p25Index] * 0.90  // 25th percentile - 10% buffer
- : 250; // Conservative default $/sqft if no comps
+ ? sortedPpsf[medianIndex] * 1.05  // Median + 5% new construction premium
+ : 300; // Default for areas without comps
  
  // Adjust build cost based on actual room count (complexity factor)
  const roomCostMultiplier = {
@@ -2470,8 +2471,9 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  html += `</div>`;
  html += `<div style="margin-top:0.75rem;padding:0.75rem;background:rgba(16,185,129,0.15);border-radius:8px;font-size:0.8rem">
  <strong style="color:#10b981">📊 Deal Analysis:</strong> 
- Build ${land.actualBuildSqft?.toLocaleString() || '?'} sqft ${land.actualRooms || 3}BR @ $${land.avgPpsf}/sqft = <strong style="color:#22d3ee">${fmtPrice(land.estSalePrice)}</strong> est. value | 
+ Build ${land.actualBuildSqft?.toLocaleString() || '?'} sqft ${land.actualRooms || 3}BR @ <strong>$${land.avgPpsf}/sqft</strong> (median + 5% new construction) = <strong style="color:#22d3ee">${fmtPrice(land.estSalePrice)}</strong> est. value | 
  Profit: <strong style="color:${land.profit > 0 ? '#10b981' : '#ef4444'}">${fmtPrice(land.profit)} (${land.profitPct}%)</strong>
+ ${land.profit < 0 ? '<br><span style="color:#f59e0b">⚠️ Offer $' + Math.round(land.maxOffer/1000) + 'K or below to hit ' + (document.getElementById('targetProfit')?.value || 25) + '% profit target</span>' : ''}
  </div>`;
  }
  

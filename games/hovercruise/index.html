@@ -2471,14 +2471,15 @@
                 const whiteMat = sharedMats.white;
                 const edgeLineY = segmentElevation + 0.03;
                 [-edgeLineOffset, edgeLineOffset].forEach(offset => {
-                    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.8, segLen), whiteMat); // NEON - extra wide
+                    const line = new THREE.Mesh(new THREE.PlaneGeometry(0.8, segLen, 1, 4), whiteMat); // NEON - extra wide
                     line.rotation.x = -Math.PI / 2;
-                    line.rotation.z = bankAngle; // Bank with road
+                    line.rotation.z = bankAngle;
                     line.position.set(offset, edgeLineY, segZ);
                     line.userData.baseX = offset;
                     line.userData.baseY = edgeLineY;
                     line.userData.segmentElevation = segmentElevation;
-                    line.userData.banking = bankAngle; // Enable dynamic banking updates
+                    line.userData.banking = bankAngle;
+                    line.userData.isRoadSurface = true; // vertex warp like road
                     scene.add(line);
                     roadSegments.push(line);
                 });
@@ -2559,7 +2560,7 @@
                 const shoulderOffset = halfRoad + shoulderWidth/2 + 0.5; // Just outside road edge
                 const shoulderY = segmentElevation - 0.15; // Well below road surface to prevent z-fighting
                 [-shoulderOffset, shoulderOffset].forEach(offset => {
-                    const shoulder = new THREE.Mesh(new THREE.PlaneGeometry(shoulderWidth, segLen), shoulderMat);
+                    const shoulder = new THREE.Mesh(new THREE.PlaneGeometry(shoulderWidth, segLen, 1, 4), shoulderMat);
                     shoulder.rotation.x = -Math.PI / 2;
                     shoulder.rotation.z = bankAngle;
                     shoulder.position.set(offset, shoulderY, segZ);
@@ -2568,6 +2569,7 @@
                     shoulder.userData.baseY = shoulderY;
                     shoulder.userData.segmentElevation = segmentElevation;
                     shoulder.userData.banking = bankAngle;
+                    shoulder.userData.isRoadSurface = true; // vertex warp like road
                     scene.add(shoulder);
                     roadSegments.push(shoulder);
                 });
@@ -12677,10 +12679,11 @@
                     posAttr.needsUpdate = true;
                 }
 
-                // Banking on curves
+                // Banking on curves — use current global banking for ALL segments
+                // so adjacent segments always have the same bank angle (no seams)
                 if (seg.userData.banking !== undefined) {
                     const currentBankAngle = banking * Math.sign(roadCurve) * Math.min(1, Math.abs(roadCurve) * 1.5);
-                    seg.rotation.z = seg.userData.banking * (1 - elevLerp) + currentBankAngle * elevLerp;
+                    seg.rotation.z = currentBankAngle;
                 }
             });
             roadSegments = roadSegments.filter(seg => { if (seg.position.z > 80) { removeAndDispose(seg); return false; } return true; });

@@ -1076,39 +1076,101 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            --glow-color: #00E1E6;
+            --glow-spread: rgba(0, 225, 230, 0.6);
+            --btn-bg: #0051E6;
+            background-color: var(--btn-bg);
+            color: var(--glow-color);
+            border: 0.2em solid var(--glow-color);
+            border-radius: 0.75em;
+            box-shadow: 
+                0 0 1em 0.25em var(--glow-color),
+                0 0 4em 1em var(--glow-spread),
+                inset 0 0 0.75em 0.25em var(--glow-color);
+            text-shadow: 0 0 0.5em var(--glow-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary::after {
+            pointer-events: none;
+            content: "";
+            position: absolute;
+            top: 120%;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: var(--glow-spread);
+            filter: blur(2em);
+            opacity: 0.7;
+            transform: perspective(1.5em) rotateX(35deg) scale(1, 0.6);
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
+            color: var(--btn-bg);
+            background-color: var(--glow-color);
             box-shadow: 
-                0 20px 50px rgba(99, 102, 241, 0.4),
-                0 0 30px rgba(99, 102, 241, 0.2);
+                0 0 1em 0.25em var(--glow-color),
+                0 0 4em 2em var(--glow-spread),
+                inset 0 0 0.75em 0.25em var(--glow-color);
+            transform: translateY(-2px);
         }
 
         .btn-primary:active {
-            transform: translateY(-1px) scale(0.98);
+            box-shadow: 
+                0 0 0.6em 0.25em var(--glow-color),
+                0 0 2.5em 2em var(--glow-spread),
+                inset 0 0 0.5em 0.25em var(--glow-color);
+            transform: translateY(0);
         }
 
         .btn-secondary {
-            background: var(--bg-glass);
-            color: var(--text);
-            border: 1px solid var(--border);
+            --glow-color: #4C82E6;
+            --glow-spread: rgba(76, 130, 230, 0.4);
+            --btn-bg: rgba(0, 81, 230, 0.2);
+            background-color: var(--btn-bg);
+            color: var(--glow-color);
+            border: 0.15em solid var(--glow-color);
+            border-radius: 0.75em;
             backdrop-filter: blur(10px);
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 
+                0 0 0.5em 0.1em var(--glow-color),
+                0 0 2em 0.5em var(--glow-spread),
+                inset 0 0 0.5em 0.1em rgba(76, 130, 230, 0.3);
+            text-shadow: 0 0 0.3em var(--glow-color);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary::after {
+            pointer-events: none;
+            content: "";
+            position: absolute;
+            top: 120%;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: var(--glow-spread);
+            filter: blur(1.5em);
+            opacity: 0.5;
+            transform: perspective(1.5em) rotateX(35deg) scale(1, 0.6);
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--primary);
+            color: #0a0a0f;
+            background-color: var(--glow-color);
+            box-shadow: 
+                0 0 1em 0.25em var(--glow-color),
+                0 0 3em 1em var(--glow-spread),
+                inset 0 0 0.5em 0.25em var(--glow-color);
             transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary:active {
+            box-shadow: 
+                0 0 0.4em 0.15em var(--glow-color),
+                0 0 2em 1em var(--glow-spread),
+                inset 0 0 0.3em 0.15em var(--glow-color);
             transform: translateY(0);
         }
 

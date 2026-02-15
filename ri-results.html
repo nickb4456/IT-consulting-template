@@ -423,17 +423,23 @@
                 else if (p.dom <= 180) domBuckets['91-180']++;
                 else domBuckets['180+']++;
             });
-            new Chart(document.getElementById('domChart'), {
-                type: 'bar',
-                data: { labels: Object.keys(domBuckets), datasets: [{ data: Object.values(domBuckets), backgroundColor: ['#10b981', '#22c55e', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 6 }] },
-                options: { plugins: { legend: { display: false } } }
-            });
-            // DOM insight
-            const fastSales = domBuckets['0-30'] + domBuckets['31-60'];
             const totalDom = Object.values(domBuckets).reduce((a,b) => a+b, 0);
-            const fastPct = totalDom ? Math.round(fastSales / totalDom * 100) : 0;
-            const slowPct = totalDom ? Math.round(domBuckets['180+'] / totalDom * 100) : 0;
-            document.getElementById('domInsight').innerHTML = totalDom ? `<strong>${fastPct}%</strong> sell within 60 days. ${slowPct > 10 ? `⚠️ <strong>${slowPct}%</strong> sit 180+ days — potential negotiation opportunities.` : 'Market moving at healthy pace.'}` : 'No DOM data for active listings.';
+            const domCard = document.getElementById('domChart').closest('.chart-card');
+            if (totalDom === 0) {
+                domCard.style.display = 'none';
+            } else {
+                domCard.style.display = '';
+                new Chart(document.getElementById('domChart'), {
+                    type: 'bar',
+                    data: { labels: Object.keys(domBuckets), datasets: [{ data: Object.values(domBuckets), backgroundColor: ['#10b981', '#22c55e', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 6 }] },
+                    options: { plugins: { legend: { display: false } } }
+                });
+                // DOM insight
+                const fastSales = domBuckets['0-30'] + domBuckets['31-60'];
+                const fastPct = Math.round(fastSales / totalDom * 100);
+                const slowPct = Math.round(domBuckets['180+'] / totalDom * 100);
+                document.getElementById('domInsight').innerHTML = `<strong>${fastPct}%</strong> sell within 60 days. ${slowPct > 10 ? `⚠️ <strong>${slowPct}%</strong> sit 180+ days — potential negotiation opportunities.` : 'Market moving at healthy pace.'}`;
+            }
             
             // Year Built
             const decades = { 'Pre-1900': 0, '1900-50': 0, '1950-80': 0, '1980-00': 0, '2000-20': 0, '2020+': 0 };

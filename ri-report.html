@@ -1154,6 +1154,7 @@ function loadMainData() {
   Promise.all([
     // Load slim data - Cloudflare Brotli compresses, browser decompresses natively
     fetch('ri-sales-slim.json?v=' + dataVersion).then(r => r.json()).then(d => ({
+      summary: d.summary,
       properties: d.properties.map(expandKeys)
     })),
     // Load SQL.js WASM

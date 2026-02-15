@@ -2933,8 +2933,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  );
  const useComps = similarComps.length >= 3 ? similarComps : comps;
  
- const avgPpsf = useComps.reduce((s, c) => s + c.ppsf, 0) / useComps.length;
- const marketValue = Math.round(h.sqft * avgPpsf);
+ // CONSERVATIVE: Use 25th percentile instead of average, then apply 10% haircut
+ const sortedPpsf = useComps.map(c => c.ppsf).sort((a, b) => a - b);
+ const p25Index = Math.floor(sortedPpsf.length * 0.25);
+ const conservativePpsf = sortedPpsf[p25Index]; // 25th percentile (lower estimate)
+ const rawMarketValue = h.sqft * conservativePpsf;
+ const marketValue = Math.round(rawMarketValue * 0.90); // 10% haircut for repairs/closing costs
+ const avgPpsf = conservativePpsf; // For display
  const discount = Math.round((1 - h.price / marketValue) * 100);
  const instantEquity = marketValue - h.price;
  
@@ -3076,8 +3081,9 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="margin-top:0.75rem"><a href="' + house.url + '" target="_blank" style="color:#6366f1">🔗 View on Redfin</a></div>' +
  '</div>' +
  '<div style="background:rgba(99,102,241,0.15);padding:1.5rem;border-radius:12px;text-align:center;margin-bottom:1.5rem;border:2px solid #10b981">' +
- '<div style="color:#94a3b8;font-size:0.9rem">Market Value: <strong style="color:#a5b4fc">' + formatPrice(house.marketValue) + '</strong> (based on $' + house.avgPpsf + '/sqft)</div>' +
- '<div style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0">' + formatPrice(house.instantEquity) + ' Instant Equity</div>' +
+ '<div style="color:#94a3b8;font-size:0.9rem">Conservative Value: <strong style="color:#a5b4fc">' + formatPrice(house.marketValue) + '</strong> (25th %ile: $' + house.avgPpsf + '/sqft − 10%)</div>' +
+ '<div style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0">' + formatPrice(house.instantEquity) + ' Est. Equity</div>' +
+ '<div style="color:#64748b;font-size:0.75rem;margin-top:-0.25rem">(Conservative: 25th percentile comps − 10% buffer)</div>' +
  '<div style="color:#f59e0b;font-size:1.1rem">' + house.discount + '% below market • ' + house.dom + ' days on market</div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Offer Strategy</h4>' +

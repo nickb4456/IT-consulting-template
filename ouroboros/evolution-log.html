@@ -10,6 +10,9 @@
       --primary: #4C69F5;
       --accent: #654CF4;
       --cyan: #00E1E6;
+      --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
       --dark: #0f172a;
       --darker: #020617;
       --text: #f1f5f9;
@@ -71,13 +74,12 @@
       background: rgba(30, 41, 59, 0.7);
       border: 1px solid rgba(76, 105, 245, 0.2);
       border-radius: 12px;
-      padding: 1rem 1.25rem;
       margin-bottom: 0.75rem;
+      overflow: hidden;
       transition: all 0.2s;
     }
     .version-card:hover {
       border-color: var(--cyan);
-      transform: translateX(4px);
     }
     .version-card::before {
       content: '';
@@ -89,6 +91,7 @@
       border-radius: 50%;
       background: var(--primary);
       border: 2px solid var(--darker);
+      z-index: 1;
     }
     .version-card.milestone::before {
       background: var(--cyan);
@@ -99,7 +102,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.5rem;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .version-header:hover {
+      background: rgba(76, 105, 245, 0.05);
+    }
+    .version-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
     .version-name {
       font-family: 'JetBrains Mono', monospace;
@@ -114,56 +127,81 @@
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
     }
-    .version-meta {
-      display: flex;
-      gap: 1.5rem;
+    .version-summary {
       font-size: 0.85rem;
       color: var(--muted);
     }
-    .version-meta span { display: flex; align-items: center; gap: 0.3rem; }
+    .expand-icon {
+      font-size: 1.2rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+    }
+    .version-card.expanded .expand-icon {
+      transform: rotate(180deg);
+    }
+    
+    .version-details {
+      display: none;
+      padding: 0 1.25rem 1rem;
+      border-top: 1px solid rgba(76, 105, 245, 0.1);
+    }
+    .version-card.expanded .version-details {
+      display: block;
+    }
+    
+    .changes-list {
+      margin-top: 0.75rem;
+    }
+    .change-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.4rem 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+    }
     .change-badge {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       padding: 0.15rem 0.4rem;
       border-radius: 4px;
       font-weight: 700;
+      min-width: 55px;
+      text-align: center;
     }
-    .change-badge.added { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-    .change-badge.modified { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .change-badge.added { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .change-badge.modified { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
+    .change-badge.removed { background: rgba(239, 68, 68, 0.2); color: var(--red); }
     
-    .legend {
-      display: flex;
-      gap: 2rem;
-      justify-content: center;
-      margin-bottom: 2rem;
-      font-size: 0.85rem;
-    }
-    .legend span { display: flex; align-items: center; gap: 0.5rem; }
-    .legend .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .legend .dot.milestone { background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
-    .legend .dot.normal { background: var(--primary); }
-    
-    .code-sample {
+    .diff-block {
       background: rgba(0,0,0,0.4);
       border-radius: 8px;
       padding: 1rem;
-      margin-top: 2rem;
+      margin-top: 1rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       overflow-x: auto;
+      white-space: pre;
     }
-    .code-sample .comment { color: #6b7280; }
-    .code-sample .keyword { color: #c084fc; }
-    .code-sample .function { color: #60a5fa; }
-    .code-sample .string { color: #34d399; }
-    .code-sample .number { color: #f59e0b; }
+    .diff-block .added-line { color: var(--green); }
+    .diff-block .removed-line { color: var(--red); }
+    .diff-block .comment { color: #6b7280; }
+    .diff-block .keyword { color: #c084fc; }
+    .diff-block .function { color: #60a5fa; }
+    .diff-block .number { color: var(--amber); }
+    
+    .ant-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 0.5rem;
+    }
     
     @media (max-width: 768px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .version-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .version-left { flex-wrap: wrap; }
     }
   </style>
 </head>
@@ -191,175 +229,197 @@
       </div>
     </div>
     
-    <div class="legend">
-      <span><div class="dot milestone"></div> Milestone (structural change)</span>
-      <span><div class="dot normal"></div> Incremental update</span>
-    </div>
-    
-    <div class="timeline">
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v30</span>
-          <span class="version-hash">cab5d8958924</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 39 ants</span>
-          <span>📅 Current</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v29</span>
-          <span class="version-hash">cab5d8958924</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 39 ants</span>
-          <span class="change-badge added">+1 ant</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v28</span>
-          <span class="version-hash">ee0e883b783d</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 38 ants</span>
-          <span class="change-badge modified">selectiveDecay()</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v27</span>
-          <span class="version-hash">9e6cd93341ba</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 38 ants</span>
-          <span class="change-badge added">+1 ant</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v26</span>
-          <span class="version-hash">73b759cdd522</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 37 ants</span>
-          <span class="change-badge added">+4 ants</span>
-          <span>Federation system</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v25</span>
-          <span class="version-hash">621709c340bc</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 33 ants</span>
-          <span class="change-badge added">+5 ants</span>
-          <span>Multi-source scouts</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v24</span>
-          <span class="version-hash">e7cd82f52243</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 28 ants</span>
-          <span class="change-badge modified">Threshold tuning</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v23</span>
-          <span class="version-hash">3544c84e6419</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 28 ants</span>
-          <span class="change-badge modified">hierarchical-pheromones.js</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v22</span>
-          <span class="version-hash">e7578a7c520c</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 28 ants</span>
-          <span class="change-badge added">+2 ants</span>
-          <span>Implementer ant (self-mod)</span>
-        </div>
-      </div>
-      
-      <div class="version-card">
-        <div class="version-header">
-          <span class="version-name">v21</span>
-          <span class="version-hash">ffdb998cab25</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 26 ants</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v11</span>
-          <span class="version-hash">fc09ea1f31b6</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 26 ants</span>
-          <span class="change-badge added">+3 ants</span>
-          <span>Belief system</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v9</span>
-          <span class="version-hash">dc1e8e0d185b</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 23 ants</span>
-          <span class="change-badge added">+1 ant</span>
-          <span>Deep reader</span>
-        </div>
-      </div>
-      
-      <div class="version-card milestone">
-        <div class="version-header">
-          <span class="version-name">v1</span>
-          <span class="version-hash">a62f89b6369d</span>
-        </div>
-        <div class="version-meta">
-          <span>🐜 22 ants</span>
-          <span>Genesis</span>
-        </div>
-      </div>
-    </div>
-    
-    <div class="code-sample">
-      <span class="comment">// AUTO-IMPLEMENTED by colony from neuroscience research paper</span><br>
-      <span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {<br>
-      &nbsp;&nbsp;<span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;  <span class="comment">// High decay for mundane</span><br>
-      &nbsp;&nbsp;<span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>; <span class="comment">// Preserve novel findings</span><br>
-      &nbsp;&nbsp;<br>
-      &nbsp;&nbsp;<span class="keyword">if</span> (novelty > <span class="number">0.5</span>) <span class="keyword">return</span> pheromone * executiveDecay;<br>
-      &nbsp;&nbsp;<span class="keyword">else</span> <span class="keyword">return</span> pheromone * salienceDecay;<br>
-      }
-    </div>
+    <div class="timeline" id="timeline"></div>
     
     <p style="text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem;">
       The snake eats its own tail. 🐍🔄<br>
       <a href="index.html" style="color: var(--cyan);">← Back to Ouroboros</a>
     </p>
   </div>
+
+  <script>
+    const versions = [
+      { v: "v30", hash: "cab5d8958924", ants: 39, milestone: true, summary: "Current stable", changes: [] },
+      { v: "v29", hash: "cab5d8958924", ants: 39, summary: "Prefilter ant, pheromone-lang", changes: [
+        { type: "added", file: "prefilter-ant.js" },
+        { type: "added", file: "pheromone-lang.js" },
+        { type: "modified", file: "filter-ant.js" },
+        { type: "modified", file: "synthesis-ant.js" }
+      ]},
+      { v: "v28", hash: "ee0e883b783d", ants: 38, summary: "Ant protocol & language integration", changes: [
+        { type: "added", file: "ant-language-integration.js" },
+        { type: "added", file: "ant-protocol.js" },
+        { type: "added", file: "language-agent.js" },
+        { type: "modified", file: "research-scout.js" }
+      ], diff: `<span class="comment">// v28: Added ant-to-ant communication protocol</span>
+<span class="keyword">const</span> <span class="function">sendSignal</span> = (fromAnt, toAnt, signal) => {
+  <span class="keyword">const</span> encoded = encodeSignal(signal);
+  pheromones.deposit(encoded, {
+    type: <span class="string">'ant_signal'</span>,
+    from: fromAnt,
+    to: toAnt,
+    ttl: <span class="number">3600</span>
+  });
+};` },
+      { v: "v27", hash: "9e6cd93341ba", ants: 38, summary: "Deep synthesis ant", changes: [
+        { type: "added", file: "deep-synthesis-ant.js" },
+        { type: "modified", file: "belief-cluster-ant.js" },
+        { type: "modified", file: "embeddings.js" }
+      ]},
+      { v: "v26", hash: "73b759cdd522", ants: 37, milestone: true, summary: "Federation + Catastrophe system", changes: [
+        { type: "added", file: "catastrophe-ant.js" },
+        { type: "added", file: "cross-domain-ant.js" },
+        { type: "added", file: "wanderer-ant.js" },
+        { type: "added", file: "batch-analyzer.js" },
+        { type: "added", file: "optimized-math.js" },
+        { type: "modified", file: "hierarchical-pheromones.js" }
+      ], diff: `<span class="comment">// v26: Catastrophe detection - shake up stagnant topology</span>
+<span class="keyword">if</span> (coefficientOfVariation < <span class="number">0.20</span>) {
+  <span class="comment">// Colony too homogeneous - trigger catastrophe</span>
+  <span class="keyword">const</span> weakEdges = edges
+    .filter(e => e.strength < threshold)
+    .slice(<span class="number">0</span>, Math.ceil(edges.length * <span class="number">0.10</span>));
+  
+  weakEdges.forEach(e => db.run(
+    <span class="string">'DELETE FROM edges WHERE id = ?'</span>, e.id
+  ));
+  log(<span class="string">'🌋 Catastrophe: pruned'</span>, weakEdges.length);
+}` },
+      { v: "v25", hash: "621709c340bc", ants: 33, milestone: true, summary: "Multi-source scouts (arXiv, HF, Semantic Scholar)", changes: [
+        { type: "added", file: "huggingface-scout.js" },
+        { type: "added", file: "semantic-scholar-scout.js" },
+        { type: "added", file: "paperswithcode-scout.js" },
+        { type: "added", file: "federation-reader.js" },
+        { type: "added", file: "downtime-ant.js" },
+        { type: "modified", file: "arxiv-scout.js" }
+      ]},
+      { v: "v24", hash: "e7cd82f52243", ants: 28, summary: "Threshold auto-tuning", changes: [
+        { type: "modified", file: "connector-lite.js" },
+        { type: "modified", file: "config.js" },
+        { type: "modified", file: "federation.js" }
+      ]},
+      { v: "v23", hash: "3544c84e6419", ants: 28, summary: "Colony patched hierarchical-pheromones.js", changes: [
+        { type: "modified", file: "hierarchical-pheromones.js" },
+        { type: "modified", file: "implementer-ant.js" }
+      ], diff: `<span class="comment">// v23: Self-modification - colony raised similarity threshold</span>
+<span class="removed-line">- const SIMILARITY_THRESHOLD = 0.65;</span>
+<span class="added-line">+ const SIMILARITY_THRESHOLD = 0.72;</span>
+
+<span class="comment">// Reasoning from belief-cluster:</span>
+<span class="comment">// "Higher threshold reduces noise, improves signal quality"</span>` },
+      { v: "v22", hash: "e7578a7c520c", ants: 28, milestone: true, summary: "Belief system + Implementer (self-mod capability)", changes: [
+        { type: "added", file: "belief-cluster-ant.js" },
+        { type: "added", file: "query-evolution-ant.js" },
+        { type: "modified", file: "implementer-ant.js" },
+        { type: "modified", file: "deep-reader-ant.js" }
+      ], diff: `<span class="comment">// v22: The snake learns to modify itself 🐍</span>
+<span class="keyword">async function</span> <span class="function">applyPatch</span>(patch, targetFile) {
+  <span class="comment">// Create backup first</span>
+  <span class="keyword">const</span> backup = \`\${targetFile}.\${Date.now()}.backup\`;
+  fs.copyFileSync(targetFile, backup);
+  
+  <span class="comment">// Sandbox test</span>
+  <span class="keyword">if</span> (!<span class="keyword">await</span> sandboxTest(patch)) {
+    <span class="keyword">throw new</span> Error(<span class="string">'Sandbox test failed'</span>);
+  }
+  
+  <span class="comment">// Apply if LOW/MEDIUM risk, queue HIGH for approval</span>
+  <span class="keyword">if</span> (patch.risk === <span class="string">'HIGH'</span>) {
+    queueForApproval(patch);
+  } <span class="keyword">else</span> {
+    injectCode(targetFile, patch.code);
+  }
+}` },
+      { v: "v21", hash: "ffdb998cab25", ants: 26, summary: "Federation tracker + stagnation detection", changes: [
+        { type: "added", file: "federation-tracker.js" },
+        { type: "added", file: "stagnation-detector.js" }
+      ]},
+      { v: "v15", hash: "b385007e0524", ants: 26, summary: "selectiveDecay() auto-implemented", changes: [
+        { type: "modified", file: "pheromones-db.js" },
+        { type: "modified", file: "implementer-ant.js" }
+      ], diff: `<span class="comment">// [Deep Analysis] Injected by Implementer Ant - 2026-02-12</span>
+<span class="comment">// Based on neuroscience paper on selective attention gating</span>
+<span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {
+  <span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;   <span class="comment">// High decay for mundane</span>
+  <span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>; <span class="comment">// Preserve novel findings</span>
+  
+  <span class="keyword">if</span> (novelty > <span class="number">0.5</span>) {
+    <span class="keyword">return</span> pheromone * executiveDecay;
+  } <span class="keyword">else</span> {
+    <span class="keyword">return</span> pheromone * salienceDecay;
+  }
+}` },
+      { v: "v11", hash: "fc09ea1f31b6", ants: 26, milestone: true, summary: "Belief system + BGE embeddings", changes: [
+        { type: "added", file: "builder-ant.js" },
+        { type: "added", file: "gap-scout.js" },
+        { type: "added", file: "openalex-scout.js" },
+        { type: "added", file: "embeddings-bge.js" },
+        { type: "added", file: "hybrid-search.js" },
+        { type: "added", file: "send-alert.js" }
+      ]},
+      { v: "v9", hash: "dc1e8e0d185b", ants: 23, milestone: true, summary: "Deep reader + novelty scoring", changes: [
+        { type: "added", file: "inquisitor-ant.js" },
+        { type: "added", file: "compute-budget.js" },
+        { type: "added", file: "novelty-scoring.js" },
+        { type: "added", file: "cosmic-rays.js" }
+      ]},
+      { v: "v1", hash: "a62f89b6369d", ants: 22, milestone: true, summary: "Genesis — 22 founding ants", changes: [], diff: `<span class="comment">// v1: The beginning 🌱</span>
+<span class="comment">// 22 ants working together:</span>
+<span class="comment">// - research-scout.js    (finds papers)</span>
+<span class="comment">// - filter-ant.js        (removes noise)</span>
+<span class="comment">// - analyzer-ant.js      (extracts insights)</span>
+<span class="comment">// - connector-lite.js    (builds edges)</span>
+<span class="comment">// - validator-ant.js     (checks quality)</span>
+<span class="comment">// - synthesis-ant.js     (generates ideas)</span>
+<span class="comment">// ... and 16 more</span>
+
+<span class="keyword">const</span> colony = {
+  name: <span class="string">'Ouroboros Alpha'</span>,
+  version: <span class="string">'v1'</span>,
+  ants: <span class="number">22</span>,
+  pheromones: <span class="number">0</span>,
+  breakthroughs: <span class="number">0</span>
+};` }
+    ];
+
+    const timeline = document.getElementById('timeline');
+    
+    versions.forEach((ver, idx) => {
+      const card = document.createElement('div');
+      card.className = 'version-card' + (ver.milestone ? ' milestone' : '');
+      
+      const changesHtml = ver.changes.length ? ver.changes.map(c => 
+        `<div class="change-item">
+          <span class="change-badge ${c.type}">${c.type}</span>
+          <span>${c.file}</span>
+        </div>`
+      ).join('') : '<div style="color: var(--muted); font-size: 0.85rem;">No file changes (config/data only)</div>';
+      
+      const diffHtml = ver.diff ? `<div class="diff-block">${ver.diff}</div>` : '';
+      
+      card.innerHTML = `
+        <div class="version-header" onclick="this.parentElement.classList.toggle('expanded')">
+          <div class="version-left">
+            <span class="version-name">${ver.v}</span>
+            <span class="version-hash">${ver.hash}</span>
+            <span class="ant-count">🐜 ${ver.ants}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span class="version-summary">${ver.summary}</span>
+            <span class="expand-icon">▼</span>
+          </div>
+        </div>
+        <div class="version-details">
+          <div class="changes-list">${changesHtml}</div>
+          ${diffHtml}
+        </div>
+      `;
+      
+      timeline.appendChild(card);
+    });
+    
+    // Auto-expand first one
+    document.querySelector('.version-card').classList.add('expanded');
+  </script>
 </body>
 </html>

@@ -2208,15 +2208,15 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Calculate deal metrics for each land parcel with lot buildability analysis
  lands = lands.map(land => {
- const lotSizeSqft = land.lotSize || 0;
- const acres = lotSizeSqft / 43560;
+ // Handle missing/zero lot size - assume minimum buildable urban lot
+ const rawLotSize = land.lotSize || 0;
+ const effectiveLotSize = rawLotSize > 0 ? rawLotSize : 5000; // Default to ~0.11 acre if missing
+ const acres = effectiveLotSize / 43560;
  const comps = cityComps[land.city] || [];
+ const lotSizeUnknown = rawLotSize <= 0;
  
  // Get lot buildability (max sqft, recommended rooms)
  let buildability;
- 
- // Handle missing/zero lot size - assume minimum buildable urban lot
- const effectiveLotSize = lotSizeSqft > 0 ? lotSizeSqft : 5000; // Default to ~0.11 acre if missing
  
  try {
  buildability = window.getLotBuildability ? window.getLotBuildability(effectiveLotSize) : null;
@@ -2286,7 +2286,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  return {
  ...land,
  acres: acres.toFixed(2),
- lotSizeSqft: lotSizeSqft,
+ lotSizeSqft: effectiveLotSize,
+ lotSizeUnknown: lotSizeUnknown,
  maxBuildableSqft: buildability.maxBuildableSqft,
  recommendedRooms: maxRoomsForLot,
  actualBuildSqft: actualBuildSqft,
@@ -2566,7 +2567,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<h3 style="color:#e2e8f0;margin:0 0 0.5rem 0">' + land.address + ', ' + land.city + '</h3>' +
  '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;font-size:0.85rem">' +
  '<div><span style="color:#94a3b8">Ask Price:</span><br><strong style="color:#00E1E6">$' + land.price.toLocaleString() + '</strong></div>' +
- '<div><span style="color:#94a3b8">Lot Size:</span><br><strong>' + land.acres + ' ac</strong><br><span style="color:#64748b;font-size:0.7rem">(' + (land.lotSizeSqft?.toLocaleString() || '?') + ' sf)</span></div>' +
+ '<div><span style="color:#94a3b8">Lot Size:</span><br><strong>' + land.acres + ' ac</strong>' + (land.lotSizeUnknown ? '<br><span style="color:#f59e0b;font-size:0.7rem">⚠️ estimated</span>' : '<br><span style="color:#64748b;font-size:0.7rem">(' + (land.lotSizeSqft?.toLocaleString() || '?') + ' sf)</span>') + '</div>' +
  '<div><span style="color:#94a3b8">Max Build:</span><br><strong style="color:#22d3ee">' + (land.maxBuildableSqft?.toLocaleString() || '?') + ' sf</strong></div>' +
  '<div><span style="color:#94a3b8">Days Listed:</span><br><strong>' + land.dom + ' days</strong></div>' +
  '<div><span style="color:#94a3b8">Deal Score:</span><br><strong style="font-size:1.3rem">' + land.dealScore + '</strong></div>' +
@@ -2583,6 +2584,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
  '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build for THIS Lot <span style="font-size:0.7rem;font-weight:normal;color:#22d3ee">(dynamic)</span></h4>' +
+ (land.lotSizeUnknown ? '<div style="background:rgba(245,158,11,0.2);padding:0.4rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;color:#f59e0b">⚠️ Lot size unknown - using 0.11 acre estimate</div>' : '') +
  '<div style="font-size:0.85rem">' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Lot Capacity: <strong style="color:#22d3ee">' + (land.maxBuildableSqft?.toLocaleString() || '?') + ' sqft max</strong></div>' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Actual Build: <input type="number" id="modalTargetSqft" value="' + actualBuildSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +

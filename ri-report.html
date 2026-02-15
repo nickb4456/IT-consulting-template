@@ -1961,11 +1961,17 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // LAND DEAL FINDER
  function initLandDealFinder() {
+ console.log('initLandDealFinder starting...');
+ if (!rawData || !rawData.properties) {
+   console.log('initLandDealFinder: No data!');
+   return;
+ }
  // Populate city dropdown with cities that have land
- const landCities = [...new Set(rawData.properties
- .filter(p => p.propertyType && p.propertyType.toLowerCase().includes('land'))
- .map(p => p.city)
- )].sort();
+ const allLand = rawData.properties.filter(p => p.propertyType && p.propertyType.toLowerCase().includes('land'));
+ const forSaleLand = allLand.filter(p => p.status === 'For Sale');
+ console.log('Total land properties:', allLand.length, 'For sale:', forSaleLand.length);
+ 
+ const landCities = [...new Set(forSaleLand.map(p => p.city))].sort();
  const sel = document.getElementById('landCity');
  if (sel) {
  landCities.forEach(c => {
@@ -1980,11 +1986,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  function filterLandDeals() {
+ console.log('filterLandDeals called');
  if (!rawData || !rawData.properties) {
    console.log('filterLandDeals: No data yet');
    return;
  }
  const city = document.getElementById('landCity')?.value || '';
+ console.log('Land filter - city:', city);
  const minDom = parseInt(document.getElementById('landMinDom')?.value) || 0;
  const maxPrice = parseInt(document.getElementById('landMaxPrice')?.value) || Infinity;
  const minAcres = parseFloat(document.getElementById('landMinAcres')?.value) || 0;
@@ -2004,6 +2012,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  if (acres < minAcres) return false;
  return true;
  });
+ 
+ console.log('Land parcels found:', lands.length);
  
  // Get city comps (sold single family homes)
  const cityComps = {};

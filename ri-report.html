@@ -1144,11 +1144,8 @@ function loadMainData() {
   document.querySelectorAll('.data-loading').forEach(el => el.style.display = 'block');
   
   Promise.all([
-    // Load data
-    fetch('ri-sales.json.gz?v=' + dataVersion).then(r => r.arrayBuffer()).then(buf => {
-      const decompressed = pako.ungzip(new Uint8Array(buf), {to: 'string'});
-      return JSON.parse(decompressed);
-    }),
+    // Load data - Cloudflare auto-compresses with Brotli, browser decompresses natively (faster than JS pako)
+    fetch('ri-sales.json?v=' + dataVersion).then(r => r.json()),
     // Load SQL.js WASM
     initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
   ]).then(([data, SQL]) => {

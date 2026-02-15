@@ -2219,9 +2219,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const comps = cityComps[land.city] || [];
  
  // Get lot buildability (max sqft, recommended rooms)
- const buildability = typeof getLotBuildability === 'function' 
- ? getLotBuildability(lotSizeSqft) 
- : { maxBuildableSqft: targetSqft * 2, recommendedRooms: 4, stories: 2, canBuildMultiple: false };
+ let buildability;
+ try {
+ buildability = window.getLotBuildability ? window.getLotBuildability(lotSizeSqft) : null;
+ } catch(e) {
+ console.error('getLotBuildability error:', e);
+ buildability = null;
+ }
+ if (!buildability) {
+ // Fallback: simple urban estimate
+ const estFAR = lotSizeSqft < 10000 ? 0.75 : 0.35;
+ buildability = { 
+ maxBuildableSqft: Math.round(lotSizeSqft * estFAR * 0.85), 
+ recommendedRooms: Math.max(2, Math.floor(lotSizeSqft * estFAR * 0.85 / 450)), 
+ stories: 2, 
+ canBuildMultiple: lotSizeSqft >= 87120 
+ };
+ }
  
  // Check if target build fits on this lot
  const canBuildTarget = buildability.maxBuildableSqft >= targetSqft;
@@ -2296,6 +2310,8 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Sort by profit potential
  lands.sort((a, b) => b.profit - a.profit);
+ 
+ console.log('Land deals calculated:', lands.length, lands.length > 0 ? 'First deal profit: $' + lands[0]?.profit : '');
  
  // Update stats
  document.getElementById('landCount').textContent = lands.length;

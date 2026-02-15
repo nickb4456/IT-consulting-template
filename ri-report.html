@@ -2248,25 +2248,50 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  };
  }
  
- // SIMPLE APPROACH: Use the target sqft from filter (user controlled)
- const actualBuildSqft = targetSqft;
+ // RESIDUAL LAND VALUE APPROACH (Proper investor math)
+ 
+ // 1. City-specific ARV (After Repair Value) - RI 2026 market data
+ const cityARV = {
+ 'Johnston': 436000,
+ 'Providence': 447000,
+ 'Cumberland': 423000,
+ 'Cranston': 440000,
+ 'Warwick': 460000,
+ 'Pawtucket': 380000,
+ 'East Providence': 420000,
+ 'Woonsocket': 320000,
+ 'Newport': 750000,
+ 'Narragansett': 680000
+ };
+ const arv = cityARV[land.city] || 450000; // Default $450K
+ 
+ // 2. Build size based on lot size (sweet spot for RI)
+ const lotAcres = effectiveLotSize / 43560;
+ const actualBuildSqft = lotAcres < 0.5 ? 1600 : 2200; // 3BR vs 4BR
+ const actualRooms = lotAcres < 0.5 ? 3 : 4;
  const maxBuildableSqft = buildability.maxBuildableSqft;
- const actualRooms = Math.max(2, Math.min(6, Math.round(actualBuildSqft / 500)));
  
- // Get median $/sqft from comps for this city
- const sortedPpsf = comps.map(c => c.ppsf).sort((a,b) => a - b);
- const medianIndex = Math.floor(sortedPpsf.length * 0.5);
- const avgPpsf = comps.length > 0 ? sortedPpsf[medianIndex] : 275;
+ // 3. Build costs (RI 2026: $180-250/sqft, use $200 mid-grade)
+ const buildCostPsfActual = 200;
+ const hardCosts = actualBuildSqft * buildCostPsfActual;
+ const softCostsFlat = 20000; // $20K flat for permits, site prep
+ const totalBuildCost = hardCosts + softCostsFlat;
  
- // Simple build cost - no multipliers, just what user entered
- const adjustedBuildCostPsf = buildCostPsf;
+ // 4. RESIDUAL LAND VALUE FORMULA
+ // Max Offer = ARV - Build Cost - Desired Profit
+ const desiredProfit = arv * (targetProfitPct / 100); // e.g., 15% of ARV
+ const maxOffer = arv - totalBuildCost - desiredProfit;
  
- const estSalePrice = avgPpsf * actualBuildSqft;
- const buildCost = adjustedBuildCostPsf * actualBuildSqft;
- const totalCost = land.price + buildCost * (1 + softCostsPct/100);
- const profit = estSalePrice - totalCost;
- const profitPct = (profit / totalCost) * 100;
- const maxOffer = estSalePrice / (1 + targetProfitPct/100) - buildCost * (1 + softCostsPct/100);
+ // 5. Actual equity at asking price
+ const totalInvestment = land.price + totalBuildCost;
+ const profit = arv - totalInvestment;
+ const profitPct = (profit / totalInvestment) * 100;
+ 
+ // For compatibility with existing code
+ const avgPpsf = Math.round(arv / actualBuildSqft);
+ const estSalePrice = arv;
+ const buildCost = hardCosts;
+ const adjustedBuildCostPsf = buildCostPsfActual;
  
  // Lot capacity label based on recommended rooms
  let lotCapacity;
@@ -2288,9 +2313,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  lotSizeSqft: effectiveLotSize,
  lotSizeUnknown: lotSizeUnknown,
  maxBuildableSqft: maxBuildableSqft,
- targetBuildSqft: targetSqft,
  actualBuildSqft: actualBuildSqft,
  actualRooms: actualRooms,
+ arv: arv,
+ hardCosts: hardCosts,
+ softCostsFlat: softCostsFlat,
+ totalBuildCost: totalBuildCost,
  lotCapacity: lotCapacity,
  stories: buildability.stories,
  compsCount: comps.length,
@@ -2492,22 +2520,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function showLandEval(idx) {
  const land = window.landDealsData[idx];
  const comps = window.cityCompsData[land.city] || [];
- // Use target sqft from filter (user controlled)
- const maxBuildSqft = land.targetBuildSqft || parseInt(document.getElementById('targetSqft')?.value) || 2000;
- const buildCostPsf = parseInt(document.getElementById('buildCostPsf')?.value) || 175;
- const softCostsPct = parseInt(document.getElementById('softCosts')?.value) || 15;
- const buildTotal = Math.round(buildCostPsf * maxBuildSqft * (1 + softCostsPct/100));
+ // Use RESIDUAL LAND VALUE approach
+ const arv = land.arv || 450000;
+ const actualBuildSqft = land.actualBuildSqft || 1600;
+ const hardCosts = land.hardCosts || (actualBuildSqft * 200);
+ const softCostsFlat = land.softCostsFlat || 20000;
+ const buildTotal = hardCosts + softCostsFlat;
  
- // Calculate profit at asking price
+ // Calculate profit at asking price using ARV
  const totalAtAsk = land.price + buildTotal;
- const profitAtAsk = land.estSalePrice - totalAtAsk;
+ const profitAtAsk = arv - totalAtAsk;
  const profitPctAtAsk = Math.round((profitAtAsk / totalAtAsk) * 100);
  
  // Calculate suggested offers (% of asking)
  const offer90 = Math.round(land.price * 0.90);
  const offer80 = Math.round(land.price * 0.80);
  const offer70 = Math.round(land.price * 0.70);
- const profit90 = land.estSalePrice - (offer90 + buildTotal);
+ const profit90 = arv - (offer90 + buildTotal);
  const profit80 = land.estSalePrice - (offer80 + buildTotal);
  const profit70 = land.estSalePrice - (offer70 + buildTotal);
  
@@ -2581,21 +2610,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>' +
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
- '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Assumptions</h4>' +
+ '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Costs (RI 2026)</h4>' +
  (land.lotSizeUnknown ? '<div style="background:rgba(245,158,11,0.2);padding:0.4rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;color:#f59e0b">⚠️ Lot size unknown</div>' : '') +
  '<div style="font-size:0.85rem">' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Target Build: <input type="number" id="modalTargetSqft" value="' + maxBuildSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Build Cost: $<input type="number" id="modalBuildCost" value="' + buildCostPsf + '" style="width:60px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">/sqft</div>' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Soft Costs: <input type="number" id="modalSoftCosts" value="' + softCostsPct + '" style="width:50px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">%</div>' +
- '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#00E1E6" id="modalBuildTotal">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Build Size: <strong>' + actualBuildSqft.toLocaleString() + ' sqft</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">(' + (land.acres < 0.5 ? '3BR/2BA for <0.5ac' : '4BR/2.5BA for 0.5ac+') + ')</div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Hard Costs: <strong>$' + Math.round(hardCosts/1000) + 'K</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">(' + actualBuildSqft + ' × $200/sf)</div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">Soft Costs: <strong>$' + Math.round(softCostsFlat/1000) + 'K</strong></div>' +
+ '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem;display:flex;justify-content:space-between">Total Build: <strong style="color:#00E1E6">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
  '</div>' +
  '</div>' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
- '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0"> Market Analysis</h4>' +
+ '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">📊 ' + land.city + ' Market (ARV)</h4>' +
  '<div style="font-size:0.85rem">' +
- '<div>City Comps: <strong>' + comps.length + ' sales</strong></div>' +
- '<div>Avg $/sqft: <strong>$' + land.avgPpsf + '</strong></div>' +
- '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Est. Sale Price: <strong style="color:#10b981">' + formatPrice(land.estSalePrice) + '</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">City Comps: <strong>' + comps.length + ' sales</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem;color:#64748b">RI 2026 median by city</div>' +
+ '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem;display:flex;justify-content:space-between">ARV (After Repair): <strong style="color:#10b981">' + formatPrice(arv) + '</strong></div>' +
  '</div>' +
  '</div>' +
  '</div>' +

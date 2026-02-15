@@ -470,10 +470,69 @@
     let displayedResults = [];
     let searchTimeout = null;
     
-    // Load slim public index (metadata only, no content)
+    // Smart weighted search with tokenization and scoring
+    function smartSearch(query, category, type) {
+      if (!query || !publicIndex) return publicIndex?.entries || [];
+      
+      // Tokenize and normalize query
+      const tokens = query.toLowerCase()
+        .replace(/[^\w\s-]/g, ' ')  // Remove punctuation except hyphens
+        .split(/\s+/)
+        .filter(t => t.length > 1);  // Skip single chars
+      
+      if (tokens.length === 0) return publicIndex.entries;
+      
+      // Score each article
+      const scored = publicIndex.entries.map(article => {
+        let score = 0;
+        const titleLower = (article.title || '').toLowerCase();
+        const summaryLower = (article.summary || '').toLowerCase();
+        const keywordsLower = (article.keywords || []).map(k => k.toLowerCase());
+        
+        for (const token of tokens) {
+          // Title matches (highest weight)
+          if (titleLower.includes(token)) {
+            score += 10;
+            // Exact word match bonus
+            if (titleLower.split(/\s+/).includes(token)) score += 5;
+          }
+          
+          // Keyword matches (high weight)
+          for (const kw of keywordsLower) {
+            if (kw.includes(token)) score += 5;
+            if (kw === token) score += 3;  // Exact match bonus
+          }
+          
+          // Summary matches (medium weight)
+          if (summaryLower.includes(token)) score += 2;
+        }
+        
+        // Bonus for matching multiple tokens
+        const matchedTokens = tokens.filter(t => 
+          titleLower.includes(t) || summaryLower.includes(t) || 
+          keywordsLower.some(k => k.includes(t))
+        );
+        if (matchedTokens.length > 1) {
+          score += matchedTokens.length * 3;
+        }
+        
+        return { ...article, score };
+      });
+      
+      // Filter and sort
+      let results = scored.filter(a => a.score > 0);
+      if (category) results = results.filter(a => a.category === category);
+      if (type) results = results.filter(a => a.type === type);
+      
+      return results.sort((a, b) => b.score - a.score);
+    }
+    
+    // Load full index (with embeddings for future semantic search)
     async function loadIndex() {
       try {
-        const res = await fetch('kb-index-public.json');
+        // Try full index first (has embeddings), fall back to slim
+        let res = await fetch('kb-index.json');
+        if (!res.ok) res = await fetch('kb-index-public.json');
         publicIndex = await res.json();
         
         document.getElementById('totalCount').textContent = publicIndex.count;
@@ -563,14 +622,8 @@
         renderResults(displayedResults);
       } catch (e) {
         console.error('Search failed:', e);
-        // Fallback to client-side search on public index
-        let results = publicIndex.entries.filter(a => {
-          const text = (a.title + ' ' + a.summary + ' ' + a.keywords.join(' ')).toLowerCase();
-          return text.includes(query.toLowerCase());
-        });
-        if (category) results = results.filter(a => a.category === category);
-        if (type) results = results.filter(a => a.type === type);
-        displayedResults = results;
+        // Smart weighted fallback search
+        displayedResults = smartSearch(query, category, type);
         renderResults(displayedResults);
       }
     }
@@ -614,32 +667,36 @@
       `).join('');
     }
     
-    // Fetch full article content from API
+    // Show article content (prefer local index, fallback to API)
     async function showArticle(id) {
       document.getElementById('modalTitle').textContent = 'Loading...';
       document.getElementById('modalBody').innerHTML = '<p>Loading article...</p>';
       document.getElementById('articleModal').classList.add('active');
       
+      // Try local index first (full index has content)
+      const localArticle = publicIndex?.entries?.find(a => a.id === id);
+      if (localArticle?.content) {
+        document.getElementById('modalTitle').textContent = localArticle.title;
+        document.getElementById('modalBody').innerHTML = marked.parse(localArticle.content);
+        return;
+      }
+      
+      // Fallback to API
       try {
         const res = await fetch(`/api/kb/${id}`);
         const article = await res.json();
         
-        if (article.error) {
-          document.getElementById('modalTitle').textContent = 'Error';
-          document.getElementById('modalBody').innerHTML = `<p>${article.error}</p>`;
-          return;
-        }
+        if (article.error) throw new Error(article.error);
         
         document.getElementById('modalTitle').textContent = article.title;
         document.getElementById('modalBody').innerHTML = marked.parse(article.content);
       } catch (e) {
         console.error('Failed to load article:', e);
-        // Fallback to summary
-        const article = displayedResults.find(a => a.id === id);
-        if (article) {
-          document.getElementById('modalTitle').textContent = article.title;
+        // Last resort: show summary
+        if (localArticle) {
+          document.getElementById('modalTitle').textContent = localArticle.title;
           document.getElementById('modalBody').innerHTML = `
-            <p><strong>Summary:</strong> ${escapeHtml(article.summary)}</p>
+            <p><strong>Summary:</strong> ${escapeHtml(localArticle.summary)}</p>
             <p><em>Full content unavailable</em></p>
           `;
         }

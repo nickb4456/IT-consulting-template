@@ -2220,20 +2220,24 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Get lot buildability (max sqft, recommended rooms)
  let buildability;
+ 
+ // Handle missing/zero lot size - assume minimum buildable urban lot
+ const effectiveLotSize = lotSizeSqft > 0 ? lotSizeSqft : 5000; // Default to ~0.11 acre if missing
+ 
  try {
- buildability = window.getLotBuildability ? window.getLotBuildability(lotSizeSqft) : null;
+ buildability = window.getLotBuildability ? window.getLotBuildability(effectiveLotSize) : null;
  } catch(e) {
  console.error('getLotBuildability error:', e);
  buildability = null;
  }
  if (!buildability) {
  // Fallback: simple urban estimate
- const estFAR = lotSizeSqft < 10000 ? 0.75 : 0.35;
+ const estFAR = effectiveLotSize < 10000 ? 0.75 : 0.35;
  buildability = { 
- maxBuildableSqft: Math.round(lotSizeSqft * estFAR * 0.85), 
- recommendedRooms: Math.max(2, Math.floor(lotSizeSqft * estFAR * 0.85 / 450)), 
+ maxBuildableSqft: Math.round(effectiveLotSize * estFAR * 0.85), 
+ recommendedRooms: Math.max(2, Math.floor(effectiveLotSize * estFAR * 0.85 / 450)), 
  stories: 2, 
- canBuildMultiple: lotSizeSqft >= 87120 
+ canBuildMultiple: effectiveLotSize >= 87120 
  };
  }
  

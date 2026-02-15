@@ -1389,59 +1389,59 @@
             gap: 2rem;
         }
 
+        /* Glowing Card Effect */
         .service-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
+            position: relative;
             border-radius: 20px;
             padding: 2.5rem;
-            position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            transform-style: preserve-3d;
-            perspective: 1000px;
+            z-index: 1;
         }
 
         .service-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(0, 81, 230, 0.12), rgba(34, 211, 238, 0.05));
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #0051E6);
             border-radius: 20px;
+            z-index: -2;
+            transition: all 0.5s ease;
         }
 
         .service-card::after {
             content: '';
             position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            border-radius: 22px;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #0051E6);
+            border-radius: 20px;
+            filter: blur(25px);
+            opacity: 0.4;
+            z-index: -3;
+            transition: all 0.5s ease;
+        }
+
+        .service-card-inner {
+            position: absolute;
+            inset: 3px;
+            background: rgba(10, 10, 15, 0.85);
+            border-radius: 18px;
             z-index: -1;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            backdrop-filter: blur(10px);
         }
 
         .service-card:hover {
-            transform: translateY(-12px);
-            border-color: transparent;
-            box-shadow: 
-                0 25px 50px rgba(0, 81, 230, 0.25),
-                0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .service-card:hover::before {
-            opacity: 1;
+            transform: translateY(-10px);
         }
 
         .service-card:hover::after {
-            opacity: 0.15;
+            filter: blur(35px);
+            opacity: 0.7;
+        }
+
+        .service-card:hover::before {
+            background: linear-gradient(315deg, #00E1E6, #0051E6, #019BE6);
         }
 
         /* Service icon with hover animation */
@@ -1959,20 +1959,64 @@
             gap: 1.5rem;
         }
 
+        /* Glowing Mini Service Cards */
         .mini-service {
-            background: var(--bg-glass);
-            border: 1px solid var(--border);
+            position: relative;
             border-radius: 16px;
             padding: 2rem;
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1;
+            overflow: visible;
+        }
+
+        .mini-service::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #0051E6);
+            border-radius: 16px;
+            z-index: -2;
+            opacity: 0.6;
+            transition: all 0.4s ease;
+        }
+
+        .mini-service::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #0051E6);
+            border-radius: 16px;
+            filter: blur(20px);
+            opacity: 0;
+            z-index: -3;
+            transition: all 0.4s ease;
+        }
+
+        /* Dark inner background */
+        .mini-service > * {
             position: relative;
+            z-index: 2;
+        }
+
+        .mini-service-bg {
+            position: absolute;
+            inset: 2px;
+            background: rgba(10, 10, 15, 0.92);
+            border-radius: 14px;
+            z-index: 1;
         }
 
         .mini-service:hover {
-            background: rgba(0, 81, 230, 0.1);
-            border-color: var(--primary);
             transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 81, 230, 0.12);
+        }
+
+        .mini-service:hover::before {
+            opacity: 1;
+        }
+
+        .mini-service:hover::after {
+            opacity: 0.5;
+            filter: blur(30px);
         }
 
         .mini-service .price {
@@ -1980,8 +2024,8 @@
         }
 
         .mini-service:hover .price {
-            color: var(--primary-light);
-            text-shadow: 0 0 20px rgba(34, 211, 238, 0.5);
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0, 225, 230, 0.6);
         }
 
         /* Most Popular badge with animation */
@@ -8221,6 +8265,23 @@
             link.classList.add('slide-link');
             link.setAttribute('data-replace', text);
             link.innerHTML = '<span>' + text + '</span>';
+        }
+    });
+
+    // Add inner background to glowing cards
+    document.querySelectorAll('.mini-service, .service-card').forEach(function(card) {
+        if (!card.querySelector('.card-inner-bg')) {
+            const inner = document.createElement('div');
+            inner.className = 'card-inner-bg';
+            inner.style.cssText = 'position:absolute;inset:2px;background:rgba(10,10,15,0.92);border-radius:14px;z-index:0;';
+            card.insertBefore(inner, card.firstChild);
+            // Make sure content is above the background
+            Array.from(card.children).forEach(function(child) {
+                if (!child.classList.contains('card-inner-bg')) {
+                    child.style.position = 'relative';
+                    child.style.zIndex = '2';
+                }
+            });
         }
     });
 

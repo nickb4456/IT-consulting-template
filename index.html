@@ -398,58 +398,24 @@
             list-style: none;
         }
 
+        /* Nav links - use slide-link effect via JS */
         .nav-links a {
             color: var(--text-muted);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
-            position: relative;
-            padding: 0.25em 0;
         }
 
-        .nav-links a:hover,
-        .nav-links a.active {
+        .nav-links a.slide-link {
+            color: var(--text-muted);
+        }
+
+        .nav-links a.slide-link::after {
             color: var(--accent);
-            text-shadow: 0 0 20px rgba(0, 225, 230, 0.5);
         }
 
-        .nav-links a::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            width: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            transform: translateX(-50%);
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
-            background-size: 200% 100%;
-            transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .nav-links a:hover::after,
-        .nav-links a.active::after {
-            transform: scaleX(1);
-            transform-origin: left;
-            animation: navGradient 2s ease infinite;
-        }
-
-        @keyframes navGradient {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .nav-links a.slide-link:hover {
+            color: var(--text-muted);
         }
 
         .nav-cta {
@@ -949,41 +915,60 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Animated Link Underlines */
-        .animated-link {
+        /* Slide-Replace Link Effect */
+        .slide-link {
+            overflow: hidden;
             position: relative;
+            display: inline-block;
             text-decoration: none;
-            color: var(--accent);
-            transition: color 0.3s ease;
+            color: var(--text);
+            font-weight: 500;
+            vertical-align: top;
         }
 
-        .animated-link::before {
+        .slide-link::before,
+        .slide-link::after {
             content: '';
             position: absolute;
             width: 100%;
-            height: 2px;
-            bottom: -2px;
             left: 0;
-            background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
-            background-size: 200% 100%;
+        }
+
+        .slide-link::before {
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            height: 2px;
+            bottom: 0;
+            transform-origin: 100% 50%;
             transform: scaleX(0);
-            transform-origin: right;
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1);
         }
 
-        .animated-link:hover::before {
+        .slide-link::after {
+            content: attr(data-replace);
+            height: 100%;
+            top: 0;
+            transform-origin: 100% 50%;
+            transform: translate3d(200%, 0, 0);
+            transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1);
+            color: var(--accent);
+        }
+
+        .slide-link:hover::before {
+            transform-origin: 0% 50%;
             transform: scaleX(1);
-            transform-origin: left;
-            animation: linkGradient 1.5s ease infinite;
         }
 
-        .animated-link:hover {
-            color: var(--primary-light);
+        .slide-link:hover::after {
+            transform: translate3d(0, 0, 0);
         }
 
-        @keyframes linkGradient {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+        .slide-link span {
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .slide-link:hover span {
+            transform: translate3d(-200%, 0, 0);
         }
 
         /* Glowing link variant */
@@ -8157,6 +8142,24 @@
     // Force autoplay on mobile (iOS Safari sometimes blocks it)
     document.querySelectorAll('video[autoplay]').forEach(function(v) {
         v.play().catch(function() {});
+    });
+
+    // Auto-convert nav links to slide-replace effect
+    document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(function(link) {
+        const text = link.textContent.trim();
+        link.classList.add('slide-link');
+        link.setAttribute('data-replace', text);
+        link.innerHTML = '<span>' + text + '</span>';
+    });
+
+    // Also convert footer links
+    document.querySelectorAll('footer a:not(.btn)').forEach(function(link) {
+        const text = link.textContent.trim();
+        if (text.length < 30) {
+            link.classList.add('slide-link');
+            link.setAttribute('data-replace', text);
+            link.innerHTML = '<span>' + text + '</span>';
+        }
     });
 
     </script>

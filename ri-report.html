@@ -2036,53 +2036,47 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Calculate lot buildability (max sqft based on zoning)
  function getLotBuildability(lotSizeSqft) {
- // RI zoning varies by area - use lot size as proxy for urban vs rural
- // Urban lots (<10K sqft): FAR ~0.75-1.0, 2-3 story typical
- // Suburban (10K-43K sqft): FAR ~0.35-0.5
- // Rural (>1 acre): FAR ~0.25, but larger lots
- let baseFAR, maxCoverage, maxStories;
+ // RI zoning - realistic residential limits
+ // Most single-family homes are 1,200-4,000 sqft regardless of lot size
+ // Lot size affects WHAT you can build, not unlimited scaling
+ let maxPracticalSqft, recommendedBR;
  
- if (lotSizeSqft < 5000) {
- // Dense urban - small infill lots
- baseFAR = 1.0; // Can build 2-3 story
- maxCoverage = 0.60;
- maxStories = 3;
+ if (lotSizeSqft < 3000) {
+ // Tiny urban lot - townhouse/small house only
+ maxPracticalSqft = Math.min(1800, lotSizeSqft * 0.8);
+ recommendedBR = 2;
+ } else if (lotSizeSqft < 5000) {
+ // Small urban lot
+ maxPracticalSqft = Math.min(2400, lotSizeSqft * 0.7);
+ recommendedBR = 3;
  } else if (lotSizeSqft < 10000) {
- // Urban residential
- baseFAR = 0.75;
- maxCoverage = 0.50;
- maxStories = 2;
- } else if (lotSizeSqft < 21780) { // < 0.5 acres
- // Suburban
- baseFAR = 0.50;
- maxCoverage = 0.40;
- maxStories = 2;
- } else if (lotSizeSqft < 43560) { // < 1 acre
- // Large suburban
- baseFAR = 0.35;
- maxCoverage = 0.35;
- maxStories = 2;
+ // Standard urban lot (0.11-0.23 acres)
+ maxPracticalSqft = Math.min(3200, lotSizeSqft * 0.5);
+ recommendedBR = 3;
+ } else if (lotSizeSqft < 21780) {
+ // Suburban (0.23-0.5 acres)
+ maxPracticalSqft = Math.min(4000, lotSizeSqft * 0.35);
+ recommendedBR = 4;
+ } else if (lotSizeSqft < 43560) {
+ // Large suburban (0.5-1 acre)
+ maxPracticalSqft = Math.min(5000, lotSizeSqft * 0.25);
+ recommendedBR = 4;
+ } else if (lotSizeSqft < 87120) {
+ // Small estate (1-2 acres)
+ maxPracticalSqft = 6000;
+ recommendedBR = 5;
  } else {
- // Rural (1+ acres)
- baseFAR = 0.25;
- maxCoverage = 0.25;
- maxStories = 2;
+ // Large estate (2+ acres) - could subdivide
+ maxPracticalSqft = 8000;
+ recommendedBR = 6;
  }
  
- const setbackReduction = 0.85; // ~15% lost to setbacks
- const maxBuildable = lotSizeSqft * baseFAR * setbackReduction;
- const maxFootprint = lotSizeSqft * maxCoverage * setbackReduction;
- 
- // Estimate room capacity (assume 450 sqft per bedroom + common areas)
- const sqftPerBedroom = 450;
- const maxRooms = Math.floor(maxBuildable / sqftPerBedroom);
- 
  return {
- maxBuildableSqft: Math.round(maxBuildable),
- maxFootprint: Math.round(maxFootprint),
- recommendedRooms: Math.min(Math.max(2, maxRooms), 8), // 2-8 BR range
- canBuildMultiple: lotSizeSqft >= 87120, // 2+ acres
- stories: Math.min(maxStories, Math.ceil(maxBuildable / maxFootprint))
+ maxBuildableSqft: Math.round(maxPracticalSqft),
+ maxFootprint: Math.round(maxPracticalSqft / 2), // Assume 2-story
+ recommendedRooms: recommendedBR,
+ canBuildMultiple: lotSizeSqft >= 87120, // 2+ acres for subdivision
+ stories: 2
  };
  }
  

@@ -418,11 +418,11 @@
  <div class="filter-group">
  <label>Min Discount %</label>
  <select id="houseMinDiscount" onchange="filterHouseDeals()">
- <option value="0">Any</option>
+ <option value="-10" selected>Any (incl. near market)</option>
+ <option value="0">0%+ below market</option>
  <option value="5">5%+ below</option>
- <option value="10" selected>10%+ below</option>
+ <option value="10">10%+ below</option>
  <option value="15">15%+ below</option>
- <option value="20">20%+ below</option>
  </select>
  </div>
  </div>
@@ -3049,7 +3049,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  bestValue: bestValue,
  bestEquity: bestValue - h.price
  };
- }).filter(d => d && d.discount >= minDiscount);
+ }).filter(d => d && d.instantEquity >= 0 && d.discount >= minDiscount);
  
  // Sort by deal score
  deals.sort((a, b) => b.dealScore - a.dealScore);
@@ -3164,7 +3164,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<div style="margin-top:0.75rem"><a href="' + house.url + '" target="_blank" style="color:#6366f1">🔗 View on Redfin</a></div>' +
  '</div>' +
  '<div style="background:rgba(99,102,241,0.15);padding:1.5rem;border-radius:12px;text-align:center;margin-bottom:1.5rem;border:2px solid #10b981">' +
- '<div style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.5rem">Estimated Market Value (like Redfin)</div>' +
+ '<div style="color:#94a3b8;font-size:0.85rem;margin-bottom:0.5rem">Estimated Market Value</div>' +
  '<div style="color:#a5b4fc;font-size:1.5rem;font-weight:bold;margin-bottom:0.25rem">' + formatPrice(house.lowValue) + ' − ' + formatPrice(house.highValue) + '</div>' +
  '<div style="color:#64748b;font-size:0.75rem;margin-bottom:1rem">Based on ' + house.compCount + ' nearby sales • Median: $' + house.avgPpsf + '/sqft</div>' +
  '<div id="scenario-equity-' + idx + '" style="color:#10b981;font-size:2.5rem;font-weight:bold;margin:0.5rem 0">' + formatPrice(house.instantEquity) + ' Est. Equity</div>' +

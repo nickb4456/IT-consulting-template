@@ -2250,45 +2250,38 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // RESIDUAL LAND VALUE APPROACH (Proper investor math)
  
- // 1. City-specific ARV (After Repair Value) - RI 2026 market data
- const cityARV = {
- 'Johnston': 436000,
- 'Providence': 447000,
- 'Cumberland': 423000,
- 'Cranston': 440000,
- 'Warwick': 460000,
- 'Pawtucket': 380000,
- 'East Providence': 420000,
- 'Woonsocket': 320000,
- 'Newport': 750000,
- 'Narragansett': 680000
- };
- const arv = cityARV[land.city] || 450000; // Default $450K
+ // 1. Get ACTUAL median $/sqft from comps data
+ const sortedPpsf = comps.map(c => c.ppsf).sort((a,b) => a - b);
+ const medianIndex = Math.floor(sortedPpsf.length * 0.5);
+ const marketPpsf = comps.length > 0 ? Math.round(sortedPpsf[medianIndex]) : 260;
  
- // 2. Build size based on lot size (sweet spot for RI)
+ // 2. Build size based on lot (sweet spot for RI)
  const lotAcres = effectiveLotSize / 43560;
- const actualBuildSqft = lotAcres < 0.5 ? 1600 : 2200; // 3BR vs 4BR
+ const actualBuildSqft = lotAcres < 0.5 ? 1600 : 2000; // 3BR vs 4BR
  const actualRooms = lotAcres < 0.5 ? 3 : 4;
  const maxBuildableSqft = buildability.maxBuildableSqft;
  
- // 3. Build costs (RI 2026: $180-250/sqft, use $200 mid-grade)
+ // 3. ARV = Build size × Market $/sqft
+ const arv = actualBuildSqft * marketPpsf;
+ 
+ // 4. Build costs (RI 2026: $180-220/sqft mid-grade)
  const buildCostPsfActual = 200;
  const hardCosts = actualBuildSqft * buildCostPsfActual;
  const softCostsFlat = 20000; // $20K flat for permits, site prep
  const totalBuildCost = hardCosts + softCostsFlat;
  
- // 4. RESIDUAL LAND VALUE FORMULA
+ // 5. RESIDUAL LAND VALUE FORMULA
  // Max Offer = ARV - Build Cost - Desired Profit
- const desiredProfit = arv * (targetProfitPct / 100); // e.g., 15% of ARV
+ const desiredProfit = arv * (targetProfitPct / 100);
  const maxOffer = arv - totalBuildCost - desiredProfit;
  
- // 5. Actual equity at asking price
+ // 6. Actual equity at asking price
  const totalInvestment = land.price + totalBuildCost;
  const profit = arv - totalInvestment;
  const profitPct = (profit / totalInvestment) * 100;
  
- // For compatibility with existing code
- const avgPpsf = Math.round(arv / actualBuildSqft);
+ // For compatibility
+ const avgPpsf = marketPpsf;
  const estSalePrice = arv;
  const buildCost = hardCosts;
  const adjustedBuildCostPsf = buildCostPsfActual;

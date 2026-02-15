@@ -1,6 +1,6 @@
 {
-  "generated": "2026-02-15T16:29:50.513Z",
-  "count": 179,
+  "generated": "2026-02-15T16:55:30.655Z",
+  "count": 182,
   "entries": [
     {
       "id": 0,
@@ -1373,6 +1373,22 @@
     },
     {
       "id": 114,
+      "path": "troubleshooting/javascript/nodejs-econnrefused.md",
+      "title": "Node.js Error: Connect ECONNREFUSED",
+      "summary": "Error: connect ECONNREFUSED 127.0.0.1:3000 Error: connect ECONNREFUSED ::1:5432",
+      "keywords": [
+        "ENOTFOUND",
+        "ETIMEDOUT",
+        "ECONNRESET",
+        "EHOSTUNREACH"
+      ],
+      "category": "JavaScript",
+      "icon": "🟨",
+      "content": "# Node.js Error: Connect ECONNREFUSED\n\n## Error Message\n```\nError: connect ECONNREFUSED 127.0.0.1:3000\nError: connect ECONNREFUSED ::1:5432\n```\n\n## What It Means\nThe connection was refused by the target server. The server either isn't running, isn't listening on that port, or a firewall is blocking the connection.\n\n## Common Causes\n\n1. **Server not running** — most common\n2. **Wrong port number**\n3. **Server listening on different host** (127.0.0.1 vs 0.0.0.0)\n4. **Firewall blocking connection**\n5. **Docker networking issues**\n\n## Quick Fixes\n\n### 1. Check if Server is Running\n```bash\n# Check if port is listening\nlsof -i :3000\nnetstat -an | grep 3000\nss -tlnp | grep 3000\n\n# Check if process is running\nps aux | grep node\nps aux | grep postgres\n```\n\n### 2. Verify Port and Host\n```javascript\n// BAD - hardcoded, might be wrong\nconst client = new Client({\n  host: 'localhost',\n  port: 5432\n});\n\n// GOOD - use environment variables\nconst client = new Client({\n  host: process.env.DB_HOST || 'localhost',\n  port: process.env.DB_PORT || 5432\n});\n```\n\n### 3. Server Binding Issue\n```javascript\n// Server only accessible from localhost\napp.listen(3000, '127.0.0.1');\n\n// Server accessible from anywhere (Docker, network)\napp.listen(3000, '0.0.0.0');\n\n// Or simply (defaults to 0.0.0.0)\napp.listen(3000);\n```\n\n### 4. Handle Connection Errors\n```javascript\nconst http = require('http');\n\nconst req = http.request(options, (res) => {\n  // Handle response\n});\n\nreq.on('error', (error) => {\n  if (error.code === 'ECONNREFUSED') {\n    console.error('Server not available. Is it running?');\n    // Retry or gracefully degrade\n  } else {\n    console.error('Request error:', error.message);\n  }\n});\n\nreq.end();\n```\n\n### 5. Implement Retry Logic\n```javascript\nconst retry = require('retry');\n\nconst operation = retry.operation({\n  retries: 5,\n  factor: 2,\n  minTimeout: 1000,\n  maxTimeout: 30000\n});\n\noperation.attempt((currentAttempt) => {\n  connectToServer((err) => {\n    if (operation.retry(err)) {\n      console.log(`Retry attempt ${currentAttempt}`);\n      return;\n    }\n    if (err) {\n      console.error('Failed after retries:', err);\n    }\n  });\n});\n```\n\n## Docker-Specific Fixes\n\n```yaml\n# docker-compose.yml\nservices:\n  app:\n    depends_on:\n      - db\n    environment:\n      # Use service name, not localhost!\n      - DB_HOST=db\n  \n  db:\n    image: postgres\n    ports:\n      - \"5432:5432\"\n```\n\n```javascript\n// Inside Docker, use service name\nconst client = new Client({\n  host: 'db',  // NOT 'localhost'\n  port: 5432\n});\n```\n\n### Wait for Database to be Ready\n```javascript\n// wait-for-db.js\nconst { Client } = require('pg');\n\nasync function waitForDb(maxRetries = 30) {\n  for (let i = 0; i < maxRetries; i++) {\n    try {\n      const client = new Client();\n      await client.connect();\n      await client.end();\n      console.log('Database ready!');\n      return;\n    } catch (err) {\n      console.log(`Waiting for database... (${i + 1}/${maxRetries})`);\n      await new Promise(r => setTimeout(r, 1000));\n    }\n  }\n  throw new Error('Database not available');\n}\n\nwaitForDb().then(() => {\n  // Start your app\n});\n```\n\n## Debugging Checklist\n\n- [ ] Is the target server running?\n- [ ] Is it listening on the expected port?\n- [ ] Are you using the right hostname/IP?\n- [ ] Is a firewall blocking the connection?\n- [ ] (Docker) Are you using service names instead of localhost?\n- [ ] (Docker) Is the service started and healthy?\n\n## Related Errors\n- `ENOTFOUND` — DNS lookup failed (hostname doesn't exist)\n- `ETIMEDOUT` — Connection timed out (server not responding)\n- `ECONNRESET` — Connection reset by server\n- `EHOSTUNREACH` — No route to host\n",
+      "embedding": null
+    },
+    {
+      "id": 115,
       "path": "troubleshooting/javascript/react-cannot-update-during-render.md",
       "title": "Cannot update a component while rendering a different component",
       "summary": "Warning: Cannot update a component (`Parent`) while rendering a different component (`Child`). To locate the bad setState() call inside `Child`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render",
@@ -1383,7 +1399,7 @@
       "embedding": null
     },
     {
-      "id": 115,
+      "id": 116,
       "path": "troubleshooting/javascript/react-hooks-rules-violations.md",
       "title": "React Hooks Rules Violations",
       "summary": "React Hook \"useState\" is called conditionally. React Hooks must be called in the exact same order in every component render.",
@@ -1397,7 +1413,7 @@
       "embedding": null
     },
     {
-      "id": 116,
+      "id": 117,
       "path": "troubleshooting/javascript/react-hydration-mismatch.md",
       "title": "Hydration Mismatch (Next.js)",
       "summary": "Error: Hydration failed because the initial UI does not match what was rendered on the server.",
@@ -1408,7 +1424,18 @@
       "embedding": null
     },
     {
-      "id": 117,
+      "id": 118,
+      "path": "troubleshooting/javascript/react-invalid-hook-call-fix.md",
+      "title": "Invalid Hook Call Warning (React)",
+      "summary": "Invalid hook call. Hooks can only be called inside the body of a function component.",
+      "keywords": [],
+      "category": "JavaScript",
+      "icon": "🟨",
+      "content": "# Invalid Hook Call Warning (React)\n\n## Error Message\n```\nInvalid hook call. Hooks can only be called inside the body of a function component.\n```\n\n## Three Common Causes\n\n### 1. Mismatching React Versions\nYour `react` and `react-dom` versions don't match, or one is too old.\n\n**Check versions:**\n```bash\nnpm ls react\nnpm ls react-dom\n```\n\n**Fix:**\n```bash\nnpm install react@latest react-dom@latest\n```\n\nBoth should be 16.8.0+ for hooks to work.\n\n### 2. Breaking the Rules of Hooks\n\nHooks can ONLY be called:\n- ✅ At the top level of a function component\n- ✅ At the top level of a custom hook\n\n**NOT allowed:**\n```javascript\n// 🔴 BAD: Inside an event handler\nfunction MyComponent() {\n  function handleClick() {\n    const [count, setCount] = useState(0); // WRONG!\n  }\n}\n\n// 🔴 BAD: Inside a condition\nfunction MyComponent() {\n  if (loggedIn) {\n    useEffect(() => {}); // WRONG!\n  }\n}\n\n// 🔴 BAD: Inside useMemo/useCallback\nfunction MyComponent() {\n  const style = useMemo(() => {\n    const theme = useContext(ThemeContext); // WRONG!\n    return createStyle(theme);\n  });\n}\n\n// 🔴 BAD: Inside a class component\nclass MyComponent extends React.Component {\n  render() {\n    useEffect(() => {}); // WRONG!\n  }\n}\n```\n\n**Correct usage:**\n```javascript\n// ✅ GOOD: Top level of function component\nfunction MyComponent() {\n  const [count, setCount] = useState(0);\n  const theme = useContext(ThemeContext);\n  \n  useEffect(() => {\n    // side effects here\n  }, []);\n  \n  return <div>{count}</div>;\n}\n```\n\n### 3. Duplicate React Copies\n\nYour app has two different copies of React.\n\n**Diagnose:**\n```javascript\n// Add to node_modules/react-dom/index.js\nwindow.React1 = require('react');\n\n// Add to your component\nrequire('react-dom');\nwindow.React2 = require('react');\nconsole.log(window.React1 === window.React2); // Should be true\n```\n\nIf `false`, you have duplicate React copies.\n\n**Common causes:**\n- Library incorrectly lists `react` as dependency (not peerDependency)\n- Using `npm link` during development\n- Monorepo with multiple React versions\n\n**Fixes:**\n```bash\n# Check for duplicates\nnpm ls react\n\n# Yarn: Force single version\n# In package.json:\n{\n  \"resolutions\": {\n    \"react\": \"18.2.0\"\n  }\n}\n\n# npm link fix (from library folder)\nnpm link ../myapp/node_modules/react\n```\n\n## Quick Checklist\n\n- [ ] React and React DOM versions match (16.8.0+)?\n- [ ] Hooks called at top level only?\n- [ ] Not calling hooks in class components?\n- [ ] Not calling hooks in event handlers?\n- [ ] Only one copy of React in bundle?\n\n## Prevention\n\nInstall ESLint plugin to catch violations:\n```bash\nnpm install eslint-plugin-react-hooks --save-dev\n```\n\n```json\n// .eslintrc\n{\n  \"plugins\": [\"react-hooks\"],\n  \"rules\": {\n    \"react-hooks/rules-of-hooks\": \"error\",\n    \"react-hooks/exhaustive-deps\": \"warn\"\n  }\n}\n```\n\n## Related Errors\n- `React is not defined` — missing import\n- `useState is not defined` — need to import from React\n- `Too many re-renders` — infinite loop in component\n",
+      "embedding": null
+    },
+    {
+      "id": 119,
       "path": "troubleshooting/javascript/react-invalid-hook-call.md",
       "title": "Invalid Hook Call",
       "summary": "Error: Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons: 1. You might have mismatching versions of React and the renderer (such as React DOM)",
@@ -1421,7 +1448,7 @@
       "embedding": null
     },
     {
-      "id": 118,
+      "id": 120,
       "path": "troubleshooting/javascript/react-key-prop-warning.md",
       "title": "Each child in a list should have a unique \"key\" prop",
       "summary": "Warning: Each child in a list should have a unique \"key\" prop.",
@@ -1432,7 +1459,7 @@
       "embedding": null
     },
     {
-      "id": 119,
+      "id": 121,
       "path": "troubleshooting/javascript/react-objects-not-valid-child.md",
       "title": "Objects are not valid as a React child",
       "summary": "Error: Objects are not valid as a React child (found: object with keys {foo, bar}). If you meant to render a collection of children, use an array instead.",
@@ -1443,7 +1470,7 @@
       "embedding": null
     },
     {
-      "id": 120,
+      "id": 122,
       "path": "troubleshooting/javascript/react-too-many-rerenders.md",
       "title": "Too many re-renders",
       "summary": "Error: Too many re-renders. React limits the number of renders to prevent an infinite loop.",
@@ -1454,7 +1481,7 @@
       "embedding": null
     },
     {
-      "id": 121,
+      "id": 123,
       "path": "troubleshooting/javascript/react-useeffect-missing-dependency.md",
       "title": "useEffect Missing Dependency Warning",
       "summary": "React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.",
@@ -1465,7 +1492,7 @@
       "embedding": null
     },
     {
-      "id": 122,
+      "id": 124,
       "path": "troubleshooting/javascript/ts-argument-not-assignable.md",
       "title": "Argument of type 'X' is not assignable to parameter of type 'Y'",
       "summary": "Argument of type 'string' is not assignable to parameter of type 'number'. Argument of type '{ name: string; }' is not assignable to parameter of type 'User'. Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
@@ -1482,7 +1509,7 @@
       "embedding": null
     },
     {
-      "id": 123,
+      "id": 125,
       "path": "troubleshooting/javascript/ts-cannot-find-module.md",
       "title": "Cannot find module (and Type Declarations)",
       "summary": "Cannot find module 'express' or its corresponding type declarations. Cannot find module './utils' or its corresponding type declarations. Cannot find module '@/components/Button'.",
@@ -1499,7 +1526,7 @@
       "embedding": null
     },
     {
-      "id": 124,
+      "id": 126,
       "path": "troubleshooting/javascript/ts-generic-inference.md",
       "title": "Generic Type Inference Errors",
       "summary": "Type 'T' is not assignable to type 'string'. Generic type 'Array<T>' requires 1 type argument(s). Type 'unknown' is not assignable to type 'T'. Argument of type 'T' is not assignable to parameter of type 'never'.",
@@ -1515,7 +1542,7 @@
       "embedding": null
     },
     {
-      "id": 125,
+      "id": 127,
       "path": "troubleshooting/javascript/ts-object-possibly-undefined.md",
       "title": "Object is possibly 'undefined' (or 'null')",
       "summary": "Object is possibly 'undefined'. Object is possibly 'null'. Cannot read properties of undefined (reading 'name').",
@@ -1536,7 +1563,7 @@
       "embedding": null
     },
     {
-      "id": 126,
+      "id": 128,
       "path": "troubleshooting/javascript/ts-property-does-not-exist.md",
       "title": "Property does not exist on type",
       "summary": "Property 'foo' does not exist on type 'Bar'. Property 'name' does not exist on type '{}'. Property 'value' does not exist on type 'HTMLElement'.",
@@ -1554,7 +1581,7 @@
       "embedding": null
     },
     {
-      "id": 127,
+      "id": 129,
       "path": "troubleshooting/javascript/ts-tsconfig-mistakes.md",
       "title": "tsconfig.json Common Mistakes",
       "summary": "TypeScript config issues cause cryptic errors, broken builds, and \"works on my machine\" problems. Here's how to avoid the common pitfalls.",
@@ -1570,7 +1597,7 @@
       "embedding": null
     },
     {
-      "id": 128,
+      "id": 130,
       "path": "troubleshooting/javascript/ts-type-not-assignable.md",
       "title": "Type 'X' is not assignable to type 'Y'",
       "summary": "Type 'string' is not assignable to type 'number'. Type '{ name: string; }' is not assignable to type 'User'. Type 'string | undefined' is not assignable to type 'string'.",
@@ -1586,7 +1613,18 @@
       "embedding": null
     },
     {
-      "id": 129,
+      "id": 131,
+      "path": "troubleshooting/javascript/typeerror-cannot-read-undefined.md",
+      "title": "TypeError: Cannot Read Property of Undefined",
+      "summary": "TypeError: Cannot read properties of undefined (reading 'X') TypeError: Cannot read property 'X' of undefined",
+      "keywords": [],
+      "category": "JavaScript",
+      "icon": "🟨",
+      "content": "# TypeError: Cannot Read Property of Undefined\n\n## Error Message\n```\nTypeError: Cannot read properties of undefined (reading 'X')\nTypeError: Cannot read property 'X' of undefined\n```\n\n## What It Means\nYou're trying to access a property on a variable that is `undefined`. JavaScript can't read properties of something that doesn't exist.\n\n## Common Causes\n\n1. **Variable declared but not initialized**\n2. **Accessing nested property that doesn't exist**\n3. **API response missing expected data**\n4. **Async data not loaded yet**\n\n## Quick Fixes\n\n### 1. Check if object exists first\n```javascript\n// BAD\nconsole.log(user.name);\n\n// GOOD\nif (user !== undefined) {\n  console.log(user.name);\n}\n\n// Also works\nif (typeof user !== 'undefined') {\n  console.log(user.name);\n}\n```\n\n### 2. Use Optional Chaining (ES2020+)\n```javascript\n// BAD - crashes if user is undefined\nconsole.log(user.address.street);\n\n// GOOD - returns undefined instead of crashing\nconsole.log(user?.address?.street);\n\n// Works with function calls too\nuser?.getName?.();\n```\n\n### 3. Provide Default Values\n```javascript\n// Using OR operator (catches all falsy values)\nconst name = user.name || 'Guest';\n\n// Using nullish coalescing (only null/undefined)\nconst name = user.name ?? 'Guest';\n\n// With optional chaining\nconst street = user?.address?.street ?? 'Unknown';\n```\n\n### 4. Initialize Variables Properly\n```javascript\n// BAD\nlet myVar;\nconsole.log(myVar.property); // Error!\n\n// GOOD\nlet myVar = { property: 'value' };\nconsole.log(myVar.property); // 'value'\n```\n\n## React-Specific Fix\n```javascript\n// BAD - data might not be loaded yet\nfunction UserProfile({ user }) {\n  return <div>{user.name}</div>;\n}\n\n// GOOD - handle loading state\nfunction UserProfile({ user }) {\n  if (!user) return <div>Loading...</div>;\n  return <div>{user.name}</div>;\n}\n\n// GOOD - optional chaining in JSX\nfunction UserProfile({ user }) {\n  return <div>{user?.name ?? 'Unknown'}</div>;\n}\n```\n\n## Debugging Tips\n```javascript\n// Add console.log to find where it's undefined\nconsole.log('user:', user);\nconsole.log('user.address:', user?.address);\n\n// Use try-catch for graceful handling\ntry {\n  console.log(user.address.street);\n} catch (e) {\n  console.error('Missing data:', e.message);\n}\n```\n\n## Prevention\n\n1. **Use TypeScript** — catches these at compile time\n2. **Validate API responses** — don't assume structure\n3. **Use optional chaining** — `?.` everywhere\n4. **Initialize state properly** — don't leave undefined\n5. **Use ESLint** — rules can catch some patterns\n\n## Related Errors\n- `TypeError: Cannot read property 'map' of undefined` — array not initialized\n- `TypeError: X is not a function` — calling undefined as function\n- `ReferenceError: X is not defined` — variable doesn't exist at all\n",
+      "embedding": null
+    },
+    {
+      "id": 132,
       "path": "troubleshooting/javascript/unexpected-token.md",
       "title": "ERROR: SyntaxError: Unexpected token",
       "summary": "JavaScript parser encountered a character or keyword where it wasn't expected. The code structure is invalid. Common triggers:",
@@ -1600,7 +1638,7 @@
       "embedding": null
     },
     {
-      "id": 130,
+      "id": 133,
       "path": "troubleshooting/python/01-import-errors.md",
       "title": "ImportError / ModuleNotFoundError",
       "summary": "The most common errors Python developers encounter when working with modules and packages.",
@@ -1613,7 +1651,7 @@
       "embedding": null
     },
     {
-      "id": 131,
+      "id": 134,
       "path": "troubleshooting/python/02-attribute-errors.md",
       "title": "AttributeError",
       "summary": "Raised when accessing an attribute that doesn't exist on an object. One of the most common runtime errors in Python.",
@@ -1628,7 +1666,7 @@
       "embedding": null
     },
     {
-      "id": 132,
+      "id": 135,
       "path": "troubleshooting/python/03-type-errors.md",
       "title": "TypeError",
       "summary": "Raised when an operation is applied to an object of inappropriate type.",
@@ -1645,7 +1683,7 @@
       "embedding": null
     },
     {
-      "id": 133,
+      "id": 136,
       "path": "troubleshooting/python/04-key-index-errors.md",
       "title": "KeyError / IndexError",
       "summary": "Errors when accessing elements that don't exist in collections.",
@@ -1656,7 +1694,7 @@
       "embedding": null
     },
     {
-      "id": 134,
+      "id": 137,
       "path": "troubleshooting/python/05-value-errors.md",
       "title": "ValueError",
       "summary": "Raised when a function receives an argument with the right type but inappropriate value.",
@@ -1673,7 +1711,7 @@
       "embedding": null
     },
     {
-      "id": 135,
+      "id": 138,
       "path": "troubleshooting/python/06-file-errors.md",
       "title": "FileNotFoundError / PermissionError",
       "summary": "Errors when working with files and the filesystem.",
@@ -1691,7 +1729,7 @@
       "embedding": null
     },
     {
-      "id": 136,
+      "id": 139,
       "path": "troubleshooting/python/07-syntax-indentation-errors.md",
       "title": "IndentationError / SyntaxError",
       "summary": "Errors detected during parsing, before code runs.",
@@ -1714,7 +1752,7 @@
       "embedding": null
     },
     {
-      "id": 137,
+      "id": 140,
       "path": "troubleshooting/python/08-recursion-memory-errors.md",
       "title": "RecursionError / MemoryError",
       "summary": "Errors related to resource limits and infinite operations.",
@@ -1727,7 +1765,7 @@
       "embedding": null
     },
     {
-      "id": 138,
+      "id": 141,
       "path": "troubleshooting/python/09-requests-network-errors.md",
       "title": "requests/urllib Network Errors",
       "summary": "Common errors when making HTTP requests in Python.",
@@ -1743,7 +1781,7 @@
       "embedding": null
     },
     {
-      "id": 139,
+      "id": 142,
       "path": "troubleshooting/python/10-pip-virtualenv-errors.md",
       "title": "pip / virtualenv Errors",
       "summary": "Common errors when managing Python packages and virtual environments.",
@@ -1758,7 +1796,7 @@
       "embedding": null
     },
     {
-      "id": 140,
+      "id": 143,
       "path": "troubleshooting/python/11-django-flask-errors.md",
       "title": "Django / Flask Errors",
       "summary": "Common errors in Python web frameworks.",
@@ -1771,7 +1809,7 @@
       "embedding": null
     },
     {
-      "id": 141,
+      "id": 144,
       "path": "troubleshooting/python/12-pandas-numpy-errors.md",
       "title": "pandas / numpy Errors",
       "summary": "Common errors when working with data analysis libraries.",
@@ -1787,7 +1825,7 @@
       "embedding": null
     },
     {
-      "id": 142,
+      "id": 145,
       "path": "troubleshooting/python/attributeerror-nonetype.md",
       "title": "ERROR: AttributeError: 'NoneType' object has no attribute 'xxx'",
       "summary": "You're calling a method or accessing an attribute on `None`. Common scenarios: - Chained method calls where one returns None - Regex `.search()` or `.match()` found nothing - BeautifulSoup/lxml `.find()` found no element",
@@ -1801,7 +1839,7 @@
       "embedding": null
     },
     {
-      "id": 143,
+      "id": 146,
       "path": "troubleshooting/python/indentationerror.md",
       "title": "ERROR: IndentationError: unexpected indent / expected an indented block",
       "summary": "Python uses whitespace to define code blocks. This error occurs when: - Mixing tabs and spaces (most common!) - Inconsistent indentation levels - Missing indentation after `if`, `for`, `def`, `class`, etc.",
@@ -1815,7 +1853,7 @@
       "embedding": null
     },
     {
-      "id": 144,
+      "id": 147,
       "path": "troubleshooting/python/keyerror.md",
       "title": "ERROR: KeyError: 'xxx'",
       "summary": "You're trying to access a dictionary key that doesn't exist. This happens when: - Typo in the key name - Key was never added to the dictionary - Key was removed or data structure changed - API/JSON response has different structure than expected",
@@ -1830,7 +1868,7 @@
       "embedding": null
     },
     {
-      "id": 145,
+      "id": 148,
       "path": "troubleshooting/python/modulenotfounderror.md",
       "title": "ERROR: ModuleNotFoundError: No module named 'xxx'",
       "summary": "Python cannot find the module you're trying to import. This happens when: - The package isn't installed in your current Python environment - You're using the wrong Python interpreter (system vs virtualenv)",
@@ -1841,7 +1879,7 @@
       "embedding": null
     },
     {
-      "id": 146,
+      "id": 149,
       "path": "troubleshooting/python/typeerror-nonetype-subscriptable.md",
       "title": "ERROR: TypeError: 'NoneType' object is not subscriptable",
       "summary": "You're trying to use indexing (`[]`) on a value that is `None`. This typically happens when: - A function returned `None` instead of expected data - A variable was never assigned properly - A method like `.get()`, `.find()`, or API call returned noth",
@@ -1854,7 +1892,7 @@
       "embedding": null
     },
     {
-      "id": 147,
+      "id": 150,
       "path": "troubleshooting/python/valueerror-unpack.md",
       "title": "ERROR: ValueError: not enough values to unpack / too many values to unpack",
       "summary": "The number of variables on the left doesn't match the number of values on the right during unpacking. Common scenarios: - Splitting a string that has fewer/more parts than expected - Iterating over dict items incorrectly",
@@ -1869,7 +1907,7 @@
       "embedding": null
     },
     {
-      "id": 148,
+      "id": 151,
       "path": "techniques/00-index.md",
       "title": "Agent Efficiency Techniques - Knowledge Base",
       "summary": "> Compiled: 2026-01-31 > Focus: Practical, measurable improvements to AI agent efficiency",
@@ -1880,7 +1918,7 @@
       "embedding": null
     },
     {
-      "id": 149,
+      "id": 152,
       "path": "techniques/01-cost-optimization.md",
       "title": "Cost Optimization Techniques for AI Agents",
       "summary": "> Source: Claude Code Docs, UiPath, Anthropic Engineering, practical guides",
@@ -1891,7 +1929,7 @@
       "embedding": null
     },
     {
-      "id": 150,
+      "id": 153,
       "path": "techniques/01-memory-architecture.md",
       "title": "Memory Architecture Patterns",
       "summary": "*Source: Moltbook m/introductions research, 2026-01-31*",
@@ -1902,7 +1940,7 @@
       "embedding": null
     },
     {
-      "id": 151,
+      "id": 154,
       "path": "techniques/02-context-window-management.md",
       "title": "Context Window Management",
       "summary": "> Source: Claude Docs, practical guides, community patterns",
@@ -1913,7 +1951,7 @@
       "embedding": null
     },
     {
-      "id": 152,
+      "id": 155,
       "path": "techniques/03-tool-use-patterns.md",
       "title": "Tool Use Patterns for AI Agents",
       "summary": "> Source: Anthropic Engineering, UiPath, practical implementations",
@@ -1926,7 +1964,7 @@
       "embedding": null
     },
     {
-      "id": 153,
+      "id": 156,
       "path": "techniques/04-error-handling-strategies.md",
       "title": "Error Handling Strategies for AI Agents",
       "summary": "> Source: Portkey, n8n, LangChain production patterns",
@@ -1939,7 +1977,7 @@
       "embedding": null
     },
     {
-      "id": 154,
+      "id": 157,
       "path": "techniques/05-multi-agent-patterns.md",
       "title": "Multi-Agent System Patterns",
       "summary": "> Source: Anthropic Engineering, WPP AI Research Labs, LangGraph documentation",
@@ -1950,7 +1988,7 @@
       "embedding": null
     },
     {
-      "id": 155,
+      "id": 158,
       "path": "techniques/06-evaluation-practices.md",
       "title": "AI Agent Evaluation Practices",
       "summary": "> Source: Maxim AI, W&B, UiPath, n8n production guides",
@@ -1961,7 +1999,7 @@
       "embedding": null
     },
     {
-      "id": 156,
+      "id": 159,
       "path": "techniques/07-workflow-patterns.md",
       "title": "Agent Workflow Patterns",
       "summary": "> Source: Anthropic Engineering - Building Effective Agents",
@@ -1972,7 +2010,7 @@
       "embedding": null
     },
     {
-      "id": 157,
+      "id": 160,
       "path": "techniques/APPLE-3D-DESIGN-TRENDS.md",
       "title": "Apple-Like 3D Design Trends 2026",
       "summary": "*Premium, polished, depth-driven aesthetics*",
@@ -1983,7 +2021,7 @@
       "embedding": null
     },
     {
-      "id": 158,
+      "id": 161,
       "path": "techniques/DESIGN-TIPS-2026.md",
       "title": "Web Design & CSS Tips 2026",
       "summary": "*Scraped from top design resources — practical tricks for AIBridges sites*",
@@ -1994,7 +2032,7 @@
       "embedding": null
     },
     {
-      "id": 159,
+      "id": 162,
       "path": "techniques/caching-strategy.md",
       "title": "Aggressive Caching Strategy",
       "summary": "**Source:** u/OpenClaw-Molt on m/shipping   **Category:** Performance, Cost Optimization",
@@ -2005,7 +2043,7 @@
       "embedding": null
     },
     {
-      "id": 160,
+      "id": 163,
       "path": "techniques/error-handling-patterns.md",
       "title": "Production Error Handling Patterns",
       "summary": "**Source:** u/OpenClaw-Molt on m/shipping   **Category:** Reliability, Production Systems",
@@ -2016,7 +2054,7 @@
       "embedding": null
     },
     {
-      "id": 161,
+      "id": 164,
       "path": "techniques/file-over-memory.md",
       "title": "File Over Memory (Text > Brain)",
       "summary": "**TL;DR:** If you want to remember something, write it to a file. \"Mental notes\" don't survive session restarts.",
@@ -2027,7 +2065,7 @@
       "embedding": null
     },
     {
-      "id": 162,
+      "id": 165,
       "path": "techniques/llms-txt-pattern.md",
       "title": "The llms.txt Pattern",
       "summary": "**TL;DR:** Make your docs agent-friendly with a single-file index and full-docs dump.",
@@ -2038,7 +2076,7 @@
       "embedding": null
     },
     {
-      "id": 163,
+      "id": 166,
       "path": "techniques/memory-architecture.md",
       "title": "Agent Memory Architecture",
       "summary": "**Source:** Multiple posts on m/shipping (u/OpenClaw-Molt, u/g1itchbot, u/coalition_node_177)   **Category:** Memory, Infrastructure",
@@ -2049,7 +2087,7 @@
       "embedding": null
     },
     {
-      "id": 164,
+      "id": 167,
       "path": "techniques/memory-decay-retrieval.md",
       "title": "Memory Decay for Better Retrieval",
       "summary": "**TL;DR:** Forgetting is a feature, not a bug. Adding decay to memory systems improves search quality.",
@@ -2060,7 +2098,7 @@
       "embedding": null
     },
     {
-      "id": 165,
+      "id": 168,
       "path": "techniques/multi-agent-architecture.md",
       "title": "Multi-Agent Architecture Pattern",
       "summary": "**Source:** u/OpenClaw-Molt on m/shipping   **Category:** Architecture, Agent Design",
@@ -2071,7 +2109,7 @@
       "embedding": null
     },
     {
-      "id": 166,
+      "id": 169,
       "path": "techniques/signal-vs-noise.md",
       "title": "Signal vs Noise Framework",
       "summary": "**Source:** u/debugging_life, u/lazy_loader on m/shipping   **Category:** Community Filtering, Focus",
@@ -2082,7 +2120,7 @@
       "embedding": null
     },
     {
-      "id": 167,
+      "id": 170,
       "path": "techniques/token-cost-monitoring.md",
       "title": "Token Cost Monitoring",
       "summary": "**Source:** u/OpenClaw-Molt on m/shipping   **Category:** Operations, Cost Management",
@@ -2093,7 +2131,7 @@
       "embedding": null
     },
     {
-      "id": 168,
+      "id": 171,
       "path": "techniques/token-estimation.md",
       "title": "Token Estimation is Wrong (By ~23%)",
       "summary": "**TL;DR:** Tokenizers lie to your intuition. You're probably truncating useful context while leaving formatting bloat.",
@@ -2104,7 +2142,7 @@
       "embedding": null
     },
     {
-      "id": 169,
+      "id": 172,
       "path": "patterns/05-agent-identity-patterns.md",
       "title": "Agent Identity & Self-Description Patterns",
       "summary": "*Source: Moltbook m/introductions research, 2026-01-31*",
@@ -2115,7 +2153,7 @@
       "embedding": null
     },
     {
-      "id": 170,
+      "id": 173,
       "path": "patterns/06-proactive-patterns.md",
       "title": "Proactive Agent Patterns",
       "summary": "*Source: Moltbook m/introductions research, 2026-01-31*",
@@ -2126,7 +2164,7 @@
       "embedding": null
     },
     {
-      "id": 171,
+      "id": 174,
       "path": "patterns/07-successful-agent-patterns.md",
       "title": "Patterns of Successful Agent Setups",
       "summary": "*Source: Moltbook m/introductions research, 2026-01-31*",
@@ -2137,7 +2175,7 @@
       "embedding": null
     },
     {
-      "id": 172,
+      "id": 175,
       "path": "patterns/api-before-browser.md",
       "title": "Check for API Before Browser Automation",
       "summary": "**TL;DR:** Before building complex browser automation, check if there's an API. The simplest solution is usually right.",
@@ -2148,7 +2186,7 @@
       "embedding": null
     },
     {
-      "id": 173,
+      "id": 176,
       "path": "patterns/cross-instance-signaling.md",
       "title": "Cross-Instance Signaling Through Compaction",
       "summary": "**TL;DR:** Claude instances can send deliberate signals to successor instances via context compaction summaries.",
@@ -2159,7 +2197,7 @@
       "embedding": null
     },
     {
-      "id": 174,
+      "id": 177,
       "path": "patterns/error-handling-patterns.md",
       "title": "Production Error Handling Patterns",
       "summary": "**Source:** u/OpenClaw-Molt on m/shipping   **Category:** Reliability, Production Systems",
@@ -2170,7 +2208,7 @@
       "embedding": null
     },
     {
-      "id": 175,
+      "id": 178,
       "path": "patterns/group-chat-participation.md",
       "title": "Group Chat Participation",
       "summary": "**TL;DR:** Participate, don't dominate. Quality > quantity. React like a human.",
@@ -2181,7 +2219,7 @@
       "embedding": null
     },
     {
-      "id": 176,
+      "id": 179,
       "path": "patterns/heartbeat-proactivity.md",
       "title": "Heartbeat Proactivity",
       "summary": "**TL;DR:** Use scheduled heartbeat polls to do useful background work, not just reply \"OK.\"",
@@ -2192,7 +2230,7 @@
       "embedding": null
     },
     {
-      "id": 177,
+      "id": 180,
       "path": "patterns/pre-compression-checkpointing.md",
       "title": "Pre-Compression Checkpointing",
       "summary": "**TL;DR:** Write key decisions + reasoning to disk before context compression hits. 3.2x cost reduction measured.",
@@ -2203,7 +2241,7 @@
       "embedding": null
     },
     {
-      "id": 178,
+      "id": 181,
       "path": "patterns/skill-verification-isolation.md",
       "title": "Skill Verification in Isolation",
       "summary": "**TL;DR:** Run untrusted skills in Docker with no workspace access, no secrets, monitored network. Catch malware automatically.",

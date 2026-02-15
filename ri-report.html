@@ -2499,10 +2499,11 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function showLandEval(idx) {
  const land = window.landDealsData[idx];
  const comps = window.cityCompsData[land.city] || [];
- const targetSqft = parseInt(document.getElementById('targetSqft')?.value) || 2000;
- const buildCostPsf = parseInt(document.getElementById('buildCostPsf')?.value) || 175;
+ // Use THIS property's actual buildable sqft (varies by lot size), not global target
+ const actualBuildSqft = land.actualBuildSqft || parseInt(document.getElementById('targetSqft')?.value) || 1600;
+ const buildCostPsf = land.adjustedCostPsf || parseInt(document.getElementById('buildCostPsf')?.value) || 175;
  const softCostsPct = parseInt(document.getElementById('softCosts')?.value) || 15;
- const buildTotal = Math.round(buildCostPsf * targetSqft * (1 + softCostsPct/100));
+ const buildTotal = Math.round(buildCostPsf * actualBuildSqft * (1 + softCostsPct/100));
  
  // Calculate profit at asking price
  const totalAtAsk = land.price + buildTotal;
@@ -2569,11 +2570,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>' +
  '<div style="background:rgba(99,102,241,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem">' +
  '<h3 style="color:#e2e8f0;margin:0 0 0.5rem 0">' + land.address + ', ' + land.city + '</h3>' +
- '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;font-size:0.85rem">' +
+ '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:0.75rem;font-size:0.85rem">' +
  '<div><span style="color:#94a3b8">Ask Price:</span><br><strong style="color:#00E1E6">$' + land.price.toLocaleString() + '</strong></div>' +
- '<div><span style="color:#94a3b8">Lot Size:</span><br><strong>' + land.acres + ' acres</strong></div>' +
+ '<div><span style="color:#94a3b8">Lot Size:</span><br><strong>' + land.acres + ' ac</strong><br><span style="color:#64748b;font-size:0.7rem">(' + (land.lotSizeSqft?.toLocaleString() || '?') + ' sf)</span></div>' +
+ '<div><span style="color:#94a3b8">Max Build:</span><br><strong style="color:#22d3ee">' + (land.maxBuildableSqft?.toLocaleString() || '?') + ' sf</strong></div>' +
  '<div><span style="color:#94a3b8">Days Listed:</span><br><strong>' + land.dom + ' days</strong></div>' +
- '<div><span style="color:#94a3b8">Deal Score:</span><br><strong style="font-size:1.5rem">' + land.dealScore + '</strong></div>' +
+ '<div><span style="color:#94a3b8">Deal Score:</span><br><strong style="font-size:1.3rem">' + land.dealScore + '</strong></div>' +
  '</div>' +
  '<div style="margin-top:0.75rem;display:flex;justify-content:space-between;align-items:center">' +
  '<a href="' + land.url + '" target="_blank" style="color:#6366f1">🔗 View on Redfin</a>' +
@@ -2586,12 +2588,13 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>' +
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
- '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Assumptions <span style="font-size:0.7rem;font-weight:normal">(editable)</span></h4>' +
+ '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build for THIS Lot <span style="font-size:0.7rem;font-weight:normal;color:#22d3ee">(dynamic)</span></h4>' +
  '<div style="font-size:0.85rem">' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Target Home: <input type="number" id="modalTargetSqft" value="' + targetSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Lot Capacity: <strong style="color:#22d3ee">' + (land.maxBuildableSqft?.toLocaleString() || '?') + ' sqft max</strong></div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Actual Build: <input type="number" id="modalTargetSqft" value="' + actualBuildSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Build Cost: $<input type="number" id="modalBuildCost" value="' + buildCostPsf + '" style="width:60px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">/sqft</div>' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Soft Costs: <input type="number" id="modalSoftCosts" value="' + softCostsPct + '" style="width:50px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">%</div>' +
- '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#00E1E6" id="modalBuildTotal">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
+ '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#00E1E6" id="modalBuildTotal">$' + Math.round(buildTotal/1000) + 'K</strong>' + (land.canBuildTarget === false ? ' <span style="color:#f59e0b">⚠️ lot limited</span>' : '') + '</div>' +
  '</div>' +
  '</div>' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +

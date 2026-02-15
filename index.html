@@ -8250,8 +8250,15 @@
         v.play().catch(function() {});
     });
 
-    // Auto-convert nav links to slide-replace effect
-    document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(function(link) {
+    // Auto-convert nav links to slide-replace effect (exclude dropdowns)
+    document.querySelectorAll('.nav-links > li > a:not(.nav-cta)').forEach(function(link) {
+        // Skip dropdown parent links and dropdown menu links
+        if (link.closest('.nav-dropdown') && !link.closest('.dropdown-menu')) {
+            return; // Skip dropdown trigger links
+        }
+        if (link.closest('.dropdown-menu')) {
+            return; // Skip dropdown menu items
+        }
         const text = link.textContent.trim();
         link.classList.add('slide-link');
         link.setAttribute('data-replace', text);

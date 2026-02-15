@@ -375,7 +375,7 @@
 
  <h2 id="house-hunter">🏠 House Hunter</h2>
  <div class="sql-section">
- <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes by comparing to <strong style="color:#a5b4fc">nearby sales within 0.5 miles</strong>. Uses <strong>20th percentile</strong> $/sqft minus <strong>10%</strong> costs. <span style="color:#f59e0b">Very conservative</span> — assumes worst comps, as-is condition, max ~$50K equity.</p>
+ <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes using <strong style="color:#a5b4fc">weighted nearby comps</strong> (closest 3-5 sales = 70% weight). <strong>Outliers removed</strong> ($1M+ homes excluded for sub-$500K properties). Uses <strong>10% haircut</strong> for selling costs. <span style="color:#f59e0b">Very conservative</span> — max ~$50K equity.</p>
  
  <!-- Filters -->
  <div class="filters" style="margin-bottom:1.5rem">
@@ -2954,6 +2954,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const nearbyComps = window.allSoldComps.filter(c => {
  if (!c.lat || !c.lng) return false;
  const dist = getDistance(h.lat, h.lng, c.lat, c.lng);
+ c.distance = dist; // Store distance for weighting
  return dist <= 0.5; // 0.5 miles
  });
  // Prefer same property type
@@ -2966,41 +2967,66 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  if (comps.length < 3) return null;
  
+ // STEP 1: Remove outliers - exclude comps way outside subject's price range
+ // If subject < $500K, exclude comps > $1M (million dollar homes skew averages)
+ // Otherwise exclude comps > 2x subject price
+ const outlierCap = h.price < 500000 ? 1000000 : h.price * 2;
+ const outlierFloor = h.price * 0.3; // Also exclude if way cheaper (teardowns)
+ const noOutliers = comps.filter(c => c.price >= outlierFloor && c.price <= outlierCap);
+ 
  // Filter comps to similar size (+/- 25% tighter than before)
- const similarComps = comps.filter(c => 
+ const similarComps = noOutliers.filter(c => 
  c.sqft >= h.sqft * 0.75 && c.sqft <= h.sqft * 1.25
  );
- const useComps = similarComps.length >= 3 ? similarComps : comps;
+ let useComps = similarComps.length >= 3 ? similarComps : (noOutliers.length >= 3 ? noOutliers : comps);
  
- // VERY CONSERVATIVE: Use 20th percentile with 10% haircut
- // Most listings are NOT renovated - compare to bottom 20% of comps
- // 10% haircut = 6% selling costs + 4% repairs/condition buffer
+ // STEP 2: Weight nearby comps heavily (closest 3-5 get 70% weight)
+ // Sort by distance if available
+ useComps.sort((a, b) => (a.distance || 999) - (b.distance || 999));
+ 
+ // Calculate weighted $/sqft - closest comps matter most
+ let weightedPpsf;
+ if (useComps.length >= 5 && useComps[0].distance !== undefined) {
+   // Closest 5 comps get 70% weight, rest get 30%
+   const closest = useComps.slice(0, 5);
+   const others = useComps.slice(5);
+   const closestAvg = closest.reduce((sum, c) => sum + c.ppsf, 0) / closest.length;
+   const othersAvg = others.length > 0 
+     ? others.reduce((sum, c) => sum + c.ppsf, 0) / others.length 
+     : closestAvg;
+   weightedPpsf = closestAvg * 0.7 + othersAvg * 0.3;
+ } else {
+   // No distance data - use simple average
+   weightedPpsf = useComps.reduce((sum, c) => sum + c.ppsf, 0) / useComps.length;
+ }
+ 
+ // STEP 3: Calculate percentiles for range estimates (still useful for bounds)
  const sortedPpsf = useComps.map(c => c.ppsf).sort((a, b) => a - b);
  const p20Index = Math.floor(sortedPpsf.length * 0.20);
  const p25Index = Math.floor(sortedPpsf.length * 0.25);
  const p33Index = Math.floor(sortedPpsf.length * 0.33);
- const p50Index = Math.floor(sortedPpsf.length * 0.50);
  
  const bottomPpsf = sortedPpsf[p20Index]; // 20th percentile - worst comps
  const conservativePpsf = sortedPpsf[p25Index]; // 25th percentile
  const realisticPpsf = sortedPpsf[p33Index]; // 33rd percentile
- const medianPpsf = sortedPpsf[p50Index]; // Median
  
- // PRIMARY ESTIMATE: 20th percentile - 10% (very conservative)
+ // PRIMARY ESTIMATE: Weighted nearby comps with 10% haircut (very conservative)
+ // Weighted ppsf puts 70% weight on closest 3-5 properties
  const haircutPct = 10;
- const marketValue = Math.round(h.sqft * bottomPpsf * (1 - haircutPct/100));
+ const marketValue = Math.round(h.sqft * weightedPpsf * (1 - haircutPct/100));
  
  // Range values: worst case to moderate case
  const lowValue = Math.round(h.sqft * bottomPpsf * 0.85); // 20th - 15% (fire sale)
  const highValue = Math.round(h.sqft * conservativePpsf * 0.94); // 25th - 6%
  
- const avgPpsf = Math.round(bottomPpsf); // Show 20th pct for display
+ const avgPpsf = Math.round(weightedPpsf); // Show weighted avg for display
  let discount = Math.round((1 - h.price / marketValue) * 100);
  let instantEquity = marketValue - h.price;
  
- // CAP equity at $50K max for realistic first-purchase expectations
- if (instantEquity > 50000) {
-   instantEquity = 50000;
+ // CAP ALL equity values at $50K max for realistic first-purchase expectations
+ const EQUITY_CAP = 50000;
+ if (instantEquity > EQUITY_CAP) {
+   instantEquity = EQUITY_CAP;
    discount = Math.round((instantEquity / h.price) * 100);
  }
  // Negative equity = overpriced, cap at -$20K display
@@ -3008,11 +3034,17 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
    instantEquity = -20000;
  }
  
+ // Cap low/high equity too (these were showing uncapped $103K, $134K)
+ let lowEquityRaw = lowValue - h.price;
+ let highEquityRaw = highValue - h.price;
+ const lowEquityCapped = Math.max(-20000, Math.min(EQUITY_CAP, lowEquityRaw));
+ const highEquityCapped = Math.max(-20000, Math.min(EQUITY_CAP, highEquityRaw));
+ 
  // Deal score: discount % + DOM factor
  const domBonus = Math.min(20, Math.floor(h.dom / 15));
  const dealScore = Math.min(discount + domBonus, 40); // Cap deal score too
  
- // Scenario values for toggle (all more conservative)
+ // Scenario values for toggle (all more conservative, all capped)
  const worstValue = lowValue; // 20th pct - 15%
  const expectedValue = Math.round(h.sqft * conservativePpsf * 0.90); // 25th - 10%
  const bestValue = Math.round(h.sqft * realisticPpsf * 0.94); // 33rd - 6%
@@ -3038,16 +3070,16 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  // Range values
  lowValue: lowValue,
  highValue: highValue,
- lowEquity: lowValue - h.price,
- highEquity: highValue - h.price,
+ lowEquity: lowEquityCapped,
+ highEquity: highEquityCapped,
  haircutPct: haircutPct,
  // Scenario values
  worstValue: worstValue,
- worstEquity: worstValue - h.price,
+ worstEquity: Math.max(-20000, Math.min(EQUITY_CAP, worstValue - h.price)),
  expectedValue: expectedValue,
- expectedEquity: expectedValue - h.price,
+ expectedEquity: Math.max(-20000, Math.min(EQUITY_CAP, expectedValue - h.price)),
  bestValue: bestValue,
- bestEquity: bestValue - h.price
+ bestEquity: Math.max(-20000, Math.min(EQUITY_CAP, bestValue - h.price))
  };
  }).filter(d => d && d.instantEquity >= 0 && d.discount >= minDiscount);
  
@@ -3178,19 +3210,19 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem"> Offer Strategy</h4>' +
  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px;text-align:center">' +
- '<div style="color:#94a3b8;font-size:0.75rem">95% of Ask</div>' +
+ '<div style="color:#94a3b8;font-size:0.75rem">Fire Sale (95%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.95)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.95)) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.95))) + ' equity</div>' +
  '</div>' +
  '<div style="background:rgba(245,158,11,0.2);padding:1rem;border-radius:12px;text-align:center;border:2px solid #f59e0b">' +
- '<div style="color:#94a3b8;font-size:0.75rem">90% of Ask (Recommended)</div>' +
+ '<div style="color:#94a3b8;font-size:0.75rem">As-Is (90%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.90)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.90)) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.90))) + ' equity</div>' +
  '</div>' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px;text-align:center">' +
- '<div style="color:#94a3b8;font-size:0.75rem">85% of Ask (Aggressive)</div>' +
+ '<div style="color:#94a3b8;font-size:0.75rem">Aggressive (85%)</div>' +
  '<div style="color:#f59e0b;font-size:1.3rem;font-weight:bold">' + formatPrice(Math.round(house.price * 0.85)) + '</div>' +
- '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(house.marketValue - Math.round(house.price * 0.85)) + ' equity</div>' +
+ '<div style="color:#10b981;font-size:0.8rem">→ ' + formatPrice(Math.min(50000, house.marketValue - Math.round(house.price * 0.85))) + ' equity</div>' +
  '</div>' +
  '</div>' +
  '<h4 style="color:#a5b4fc;margin-bottom:0.75rem">🏘️ Similar Comparable Sales (' + similarComps.length + ')</h4>' +

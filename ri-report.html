@@ -2248,35 +2248,18 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  };
  }
  
- // Use COMP-BASED sizing - build what actually sells in this neighborhood
- const stats = cityStats[land.city] || { medianSqft: 1800 };
- const compBasedSqft = stats.medianSqft || 1800;
- 
- // Cap at lot's max buildable (can't build more than lot allows)
+ // SIMPLE APPROACH: Use the target sqft from filter (user controlled)
+ const actualBuildSqft = targetSqft;
  const maxBuildableSqft = buildability.maxBuildableSqft;
- const actualBuildSqft = Math.min(compBasedSqft, maxBuildableSqft);
+ const actualRooms = Math.max(2, Math.min(6, Math.round(actualBuildSqft / 500)));
  
- // Estimate rooms from sqft (typical: 500-600 sf per bedroom including common areas)
- const actualRooms = Math.max(2, Math.min(6, Math.round(actualBuildSqft / 550)));
- 
- // Use MEDIAN $/sqft (new construction commands median+ prices in most markets)
- // New homes typically sell at 10-20% premium over median comps
+ // Get median $/sqft from comps for this city
  const sortedPpsf = comps.map(c => c.ppsf).sort((a,b) => a - b);
  const medianIndex = Math.floor(sortedPpsf.length * 0.5);
- const avgPpsf = comps.length > 0 
- ? sortedPpsf[medianIndex] * 1.05  // Median + 5% new construction premium
- : 300; // Default for areas without comps
+ const avgPpsf = comps.length > 0 ? sortedPpsf[medianIndex] : 275;
  
- // Adjust build cost based on actual room count (complexity factor)
- const roomCostMultiplier = {
- 2: 0.91, // simpler, cheaper
- 3: 1.00, // baseline
- 4: 1.06, // more complex
- 5: 1.11, // even more
- 6: 1.20  // estate complexity
- };
- const costMultiplier = roomCostMultiplier[Math.min(actualRooms, 6)] || 1.0;
- const adjustedBuildCostPsf = Math.round(buildCostPsf * costMultiplier);
+ // Simple build cost - no multipliers, just what user entered
+ const adjustedBuildCostPsf = buildCostPsf;
  
  const estSalePrice = avgPpsf * actualBuildSqft;
  const buildCost = adjustedBuildCostPsf * actualBuildSqft;
@@ -2305,8 +2288,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  lotSizeSqft: effectiveLotSize,
  lotSizeUnknown: lotSizeUnknown,
  maxBuildableSqft: maxBuildableSqft,
- compBasedSqft: compBasedSqft,
- recommendedRooms: actualRooms,
+ targetBuildSqft: targetSqft,
  actualBuildSqft: actualBuildSqft,
  actualRooms: actualRooms,
  lotCapacity: lotCapacity,
@@ -2404,7 +2386,6 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  // Store for export and comp lookups
  window.landDealsData = lands;
  window.cityCompsData = cityComps;
- window.cityStatsData = cityStats;
  }
  
  function toggleLandComps(idx) {
@@ -2511,9 +2492,9 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function showLandEval(idx) {
  const land = window.landDealsData[idx];
  const comps = window.cityCompsData[land.city] || [];
- // Use COMP-BASED sqft (what actually sells in this neighborhood)
- const maxBuildSqft = land.actualBuildSqft || land.compBasedSqft || 1800;
- const buildCostPsf = land.adjustedCostPsf || parseInt(document.getElementById('buildCostPsf')?.value) || 175;
+ // Use target sqft from filter (user controlled)
+ const maxBuildSqft = land.targetBuildSqft || parseInt(document.getElementById('targetSqft')?.value) || 2000;
+ const buildCostPsf = parseInt(document.getElementById('buildCostPsf')?.value) || 175;
  const softCostsPct = parseInt(document.getElementById('softCosts')?.value) || 15;
  const buildTotal = Math.round(buildCostPsf * maxBuildSqft * (1 + softCostsPct/100));
  
@@ -2572,7 +2553,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  modal.onclick = function() { modal.remove(); };
  
  modal.innerHTML = '<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;position:relative" onclick="event.stopPropagation()">' +
- '<button onclick="document.getElementById(\'landEvalModal\').remove()" style="position:absolute;top:-12px;right:-12px;background:#ef4444;border:2px solid #1e293b;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;font-weight:bold;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);line-height:24px;text-align:center">✕</button>' +
+ '<button onclick="document.getElementById(\'landEvalModal\').remove()" style="position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.9);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1.2rem;font-weight:bold;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.3)">✕</button>' +
  '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:0.5rem">' +
  '<h2 style="color:#6366f1;margin:0"> Deal Evaluation</h2>' +
  '<div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center">' +
@@ -2600,11 +2581,10 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  '</div>' +
  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">' +
  '<div style="background:rgba(0,0,0,0.3);padding:1rem;border-radius:12px">' +
- '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Based on Comps <span style="font-size:0.7rem;font-weight:normal;color:#10b981">(smart)</span></h4>' +
- (land.lotSizeUnknown ? '<div style="background:rgba(245,158,11,0.2);padding:0.4rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;color:#f59e0b">⚠️ Lot size unknown - using 0.11 acre estimate</div>' : '') +
+ '<h4 style="color:#94a3b8;margin:0 0 0.5rem 0">🔧 Build Assumptions</h4>' +
+ (land.lotSizeUnknown ? '<div style="background:rgba(245,158,11,0.2);padding:0.4rem;border-radius:4px;margin-bottom:0.5rem;font-size:0.75rem;color:#f59e0b">⚠️ Lot size unknown</div>' : '') +
  '<div style="font-size:0.85rem">' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;color:#64748b">Neighborhood median: <strong style="color:#10b981">' + (land.compBasedSqft?.toLocaleString() || '?') + ' sqft</strong></div>' +
- '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Suggested Build: <input type="number" id="modalTargetSqft" value="' + maxBuildSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
+ '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Target Build: <input type="number" id="modalTargetSqft" value="' + maxBuildSqft + '" style="width:70px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')"> sqft</div>' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Build Cost: $<input type="number" id="modalBuildCost" value="' + buildCostPsf + '" style="width:60px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">/sqft</div>' +
  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem">Soft Costs: <input type="number" id="modalSoftCosts" value="' + softCostsPct + '" style="width:50px;background:#1e293b;border:1px solid #334155;color:#f8fafc;padding:0.25rem 0.5rem;border-radius:4px;text-align:right" onchange="recalcLandModal(' + idx + ')">%</div>' +
  '<div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:0.5rem;padding-top:0.5rem">Total Build: <strong style="color:#00E1E6" id="modalBuildTotal">$' + Math.round(buildTotal/1000) + 'K</strong></div>' +
@@ -2765,7 +2745,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  modal.onclick = function() { modal.remove(); };
  
  modal.innerHTML = '<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:900px;width:95%;max-height:95vh;overflow-y:auto;position:relative" onclick="event.stopPropagation()">' +
- '<button onclick="document.getElementById(\'landNeighborhoodModal\').remove()" style="position:absolute;top:-12px;right:-12px;background:#ef4444;border:2px solid #1e293b;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;font-weight:bold;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);line-height:24px;text-align:center">✕</button>' +
+ '<button onclick="document.getElementById(\'landNeighborhoodModal\').remove()" style="position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.9);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1.2rem;font-weight:bold;z-index:100">✕</button>' +
  '<h2 style="color:#6366f1;margin:0 0 1rem 0">🗺️ Land Neighborhood Explorer</h2>' +
  '<div style="background:rgba(245,158,11,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem">' +
  '<h3 style="color:#6366f1;margin:0 0 0.25rem 0">' + land.address + ', ' + land.city + '</h3>' +
@@ -3540,7 +3520,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  modal.onclick = function() { modal.remove(); };
  
  modal.innerHTML = '<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:700px;width:90%;max-height:90vh;overflow-y:auto;position:relative" onclick="event.stopPropagation()">' +
- '<button onclick="document.getElementById(\'houseEvalModal\').remove()" style="position:absolute;top:-12px;right:-12px;background:#ef4444;border:2px solid #1e293b;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;font-weight:bold;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);line-height:24px;text-align:center">✕</button>' +
+ '<button onclick="document.getElementById(\'houseEvalModal\').remove()" style="position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.9);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1.2rem;font-weight:bold;z-index:100">✕</button>' +
  '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:1.5rem;gap:0.5rem">' +
  '<h2 style="color:#6366f1;margin:0"> House Deal Evaluation</h2>' +
  '</div>' +
@@ -3636,7 +3616,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
    modal.onclick = () => modal.remove();
    
    modal.innerHTML = `<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:700px;width:95%;max-height:90vh;overflow-y:auto" onclick="event.stopPropagation()">
-     <button onclick="this.closest('#cityCompsModal').remove()" style="position:absolute;top:-12px;right:-12px;background:#ef4444;border:2px solid #1e293b;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;font-weight:bold;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);line-height:24px;text-align:center">✕</button>
+     <button onclick="this.closest('#cityCompsModal').remove()" style="position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.9);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1.2rem;font-weight:bold;z-index:100">✕</button>
      <h2 style="color:#f59e0b;margin:0 0 0.5rem 0">📍 ${city} Market Data</h2>
      <p style="color:#94a3b8;font-size:0.85rem;margin-bottom:1.5rem">${titleNote}</p>
      
@@ -3797,7 +3777,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  modal.onclick = function() { modal.remove(); };
  
  modal.innerHTML = '<div style="background:#1e293b;padding:2rem;border-radius:16px;max-width:900px;width:95%;max-height:95vh;overflow-y:auto;position:relative" onclick="event.stopPropagation()">' +
- '<button onclick="document.getElementById(\'neighborhoodModal\').remove()" style="position:absolute;top:-12px;right:-12px;background:#ef4444;border:2px solid #1e293b;color:white;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:0.9rem;font-weight:bold;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.4);line-height:24px;text-align:center">✕</button>' +
+ '<button onclick="document.getElementById(\'neighborhoodModal\').remove()" style="position:absolute;top:10px;right:10px;background:rgba(239,68,68,0.9);border:none;color:white;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1.2rem;font-weight:bold;z-index:100">✕</button>' +
  '<h2 style="color:#6366f1;margin:0 0 1rem 0">🗺️ Neighborhood Explorer</h2>' +
  '<div style="background:rgba(99,102,241,0.2);padding:1rem;border-radius:12px;margin-bottom:1.5rem">' +
  '<h3 style="color:#e2e8f0;margin:0 0 0.25rem 0">' + house.address + ', ' + house.city + '</h3>' +

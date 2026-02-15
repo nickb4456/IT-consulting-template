@@ -83,7 +83,7 @@
         <div class="overlay-sub">Fly through the asteroid field!<br>Dodge obstacles &bull; Collect power-ups</div>
         <div class="ctrl-box">
             <div class="ctrl-label">CONTROLS</div>
-            <div class="ctrl-line">Arrow Keys or A/D — Move</div>
+            <div class="ctrl-line">Arrow Keys or WASD — Move</div>
             <div class="ctrl-line">SPACE — Shoot</div>
             <div class="ctrl-line">Touch — Drag to move</div>
         </div>
@@ -138,8 +138,9 @@
     scene.fog = new THREE.FogExp2(0x050510, 0.008);
 
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
-    camera.position.set(0, 22, 6);
-    camera.lookAt(0, 0, -10);
+    // Perfectly straight down — offset in Z so rocket (at Z=0) appears at bottom of screen
+    camera.position.set(0, 18, -6);
+    camera.lookAt(0, 0, -6);
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -161,7 +162,7 @@
 
     // Engine glow light (attached to rocket later)
     const engineLight = new THREE.PointLight(0xff6600, 3, 8);
-    engineLight.position.set(0, -1, 0);
+    engineLight.position.set(0, -2, 0);
 
     // ============ STARFIELD ============
     const starCount = 600;
@@ -170,7 +171,7 @@
     const starSpeeds = new Float32Array(starCount);
     for (let i = 0; i < starCount; i++) {
         starPositions[i * 3] = (Math.random() - 0.5) * 80;
-        starPositions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+        starPositions[i * 3 + 1] = -5;
         starPositions[i * 3 + 2] = Math.random() * -120;
         starSpeeds[i] = 0.3 + Math.random() * 0.8;
     }
@@ -207,8 +208,8 @@
         rocketModel.scale.set(s, s, s);
         const center = box.getCenter(new THREE.Vector3());
         rocketModel.position.set(-center.x * s, -center.y * s, -center.z * s);
-        // Rotate: nose up (-Z), back/wings facing camera (+Y)
-        rocketPivot.rotation.set(-Math.PI / 2, Math.PI, 0);
+        // Rotate around Y so nose points to top of screen (clockwise when viewed from above)
+        rocketPivot.rotation.set(0, -Math.PI / 2, 0);
         rocketPivot.add(rocketModel);
         rocketLoaded = true;
         console.log('Rocket loaded:', size);
@@ -305,9 +306,8 @@
         const geo = new THREE.CylinderGeometry(0.08, 0.08, 1.2, 6);
         const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff });
         const mesh = new THREE.Mesh(geo, mat);
-        // Rotate cylinder to point along -Z
-        mesh.rotation.x = Math.PI / 2;
-        mesh.position.set(x, 0.5, z - 2);
+        // Bullet is a cylinder — keep upright (Y-axis), viewed from above it's a dot with glow
+        mesh.position.set(x, 2, z);
         // Glow
         const glowGeo = new THREE.SphereGeometry(0.2, 8, 8);
         const glowMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.3 });
@@ -327,7 +327,9 @@
     let score = 0, lives = 3, altitude = 0, gameSpeed = 1;
     let invincible = 0;
     let rocketX = 0, rocketTargetX = 0;
+    let rocketZ = 0, rocketTargetZ = 0;
     const LANE_WIDTH = 14; // total X range: -7 to 7
+    const Z_RANGE = 18; // total Z range for up/down movement
     const obstacles = [];
     const powerups = [];
     let obstacleTimer = 0, powerupTimer = 0;
@@ -358,18 +360,23 @@
     });
     window.addEventListener('keyup', (e) => { keys[e.code] = false; });
 
+    let touchStartY = 0, touchRocketStartZ = 0;
     renderer.domElement.addEventListener('touchstart', (e) => {
         if (state === 'menu') return;
         e.preventDefault();
         touchActive = true;
         touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
         touchRocketStartX = rocketX;
+        touchRocketStartZ = rocketZ;
     }, { passive: false });
     renderer.domElement.addEventListener('touchmove', (e) => {
         if (!touchActive || state !== 'playing') return;
         e.preventDefault();
         const dx = (e.touches[0].clientX - touchStartX) / window.innerWidth * LANE_WIDTH * 2;
+        const dy = (e.touches[0].clientY - touchStartY) / window.innerHeight * Z_RANGE * 2;
         rocketTargetX = Math.max(-LANE_WIDTH / 2, Math.min(LANE_WIDTH / 2, touchRocketStartX + dx));
+        rocketTargetZ = Math.max(-Z_RANGE / 2, Math.min(Z_RANGE / 2, touchRocketStartZ + dy));
     }, { passive: false });
     renderer.domElement.addEventListener('touchend', () => { touchActive = false; });
 
@@ -378,7 +385,7 @@
         ensureAudio();
         state = 'playing';
         score = 0; lives = 3; altitude = 0; gameSpeed = 1;
-        invincible = 0; rocketX = 0; rocketTargetX = 0;
+        invincible = 0; rocketX = 0; rocketTargetX = 0; rocketZ = 0; rocketTargetZ = 0;
         obstacleTimer = 0; powerupTimer = 0;
 
         // Clear old obstacles/powerups
@@ -422,7 +429,7 @@
             <div class="overlay-sub">Fly through the asteroid field!<br>Dodge obstacles &bull; Collect power-ups</div>
             <div class="ctrl-box">
                 <div class="ctrl-label">CONTROLS</div>
-                <div class="ctrl-line">Arrow Keys or A/D — Move</div>
+                <div class="ctrl-line">Arrow Keys or WASD — Move</div>
                 <div class="ctrl-line">SPACE — Shoot</div>
                 <div class="ctrl-line">Touch — Drag to move</div>
             </div>
@@ -469,30 +476,37 @@
 
         // Rocket idle animation on menu
         if (state === 'menu') {
-            rocketGroup.position.set(0, Math.sin(Date.now() * 0.002) * 0.3, 0);
-            rocketGroup.rotation.set(0, Date.now() * 0.001, 0);
+            rocketGroup.position.set(0, 0, 0);
+            rocketGroup.rotation.set(0, 0, 0);
         }
 
         if (state === 'playing') {
-            // Rocket movement
+            // Rocket movement — full freedom: left/right + up/down
             const moveSpeed = 12 * dt;
             if (keys['ArrowLeft'] || keys['KeyA']) rocketTargetX -= moveSpeed;
             if (keys['ArrowRight'] || keys['KeyD']) rocketTargetX += moveSpeed;
+            if (keys['ArrowUp'] || keys['KeyW']) rocketTargetZ -= moveSpeed;
+            if (keys['ArrowDown'] || keys['KeyS']) rocketTargetZ += moveSpeed;
             rocketTargetX = Math.max(-LANE_WIDTH / 2, Math.min(LANE_WIDTH / 2, rocketTargetX));
+            rocketTargetZ = Math.max(-Z_RANGE / 2, Math.min(Z_RANGE / 2, rocketTargetZ));
             rocketX += (rocketTargetX - rocketX) * 0.15;
+            rocketZ += (rocketTargetZ - rocketZ) * 0.15;
 
             rocketGroup.position.x = rocketX;
-            rocketGroup.position.y = Math.sin(Date.now() * 0.004) * 0.1; // gentle bob
+            rocketGroup.position.y = 0;
+            rocketGroup.position.z = rocketZ;
 
-            // Tilt toward movement
-            const tiltTarget = -(rocketTargetX - rocketX) * 0.3;
+            // Bank toward movement direction
+            const tiltTarget = (rocketTargetX - rocketX) * 0.15;
             rocketGroup.rotation.z += (tiltTarget - rocketGroup.rotation.z) * 0.1;
+            rocketGroup.rotation.x = 0;
+            rocketGroup.rotation.y = 0;
 
             // Shooting
             shootCooldown -= dt;
             if (keys['Space'] && shootCooldown <= 0) {
                 shootCooldown = 0.15; // fire rate
-                createBullet(rocketX, 0);
+                createBullet(rocketX, rocketZ);
             }
 
             // Update bullets
@@ -536,8 +550,8 @@
             const fPos = flameParticles.geometry.attributes.position;
             for (let i = 0; i < 30; i++) {
                 fPos.setX(i, (Math.random() - 0.5) * 0.4);
-                fPos.setY(i, 0);
-                fPos.setZ(i, 1.8 + Math.random() * 1.2);
+                fPos.setY(i, -2 - Math.random() * 1.5);
+                fPos.setZ(i, (Math.random() - 0.5) * 0.4);
             }
             fPos.needsUpdate = true;
 
@@ -551,13 +565,13 @@
 
             // Spawn obstacles
             obstacleTimer += dt;
-            const spawnInterval = Math.max(0.3, 0.8 - gameSpeed * 0.06);
+            const spawnInterval = Math.max(0.12, 0.35 - gameSpeed * 0.03);
             if (obstacleTimer > spawnInterval) {
                 obstacleTimer = 0;
-                const isAsteroid = Math.random() > 0.25;
+                const isAsteroid = Math.random() > 0.2;
                 const mesh = isAsteroid ? createAsteroid() : createGlowStar();
                 const x = (Math.random() - 0.5) * LANE_WIDTH;
-                mesh.position.set(x, (Math.random() - 0.5) * 2, -80 - Math.random() * 20);
+                mesh.position.set(x, 0, -80 - Math.random() * 20);
                 scene.add(mesh);
                 obstacles.push({ mesh, speed: 15 + Math.random() * 10 });
             }
@@ -585,7 +599,7 @@
                 // Collision
                 if (invincible <= 0) {
                     const dx = ob.mesh.position.x - rocketX;
-                    const dz = ob.mesh.position.z - 0;
+                    const dz = ob.mesh.position.z - rocketZ;
                     const dist = Math.sqrt(dx * dx + dz * dz);
                     if (dist < (ud.radius || 1) + 1.2) {
                         SFX.hit();
@@ -615,7 +629,7 @@
                 pu.mesh.rotateY(3 * dt);
 
                 const dx = pu.mesh.position.x - rocketX;
-                const dz = pu.mesh.position.z - 0;
+                const dz = pu.mesh.position.z - rocketZ;
                 const dist = Math.sqrt(dx * dx + dz * dz);
                 if (dist < 1.8) {
                     SFX.powerup();

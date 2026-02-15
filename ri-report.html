@@ -381,6 +381,13 @@
         </div>
     </div>
 
+    <!-- Loading indicator -->
+    <div id="mainLoadingBar" style="background:rgba(99,102,241,0.2);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.75rem">
+      <div style="width:20px;height:20px;border:2px solid #6366f1;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></div>
+      <span style="color:#94a3b8;font-size:0.9rem">Loading market data...</span>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
     <h2>Key Market Insights</h2>
  <div class="insight-grid">
         <div class="insight-card insight-hover" data-chart="inland">
@@ -1127,19 +1134,27 @@
 let rawData = null;
 let db, lastResults = [];
 
-// Parallel load: fetch gzip data AND SQL.js WASM at the same time
-// Cache-bust with daily version to ensure fresh data
-const dataVersion = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
-const t0 = performance.now();
-Promise.all([
-  // Load data
-  fetch('ri-sales.json.gz?v=' + dataVersion).then(r => r.arrayBuffer()).then(buf => {
-    const decompressed = pako.ungzip(new Uint8Array(buf), {to: 'string'});
-    return JSON.parse(decompressed);
-  }),
-  // Load SQL.js WASM
-  initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
-]).then(([data, SQL]) => {
+// Defer data loading until after first paint for faster perceived load
+const dataVersion = new Date().toISOString().slice(0, 10);
+let t0;
+
+function loadMainData() {
+  t0 = performance.now();
+  // Show loading indicator
+  document.querySelectorAll('.data-loading').forEach(el => el.style.display = 'block');
+  
+  Promise.all([
+    // Load data
+    fetch('ri-sales.json.gz?v=' + dataVersion).then(r => r.arrayBuffer()).then(buf => {
+      const decompressed = pako.ungzip(new Uint8Array(buf), {to: 'string'});
+      return JSON.parse(decompressed);
+    }),
+    // Load SQL.js WASM
+    initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
+  ]).then(([data, SQL]) => {
+    // Hide loading indicators
+    const loadingBar = document.getElementById('mainLoadingBar');
+    if (loadingBar) loadingBar.style.display = 'none';
   rawData = data;
   console.log('Parallel load took', Math.round(performance.now() - t0), 'ms for', rawData.properties.length, 'properties');
   
@@ -1222,14 +1237,22 @@ Promise.all([
     statusEl.style.color = '#10b981';
   }
   console.log('SQL database initialized with ' + rawData.properties.length + ' properties');
-}).catch(err => {
-  console.error('Initialization failed:', err);
-  const statusEl = document.getElementById('dbStatus');
-  if (statusEl) {
-    statusEl.textContent = 'Database failed to load: ' + err.message;
-    statusEl.style.color = '#00E1E6';
-  }
-});
+  }).catch(err => {
+    console.error('Initialization failed:', err);
+    const statusEl = document.getElementById('dbStatus');
+    if (statusEl) {
+      statusEl.textContent = 'Database failed to load: ' + err.message;
+      statusEl.style.color = '#00E1E6';
+    }
+  });
+}
+
+// Load data AFTER first paint for instant perceived load
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(loadMainData, { timeout: 1000 });
+} else {
+  setTimeout(loadMainData, 100);
+}
 
 function updateInsights() {
   if (!rawData || !rawData.properties || !window.cityStats) return;

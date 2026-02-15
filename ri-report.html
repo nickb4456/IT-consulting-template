@@ -505,13 +505,24 @@
  <!-- Build Calculator Inputs -->
  <div style="background:rgba(99,102,241,0.1);padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid rgba(99,102,241,0.25)">
  <h3 style="color:#6366f1;margin-bottom:1rem;font-size:1rem">🔧 Build Calculator Settings</h3>
- <div class="filters" style="margin-bottom:0">
+ <div class="filters" style="margin-bottom:0.75rem">
  <div class="filter-group">
- <label>Target Home SqFt</label>
- <input type="number" id="targetSqft" value="2000" style="width:100px" onchange="filterLandDeals()">
+ <label>🛏️ Bedrooms</label>
+ <select id="targetRooms" onchange="updateBuildFromRooms();filterLandDeals()">
+ <option value="2">2 BR (~1,200 sqft)</option>
+ <option value="3" selected>3 BR (~1,600 sqft)</option>
+ <option value="4">4 BR (~2,200 sqft)</option>
+ <option value="5">5 BR (~2,800 sqft)</option>
+ <option value="6">6 BR (~3,500 sqft)</option>
+ <option value="custom">Custom</option>
+ </select>
  </div>
  <div class="filter-group">
- <label>Build Cost $/sqft</label>
+ <label>Target SqFt</label>
+ <input type="number" id="targetSqft" value="1600" style="width:100px" onchange="document.getElementById('targetRooms').value='custom';filterLandDeals()">
+ </div>
+ <div class="filter-group">
+ <label>Build $/sqft</label>
  <input type="number" id="buildCostPsf" value="175" style="width:80px" onchange="filterLandDeals()">
  </div>
  <div class="filter-group">
@@ -523,7 +534,47 @@
  <input type="number" id="targetProfit" value="25" style="width:60px" onchange="filterLandDeals()">
  </div>
  </div>
- <p style="color:#64748b;font-size:0.75rem;margin-top:0.75rem">Build cost ~$150-200/sqft in RI. Soft costs include permits, design, contingency.</p>
+ <!-- Room cost adjustments info -->
+ <div id="buildEstimate" style="background:rgba(16,185,129,0.15);padding:0.75rem 1rem;border-radius:8px;margin-bottom:0.75rem;font-size:0.8rem">
+ <span style="color:#10b981;font-weight:600">📊 Est. Build Cost:</span> 
+ <span id="buildCostDisplay">$280K</span> 
+ <span style="color:#94a3b8">(1,600 sqft × $175/sf)</span>
+ <span id="roomCostNote" style="color:#64748b;margin-left:1rem">3 BR base rate</span>
+ </div>
+ <p style="color:#64748b;font-size:0.75rem;margin-top:0.5rem">
+ 💡 <strong>Build cost scales with complexity:</strong> 2BR=$160/sf, 3BR=$175/sf, 4BR=$185/sf, 5BR=$195/sf, 6BR=$210/sf. 
+ More rooms = more plumbing, HVAC, finishes.
+ </p>
+ </div>
+ 
+ <!-- Lot Buildability Analysis -->
+ <div style="background:rgba(34,211,238,0.08);padding:1rem 1.5rem;border-radius:12px;margin-bottom:1.5rem;border:1px solid rgba(34,211,238,0.25)">
+ <h4 style="color:#22d3ee;margin-bottom:0.75rem;font-size:0.9rem">📐 Lot Buildability Analysis (RI Zoning Estimates)</h4>
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;font-size:0.8rem">
+ <div>
+ <div style="color:#94a3b8">0.25 acres (10,890 sf)</div>
+ <div style="color:#22d3ee;font-weight:600">→ ~2,700 sf buildable</div>
+ <div style="color:#64748b;font-size:0.7rem">3-4 BR typical</div>
+ </div>
+ <div>
+ <div style="color:#94a3b8">0.50 acres (21,780 sf)</div>
+ <div style="color:#22d3ee;font-weight:600">→ ~5,400 sf buildable</div>
+ <div style="color:#64748b;font-size:0.7rem">4-6 BR typical</div>
+ </div>
+ <div>
+ <div style="color:#94a3b8">1.0 acres (43,560 sf)</div>
+ <div style="color:#22d3ee;font-weight:600">→ ~10,800 sf buildable</div>
+ <div style="color:#64748b;font-size:0.7rem">6+ BR or multi-unit</div>
+ </div>
+ <div>
+ <div style="color:#94a3b8">2.0+ acres</div>
+ <div style="color:#22d3ee;font-weight:600">→ Estate / Subdivision</div>
+ <div style="color:#64748b;font-size:0.7rem">Multiple homes possible</div>
+ </div>
+ </div>
+ <p style="color:#64748b;font-size:0.7rem;margin-top:0.75rem">
+ Based on typical RI FAR 0.25 + 35% coverage. Actual limits vary by town zoning. Coastal zones may be more restrictive.
+ </p>
  </div>
 
  <!-- Summary Stats -->
@@ -1974,12 +2025,88 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  
  // LAND DEAL FINDER
+ // Room-based build assumptions
+ const ROOM_CONFIG = {
+ 2: { sqft: 1200, costPsf: 160, label: '2 BR base rate' },
+ 3: { sqft: 1600, costPsf: 175, label: '3 BR base rate' },
+ 4: { sqft: 2200, costPsf: 185, label: '4 BR (more plumbing)' },
+ 5: { sqft: 2800, costPsf: 195, label: '5 BR (complex HVAC)' },
+ 6: { sqft: 3500, costPsf: 210, label: '6 BR (estate build)' }
+ };
+ 
+ // Calculate lot buildability (max sqft based on zoning)
+ function getLotBuildability(lotSizeSqft) {
+ // RI typical: FAR 0.25, max coverage 35%, with setbacks
+ const baseFAR = 0.25; // Floor Area Ratio
+ const maxCoverage = 0.35; // Ground coverage
+ const setbackReduction = 0.80; // ~20% lost to setbacks
+ 
+ const maxBuildable = lotSizeSqft * baseFAR * setbackReduction;
+ const maxFootprint = lotSizeSqft * maxCoverage * setbackReduction;
+ 
+ // Estimate room capacity (assume 400 sqft per bedroom + common areas)
+ const sqftPerBedroom = 450; // includes share of common space
+ const maxRooms = Math.floor(maxBuildable / sqftPerBedroom);
+ 
+ return {
+ maxBuildableSqft: Math.round(maxBuildable),
+ maxFootprint: Math.round(maxFootprint),
+ recommendedRooms: Math.min(Math.max(2, maxRooms), 8), // 2-8 BR range
+ canBuildMultiple: lotSizeSqft >= 87120, // 2+ acres
+ stories: maxBuildable > maxFootprint ? 2 : 1
+ };
+ }
+ 
+ function updateBuildFromRooms() {
+ const roomsSelect = document.getElementById('targetRooms');
+ const sqftInput = document.getElementById('targetSqft');
+ const costInput = document.getElementById('buildCostPsf');
+ const rooms = roomsSelect?.value;
+ 
+ if (rooms && rooms !== 'custom' && ROOM_CONFIG[rooms]) {
+ const config = ROOM_CONFIG[rooms];
+ sqftInput.value = config.sqft;
+ costInput.value = config.costPsf;
+ updateBuildEstimateDisplay();
+ }
+ }
+ 
+ function updateBuildEstimateDisplay() {
+ const sqft = parseInt(document.getElementById('targetSqft')?.value) || 1600;
+ const costPsf = parseInt(document.getElementById('buildCostPsf')?.value) || 175;
+ const softPct = parseInt(document.getElementById('softCosts')?.value) || 15;
+ const rooms = document.getElementById('targetRooms')?.value || '3';
+ 
+ const buildCost = sqft * costPsf;
+ const totalWithSoft = buildCost * (1 + softPct / 100);
+ 
+ const displayEl = document.getElementById('buildCostDisplay');
+ const noteEl = document.getElementById('roomCostNote');
+ 
+ if (displayEl) {
+ displayEl.textContent = '$' + Math.round(totalWithSoft / 1000) + 'K';
+ }
+ if (noteEl) {
+ noteEl.textContent = rooms !== 'custom' && ROOM_CONFIG[rooms] 
+ ? ROOM_CONFIG[rooms].label 
+ : 'Custom build';
+ }
+ }
+ 
+ // Expose to global scope
+ window.updateBuildFromRooms = updateBuildFromRooms;
+ window.updateBuildEstimateDisplay = updateBuildEstimateDisplay;
+ window.getLotBuildability = getLotBuildability;
+ window.ROOM_CONFIG = ROOM_CONFIG;
+
  function initLandDealFinder() {
  console.log('initLandDealFinder starting...');
  if (!rawData || !rawData.properties) {
    console.log('initLandDealFinder: No data!');
    return;
  }
+ // Initialize build estimate display
+ updateBuildEstimateDisplay();
  // Populate city dropdown with cities that have land
  const allLand = rawData.properties.filter(p => p.propertyType && p.propertyType.toLowerCase().includes('land'));
  const forSaleLand = allLand.filter(p => p.status === 'For Sale');
@@ -2005,15 +2132,20 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
    console.log('filterLandDeals: No data yet');
    return;
  }
+ 
+ // Update build estimate display
+ if (typeof updateBuildEstimateDisplay === 'function') updateBuildEstimateDisplay();
+ 
  const city = document.getElementById('landCity')?.value || '';
  console.log('Land filter - city:', city);
  const minDom = parseInt(document.getElementById('landMinDom')?.value) || 0;
  const maxPrice = parseInt(document.getElementById('landMaxPrice')?.value) || Infinity;
  const minAcres = parseFloat(document.getElementById('landMinAcres')?.value) || 0;
- const targetSqft = parseInt(document.getElementById('targetSqft')?.value) || 2000;
+ const targetSqft = parseInt(document.getElementById('targetSqft')?.value) || 1600;
  const buildCostPsf = parseInt(document.getElementById('buildCostPsf')?.value) || 175;
  const softCostsPct = parseInt(document.getElementById('softCosts')?.value) || 15;
  const targetProfitPct = parseInt(document.getElementById('targetProfit')?.value) || 25;
+ const targetRooms = parseInt(document.getElementById('targetRooms')?.value) || 3;
  
  // Filter land deals
  let lands = rawData.properties.filter(p => {
@@ -2051,10 +2183,25 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  });
  });
  
- // Calculate deal metrics for each land parcel
+ // Calculate deal metrics for each land parcel with lot buildability analysis
  lands = lands.map(land => {
- const acres = (land.lotSize || 0) / 43560;
+ const lotSizeSqft = land.lotSize || 0;
+ const acres = lotSizeSqft / 43560;
  const comps = cityComps[land.city] || [];
+ 
+ // Get lot buildability (max sqft, recommended rooms)
+ const buildability = typeof getLotBuildability === 'function' 
+ ? getLotBuildability(lotSizeSqft) 
+ : { maxBuildableSqft: targetSqft * 2, recommendedRooms: 4, stories: 2, canBuildMultiple: false };
+ 
+ // Check if target build fits on this lot
+ const canBuildTarget = buildability.maxBuildableSqft >= targetSqft;
+ const actualBuildSqft = canBuildTarget ? targetSqft : buildability.maxBuildableSqft;
+ 
+ // Adjust rooms based on what lot can actually support
+ const maxRoomsForLot = buildability.recommendedRooms;
+ const actualRooms = canBuildTarget ? targetRooms : Math.min(targetRooms, maxRoomsForLot);
+ 
  // Use 25th percentile of comps (conservative - new builds compete with existing)
  const sortedPpsf = comps.map(c => c.ppsf).sort((a,b) => a - b);
  const p25Index = Math.floor(sortedPpsf.length * 0.25);
@@ -2062,18 +2209,52 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  ? sortedPpsf[p25Index] * 0.90  // 25th percentile - 10% buffer
  : 250; // Conservative default $/sqft if no comps
  
- const estSalePrice = avgPpsf * targetSqft;
- const buildCost = buildCostPsf * targetSqft;
+ // Adjust build cost based on actual room count (complexity factor)
+ const roomCostMultiplier = {
+ 2: 0.91, // simpler, cheaper
+ 3: 1.00, // baseline
+ 4: 1.06, // more complex
+ 5: 1.11, // even more
+ 6: 1.20  // estate complexity
+ };
+ const costMultiplier = roomCostMultiplier[Math.min(actualRooms, 6)] || 1.0;
+ const adjustedBuildCostPsf = Math.round(buildCostPsf * costMultiplier);
+ 
+ const estSalePrice = avgPpsf * actualBuildSqft;
+ const buildCost = adjustedBuildCostPsf * actualBuildSqft;
  const totalCost = land.price + buildCost * (1 + softCostsPct/100);
  const profit = estSalePrice - totalCost;
  const profitPct = (profit / totalCost) * 100;
  const maxOffer = estSalePrice / (1 + targetProfitPct/100) - buildCost * (1 + softCostsPct/100);
  
+ // Lot capacity label
+ let lotCapacity;
+ if (buildability.canBuildMultiple) {
+ lotCapacity = '🏘️ Multi-home';
+ } else if (maxRoomsForLot >= 6) {
+ lotCapacity = '🏰 6+ BR';
+ } else if (maxRoomsForLot >= 4) {
+ lotCapacity = '🏠 4-5 BR';
+ } else if (maxRoomsForLot >= 3) {
+ lotCapacity = '🏡 3 BR';
+ } else {
+ lotCapacity = '🏚️ Small';
+ }
+ 
  return {
  ...land,
  acres: acres.toFixed(2),
+ lotSizeSqft: lotSizeSqft,
+ maxBuildableSqft: buildability.maxBuildableSqft,
+ recommendedRooms: maxRoomsForLot,
+ actualBuildSqft: actualBuildSqft,
+ actualRooms: actualRooms,
+ lotCapacity: lotCapacity,
+ canBuildTarget: canBuildTarget,
+ stories: buildability.stories,
  compsCount: comps.length,
  avgPpsf: Math.round(avgPpsf),
+ adjustedCostPsf: adjustedBuildCostPsf,
  estSalePrice: Math.round(estSalePrice),
  buildCost: Math.round(buildCost),
  totalCost: Math.round(totalCost),
@@ -2108,43 +2289,47 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  return;
  }
  
- let html = `<table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+ let html = `<table style="width:100%;border-collapse:collapse;font-size:0.75rem">
  <thead>
  <tr style="background:rgba(99,102,241,0.3)">
- <th style="padding:0.6rem;text-align:left">Deal</th>
- <th style="padding:0.6rem;text-align:left">Address</th>
- <th style="padding:0.6rem;text-align:left">City</th>
- <th style="padding:0.6rem;text-align:right">Ask Price</th>
- <th style="padding:0.6rem;text-align:right">Acres</th>
- <th style="padding:0.6rem;text-align:right">DOM</th>
- <th style="padding:0.6rem;text-align:right">Comps</th>
- <th style="padding:0.6rem;text-align:right">Est. Sale</th>
- <th style="padding:0.6rem;text-align:right">Total Cost</th>
- <th style="padding:0.6rem;text-align:right;color:#10b981">Profit</th>
- <th style="padding:0.6rem;text-align:right;color:#f59e0b">Max Offer</th>
- <th style="padding:0.6rem;text-align:center">Eval</th>
+ <th style="padding:0.5rem;text-align:left">Deal</th>
+ <th style="padding:0.5rem;text-align:left">Address</th>
+ <th style="padding:0.5rem;text-align:left">City</th>
+ <th style="padding:0.5rem;text-align:right">Ask</th>
+ <th style="padding:0.5rem;text-align:right">Acres</th>
+ <th style="padding:0.5rem;text-align:center;color:#22d3ee" title="Lot capacity based on RI zoning">🏠 Capacity</th>
+ <th style="padding:0.5rem;text-align:right" title="Actual build sqft for this lot">Build SqFt</th>
+ <th style="padding:0.5rem;text-align:right">DOM</th>
+ <th style="padding:0.5rem;text-align:right">Comps</th>
+ <th style="padding:0.5rem;text-align:right">Est. Sale</th>
+ <th style="padding:0.5rem;text-align:right;color:#10b981">Profit</th>
+ <th style="padding:0.5rem;text-align:right;color:#f59e0b">Max Offer</th>
+ <th style="padding:0.5rem;text-align:center">Eval</th>
  </tr>
  </thead>
  <tbody>`;
  
  lands.slice(0, 50).forEach((land, idx) => {
  const profitColor = land.profit > 0 ? '#10b981' : '#ef4444';
+ const capacityColor = land.canBuildTarget ? '#22d3ee' : '#f59e0b';
+ const buildNote = land.canBuildTarget ? '' : ' ⚠️';
  html += `<tr style="border-bottom:1px solid rgba(255,255,255,0.05);cursor:pointer" onclick="toggleLandComps(${idx})">
- <td style="padding:0.5rem">${land.dealScore}</td>
- <td style="padding:0.5rem"><a href="${land.url}" target="_blank" style="color:#6366f1" onclick="event.stopPropagation()">${land.address}</a></td>
- <td style="padding:0.5rem">${land.city}</td>
- <td style="padding:0.5rem;text-align:right">$${(land.price/1000).toFixed(0)}K</td>
- <td style="padding:0.5rem;text-align:right">${land.acres}</td>
- <td style="padding:0.5rem;text-align:right;color:${land.dom > 180 ? '#f59e0b' : '#94a3b8'}">${land.dom}</td>
- <td style="padding:0.5rem;text-align:right">${land.compsCount} @ $${land.avgPpsf}/sf</td>
- <td style="padding:0.5rem;text-align:right">$${(land.estSalePrice/1000).toFixed(0)}K</td>
- <td style="padding:0.5rem;text-align:right">$${(land.totalCost/1000).toFixed(0)}K</td>
- <td style="padding:0.5rem;text-align:right;color:${profitColor};font-weight:bold">$${(land.profit/1000).toFixed(0)}K (${land.profitPct}%)</td>
- <td style="padding:0.5rem;text-align:right;color:#f59e0b;font-weight:bold">$${(land.maxOffer/1000).toFixed(0)}K</td>
- <td style="padding:0.5rem;text-align:center"><button onclick="event.stopPropagation();showLandEval(${idx})" style="background:#6366f1;border:none;color:white;padding:0.3rem 0.6rem;border-radius:4px;cursor:pointer;font-size:0.7rem"> View</button></td>
+ <td style="padding:0.4rem">${land.dealScore}</td>
+ <td style="padding:0.4rem"><a href="${land.url}" target="_blank" style="color:#6366f1" onclick="event.stopPropagation()">${land.address}</a></td>
+ <td style="padding:0.4rem">${land.city}</td>
+ <td style="padding:0.4rem;text-align:right">$${(land.price/1000).toFixed(0)}K</td>
+ <td style="padding:0.4rem;text-align:right">${land.acres}</td>
+ <td style="padding:0.4rem;text-align:center;color:${capacityColor}" title="Max buildable: ${land.maxBuildableSqft?.toLocaleString() || '?'} sqft">${land.lotCapacity}</td>
+ <td style="padding:0.4rem;text-align:right;color:${land.canBuildTarget ? '#94a3b8' : '#f59e0b'}" title="${land.canBuildTarget ? 'Target fits' : 'Lot limited to ' + land.maxBuildableSqft + ' sqft'}">${land.actualBuildSqft?.toLocaleString() || '?'}${buildNote}</td>
+ <td style="padding:0.4rem;text-align:right;color:${land.dom > 180 ? '#f59e0b' : '#94a3b8'}">${land.dom}</td>
+ <td style="padding:0.4rem;text-align:right">${land.compsCount} @ $${land.avgPpsf}/sf</td>
+ <td style="padding:0.4rem;text-align:right">$${(land.estSalePrice/1000).toFixed(0)}K</td>
+ <td style="padding:0.4rem;text-align:right;color:${profitColor};font-weight:bold">$${(land.profit/1000).toFixed(0)}K (${land.profitPct}%)</td>
+ <td style="padding:0.4rem;text-align:right;color:#f59e0b;font-weight:bold">$${(land.maxOffer/1000).toFixed(0)}K</td>
+ <td style="padding:0.4rem;text-align:center"><button onclick="event.stopPropagation();showLandEval(${idx})" style="background:#6366f1;border:none;color:white;padding:0.25rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.65rem">View</button></td>
  </tr>
  <tr id="land-comps-${idx}" style="display:none;background:rgba(99,102,241,0.1)">
- <td colspan="12" style="padding:1rem" id="land-comps-content-${idx}"></td>
+ <td colspan="13" style="padding:1rem" id="land-comps-content-${idx}"></td>
  </tr>`;
  });
  
@@ -2190,24 +2375,58 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  .sort((a, b) => b.price - a.price)
  .slice(0, 8);
  
- let html = `<div style="margin-bottom:0.5rem;color:#6366f1;font-weight:600"> ${land.city} Comparable Sales (${comps.length} total)</div>`;
+ // Lot Analysis Section
+ let html = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">`;
+ 
+ // Left: Lot Buildability
+ html += `<div style="background:rgba(34,211,238,0.1);padding:1rem;border-radius:8px;border:1px solid rgba(34,211,238,0.25)">
+ <div style="color:#22d3ee;font-weight:600;margin-bottom:0.5rem">📐 Lot Buildability Analysis</div>
+ <div style="font-size:0.8rem;color:#94a3b8;line-height:1.6">
+ <div>Lot Size: <strong style="color:#e2e8f0">${land.acres} acres (${land.lotSizeSqft?.toLocaleString() || '?'} sqft)</strong></div>
+ <div>Max Buildable: <strong style="color:#22d3ee">${land.maxBuildableSqft?.toLocaleString() || '?'} sqft</strong></div>
+ <div>Recommended: <strong style="color:#10b981">${land.recommendedRooms || '?'} bedrooms</strong></div>
+ <div>Stories: <strong>${land.stories || 2}</strong> ${land.stories === 1 ? '(ranch style)' : '(two-story)'}</div>
+ ${!land.canBuildTarget ? `<div style="color:#f59e0b;margin-top:0.5rem">⚠️ Target ${document.getElementById('targetSqft')?.value || 1600} sqft exceeds lot capacity. Using ${land.actualBuildSqft} sqft.</div>` : ''}
+ </div>
+ </div>`;
+ 
+ // Right: Build Cost Breakdown
+ const targetRooms = document.getElementById('targetRooms')?.value || 3;
+ html += `<div style="background:rgba(99,102,241,0.1);padding:1rem;border-radius:8px;border:1px solid rgba(99,102,241,0.25)">
+ <div style="color:#6366f1;font-weight:600;margin-bottom:0.5rem">💰 Build Cost Breakdown</div>
+ <div style="font-size:0.8rem;color:#94a3b8;line-height:1.6">
+ <div>Build Size: <strong style="color:#e2e8f0">${land.actualBuildSqft?.toLocaleString() || '?'} sqft</strong></div>
+ <div>Adjusted $/sqft: <strong style="color:#6366f1">$${land.adjustedCostPsf || 175}</strong> (${land.actualRooms || targetRooms} BR complexity)</div>
+ <div>Construction: <strong>$${Math.round((land.buildCost || 0) / 1000)}K</strong></div>
+ <div>+ Land: <strong>$${Math.round(land.price / 1000)}K</strong></div>
+ <div>+ Soft Costs: <strong>$${Math.round((land.totalCost - land.price - land.buildCost) / 1000)}K</strong></div>
+ <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:0.5rem;margin-top:0.5rem">
+ Total Investment: <strong style="color:#f59e0b;font-size:0.9rem">$${Math.round(land.totalCost / 1000)}K</strong>
+ </div>
+ </div>
+ </div>`;
+ 
+ html += `</div>`;
+ 
+ // Comps Section
+ html += `<div style="margin-bottom:0.5rem;color:#6366f1;font-weight:600">🏘️ ${land.city} Comparable Sales (${comps.length} total)</div>`;
  
  if (topComps.length === 0) {
  html += '<p style="color:#94a3b8">No comparable sales found in this city.</p>';
  } else {
- html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.5rem">`;
+ html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.5rem">`;
  topComps.forEach(comp => {
  html += `<div style="background:rgba(0,0,0,0.3);padding:0.75rem;border-radius:8px;font-size:0.75rem">
  <div style="color:#10b981;font-weight:600">${fmtPrice(comp.price)}</div>
- <div style="color:#94a3b8">${comp.sqft.toLocaleString()} sqft • $${Math.round(comp.ppsf)}/sf</div>
+ <div style="color:#94a3b8">${comp.sqft?.toLocaleString() || '?'} sqft • $${Math.round(comp.ppsf)}/sf</div>
  <a href="${comp.url}" target="_blank" style="color:#6366f1;font-size:0.7rem">${comp.address}</a>
  </div>`;
  });
  html += `</div>`;
- html += `<div style="margin-top:0.75rem;padding:0.5rem;background:rgba(16,185,129,0.1);border-radius:6px;font-size:0.75rem">
- <strong style="color:#10b981">Analysis:</strong> 
- Avg $/sqft in ${land.city}: <strong>$${land.avgPpsf}</strong> | 
- Build ${document.getElementById('targetSqft')?.value || 2000} sqft home → Est. value: <strong>${fmtPrice(land.estSalePrice)}</strong>
+ html += `<div style="margin-top:0.75rem;padding:0.75rem;background:rgba(16,185,129,0.15);border-radius:8px;font-size:0.8rem">
+ <strong style="color:#10b981">📊 Deal Analysis:</strong> 
+ Build ${land.actualBuildSqft?.toLocaleString() || '?'} sqft ${land.actualRooms || 3}BR @ $${land.avgPpsf}/sqft = <strong style="color:#22d3ee">${fmtPrice(land.estSalePrice)}</strong> est. value | 
+ Profit: <strong style="color:${land.profit > 0 ? '#10b981' : '#ef4444'}">${fmtPrice(land.profit)} (${land.profitPct}%)</strong>
  </div>`;
  }
  

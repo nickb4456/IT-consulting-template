@@ -18,9 +18,17 @@
  
  <!-- Favicon -->
  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232E1A47'%3E%3Cpath d='M12 3L2 12h3v9h6v-6h2v6h6v-9h3L12 3z'/%3E%3C/svg%3E">
- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+ 
+ <!-- Preconnect for faster third-party loads -->
+ <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+ <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+ <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+ 
+ <!-- Critical: pako needed for decompression -->
  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+ <!-- Defer non-critical scripts -->
+ <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js" defer></script>
  <style>
  :root { 
   --primary: #6366f1; 
@@ -362,7 +370,7 @@
 
     <!-- Hero Image Section -->
     <div class="hero-image">
-        <img src="images/newport-bridge.png?v=2" alt="Newport Bridge at sunset, Rhode Island" loading="lazy">
+        <img src="images/newport-bridge.jpg" alt="Newport Bridge at sunset, Rhode Island" loading="lazy">
         <div class="hero-image-overlay">
             <p class="hero-top">FIND YOUR HOME</p>
             <svg class="hero-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="2">
@@ -4718,8 +4726,10 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  if (!assessmentData) {
  status.textContent = '⏳ Loading assessment data...';
  try {
- const response = await fetch('ri-assessments-geocoded.json');
- assessmentData = await response.json();
+ const response = await fetch('ri-assessments-geocoded.json.gz');
+ const buffer = await response.arrayBuffer();
+ const decompressed = pako.ungzip(new Uint8Array(buffer), { to: 'string' });
+ assessmentData = JSON.parse(decompressed);
  } catch (err) {
  status.textContent = ' Failed to load data';
  status.style.color = '#ef4444';

@@ -1,0 +1,1937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Dino Roam!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            overflow: hidden;
+            background: #1a0e00;
+            font-family: 'Quicksand', sans-serif;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        canvas { display: block; }
+
+        .back-btn {
+            position: fixed;
+            top: 14px; left: 14px;
+            z-index: 400;
+            background: rgba(40,20,0,0.7);
+            border: 2px solid rgba(200,150,50,0.5);
+            border-radius: 12px;
+            padding: 8px 16px;
+            color: #e8c56d;
+            font-family: 'Lilita One', cursive;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(6px);
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(80,40,0,0.6); transform: scale(1.05); }
+
+        #hud {
+            position: fixed;
+            top: 0; right: 0;
+            padding: 14px 20px;
+            display: flex;
+            gap: 16px;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .hud-pill {
+            background: linear-gradient(145deg, rgba(60,30,0,0.85), rgba(40,20,0,0.9));
+            border: 2px solid rgba(200,150,50,0.35);
+            border-radius: 30px;
+            padding: 8px 20px;
+            color: #e8c56d;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(8px);
+        }
+        .hud-icon { font-size: 1.3rem; }
+        .hud-val {
+            font-family: 'Lilita One', cursive;
+            font-size: 1.4rem;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255,200,50,0.4);
+        }
+        .hud-label {
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            color: rgba(230,200,100,0.6);
+            text-transform: uppercase;
+        }
+
+        #minimap {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 3px solid rgba(200,150,50,0.5);
+            background: rgba(20,40,10,0.8);
+            z-index: 100;
+            overflow: hidden;
+        }
+        #minimap-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .score-popup {
+            position: fixed;
+            pointer-events: none;
+            z-index: 200;
+            font-family: 'Lilita One', cursive;
+            font-size: 2rem;
+            text-shadow: 0 3px 8px rgba(0,0,0,0.5);
+            animation: popUp 1.2s ease-out forwards;
+        }
+        @keyframes popUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-60px) scale(0.8); opacity: 0; }
+        }
+
+        #start-screen, #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 500;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, #1a3a0a 0%, #0d1f05 40%, #1a0e00 100%);
+        }
+        #start-screen.hidden, #loading-screen.hidden { display: none; }
+
+        .title {
+            font-family: 'Lilita One', cursive;
+            font-size: 4.5rem;
+            color: #ffd700;
+            text-shadow: 0 4px 20px rgba(255,200,0,0.4), 0 0 60px rgba(255,150,0,0.2);
+            margin-bottom: 8px;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        .subtitle {
+            font-family: 'Quicksand', sans-serif;
+            font-size: 1.1rem;
+            color: rgba(200,180,100,0.7);
+            margin-bottom: 40px;
+            letter-spacing: 3px;
+        }
+
+        .start-btn {
+            font-family: 'Lilita One', cursive;
+            font-size: 1.6rem;
+            padding: 16px 50px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ff8800, #ff5500);
+            color: white;
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 25px rgba(255,100,0,0.4);
+            transition: all 0.3s;
+            margin-bottom: 24px;
+        }
+        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 35px rgba(255,100,0,0.5); }
+
+        .controls-info {
+            font-size: 0.8rem;
+            color: rgba(200,180,100,0.5);
+            text-align: center;
+            line-height: 1.8;
+        }
+        .controls-info span {
+            background: rgba(200,150,50,0.15);
+            border: 1px solid rgba(200,150,50,0.25);
+            border-radius: 6px;
+            padding: 2px 8px;
+            margin: 0 2px;
+        }
+
+        #loading-bar-container {
+            width: 300px;
+            height: 12px;
+            background: rgba(200,150,50,0.15);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        #loading-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff8800, #ffd700);
+            border-radius: 6px;
+            transition: width 0.2s;
+        }
+        #loading-text {
+            font-family: 'Lilita One', cursive;
+            font-size: 1.5rem;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        /* Touch controls */
+        #touch-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 300;
+            display: none;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            #touch-controls { display: block; }
+            #minimap { bottom: 200px; }
+        }
+        .touch-dpad {
+            width: 140px;
+            height: 140px;
+            position: relative;
+        }
+        .touch-btn {
+            position: absolute;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: rgba(200,150,50,0.3);
+            border: 2px solid rgba(200,150,50,0.4);
+            color: #e8c56d;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-user-select: none;
+        }
+        .touch-btn:active { background: rgba(200,150,50,0.6); }
+        .touch-up { top: 0; left: 50%; transform: translateX(-50%); }
+        .touch-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .touch-left { top: 50%; left: 0; transform: translateY(-50%); }
+        .touch-right { top: 50%; right: 0; transform: translateY(-50%); }
+        .touch-roar {
+            position: fixed;
+            bottom: 30px;
+            left: 180px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255,80,0,0.4);
+            border: 2px solid rgba(255,100,0,0.5);
+            color: #ff8800;
+            font-family: 'Lilita One', cursive;
+            font-size: 0.7rem;
+            z-index: 300;
+            display: none;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            .touch-roar { display: flex; align-items: center; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <a href="games.html" class="back-btn">&larr; Back</a>
+
+    <div id="hud">
+        <div class="hud-pill">
+            <span class="hud-icon">&#x1F969;</span>
+            <div>
+                <div class="hud-val" id="food-val">0</div>
+                <div class="hud-label">Food</div>
+            </div>
+        </div>
+        <div class="hud-pill">
+            <span class="hud-icon">&#x2B50;</span>
+            <div>
+                <div class="hud-val" id="score-val">0</div>
+                <div class="hud-label">Score</div>
+            </div>
+        </div>
+        <div class="hud-pill">
+            <span class="hud-icon">&#x1F9ED;</span>
+            <div>
+                <div class="hud-val" id="explored-val">0%</div>
+                <div class="hud-label">Explored</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="minimap">
+        <canvas id="minimap-canvas" width="160" height="160"></canvas>
+    </div>
+
+    <div id="touch-controls">
+        <div class="touch-dpad">
+            <div class="touch-btn touch-up" data-dir="up">&#9650;</div>
+            <div class="touch-btn touch-down" data-dir="down">&#9660;</div>
+            <div class="touch-btn touch-left" data-dir="left">&#9664;</div>
+            <div class="touch-btn touch-right" data-dir="right">&#9654;</div>
+        </div>
+    </div>
+    <button class="touch-roar" id="touch-roar-btn">ROAR!</button>
+
+    <div id="loading-screen">
+        <div id="loading-text">Loading T-Rex...</div>
+        <div id="loading-bar-container">
+            <div id="loading-bar"></div>
+        </div>
+    </div>
+
+    <div id="start-screen" class="hidden">
+        <div class="title">DINO ROAM!</div>
+        <div class="subtitle">EXPLORE THE PREHISTORIC WORLD</div>
+        <button class="start-btn" onclick="startGame()">EXPLORE!</button>
+        <div class="controls-info">
+            <span>W</span><span>A</span><span>S</span><span>D</span> or <span>&#x2190;</span><span>&#x2191;</span><span>&#x2192;</span><span>&#x2193;</span> to move<br>
+            <span>SPACE</span> to ROAR! &nbsp; <span>SHIFT</span> to sprint<br>
+            Mouse to look around
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+    // ============ GAME STATE ============
+    let scene, camera, renderer, clock;
+    let trexGroup, trexPivot, trexModel;
+    let isPlaying = false;
+    let score = 0, foodCollected = 0;
+    let moveForward = false, moveBack = false, moveLeft = false, moveRight = false;
+    let isSprinting = false;
+    const WALK_SPEED = 12;
+    const SPRINT_SPEED = 22;
+    const TURN_SPEED = 3;
+    const MAP_SIZE = 200; // total map radius
+    let trexX = 0, trexZ = 0, trexAngle = 0;
+
+    // Camera
+    let cameraAngleX = 0, cameraAngleY = 0.3;
+    let cameraDist = 14;
+    let isMouseDown = false;
+
+    // World objects
+    let trees = [];
+    let rocks = [];
+    let foodItems = [];
+    let footprints = [];
+    let exploredCells = new Set();
+    const GRID_SIZE = 10; // exploration grid cell size
+    const TOTAL_CELLS = Math.pow(Math.floor(MAP_SIZE * 2 / GRID_SIZE), 2);
+
+    // Roar
+    let roarCooldown = 0;
+    let audioCtx;
+
+    // Raptor packs
+    let raptorPacks = [];
+    let raptorTemplate = null; // loaded GLB scene to clone
+
+    // Triceratops herds
+    let triceratopsHerds = [];
+    let triceratopsTemplate = null;
+    let triceratopsYOffset = 0;
+
+    // Placeholder
+    let trexLoaded = false;
+    let trexPlaceholder;
+    let trexMixer = null; // for GLB embedded animations
+
+    // Vertex deformation walk animation
+    let walkMeshes = []; // {mesh, origPositions, box} for each mesh in the model
+    let trexYOffset = 0; // how much to lift the model above ground
+
+    function getAudioCtx() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return audioCtx;
+    }
+
+    // ============ SOUNDS ============
+    function playRoarSound() {
+        const ctx = getAudioCtx();
+        // Deep roar with harmonics
+        for (let i = 0; i < 3; i++) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(80 - i * 20, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40 - i * 10, ctx.currentTime + 0.8);
+            gain.gain.setValueAtTime(0.15 - i * 0.03, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.0);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(ctx.currentTime + i * 0.05);
+            osc.stop(ctx.currentTime + 1.0);
+        }
+        // Noise burst
+        const bufSize = ctx.sampleRate * 0.5;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.3;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const nGain = ctx.createGain();
+        nGain.gain.setValueAtTime(0.08, ctx.currentTime);
+        nGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 300;
+        noise.connect(filter).connect(nGain).connect(ctx.destination);
+        noise.start(); noise.stop(ctx.currentTime + 0.6);
+    }
+
+    function playEatSound() {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.2);
+    }
+
+    function playStepSound() {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = 50 + Math.random() * 30;
+        gain.gain.setValueAtTime(0.04, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.1);
+    }
+
+    function playStompSound() {
+        const ctx = getAudioCtx();
+        // Heavy impact thud
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(60, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(25, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+        // Crunch noise
+        const bufSize = ctx.sampleRate * 0.2;
+        const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufSize; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const nGain = ctx.createGain();
+        nGain.gain.setValueAtTime(0.12, ctx.currentTime);
+        nGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 800;
+        noise.connect(filter).connect(nGain).connect(ctx.destination);
+        noise.start(); noise.stop(ctx.currentTime + 0.2);
+    }
+
+    let evaporateParticles = [];
+
+    function createEvaporateEffect(pos) {
+        // Burst of particles that rise and fade — like the raptor vaporizing
+        const colors = [0xff6600, 0xff8833, 0xffaa00, 0xff4400, 0xffcc44];
+        for (let i = 0; i < 25; i++) {
+            const geo = new THREE.SphereGeometry(0.15 + Math.random() * 0.25, 6, 4);
+            const mat = new THREE.MeshBasicMaterial({
+                color: colors[Math.floor(Math.random() * colors.length)],
+                transparent: true,
+                opacity: 1
+            });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(pos);
+            p.position.x += (Math.random() - 0.5) * 2;
+            p.position.y += Math.random() * 2;
+            p.position.z += (Math.random() - 0.5) * 2;
+            p.userData = {
+                vel: new THREE.Vector3(
+                    (Math.random() - 0.5) * 0.15,
+                    0.08 + Math.random() * 0.15,
+                    (Math.random() - 0.5) * 0.15
+                ),
+                life: 1.0
+            };
+            scene.add(p);
+            evaporateParticles.push(p);
+        }
+    }
+
+    function updateEvaporateParticles(delta) {
+        for (let i = evaporateParticles.length - 1; i >= 0; i--) {
+            const p = evaporateParticles[i];
+            p.position.add(p.userData.vel);
+            p.userData.vel.y += 0.002; // float upward
+            p.userData.life -= delta * 1.5;
+            p.material.opacity = Math.max(0, p.userData.life);
+            p.scale.multiplyScalar(0.98);
+            if (p.userData.life <= 0) {
+                scene.remove(p);
+                evaporateParticles.splice(i, 1);
+            }
+        }
+    }
+
+    // ============ INIT ============
+    function init() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87ceeb);
+        scene.fog = new THREE.Fog(0x87ceeb, 80, 200);
+
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 500);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        clock = new THREE.Clock();
+
+        setupLighting();
+        buildTerrain();
+        buildTrex();
+        populateWorld();
+        loadRaptorTemplate();
+        loadTriceratopsTemplate();
+
+        // Controls
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('keyup', onKeyUp);
+        window.addEventListener('resize', onResize);
+        renderer.domElement.addEventListener('mousedown', (e) => { isMouseDown = true; });
+        window.addEventListener('mouseup', () => { isMouseDown = false; });
+        renderer.domElement.addEventListener('mousemove', onMouseMove);
+        renderer.domElement.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Touch controls
+        setupTouchControls();
+
+        animate();
+    }
+
+    function setupLighting() {
+        scene.add(new THREE.AmbientLight(0xffeedd, 0.6));
+
+        const sun = new THREE.DirectionalLight(0xfff0cc, 1.5);
+        sun.position.set(50, 80, 30);
+        sun.castShadow = true;
+        sun.shadow.mapSize.set(2048, 2048);
+        sun.shadow.camera.near = 1;
+        sun.shadow.camera.far = 200;
+        sun.shadow.camera.left = -60;
+        sun.shadow.camera.right = 60;
+        sun.shadow.camera.top = 60;
+        sun.shadow.camera.bottom = -60;
+        scene.add(sun);
+
+        // Warm fill
+        const fill = new THREE.DirectionalLight(0xffaa44, 0.3);
+        fill.position.set(-30, 20, -40);
+        scene.add(fill);
+
+        // Hemisphere light for sky/ground
+        const hemi = new THREE.HemisphereLight(0x87ceeb, 0x556b2f, 0.4);
+        scene.add(hemi);
+    }
+
+    function getTerrainHeight(x, z) {
+        let h = Math.sin(x * 0.02) * Math.cos(z * 0.015) * 3
+              + Math.sin(x * 0.05 + 1) * Math.cos(z * 0.04) * 1.5
+              + Math.sin(x * 0.1) * Math.sin(z * 0.08) * 0.5;
+
+        // Match beach slope from buildTerrain
+        const BEACH_START = MAP_SIZE * 0.75;
+        const BEACH_END = MAP_SIZE * 1.1;
+        const distFromCenter = Math.sqrt(x * x + z * z);
+        if (distFromCenter > BEACH_START) {
+            const beachFactor = Math.min(1, (distFromCenter - BEACH_START) / (BEACH_END - BEACH_START));
+            h = h * (1 - beachFactor) + (-0.5 * beachFactor);
+        }
+        return h;
+    }
+
+    function buildTerrain() {
+        // Ground plane with vertex colors for grass → sand transition
+        const groundGeo = new THREE.PlaneGeometry(MAP_SIZE * 2.5, MAP_SIZE * 2.5, 100, 100);
+        const verts = groundGeo.attributes.position;
+        const colors = new Float32Array(verts.count * 3);
+
+        const grassColor = { r: 0.29, g: 0.49, b: 0.14 };
+        const sandColor = { r: 0.93, g: 0.87, b: 0.68 };
+        const BEACH_START = MAP_SIZE * 0.75; // where sand starts
+        const BEACH_END = MAP_SIZE * 1.1;    // fully sand
+
+        for (let i = 0; i < verts.count; i++) {
+            const x = verts.getX(i);
+            const y = verts.getY(i);
+            const distFromCenter = Math.sqrt(x * x + y * y);
+
+            // Height: flatten toward beach, slope down to water
+            let height = getTerrainHeight(x, y);
+            if (distFromCenter > BEACH_START) {
+                const beachFactor = Math.min(1, (distFromCenter - BEACH_START) / (BEACH_END - BEACH_START));
+                height = height * (1 - beachFactor) + (-0.5 * beachFactor); // slope to water
+            }
+            verts.setZ(i, height);
+
+            // Color: grass → sand blend
+            const sandFactor = Math.max(0, Math.min(1, (distFromCenter - BEACH_START) / (BEACH_END - BEACH_START * 0.8)));
+            colors[i * 3] = grassColor.r + (sandColor.r - grassColor.r) * sandFactor;
+            colors[i * 3 + 1] = grassColor.g + (sandColor.g - grassColor.g) * sandFactor;
+            colors[i * 3 + 2] = grassColor.b + (sandColor.b - grassColor.b) * sandFactor;
+        }
+        groundGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        groundGeo.computeVertexNormals();
+
+        const groundMat = new THREE.MeshPhongMaterial({
+            vertexColors: true,
+            shininess: 5,
+            flatShading: true
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Ocean ring around the island
+        const oceanGeo = new THREE.RingGeometry(MAP_SIZE * 1.05, MAP_SIZE * 2.5, 64, 4);
+        const oceanMat = new THREE.MeshPhongMaterial({
+            color: 0x1199bb,
+            shininess: 120,
+            specular: 0x88ddff,
+            transparent: true,
+            opacity: 0.8,
+            side: THREE.DoubleSide
+        });
+        const ocean = new THREE.Mesh(oceanGeo, oceanMat);
+        ocean.rotation.x = -Math.PI / 2;
+        ocean.position.y = -0.3;
+        scene.add(ocean);
+
+        // Surf foam ring at water's edge
+        const foamGeo = new THREE.RingGeometry(MAP_SIZE * 0.98, MAP_SIZE * 1.08, 64, 2);
+        const foamMat = new THREE.MeshBasicMaterial({
+            color: 0xeeffff,
+            transparent: true,
+            opacity: 0.35,
+            side: THREE.DoubleSide
+        });
+        const foam = new THREE.Mesh(foamGeo, foamMat);
+        foam.rotation.x = -Math.PI / 2;
+        foam.position.y = -0.1;
+        foam.name = 'foam';
+        scene.add(foam);
+
+        // Dirt patches (inland only)
+        for (let i = 0; i < 30; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = Math.random() * BEACH_START * 0.8;
+            const patchGeo = new THREE.CircleGeometry(3 + Math.random() * 8, 8);
+            const patchMat = new THREE.MeshPhongMaterial({
+                color: [0x8B7355, 0x6B5B3A, 0x7B6B45][Math.floor(Math.random() * 3)],
+                shininess: 2
+            });
+            const patch = new THREE.Mesh(patchGeo, patchMat);
+            patch.rotation.x = -Math.PI / 2;
+            patch.position.set(Math.cos(angle) * dist, 0.05, Math.sin(angle) * dist);
+            scene.add(patch);
+        }
+
+        // Water ponds (inland)
+        const pondGeo = new THREE.CircleGeometry(15, 32);
+        const pondMat = new THREE.MeshPhongMaterial({
+            color: 0x2288aa,
+            shininess: 120,
+            specular: 0x88ccff,
+            transparent: true,
+            opacity: 0.7
+        });
+        const pond = new THREE.Mesh(pondGeo, pondMat);
+        pond.rotation.x = -Math.PI / 2;
+        pond.position.set(40, 0.1, -30);
+        scene.add(pond);
+
+        const pond2 = pond.clone();
+        pond2.scale.set(0.7, 0.7, 0.7);
+        pond2.position.set(-60, 0.1, 50);
+        scene.add(pond2);
+    }
+
+    // ============ TREES ============
+    function buildTree(x, z) {
+        const g = new THREE.Group();
+        const treeType = Math.random();
+
+        if (treeType < 0.4) {
+            // Palm tree
+            const trunkGeo = new THREE.CylinderGeometry(0.3, 0.5, 8 + Math.random() * 4, 8);
+            const trunkMat = new THREE.MeshPhongMaterial({ color: 0x8B6914 });
+            const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+            trunk.position.y = 4;
+            trunk.castShadow = true;
+            g.add(trunk);
+
+            // Fronds
+            for (let i = 0; i < 6; i++) {
+                const frondGeo = new THREE.PlaneGeometry(1.5, 6);
+                const frondMat = new THREE.MeshPhongMaterial({
+                    color: 0x228B22,
+                    side: THREE.DoubleSide
+                });
+                const frond = new THREE.Mesh(frondGeo, frondMat);
+                frond.position.y = 8 + Math.random() * 2;
+                frond.rotation.y = (i / 6) * Math.PI * 2;
+                frond.rotation.x = -0.5 - Math.random() * 0.4;
+                frond.castShadow = true;
+                g.add(frond);
+            }
+        } else if (treeType < 0.7) {
+            // Conifer / prehistoric fern tree
+            const trunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 6, 6);
+            const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshPhongMaterial({ color: 0x654321 }));
+            trunk.position.y = 3;
+            trunk.castShadow = true;
+            g.add(trunk);
+
+            for (let layer = 0; layer < 4; layer++) {
+                const coneGeo = new THREE.ConeGeometry(3 - layer * 0.5, 3, 8);
+                const cone = new THREE.Mesh(coneGeo, new THREE.MeshPhongMaterial({
+                    color: [0x2d5a1e, 0x1e4a10, 0x3a6b2a][Math.floor(Math.random() * 3)]
+                }));
+                cone.position.y = 4 + layer * 2;
+                cone.castShadow = true;
+                g.add(cone);
+            }
+        } else {
+            // Prehistoric fern / cycad
+            const trunkGeo = new THREE.CylinderGeometry(0.6, 0.8, 3, 8);
+            const trunk = new THREE.Mesh(trunkGeo, new THREE.MeshPhongMaterial({ color: 0x5a3a1a }));
+            trunk.position.y = 1.5;
+            g.add(trunk);
+
+            for (let i = 0; i < 8; i++) {
+                const leafGeo = new THREE.PlaneGeometry(1, 4);
+                const leaf = new THREE.Mesh(leafGeo, new THREE.MeshPhongMaterial({
+                    color: 0x33aa33, side: THREE.DoubleSide
+                }));
+                leaf.position.y = 3;
+                leaf.rotation.y = (i / 8) * Math.PI * 2;
+                leaf.rotation.x = -0.8;
+                g.add(leaf);
+            }
+        }
+
+        g.position.set(x, 0, z);
+        const s = 0.8 + Math.random() * 0.6;
+        g.scale.set(s, s, s);
+        g.userData = { type: 'tree', radius: 1.5 };
+        scene.add(g);
+        trees.push(g);
+    }
+
+    function buildRock(x, z) {
+        const g = new THREE.Group();
+        const numParts = 1 + Math.floor(Math.random() * 3);
+
+        for (let i = 0; i < numParts; i++) {
+            const rockGeo = new THREE.DodecahedronGeometry(1 + Math.random() * 2, 0);
+            const rockMat = new THREE.MeshPhongMaterial({
+                color: [0x888888, 0x777766, 0x999988, 0x665555][Math.floor(Math.random() * 4)],
+                flatShading: true
+            });
+            const rock = new THREE.Mesh(rockGeo, rockMat);
+            rock.position.set(i * 1.5, Math.random() * 0.5, (Math.random() - 0.5) * 2);
+            rock.rotation.set(Math.random(), Math.random(), Math.random());
+            rock.scale.y = 0.5 + Math.random() * 0.5;
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            g.add(rock);
+        }
+
+        g.position.set(x, 0, z);
+        g.userData = { type: 'rock', radius: 2 };
+        scene.add(g);
+        rocks.push(g);
+    }
+
+    function buildFood(x, z) {
+        const g = new THREE.Group();
+
+        // Meat / prehistoric prey indicator (glowing orb)
+        const orbGeo = new THREE.SphereGeometry(0.5, 12, 8);
+        const orbMat = new THREE.MeshPhongMaterial({
+            color: 0xff4422,
+            emissive: 0xff2200,
+            emissiveIntensity: 0.3,
+            shininess: 80
+        });
+        const orb = new THREE.Mesh(orbGeo, orbMat);
+        orb.position.y = 1.5;
+        orb.castShadow = true;
+        g.add(orb);
+
+        // Glow ring
+        const ringGeo = new THREE.TorusGeometry(0.8, 0.06, 8, 16);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xff6644,
+            transparent: true,
+            opacity: 0.4
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.y = 1.5;
+        ring.rotation.x = Math.PI / 2;
+        g.add(ring);
+
+        // Point light
+        const light = new THREE.PointLight(0xff4422, 0.5, 8);
+        light.position.y = 1.5;
+        g.add(light);
+
+        g.position.set(x, 0, z);
+        g.userData = { type: 'food', collected: false, bobPhase: Math.random() * Math.PI * 2 };
+        scene.add(g);
+        foodItems.push(g);
+    }
+
+    function populateWorld() {
+        // Trees
+        for (let i = 0; i < 120; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 15 + Math.random() * (MAP_SIZE - 20);
+            buildTree(Math.cos(angle) * dist, Math.sin(angle) * dist);
+        }
+
+        // Rocks
+        for (let i = 0; i < 50; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 10 + Math.random() * (MAP_SIZE - 15);
+            buildRock(Math.cos(angle) * dist, Math.sin(angle) * dist);
+        }
+
+        // Food items scattered around
+        for (let i = 0; i < 30; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 8 + Math.random() * (MAP_SIZE - 15);
+            buildFood(Math.cos(angle) * dist, Math.sin(angle) * dist);
+        }
+    }
+
+    // ============ MODEL POSITIONING HELPER ============
+    // Finds the true world-space lowest Y vertex after scaling,
+    // then positions model so feet sit exactly at y=0 in its parent group.
+    function prepareModelTemplate(model, targetSize) {
+        // Scale uniformly
+        const box = new THREE.Box3().setFromObject(model);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const s = targetSize / maxDim;
+        model.scale.set(s, s, s);
+
+        // Force world matrix update on every child
+        model.updateMatrixWorld(true);
+
+        // Find the TRUE lowest Y by scanning all vertex positions in world space
+        let trueMinY = Infinity;
+        let trueMaxY = -Infinity;
+        let totalVerts = 0;
+        const worldPos = new THREE.Vector3();
+
+        model.traverse(function(child) {
+            if (child.isMesh && child.geometry) {
+                const pos = child.geometry.attributes.position;
+                if (!pos) return;
+                for (let i = 0; i < pos.count; i++) {
+                    worldPos.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+                    child.localToWorld(worldPos);
+                    if (worldPos.y < trueMinY) trueMinY = worldPos.y;
+                    if (worldPos.y > trueMaxY) trueMaxY = worldPos.y;
+                }
+                totalVerts += pos.count;
+            }
+        });
+
+        // Compute center for x/z centering
+        const scaledBox = new THREE.Box3().setFromObject(model);
+        const scaledCenter = new THREE.Vector3();
+        scaledBox.getCenter(scaledCenter);
+
+        // Position: center on x/z, lift so true lowest vertex is at y=0
+        const yOffset = -trueMinY;
+        model.position.set(-scaledCenter.x, yOffset, -scaledCenter.z);
+
+        console.log('Model prepared: ' + totalVerts + ' verts, trueMinY=' + trueMinY.toFixed(3) +
+            ', trueMaxY=' + trueMaxY.toFixed(3) + ', yOffset=' + yOffset.toFixed(3) +
+            ', height=' + (trueMaxY - trueMinY).toFixed(3));
+
+        model.traverse(function(child) {
+            if (child.isMesh) child.castShadow = true;
+        });
+
+        return yOffset;
+    }
+
+    // ============ RAPTOR PACKS ============
+    let raptorYOffset = 0;
+
+    function loadRaptorTemplate() {
+        const loader = new THREE.GLTFLoader();
+        loader.load('raptor-model.glb', function(gltf) {
+            raptorTemplate = new THREE.Group();
+            const model = gltf.scene;
+
+            raptorYOffset = prepareModelTemplate(model, 2.5);
+            console.log('Raptor template loaded, yOffset:', raptorYOffset);
+
+            raptorTemplate.add(model);
+            spawnRaptorPacks();
+        });
+    }
+
+    function cloneWithUniqueGeometry(source) {
+        const cloned = source.clone(true); // deep clone
+        // Give each mesh its own geometry copy so vertex deformation is independent
+        const srcMeshes = [];
+        source.traverse(function(child) { if (child.isMesh) srcMeshes.push(child); });
+        let idx = 0;
+        cloned.traverse(function(child) {
+            if (child.isMesh) {
+                // Clone geometry for independent vertex animation
+                if (srcMeshes[idx]) {
+                    child.geometry = srcMeshes[idx].geometry.clone();
+                    child.material = srcMeshes[idx].material.clone();
+                }
+                idx++;
+            }
+        });
+        return cloned;
+    }
+
+    function setupRaptorWalkMeshes(raptor) {
+        const meshes = [];
+        raptor.traverse(function(child) {
+            if (child.isMesh && child.geometry) {
+                const geo = child.geometry;
+                const pos = geo.attributes.position;
+                if (!pos) return;
+                const origPositions = new Float32Array(pos.array.length);
+                origPositions.set(pos.array);
+                geo.computeBoundingBox();
+                meshes.push({
+                    mesh: child,
+                    origPositions: origPositions,
+                    box: geo.boundingBox.clone()
+                });
+            }
+        });
+        return meshes;
+    }
+
+    function spawnRaptorPacks() {
+        // Create 5 packs of 3-5 raptors each
+        for (let p = 0; p < 5; p++) {
+            const packAngle = Math.random() * Math.PI * 2;
+            // First pack spawns close so player can see them right away
+            const packDist = p === 0 ? 15 + Math.random() * 15 : 30 + Math.random() * (MAP_SIZE - 50);
+            const packX = Math.cos(packAngle) * packDist;
+            const packZ = Math.sin(packAngle) * packDist;
+            const packSize = 3 + Math.floor(Math.random() * 3);
+
+            const pack = {
+                members: [],
+                targetX: packX + (Math.random() - 0.5) * 40,
+                targetZ: packZ + (Math.random() - 0.5) * 40,
+                wanderTimer: 0,
+                fleeing: false,
+                fleeTimer: 0
+            };
+
+            for (let i = 0; i < packSize; i++) {
+                const raptor = cloneWithUniqueGeometry(raptorTemplate);
+                const offsetX = packX + (Math.random() - 0.5) * 6;
+                const offsetZ = packZ + (Math.random() - 0.5) * 6;
+                const terrainY = getTerrainHeight(offsetX, offsetZ);
+                raptor.position.set(offsetX, terrainY, offsetZ);
+                raptor.rotation.y = Math.random() * Math.PI * 2;
+                scene.add(raptor);
+
+                // Set up vertex walk animation for this raptor
+                const raptorWalkMeshes = setupRaptorWalkMeshes(raptor);
+
+                pack.members.push({
+                    group: raptor,
+                    x: offsetX,
+                    z: offsetZ,
+                    angle: raptor.rotation.y,
+                    speed: 6 + Math.random() * 3,
+                    phase: Math.random() * Math.PI * 2,
+                    walkMeshes: raptorWalkMeshes
+                });
+            }
+
+            raptorPacks.push(pack);
+        }
+    }
+
+    function updateRaptorPacks(delta) {
+        raptorPacks.forEach(function(pack) {
+            // Pick new wander target periodically
+            pack.wanderTimer -= delta;
+            if (pack.wanderTimer <= 0) {
+                pack.wanderTimer = 4 + Math.random() * 6;
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 20 + Math.random() * 30;
+                // Wander near current center
+                const cx = pack.members.reduce((s, m) => s + m.x, 0) / pack.members.length;
+                const cz = pack.members.reduce((s, m) => s + m.z, 0) / pack.members.length;
+                pack.targetX = cx + Math.cos(angle) * dist;
+                pack.targetZ = cz + Math.sin(angle) * dist;
+                // Clamp to map
+                const d = Math.sqrt(pack.targetX * pack.targetX + pack.targetZ * pack.targetZ);
+                if (d > MAP_SIZE - 20) {
+                    pack.targetX *= (MAP_SIZE - 20) / d;
+                    pack.targetZ *= (MAP_SIZE - 20) / d;
+                }
+            }
+
+            // Check if T-Rex is near — flee!
+            const cx = pack.members.reduce((s, m) => s + m.x, 0) / pack.members.length;
+            const cz = pack.members.reduce((s, m) => s + m.z, 0) / pack.members.length;
+            const dxPlayer = trexX - cx;
+            const dzPlayer = trexZ - cz;
+            const distToPlayer = Math.sqrt(dxPlayer * dxPlayer + dzPlayer * dzPlayer);
+
+            if (distToPlayer < 20) {
+                pack.fleeing = true;
+                pack.fleeTimer = 3;
+                // Flee away from player
+                const fleeAngle = Math.atan2(-dxPlayer, -dzPlayer);
+                pack.targetX = cx + Math.sin(fleeAngle) * 40;
+                pack.targetZ = cz + Math.cos(fleeAngle) * 40;
+            }
+            if (pack.fleeing) {
+                pack.fleeTimer -= delta;
+                if (pack.fleeTimer <= 0) pack.fleeing = false;
+            }
+
+            // Move each raptor toward pack target
+            pack.members.forEach(function(member) {
+                const tx = pack.targetX + Math.sin(member.phase) * 3;
+                const tz = pack.targetZ + Math.cos(member.phase) * 3;
+                const dx = tx - member.x;
+                const dz = tz - member.z;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                let isMoving = false;
+
+                if (dist > 1) {
+                    isMoving = true;
+                    const targetAngle = Math.atan2(dx, dz);
+                    let angleDiff = targetAngle - member.angle;
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                    member.angle += angleDiff * 3 * delta;
+
+                    const spd = pack.fleeing ? member.speed * 2 : member.speed;
+                    member.x += Math.sin(member.angle) * spd * delta;
+                    member.z += Math.cos(member.angle) * spd * delta;
+
+                    const md = Math.sqrt(member.x * member.x + member.z * member.z);
+                    if (md > MAP_SIZE) {
+                        member.x *= MAP_SIZE / md;
+                        member.z *= MAP_SIZE / md;
+                    }
+
+                    const bobSpeed = pack.fleeing ? 14 : 9;
+                    const terrainY = getTerrainHeight(member.x, member.z);
+                    member.group.position.set(
+                        member.x,
+                        terrainY + Math.abs(Math.sin(Date.now() * 0.001 * bobSpeed + member.phase)) * 0.15,
+                        member.z
+                    );
+                    member.group.rotation.y = member.angle;
+                } else {
+                    const terrainY = getTerrainHeight(member.x, member.z);
+                    member.group.position.set(member.x, terrainY, member.z);
+                    member.group.position.y = terrainY + Math.sin(Date.now() * 0.002 + member.phase) * 0.03;
+                }
+
+                // Vertex walk animation for this raptor
+                animateRaptorWalk(member.walkMeshes, isMoving, pack.fleeing, member.phase);
+            });
+        });
+    }
+
+    // ============ TRICERATOPS HERDS ============
+    function loadTriceratopsTemplate() {
+        const loader = new THREE.GLTFLoader();
+        loader.load('triceratops-model.glb', function(gltf) {
+            triceratopsTemplate = new THREE.Group();
+            const model = gltf.scene;
+
+            triceratopsYOffset = prepareModelTemplate(model, 6.0);
+            console.log('Triceratops template loaded, yOffset:', triceratopsYOffset);
+
+            triceratopsTemplate.add(model);
+            spawnTriceratopsHerds();
+        }, undefined, function(error) {
+            console.warn('Triceratops GLB load failed:', error);
+        });
+    }
+
+    function spawnTriceratopsHerds() {
+        // Log Y offset for debugging
+        console.log('Spawning triceratops herds, yOffset:', triceratopsYOffset);
+
+        for (let h = 0; h < 3; h++) {
+            const herdAngle = (h / 3) * Math.PI * 2 + Math.random() * 0.5;
+            const herdDist = 30 + Math.random() * (MAP_SIZE * 0.5);
+            const herdX = Math.cos(herdAngle) * herdDist;
+            const herdZ = Math.sin(herdAngle) * herdDist;
+            const herdSize = 2 + Math.floor(Math.random() * 2); // 2-3 per herd
+
+            const herd = {
+                members: [],
+                targetX: herdX + (Math.random() - 0.5) * 30,
+                targetZ: herdZ + (Math.random() - 0.5) * 30,
+                wanderTimer: 0,
+                fleeing: false,
+                fleeTimer: 0
+            };
+
+            for (let i = 0; i < herdSize; i++) {
+                const tri = cloneWithUniqueGeometry(triceratopsTemplate);
+                const offsetX = herdX + (Math.random() - 0.5) * 8;
+                const offsetZ = herdZ + (Math.random() - 0.5) * 8;
+                const terrainY = getTerrainHeight(offsetX, offsetZ);
+                tri.position.set(offsetX, terrainY, offsetZ);
+                tri.rotation.y = Math.random() * Math.PI * 2;
+                scene.add(tri);
+
+                const triWalkMeshes = setupRaptorWalkMeshes(tri);
+                console.log('Triceratops #' + (h * 3 + i) + ' at y=' + terrainY + ' walkMeshes=' + triWalkMeshes.length);
+
+                herd.members.push({
+                    group: tri,
+                    x: offsetX,
+                    z: offsetZ,
+                    angle: tri.rotation.y,
+                    speed: 3 + Math.random() * 2,
+                    phase: Math.random() * Math.PI * 2,
+                    walkMeshes: triWalkMeshes
+                });
+            }
+
+            triceratopsHerds.push(herd);
+        }
+    }
+
+    let triAnimFrame = 0;
+    function updateTriceratopsHerds(delta) {
+        triAnimFrame++;
+        const doVertexAnim = (triAnimFrame % 3 === 0); // only every 3rd frame
+        triceratopsHerds.forEach(function(herd) {
+            herd.wanderTimer -= delta;
+            if (herd.wanderTimer <= 0) {
+                herd.wanderTimer = 6 + Math.random() * 10; // slower wander changes
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 15 + Math.random() * 25;
+                const cx = herd.members.reduce((s, m) => s + m.x, 0) / herd.members.length;
+                const cz = herd.members.reduce((s, m) => s + m.z, 0) / herd.members.length;
+                herd.targetX = cx + Math.cos(angle) * dist;
+                herd.targetZ = cz + Math.sin(angle) * dist;
+                const d = Math.sqrt(herd.targetX * herd.targetX + herd.targetZ * herd.targetZ);
+                if (d > MAP_SIZE * 0.7) {
+                    herd.targetX *= (MAP_SIZE * 0.7) / d;
+                    herd.targetZ *= (MAP_SIZE * 0.7) / d;
+                }
+            }
+
+            // Check proximity to T-Rex — triceratops are less skittish than raptors
+            const cx = herd.members.reduce((s, m) => s + m.x, 0) / herd.members.length;
+            const cz = herd.members.reduce((s, m) => s + m.z, 0) / herd.members.length;
+            const dxP = trexX - cx;
+            const dzP = trexZ - cz;
+            const distToPlayer = Math.sqrt(dxP * dxP + dzP * dzP);
+
+            if (distToPlayer < 12) { // closer range than raptors
+                herd.fleeing = true;
+                herd.fleeTimer = 2;
+                const fleeAngle = Math.atan2(-dxP, -dzP);
+                herd.targetX = cx + Math.sin(fleeAngle) * 30;
+                herd.targetZ = cz + Math.cos(fleeAngle) * 30;
+            }
+            if (herd.fleeing) {
+                herd.fleeTimer -= delta;
+                if (herd.fleeTimer <= 0) herd.fleeing = false;
+            }
+
+            herd.members.forEach(function(member) {
+                const tx = herd.targetX + Math.sin(member.phase) * 4;
+                const tz = herd.targetZ + Math.cos(member.phase) * 4;
+                const dx = tx - member.x;
+                const dz = tz - member.z;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+
+                let isMoving = false;
+
+                if (dist > 1.5) {
+                    isMoving = true;
+                    const targetAngle = Math.atan2(dx, dz);
+                    let angleDiff = targetAngle - member.angle;
+                    while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
+                    while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+                    member.angle += angleDiff * 2 * delta;
+
+                    const spd = herd.fleeing ? member.speed * 1.5 : member.speed;
+                    member.x += Math.sin(member.angle) * spd * delta;
+                    member.z += Math.cos(member.angle) * spd * delta;
+
+                    const md = Math.sqrt(member.x * member.x + member.z * member.z);
+                    if (md > MAP_SIZE * 0.85) {
+                        member.x *= (MAP_SIZE * 0.85) / md;
+                        member.z *= (MAP_SIZE * 0.85) / md;
+                    }
+
+                    const bobSpeed = herd.fleeing ? 8 : 5;
+                    const terrainY = getTerrainHeight(member.x, member.z);
+                    member.group.position.set(
+                        member.x,
+                        terrainY + Math.abs(Math.sin(Date.now() * 0.001 * bobSpeed + member.phase)) * 0.15,
+                        member.z
+                    );
+                    member.group.rotation.y = member.angle;
+                } else {
+                    const terrainY = getTerrainHeight(member.x, member.z);
+                    member.group.position.y = terrainY + Math.sin(Date.now() * 0.0015 + member.phase) * 0.03;
+                }
+
+                // Vertex walk animation — throttled for performance
+                if (doVertexAnim) {
+                    animateRaptorWalk(member.walkMeshes, isMoving, herd.fleeing, member.phase);
+                }
+            });
+        });
+    }
+
+    // ============ T-REX ============
+    function buildTrex() {
+        trexGroup = new THREE.Group();
+        trexPivot = new THREE.Group();
+        trexGroup.add(trexPivot);
+
+        // Placeholder T-Rex
+        trexPlaceholder = buildPlaceholderTrex();
+        trexPivot.add(trexPlaceholder);
+
+        trexGroup.position.set(0, 0, 0);
+        scene.add(trexGroup);
+
+        // Load GLB
+        const loader = new THREE.GLTFLoader();
+        document.getElementById('loading-screen').classList.remove('hidden');
+
+        loader.load('trex-model.glb', function(gltf) {
+            trexModel = gltf.scene;
+
+            trexYOffset = prepareModelTemplate(trexModel, 5);
+            trexModel.traverse(function(child) {
+                if (child.isMesh) child.receiveShadow = true;
+            });
+
+            trexPivot.remove(trexPlaceholder);
+            trexPivot.add(trexModel);
+            trexLoaded = true;
+
+            // Check for embedded animations
+            if (gltf.animations && gltf.animations.length > 0) {
+                trexMixer = new THREE.AnimationMixer(trexModel);
+                gltf.animations.forEach(clip => {
+                    trexMixer.clipAction(clip).play();
+                });
+                console.log('Playing ' + gltf.animations.length + ' embedded animations');
+            }
+
+            // Set up vertex deformation walk animation
+            setupWalkAnimation(trexModel);
+
+            // Show start screen
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+
+        }, function(progress) {
+            if (progress.total > 0) {
+                const pct = Math.round((progress.loaded / progress.total) * 100);
+                document.getElementById('loading-bar').style.width = pct + '%';
+                document.getElementById('loading-text').textContent = 'Loading T-Rex... ' + pct + '%';
+            }
+        }, function(error) {
+            console.warn('GLB load failed, using placeholder:', error);
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        });
+    }
+
+    function buildPlaceholderTrex() {
+        const g = new THREE.Group();
+        const mat = new THREE.MeshPhongMaterial({ color: 0x556633, shininess: 30 });
+
+        // Body
+        const body = new THREE.Mesh(new THREE.SphereGeometry(1.5, 10, 8), mat);
+        body.scale.set(1.8, 1, 1);
+        body.position.y = 2.5;
+        g.add(body);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 6), mat);
+        head.position.set(2.2, 3.5, 0);
+        g.add(head);
+
+        // Snout
+        const snout = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 0.6), mat);
+        snout.position.set(3.0, 3.3, 0);
+        g.add(snout);
+
+        // Tail
+        const tail = new THREE.Mesh(new THREE.ConeGeometry(0.6, 3, 6), mat);
+        tail.position.set(-3, 2.5, 0);
+        tail.rotation.z = Math.PI / 2;
+        g.add(tail);
+
+        // Legs
+        for (const side of [-1, 1]) {
+            const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 2.5, 6), mat);
+            leg.position.set(0.3, 1, side * 0.8);
+            g.add(leg);
+        }
+
+        // Eyes
+        for (const side of [-1, 1]) {
+            const eye = new THREE.Mesh(
+                new THREE.SphereGeometry(0.15, 6, 4),
+                new THREE.MeshBasicMaterial({ color: 0xff4400 })
+            );
+            eye.position.set(2.6, 3.8, side * 0.5);
+            g.add(eye);
+        }
+
+        return g;
+    }
+
+    // ============ VERTEX WALK ANIMATION ============
+    function setupWalkAnimation(model) {
+        model.traverse(function(child) {
+            if (child.isMesh && child.geometry) {
+                const geo = child.geometry;
+                const pos = geo.attributes.position;
+                if (!pos) return;
+
+                // Store original vertex positions
+                const origPositions = new Float32Array(pos.array.length);
+                origPositions.set(pos.array);
+
+                // Get mesh bounding box in local space
+                geo.computeBoundingBox();
+                const box = geo.boundingBox.clone();
+
+                walkMeshes.push({
+                    mesh: child,
+                    origPositions: origPositions,
+                    box: box
+                });
+
+                console.log('Walk mesh: ' + (child.name || 'unnamed') +
+                    ' verts=' + pos.count +
+                    ' bounds y=[' + box.min.y.toFixed(2) + ',' + box.max.y.toFixed(2) + ']' +
+                    ' z=[' + box.min.z.toFixed(2) + ',' + box.max.z.toFixed(2) + ']');
+            }
+        });
+        console.log('Walk animation: ' + walkMeshes.length + ' meshes registered');
+    }
+
+    function animateWalk(moving, isSprinting) {
+        if (walkMeshes.length === 0) return;
+
+        const t = Date.now() * 0.001;
+        const walkSpeed = isSprinting ? 10 : 7;
+        const amplitude = moving ? (isSprinting ? 0.4 : 0.25) : 0;
+
+        walkMeshes.forEach(function(wm) {
+            const pos = wm.mesh.geometry.attributes.position;
+            const orig = wm.origPositions;
+            const box = wm.box;
+            const height = box.max.y - box.min.y;
+            const legThreshold = box.min.y + height * 0.45; // bottom 45% = legs
+            const tailThreshold = box.min.z + (box.max.z - box.min.z) * 0.15; // back 15% = tail
+            const headThreshold = box.min.z + (box.max.z - box.min.z) * 0.85; // front 15% = head
+            const midZ = (box.min.z + box.max.z) / 2;
+            const midX = (box.min.x + box.max.x) / 2;
+
+            for (let i = 0; i < pos.count; i++) {
+                const ox = orig[i * 3];
+                const oy = orig[i * 3 + 1];
+                const oz = orig[i * 3 + 2];
+
+                let dx = 0, dy = 0, dz = 0;
+
+                // LEG ANIMATION: vertices in the lower portion
+                if (oy < legThreshold) {
+                    // How deep into the leg region (0 at threshold, 1 at feet)
+                    const legFactor = Math.max(0, (legThreshold - oy) / (legThreshold - box.min.y));
+
+                    // Left vs right leg (by X position relative to center)
+                    const isLeft = ox < midX;
+                    const phase = isLeft ? 0 : Math.PI;
+
+                    // Front vs back leg (by Z position)
+                    const isFront = oz > midZ;
+                    const legPhase = isFront ? 0 : Math.PI * 0.5;
+
+                    // Swing forward/backward (Z displacement)
+                    const swing = Math.sin(t * walkSpeed + phase + legPhase) * amplitude * legFactor;
+                    dz += swing;
+
+                    // Lift up at mid-stride (Y displacement)
+                    const lift = Math.max(0, Math.sin(t * walkSpeed + phase + legPhase)) * amplitude * 0.5 * legFactor;
+                    dy += lift;
+                }
+
+                // TAIL ANIMATION: vertices at the back
+                if (oz < tailThreshold) {
+                    const tailFactor = Math.max(0, (tailThreshold - oz) / (tailThreshold - box.min.z));
+                    // Tail sway side to side
+                    const tailSwing = moving
+                        ? Math.sin(t * walkSpeed * 0.5) * 0.15 * tailFactor
+                        : Math.sin(t * 2) * 0.05 * tailFactor;
+                    dx += tailSwing;
+                }
+
+                // HEAD BOB: vertices at the front top
+                if (oz > headThreshold && oy > legThreshold) {
+                    const headFactor = (oz - headThreshold) / (box.max.z - headThreshold);
+                    // Head bobs up and down with steps
+                    const headBob = moving
+                        ? Math.sin(t * walkSpeed * 2) * 0.08 * headFactor
+                        : Math.sin(t * 1.5) * 0.03 * headFactor;
+                    dy += headBob;
+                }
+
+                // ARM SWING: upper body, left/right sides (small T-Rex arms)
+                if (oy > legThreshold && oy < box.min.y + height * 0.8) {
+                    const armRegion = Math.abs(ox - midX) / ((box.max.x - box.min.x) / 2);
+                    if (armRegion > 0.3 && oz > midZ) {
+                        const isLeftArm = ox < midX;
+                        const armPhase = isLeftArm ? 0 : Math.PI;
+                        const armSwing = moving
+                            ? Math.sin(t * walkSpeed + armPhase) * 0.1 * armRegion
+                            : 0;
+                        dz += armSwing;
+                    }
+                }
+
+                pos.setXYZ(i, ox + dx, oy + dy, oz + dz);
+            }
+
+            pos.needsUpdate = true;
+        });
+    }
+
+    function animateRaptorWalk(raptorMeshes, moving, fleeing, phaseOffset) {
+        if (!raptorMeshes || raptorMeshes.length === 0) return;
+
+        const t = Date.now() * 0.001;
+        const walkSpeed = fleeing ? 12 : 8;
+        const amplitude = moving ? (fleeing ? 0.35 : 0.2) : 0;
+
+        raptorMeshes.forEach(function(wm) {
+            const pos = wm.mesh.geometry.attributes.position;
+            const orig = wm.origPositions;
+            const box = wm.box;
+            const height = box.max.y - box.min.y;
+            const legThreshold = box.min.y + height * 0.45;
+            const tailThreshold = box.min.z + (box.max.z - box.min.z) * 0.15;
+            const midZ = (box.min.z + box.max.z) / 2;
+            const midX = (box.min.x + box.max.x) / 2;
+
+            for (let i = 0; i < pos.count; i++) {
+                const ox = orig[i * 3];
+                const oy = orig[i * 3 + 1];
+                const oz = orig[i * 3 + 2];
+                let dx = 0, dy = 0, dz = 0;
+
+                // Leg swing
+                if (oy < legThreshold) {
+                    const legFactor = Math.max(0, (legThreshold - oy) / (legThreshold - box.min.y));
+                    const isLeft = ox < midX;
+                    const phase = isLeft ? 0 : Math.PI;
+                    const isFront = oz > midZ;
+                    const legPhase = isFront ? 0 : Math.PI * 0.5;
+
+                    const swing = Math.sin(t * walkSpeed + phase + legPhase + phaseOffset) * amplitude * legFactor;
+                    dz += swing;
+                    const lift = Math.max(0, Math.sin(t * walkSpeed + phase + legPhase + phaseOffset)) * amplitude * 0.4 * legFactor;
+                    dy += lift;
+                }
+
+                // Tail sway
+                if (oz < tailThreshold) {
+                    const tailFactor = Math.max(0, (tailThreshold - oz) / (tailThreshold - box.min.z));
+                    dx += (moving ? Math.sin(t * walkSpeed * 0.5 + phaseOffset) * 0.12 : Math.sin(t * 2 + phaseOffset) * 0.04) * tailFactor;
+                }
+
+                pos.setXYZ(i, ox + dx, oy + dy, oz + dz);
+            }
+            pos.needsUpdate = true;
+        });
+    }
+
+    // ============ CONTROLS ============
+    function onKeyDown(e) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); moveForward = true; }
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') { e.preventDefault(); moveBack = true; }
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') { e.preventDefault(); moveLeft = true; }
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') { e.preventDefault(); moveRight = true; }
+        if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') isSprinting = true;
+        if (e.code === 'Space') { e.preventDefault(); tryRoar(); }
+    }
+
+    function onKeyUp(e) {
+        if (e.code === 'ArrowUp' || e.code === 'KeyW') moveForward = false;
+        if (e.code === 'ArrowDown' || e.code === 'KeyS') moveBack = false;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') moveLeft = false;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') moveRight = false;
+        if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') isSprinting = false;
+    }
+
+    function onMouseMove(e) {
+        if (!isMouseDown) return;
+        cameraAngleX -= e.movementX * 0.005;
+        cameraAngleY = Math.max(-0.2, Math.min(1.2, cameraAngleY + e.movementY * 0.005));
+    }
+
+    function setupTouchControls() {
+        const dirs = { up: 'moveForward', down: 'moveBack', left: 'moveLeft', right: 'moveRight' };
+        document.querySelectorAll('.touch-btn').forEach(btn => {
+            const dir = btn.dataset.dir;
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); window[dirs[dir]] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); window[dirs[dir]] = false; });
+        });
+        document.getElementById('touch-roar-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault(); tryRoar();
+        });
+    }
+
+    function tryRoar() {
+        if (!isPlaying || roarCooldown > 0) return;
+        roarCooldown = 2.0;
+        playRoarSound();
+
+        // Roar scares nearby food into bonus points
+        foodItems.forEach(f => {
+            if (f.userData.collected) return;
+            const dx = f.position.x - trexX;
+            const dz = f.position.z - trexZ;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+            if (dist < 15) {
+                score += 5;
+                document.getElementById('score-val').textContent = score;
+                const v = f.position.clone().project(camera);
+                const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                showPopup('+5 ROAR!', '#ff8800', sx, sy);
+            }
+        });
+
+        // Camera shake
+        cameraShake = 0.5;
+    }
+    let cameraShake = 0;
+
+    // ============ GAME LOOP ============
+    let stepTimer = 0;
+
+    function updateTrex(delta) {
+        if (!trexGroup) return;
+
+        const speed = isSprinting ? SPRINT_SPEED : WALK_SPEED;
+        let moving = false;
+
+        // Turn
+        if (moveLeft) { trexAngle += TURN_SPEED * delta; moving = true; }
+        if (moveRight) { trexAngle -= TURN_SPEED * delta; moving = true; }
+
+        // Forward/back
+        if (moveForward) {
+            trexX += Math.sin(trexAngle) * speed * delta;
+            trexZ += Math.cos(trexAngle) * speed * delta;
+            moving = true;
+        }
+        if (moveBack) {
+            trexX -= Math.sin(trexAngle) * speed * 0.5 * delta;
+            trexZ -= Math.cos(trexAngle) * speed * 0.5 * delta;
+            moving = true;
+        }
+
+        // Clamp to map
+        const dist = Math.sqrt(trexX * trexX + trexZ * trexZ);
+        if (dist > MAP_SIZE) {
+            trexX *= MAP_SIZE / dist;
+            trexZ *= MAP_SIZE / dist;
+        }
+
+        // Collision with trees/rocks
+        [...trees, ...rocks].forEach(obj => {
+            const dx = trexX - obj.position.x;
+            const dz = trexZ - obj.position.z;
+            const d = Math.sqrt(dx * dx + dz * dz);
+            const minDist = obj.userData.radius + 1.5;
+            if (d < minDist && d > 0) {
+                trexX = obj.position.x + (dx / d) * minDist;
+                trexZ = obj.position.z + (dz / d) * minDist;
+            }
+        });
+
+        // Place T-Rex on terrain surface (always above ground)
+        const terrainY = getTerrainHeight(trexX, trexZ);
+        trexGroup.position.set(trexX, terrainY, trexZ);
+        trexGroup.rotation.y = trexAngle;
+
+        // Update embedded animations if present
+        if (trexMixer) trexMixer.update(delta);
+
+        // Procedural body animation
+        if (moving) {
+            const bobSpeed = isSprinting ? 12 : 8;
+            const t = Date.now() * 0.001 * bobSpeed;
+
+            // Walking bob — up/down stomp (ADD to terrain height)
+            trexGroup.position.y = terrainY + Math.abs(Math.sin(t)) * 0.4;
+
+            // Body tilt side-to-side (weight shift)
+            const targetTiltZ = (moveLeft ? 0.08 : moveRight ? -0.08 : 0) + Math.sin(t) * 0.03;
+            trexPivot.rotation.z += (targetTiltZ - trexPivot.rotation.z) * 0.1;
+
+            // Lean forward when sprinting, slight pitch bob when walking
+            const targetTiltX = isSprinting ? 0.15 : Math.sin(t * 0.5) * 0.04;
+            trexPivot.rotation.x += (targetTiltX - trexPivot.rotation.x) * 0.1;
+
+            // Tail/body sway (Y rotation oscillation)
+            trexPivot.rotation.y = Math.sin(t * 0.5) * 0.06;
+
+            // Footstep sounds
+            stepTimer += delta * (isSprinting ? 2 : 1);
+            if (stepTimer > 0.35) {
+                stepTimer = 0;
+                playStepSound();
+            }
+        } else {
+            // Idle breathing / sway
+            const idleT = Date.now() * 0.001;
+            trexGroup.position.y = terrainY + Math.sin(idleT * 1.5) * 0.05;
+            trexPivot.rotation.x += (Math.sin(idleT * 0.8) * 0.02 - trexPivot.rotation.x) * 0.05;
+            trexPivot.rotation.z += (Math.sin(idleT * 0.6) * 0.01 - trexPivot.rotation.z) * 0.05;
+            trexPivot.rotation.y += (Math.sin(idleT * 0.4) * 0.03 - trexPivot.rotation.y) * 0.05;
+        }
+
+        // Animate walk cycle (vertex deformation)
+        animateWalk(moving, isSprinting);
+
+        // Collect food
+        for (let i = foodItems.length - 1; i >= 0; i--) {
+            const f = foodItems[i];
+            if (f.userData.collected) continue;
+            const dx = f.position.x - trexX;
+            const dz = f.position.z - trexZ;
+            if (Math.sqrt(dx * dx + dz * dz) < 2.5) {
+                f.userData.collected = true;
+                scene.remove(f);
+                foodCollected++;
+                score += 25;
+                document.getElementById('food-val').textContent = foodCollected;
+                document.getElementById('score-val').textContent = score;
+                playEatSound();
+
+                const v = f.position.clone().project(camera);
+                const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                showPopup('+25', '#ff4422', sx, sy);
+
+                // Respawn food elsewhere after delay
+                setTimeout(() => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = 20 + Math.random() * (MAP_SIZE - 25);
+                    buildFood(Math.cos(angle) * dist, Math.sin(angle) * dist);
+                }, 5000);
+            }
+        }
+
+        // Stomp raptors
+        raptorPacks.forEach(function(pack) {
+            for (let i = pack.members.length - 1; i >= 0; i--) {
+                const m = pack.members[i];
+                const dx = m.x - trexX;
+                const dz = m.z - trexZ;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                if (dist < 3) {
+                    // Evaporate effect — burst of particles
+                    const raptorPos = m.group.position.clone();
+                    createEvaporateEffect(raptorPos);
+
+                    // Remove raptor
+                    scene.remove(m.group);
+                    pack.members.splice(i, 1);
+
+                    // Points
+                    score += 50;
+                    document.getElementById('score-val').textContent = score;
+                    playStompSound();
+
+                    const v = raptorPos.project(camera);
+                    const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                    showPopup('+50 STOMP!', '#ff6600', sx, sy);
+                }
+            }
+        });
+
+        // Stomp triceratops
+        triceratopsHerds.forEach(function(herd) {
+            for (let i = herd.members.length - 1; i >= 0; i--) {
+                const m = herd.members[i];
+                const dx = m.x - trexX;
+                const dz = m.z - trexZ;
+                const dist = Math.sqrt(dx * dx + dz * dz);
+                if (dist < 3.5) { // slightly bigger hitbox than raptors
+                    const triPos = m.group.position.clone();
+                    createEvaporateEffect(triPos);
+                    scene.remove(m.group);
+                    herd.members.splice(i, 1);
+                    score += 75; // more points than raptors
+                    document.getElementById('score-val').textContent = score;
+                    playStompSound();
+                    const v = triPos.project(camera);
+                    const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                    const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                    showPopup('+75 STOMP!', '#44bb44', sx, sy);
+                }
+            }
+        });
+
+        // Track exploration
+        const cellX = Math.floor((trexX + MAP_SIZE) / GRID_SIZE);
+        const cellZ = Math.floor((trexZ + MAP_SIZE) / GRID_SIZE);
+        const cellKey = cellX + ',' + cellZ;
+        if (!exploredCells.has(cellKey)) {
+            exploredCells.add(cellKey);
+            score += 2;
+            document.getElementById('score-val').textContent = score;
+            const pct = Math.round((exploredCells.size / TOTAL_CELLS) * 100);
+            document.getElementById('explored-val').textContent = pct + '%';
+        }
+
+        // Roar cooldown
+        if (roarCooldown > 0) roarCooldown -= delta;
+    }
+
+    function updateCamera(delta) {
+        // Third-person camera follows T-Rex
+        const camX = trexX - Math.sin(trexAngle + cameraAngleX) * cameraDist * Math.cos(cameraAngleY);
+        const camZ = trexZ - Math.cos(trexAngle + cameraAngleX) * cameraDist * Math.cos(cameraAngleY);
+        const camY = 3 + cameraDist * Math.sin(cameraAngleY);
+
+        camera.position.lerp(new THREE.Vector3(camX, camY, camZ), 0.08);
+
+        // Camera shake
+        if (cameraShake > 0) {
+            camera.position.x += (Math.random() - 0.5) * cameraShake;
+            camera.position.y += (Math.random() - 0.5) * cameraShake * 0.5;
+            cameraShake *= 0.9;
+            if (cameraShake < 0.01) cameraShake = 0;
+        }
+
+        camera.lookAt(trexX, 2.5, trexZ);
+    }
+
+    function updateWorld(delta) {
+        // Animate food items (bob + spin)
+        foodItems.forEach(f => {
+            if (f.userData.collected) return;
+            f.userData.bobPhase += delta * 3;
+            f.children[0].position.y = 1.5 + Math.sin(f.userData.bobPhase) * 0.3;
+            f.children[1].position.y = 1.5 + Math.sin(f.userData.bobPhase) * 0.3;
+            f.children[1].rotation.z += delta * 2;
+        });
+
+        // Sway trees gently
+        trees.forEach(t => {
+            t.rotation.z = Math.sin(Date.now() * 0.0005 + t.position.x) * 0.02;
+        });
+    }
+
+    function updateMinimap() {
+        const canvas = document.getElementById('minimap-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, 160, 160);
+
+        const scale = 160 / (MAP_SIZE * 2);
+        const cx = 80, cy = 80;
+
+        // Background
+        ctx.fillStyle = 'rgba(20,40,10,0.9)';
+        ctx.beginPath();
+        ctx.arc(80, 80, 80, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Explored cells
+        ctx.fillStyle = 'rgba(80,120,40,0.5)';
+        exploredCells.forEach(key => {
+            const [cellX, cellZ] = key.split(',').map(Number);
+            const px = (cellX * GRID_SIZE - MAP_SIZE) * scale + cx;
+            const pz = (cellZ * GRID_SIZE - MAP_SIZE) * scale + cy;
+            ctx.fillRect(px, pz, GRID_SIZE * scale, GRID_SIZE * scale);
+        });
+
+        // Trees (green dots)
+        ctx.fillStyle = '#2a6b2a';
+        trees.forEach(t => {
+            const px = t.position.x * scale + cx;
+            const pz = t.position.z * scale + cy;
+            ctx.beginPath();
+            ctx.arc(px, pz, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Food (red dots)
+        ctx.fillStyle = '#ff4422';
+        foodItems.forEach(f => {
+            if (f.userData.collected) return;
+            const px = f.position.x * scale + cx;
+            const pz = f.position.z * scale + cy;
+            ctx.beginPath();
+            ctx.arc(px, pz, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        // Raptors (orange dots)
+        ctx.fillStyle = '#ff6600';
+        raptorPacks.forEach(function(pack) {
+            pack.members.forEach(function(m) {
+                const rpx = m.x * scale + cx;
+                const rpz = m.z * scale + cy;
+                ctx.beginPath();
+                ctx.arc(rpx, rpz, 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+
+        // Triceratops (green dots)
+        ctx.fillStyle = '#44bb44';
+        triceratopsHerds.forEach(function(herd) {
+            herd.members.forEach(function(m) {
+                const tpx = m.x * scale + cx;
+                const tpz = m.z * scale + cy;
+                ctx.beginPath();
+                ctx.arc(tpx, tpz, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+
+        // T-Rex (gold triangle)
+        const px = trexX * scale + cx;
+        const pz = trexZ * scale + cy;
+        ctx.save();
+        ctx.translate(px, pz);
+        ctx.rotate(-trexAngle);
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.moveTo(0, -5);
+        ctx.lineTo(-3, 4);
+        ctx.lineTo(3, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    function showPopup(text, color, x, y) {
+        const el = document.createElement('div');
+        el.className = 'score-popup';
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.color = color;
+        el.textContent = text;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1300);
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const delta = Math.min(clock.getDelta(), 0.05);
+
+        if (isPlaying) {
+            updateTrex(delta);
+            updateRaptorPacks(delta);
+            updateTriceratopsHerds(delta);
+            updateEvaporateParticles(delta);
+            updateCamera(delta);
+            updateWorld(delta);
+            updateMinimap();
+        } else {
+            // Idle rotation on start screen
+            if (trexGroup) {
+                trexGroup.rotation.y += delta * 0.5;
+            }
+            camera.position.set(8, 6, 8);
+            camera.lookAt(0, 2, 0);
+        }
+
+        renderer.render(scene, camera);
+    }
+
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        trexX = 0; trexZ = 0; trexAngle = 0;
+        score = 0; foodCollected = 0;
+        exploredCells.clear();
+        document.getElementById('score-val').textContent = 0;
+        document.getElementById('food-val').textContent = 0;
+        document.getElementById('explored-val').textContent = '0%';
+        trexGroup.position.set(0, 0, 0);
+        trexGroup.rotation.y = 0;
+        isPlaying = true;
+
+        // Reset camera
+        cameraAngleX = 0;
+        cameraAngleY = 0.3;
+    }
+
+    window.onload = init;
+    </script>
+</body>
+</html>

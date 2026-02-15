@@ -332,21 +332,32 @@
     let waterSurface, waterBack;
     let invTimer = 0;
     let comboTimer = 0;
-    const GRAVITY = -0.018;
-    const JUMP_FORCE = 0.38;
+    const GRAVITY = -0.014;
+    const JUMP_FORCE = 0.48;
     const WATER_Y = 0;
     const DOLPHIN_X = -6;
 
     // Arrow key swimming
     let swimUp = false, swimDown = false;
-    const SWIM_SPEED = 5;  // units per second (delta-scaled)
+    let swimLeft = false, swimRight = false;
+    let dolphinX = -6; // current X position (was fixed DOLPHIN_X)
+    const SWIM_SPEED = 12;  // units per second (delta-scaled)
     const MIN_Y = -8;
     const MAX_Y = 12;
+    const MIN_X = -12;
+    const MAX_X = 10;
 
     // Spin trick
     let canSpin = false;
     let isSpinning = false;
     let spinAngle = 0;
+    let boostMult = 1.0; // right arrow speed boost
+
+    // Coral reef maze
+    let coralWalls = [];
+    let coralSpawnTimer = 0;
+    const CORAL_SPAWN_INTERVAL = 3.5; // seconds between coral walls
+    const CORAL_SCROLL_SPEED = 4; // horizontal speed
 
     // ============ SOUND SYSTEM (Web Audio API) ============
     let audioCtx;
@@ -485,8 +496,8 @@
         // Sky gradient via background
         scene.background = new THREE.Color(0x0a3d5c);
 
-        camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
-        camera.position.set(0, 2, 22);
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(2, 0, 24);
         camera.lookAt(0, 0, 0);
 
         renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -636,6 +647,176 @@
         return g;
     }
 
+    // ============ CORAL REEF MAZE ============
+    function buildCoralPiece(height, yPos) {
+        const g = new THREE.Group();
+
+        // Main coral column — organic branching shape
+        const colors = [0xff6b6b, 0xff8e72, 0xe85d75, 0xd4456b, 0xf4a261, 0xe76f51, 0x9b59b6, 0xff7eb3];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        const mat = new THREE.MeshPhongMaterial({ color: color, shininess: 40, specular: 0xffaaaa });
+
+        // Base trunk
+        const trunkH = height * 0.7;
+        const trunkR = 0.3 + Math.random() * 0.25;
+        const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(trunkR * 0.7, trunkR, trunkH, 8),
+            mat
+        );
+        trunk.position.y = trunkH / 2;
+        g.add(trunk);
+
+        // Coral branches / bulbs
+        const branchCount = 2 + Math.floor(Math.random() * 3);
+        for (let i = 0; i < branchCount; i++) {
+            const bSize = 0.2 + Math.random() * 0.4;
+            const branch = new THREE.Mesh(
+                new THREE.SphereGeometry(bSize, 8, 6),
+                mat
+            );
+            branch.scale.y = 0.6 + Math.random() * 0.8;
+            branch.position.set(
+                (Math.random() - 0.5) * trunkR * 2,
+                trunkH * (0.4 + Math.random() * 0.6),
+                (Math.random() - 0.5) * trunkR * 2
+            );
+            g.add(branch);
+        }
+
+        // Top bulb
+        const topBulb = new THREE.Mesh(
+            new THREE.SphereGeometry(trunkR * 1.2, 8, 6),
+            mat
+        );
+        topBulb.position.y = trunkH;
+        topBulb.scale.y = 0.6;
+        g.add(topBulb);
+
+        g.position.y = yPos;
+        g.castShadow = true;
+        return g;
+    }
+
+    function spawnCoralWall() {
+        const wall = new THREE.Group();
+
+        // Random gap position and size for the dolphin to swim through
+        const gapCenter = -1 - Math.random() * 4; // gap Y center (underwater: -1 to -5)
+        const gapSize = 2.8 + Math.random() * 1.5; // gap opening height
+        const gapTop = gapCenter + gapSize / 2;
+        const gapBottom = gapCenter - gapSize / 2;
+
+        // Build coral from bottom up to gap
+        const bottomY = -9;
+        if (gapBottom > bottomY + 0.5) {
+            const bottomHeight = gapBottom - bottomY;
+            const numBottom = 2 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < numBottom; i++) {
+                const h = bottomHeight * (0.5 + Math.random() * 0.5);
+                const piece = buildCoralPiece(h, bottomY);
+                piece.position.z = (i - numBottom / 2) * 1.2;
+                wall.add(piece);
+            }
+        }
+
+        // Build coral from gap top to water surface
+        if (gapTop < WATER_Y - 0.3) {
+            const topHeight = WATER_Y - gapTop;
+            const numTop = 1 + Math.floor(Math.random() * 2);
+            for (let i = 0; i < numTop; i++) {
+                const h = topHeight * (0.5 + Math.random() * 0.5);
+                const piece = buildCoralPiece(h, gapTop);
+                piece.position.z = (i - numTop / 2) * 1.2;
+                wall.add(piece);
+            }
+        }
+
+        // Decorative seaweed/anemone near gap edges
+        for (const edgeY of [gapTop - 0.3, gapBottom + 0.3]) {
+            if (Math.random() > 0.5) {
+                const anemone = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.2 + Math.random() * 0.15, 8, 6),
+                    new THREE.MeshPhongMaterial({
+                        color: [0x2ecc71, 0x27ae60, 0x1abc9c][Math.floor(Math.random() * 3)],
+                        shininess: 30
+                    })
+                );
+                anemone.position.set(0, edgeY, (Math.random() - 0.5) * 1.5);
+                wall.add(anemone);
+            }
+        }
+
+        wall.position.x = 25; // spawn off-screen right
+        wall.userData = {
+            type: 'coralWall',
+            gapCenter: gapCenter,
+            gapSize: gapSize,
+            scored: false
+        };
+        scene.add(wall);
+        coralWalls.push(wall);
+    }
+
+    function updateCoralMaze(delta) {
+        const sp = gameSpeed * boostMult;
+
+        // Spawn new walls
+        coralSpawnTimer += delta * sp;
+        if (coralSpawnTimer >= CORAL_SPAWN_INTERVAL) {
+            coralSpawnTimer = 0;
+            spawnCoralWall();
+        }
+
+        // Move and check collisions
+        for (let i = coralWalls.length - 1; i >= 0; i--) {
+            const wall = coralWalls[i];
+            wall.position.x -= CORAL_SCROLL_SPEED * sp * delta;
+
+            // Off screen — remove
+            if (wall.position.x < -20) {
+                scene.remove(wall);
+                coralWalls.splice(i, 1);
+                continue;
+            }
+
+            // Score for passing through
+            if (!wall.userData.scored && wall.position.x < dolphinX - 1) {
+                wall.userData.scored = true;
+                score += 25;
+                document.getElementById('score-val').textContent = score;
+                const v = dolphinGroup.position.clone().project(camera);
+                const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+                const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+                showPopup('+25', '#2ecc71', sx, sy);
+            }
+
+            // Collision — check if dolphin is within X range of wall
+            if (dolphinGroup && invTimer <= 0) {
+                const dx = Math.abs(wall.position.x - dolphinGroup.position.x);
+                if (dx < 1.2) {
+                    // Check if dolphin is outside the gap (hit the coral)
+                    const dy = dolphinGroup.position.y;
+                    const gapTop = wall.userData.gapCenter + wall.userData.gapSize / 2;
+                    const gapBottom = wall.userData.gapCenter - wall.userData.gapSize / 2;
+
+                    // Only collide underwater (coral is underwater)
+                    if (dy < WATER_Y && (dy > gapTop - 0.4 || dy < gapBottom + 0.4)) {
+                        lives--;
+                        invTimer = 2.0;
+                        updateLives();
+                        playHitJellySound();
+                        createSplash(dolphinGroup.position.clone(), 0xff6b6b, 12);
+                        const v2 = dolphinGroup.position.clone().project(camera);
+                        const sx2 = (v2.x * 0.5 + 0.5) * window.innerWidth;
+                        const sy2 = (-v2.y * 0.5 + 0.5) * window.innerHeight;
+                        showPopup('OUCH!', '#ff4466', sx2, sy2);
+                        if (lives <= 0) gameOver();
+                    }
+                }
+            }
+        }
+    }
+
     // ============ DOLPHIN ============
     let dolphinPivot = null;
     let dolphinPlaceholder = null;
@@ -645,6 +826,9 @@
         dolphinGroup = new THREE.Group();
         dolphinPivot = new THREE.Group();
         dolphinGroup.add(dolphinPivot);
+
+        // No pivot rotation — placeholder already faces right
+        // GLB model gets rotated individually in the loader callback
 
         // Build placeholder dolphin (shows immediately while GLB loads)
         dolphinPlaceholder = buildPlaceholderDolphin();
@@ -680,6 +864,9 @@
                     child.receiveShadow = true;
                 }
             });
+
+            // Rotate GLB to face right (+X)
+            model.rotation.y = Math.PI / 2;
 
             // Swap out placeholder
             dolphinPivot.remove(dolphinPlaceholder);
@@ -1016,11 +1203,21 @@
                 playSpinSound();
             }
         }
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+            e.preventDefault();
+            swimLeft = true;
+        }
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+            e.preventDefault();
+            swimRight = true;
+        }
     }
 
     function onKeyUp(e) {
         if (e.code === 'ArrowUp' || e.code === 'KeyW') swimUp = false;
         if (e.code === 'ArrowDown' || e.code === 'KeyS') swimDown = false;
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') swimLeft = false;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') swimRight = false;
     }
 
     function onTouchJump(e) {
@@ -1047,6 +1244,9 @@
     function updateDolphin(delta) {
         if (!dolphinGroup) return;
 
+        // Right arrow = boost: dolphin surges right + everything speeds up
+        boostMult = swimRight ? 1.8 : 1.0;
+
         if (isJumping) {
             jumpVel += GRAVITY;
             dolphinY += jumpVel;
@@ -1054,14 +1254,19 @@
             // Arrow key influence while in air
             if (swimUp) dolphinY += SWIM_SPEED * 0.3 * delta;
             if (swimDown) dolphinY -= SWIM_SPEED * 0.3 * delta;
+            if (swimLeft) dolphinX -= SWIM_SPEED * delta;
+            if (swimRight) dolphinX += SWIM_SPEED * 1.5 * delta;
+            dolphinX = Math.max(MIN_X, Math.min(MAX_X, dolphinX));
 
-            // Spin trick animation
+            // Spinner dolphin trick — barrel roll around longitudinal axis
             if (isSpinning) {
-                spinAngle += delta * 12; // ~0.5s for full 360
-                dolphinGroup.rotation.z = spinAngle;
+                spinAngle += delta * 14; // fast spinner rotation
+                // Spin around the X axis of the pivot (longitudinal barrel roll)
+                dolphinPivot.rotation.x = spinAngle;
                 if (spinAngle >= Math.PI * 2) {
                     isSpinning = false;
                     spinAngle = 0;
+                    dolphinPivot.rotation.x = 0;
                     score += 50;
                     document.getElementById('score-val').textContent = score;
                     const v = dolphinGroup.position.clone().project(camera);
@@ -1070,11 +1275,13 @@
                     showPopup('+50 SPIN!', '#ff44ff', sx, sy);
                     createSplash(dolphinGroup.position.clone(), 0xff88ff, 10);
                 }
-            } else {
-                // Flip rotation based on velocity
-                const targetRot = jumpVel > 0 ? Math.min(jumpVel * 5, 1.2) : Math.max(jumpVel * 3, -0.8);
-                dolphinGroup.rotation.z += (targetRot - dolphinGroup.rotation.z) * 0.1;
             }
+
+            // Arc tilt — nose up on ascent, nose down on descent (like a real dolphin leap)
+            const arcTilt = jumpVel > 0
+                ? Math.min(jumpVel * 4, 0.9)     // nose up while rising
+                : Math.max(jumpVel * 3, -1.0);    // nose down while falling
+            dolphinGroup.rotation.z += (arcTilt - dolphinGroup.rotation.z) * 0.12;
 
             // Back in water (only if below surface and moving down)
             if (dolphinY <= WATER_Y - 0.5 && jumpVel < 0) {
@@ -1083,9 +1290,11 @@
                 isSpinning = false;
                 jumpVel = 0;
                 dolphinGroup.rotation.z = 0;
+                dolphinPivot.rotation.x = 0;
+                spinAngle = 0;
 
-                // Re-entry splash
-                createSplash(dolphinGroup.position.clone(), 0x88ddff, 8);
+                // Re-entry splash (big one)
+                createSplash(dolphinGroup.position.clone(), 0x88ddff, 15);
 
                 // Show combo if > 1
                 if (combo > 1) {
@@ -1099,12 +1308,15 @@
             dolphinY = Math.max(MIN_Y, Math.min(MAX_Y, dolphinY));
         } else {
             // Underwater: arrow key swimming
-            if (swimUp || swimDown) {
+            if (swimUp || swimDown || swimLeft || swimRight) {
                 if (swimUp) dolphinY += SWIM_SPEED * delta;
                 if (swimDown) dolphinY -= SWIM_SPEED * delta;
+                if (swimLeft) dolphinX -= SWIM_SPEED * delta;
+                if (swimRight) dolphinX += SWIM_SPEED * 1.5 * delta;
                 dolphinY = Math.max(MIN_Y, Math.min(WATER_Y, dolphinY));
+                dolphinX = Math.max(MIN_X, Math.min(MAX_X, dolphinX));
                 // Tilt toward movement direction
-                const tilt = swimUp ? 0.2 : swimDown ? -0.2 : 0;
+                const tilt = swimUp ? 0.25 : swimDown ? -0.25 : 0;
                 dolphinGroup.rotation.z += (tilt - dolphinGroup.rotation.z) * 0.15;
             } else {
                 // Idle bob at current depth
@@ -1113,7 +1325,10 @@
                 dolphinGroup.rotation.z += (Math.sin(Date.now() * 0.002) * 0.05 - dolphinGroup.rotation.z) * 0.1;
             }
 
-            // Apply gravity above water (shouldn't normally happen when not jumping, but safety)
+            // Keep pivot spin reset underwater
+            dolphinPivot.rotation.x += (0 - dolphinPivot.rotation.x) * 0.2;
+
+            // Apply gravity above water (safety)
             if (dolphinY > WATER_Y) {
                 dolphinY -= 0.05;
             }
@@ -1121,9 +1336,9 @@
 
         dolphinGroup.position.y = dolphinY;
 
-        // Tail wag
+        // Tail wag (gentle side-to-side swim motion)
         const tailWag = Math.sin(Date.now() * 0.01) * 0.1;
-        dolphinGroup.position.x = DOLPHIN_X + tailWag;
+        dolphinGroup.position.x = dolphinX + tailWag;
 
         // Invincibility flash
         if (invTimer > 0) {
@@ -1135,7 +1350,7 @@
     }
 
     function updateTargets(delta) {
-        const sp = gameSpeed;
+        const sp = gameSpeed * boostMult;
 
         // Move targets
         for (let i = targets.length - 1; i >= 0; i--) {
@@ -1311,6 +1526,7 @@
         if (isPlaying) {
             updateDolphin(delta);
             updateTargets(delta);
+            updateCoralMaze(delta);
             updateParticles(delta);
 
             // Camera follows dolphin Y with smooth lerp
@@ -1338,7 +1554,8 @@
         gameSpeed = 1; spawnTimer = 0;
         invTimer = 0; isJumping = false; jumpVel = 0;
         dolphinY = WATER_Y - 0.5;
-        swimUp = false; swimDown = false;
+        swimUp = false; swimDown = false; swimLeft = false; swimRight = false;
+        dolphinX = DOLPHIN_X;
         canSpin = false; isSpinning = false; spinAngle = 0;
 
         document.getElementById('score-val').textContent = 0;
@@ -1348,18 +1565,21 @@
         targets.forEach(t => scene.remove(t));
         jellies.forEach(j => scene.remove(j));
         splashParticles.forEach(p => scene.remove(p));
-        targets = []; jellies = []; splashParticles = [];
+        coralWalls.forEach(c => scene.remove(c));
+        targets = []; jellies = []; splashParticles = []; coralWalls = [];
+        coralSpawnTimer = 0;
         document.querySelectorAll('.score-popup').forEach(el => el.remove());
 
         if (dolphinGroup) {
-            dolphinGroup.position.set(DOLPHIN_X, dolphinY, 0);
+            dolphinGroup.position.set(dolphinX, dolphinY, 0);
             dolphinGroup.rotation.z = 0;
             dolphinGroup.visible = true;
+            if (dolphinPivot) dolphinPivot.rotation.x = 0;
         }
 
         // Reset camera
-        camera.position.set(0, 2, 22);
-        camera.lookAt(0, 0, 0);
+        camera.position.set(2, 0, 24);
+        camera.lookAt(0, -2, 0);
 
         isPlaying = true;
     }

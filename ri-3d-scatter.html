@@ -264,23 +264,25 @@
             margin: { l: 0, r: 0, t: 10, b: 0 }
         };
         
-        Plotly.react('chart', [trace], layout);
+        Plotly.react('chart', [trace], layout).then(function() {
+            // Attach handlers after chart is rendered (only once)
+            var gd = document.getElementById('chart');
+            if (!gd._clickHandlerAttached) {
+                gd._clickHandlerAttached = true;
+                gd.on('plotly_click', function(data) {
+                    if (data.points && data.points[0] && data.points[0].customdata) {
+                        window.open(data.points[0].customdata, '_blank');
+                    }
+                });
+                gd.on('plotly_hover', function() {
+                    gd.style.cursor = 'pointer';
+                });
+                gd.on('plotly_unhover', function() {
+                    gd.style.cursor = 'default';
+                });
+            }
+        });
     }
-    
-    // Click handler
-    document.getElementById('chart').on('plotly_click', function(data) {
-        if (data.points && data.points[0] && data.points[0].customdata) {
-            window.open(data.points[0].customdata, '_blank');
-        }
-    });
-    
-    // Cursor change on hover
-    document.getElementById('chart').on('plotly_hover', function() {
-        document.getElementById('chart').style.cursor = 'pointer';
-    });
-    document.getElementById('chart').on('plotly_unhover', function() {
-        document.getElementById('chart').style.cursor = 'default';
-    });
     
     // Initial render
     updateChart();

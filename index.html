@@ -403,29 +403,53 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
             position: relative;
+            padding: 0.25em 0;
         }
 
         .nav-links a:hover,
         .nav-links a.active {
-            color: var(--text);
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0, 225, 230, 0.5);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
         }
 
         .nav-links a::after {
             content: '';
             position: absolute;
-            bottom: -4px;
+            bottom: 0;
             left: 0;
-            width: 0;
+            width: 100%;
             height: 2px;
-            background: var(--accent);
-            transition: width 0.3s ease;
+            background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+            background-size: 200% 100%;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .nav-links a:hover::after,
         .nav-links a.active::after {
-            width: 100%;
+            transform: scaleX(1);
+            transform-origin: left;
+            animation: navGradient 2s ease infinite;
+        }
+
+        @keyframes navGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .nav-cta {
@@ -853,83 +877,143 @@
             50% { opacity: 0.5; transform: scale(1.2); }
         }
 
-        /* 3D Ghost Text Effect */
+        /* Animated Gradient Text Effect */
         .hero h1 {
             font-size: clamp(3rem, 10vw, 5.5rem);
             font-weight: 800;
-            line-height: 1.0;
+            line-height: 1.05;
             margin-bottom: 1.5rem;
-            letter-spacing: -2px;
-            position: relative;
-            perspective: 1000px;
-            transform-style: preserve-3d;
+            letter-spacing: -3px;
         }
 
-        .ghost-text-container {
-            position: relative;
+        .gradient-flow {
+            --gradient-angle: 0deg;
+            background: linear-gradient(
+                var(--gradient-angle),
+                #00E1E6 0%,
+                #0051E6 20%,
+                #4300E6 40%,
+                #0051E6 60%,
+                #019BE6 80%,
+                #00E1E6 100%
+            );
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 4s linear infinite, gradientMove 8s ease-in-out infinite;
             display: inline-block;
-            height: 1.2em;
-            transform-style: preserve-3d;
+            filter: drop-shadow(0 0 30px rgba(0, 225, 230, 0.5));
         }
 
-        .ghost-layer {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            white-space: nowrap;
-            transform-style: preserve-3d;
-            transition: transform 0.4s ease-out;
+        @keyframes gradientFlow {
+            0% { --gradient-angle: 0deg; }
+            100% { --gradient-angle: 360deg; }
         }
 
-        /* Create 12 ghost layers with increasing depth */
-        .ghost-layer:nth-child(1) { 
-            filter: blur(8px); 
-            color: rgba(0, 81, 230, 0.3);
-            transform: translateZ(0px);
-        }
-        .ghost-layer:nth-child(2) { color: hsl(210, 100%, 15%); transform: translateZ(10px); }
-        .ghost-layer:nth-child(3) { color: hsl(210, 100%, 20%); transform: translateZ(20px); }
-        .ghost-layer:nth-child(4) { color: hsl(210, 100%, 25%); transform: translateZ(30px); }
-        .ghost-layer:nth-child(5) { color: hsl(210, 100%, 30%); transform: translateZ(40px); }
-        .ghost-layer:nth-child(6) { color: hsl(210, 100%, 40%); transform: translateZ(50px); }
-        .ghost-layer:nth-child(7) { color: hsl(210, 100%, 50%); transform: translateZ(60px); }
-        .ghost-layer:nth-child(8) { color: hsl(195, 100%, 50%); transform: translateZ(70px); }
-        .ghost-layer:nth-child(9) { color: hsl(185, 100%, 55%); transform: translateZ(80px); }
-        .ghost-layer:nth-child(10) { color: hsl(180, 100%, 60%); transform: translateZ(90px); }
-        .ghost-layer:nth-child(11) { color: hsl(180, 100%, 70%); transform: translateZ(100px); }
-        .ghost-layer:nth-child(12) { 
-            color: #00E1E6; 
-            transform: translateZ(110px);
-            text-shadow: 0 0 30px rgba(0, 225, 230, 0.8), 0 0 60px rgba(0, 225, 230, 0.4);
+        @keyframes gradientMove {
+            0%, 100% { background-position: 0% 50%; }
+            25% { background-position: 100% 0%; }
+            50% { background-position: 100% 100%; }
+            75% { background-position: 0% 100%; }
         }
 
-        .hero h1:hover .ghost-layer {
-            animation: ghostPulse 0.6s ease-out;
-        }
-
-        @keyframes ghostPulse {
-            0% { transform: translateZ(var(--tz, 0)) rotateX(0); }
-            50% { transform: translateZ(calc(var(--tz, 0) + 20px)) rotateX(5deg); }
-            100% { transform: translateZ(var(--tz, 0)) rotateX(0); }
+        @property --gradient-angle {
+            syntax: '<angle>';
+            initial-value: 0deg;
+            inherits: false;
         }
 
         .hero-subtitle-line {
             display: block;
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            background: linear-gradient(180deg, #ffffff 0%, #e0e7ff 50%, #c7d2fe 100%);
+            font-size: clamp(2.2rem, 7vw, 4rem);
+            background: linear-gradient(90deg, #ffffff 0%, #e0e7ff 30%, #c7d2fe 60%, #a5b4fc 100%);
+            background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-top: 0.1em;
-            animation: fadeSlideIn 1s ease forwards;
-            animation-delay: 0.3s;
+            margin-top: 0.15em;
+            animation: fadeSlideIn 1s ease forwards, subtleShimmer 6s ease-in-out infinite;
+            animation-delay: 0.5s, 0s;
             opacity: 0;
         }
 
         @keyframes fadeSlideIn {
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes subtleShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Animated Link Underlines */
+        .animated-link {
+            position: relative;
+            text-decoration: none;
+            color: var(--accent);
+            transition: color 0.3s ease;
+        }
+
+        .animated-link::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background: linear-gradient(90deg, var(--accent), var(--primary), var(--accent));
+            background-size: 200% 100%;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animated-link:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+            animation: linkGradient 1.5s ease infinite;
+        }
+
+        .animated-link:hover {
+            color: var(--primary-light);
+        }
+
+        @keyframes linkGradient {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Glowing link variant */
+        .glow-link {
+            position: relative;
+            text-decoration: none;
+            color: var(--text);
+            padding: 0.1em 0;
+            transition: all 0.3s ease;
+        }
+
+        .glow-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .glow-link:hover::after {
+            transform: scaleX(1);
+        }
+
+        .glow-link:hover {
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(0, 225, 230, 0.5);
         }
 
         .hero-subtitle {
@@ -3620,20 +3704,7 @@
                 We Build AI Solutions for Business
             </div>
             <h1>
-                <span class="ghost-text-container">
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                    <span class="ghost-layer">AI Solutions</span>
-                </span>
+                <span class="gradient-flow">AI Solutions</span>
                 <span class="hero-subtitle-line">for Rhode Island</span>
             </h1>
             <p class="hero-subtitle">
@@ -8087,34 +8158,6 @@
         v.play().catch(function() {});
     });
 
-    // 3D Ghost Text Mouse Tracking
-    (function() {
-        const ghostContainer = document.querySelector('.ghost-text-container');
-        if (!ghostContainer) return;
-        
-        const layers = ghostContainer.querySelectorAll('.ghost-layer');
-        const hero = document.querySelector('.hero');
-        
-        hero.addEventListener('mousemove', function(e) {
-            const rect = hero.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            
-            const rotateX = y * -20;
-            const rotateY = x * 20;
-            
-            ghostContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-        });
-        
-        hero.addEventListener('mouseleave', function() {
-            ghostContainer.style.transform = 'rotateX(0) rotateY(0)';
-            ghostContainer.style.transition = 'transform 0.5s ease-out';
-        });
-        
-        hero.addEventListener('mouseenter', function() {
-            ghostContainer.style.transition = 'transform 0.1s ease-out';
-        });
-    })();
     </script>
 </body>
 </html>

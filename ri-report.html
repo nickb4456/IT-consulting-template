@@ -3072,14 +3072,12 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const conservativePpsf = sortedPpsf[p25Index]; // 25th percentile
  const realisticPpsf = sortedPpsf[p33Index]; // 33rd percentile
  
- // PRIMARY ESTIMATE: Weighted nearby comps with 10% haircut (very conservative)
- // Weighted ppsf puts 70% weight on closest 3-5 properties
- const haircutPct = 10;
- const marketValue = Math.round(h.sqft * weightedPpsf * (1 - haircutPct/100));
+ // Range values: low to high estimate
+ const lowValue = Math.round(h.sqft * bottomPpsf * 0.85); // 20th percentile - 15% haircut
+ const highValue = Math.round(h.sqft * conservativePpsf * 0.94); // 25th percentile - 6% haircut
  
- // Range values: worst case to moderate case
- const lowValue = Math.round(h.sqft * bottomPpsf * 0.85); // 20th - 15% (fire sale)
- const highValue = Math.round(h.sqft * conservativePpsf * 0.94); // 25th - 6%
+ // PRIMARY ESTIMATE: Middle of the range (what user sees)
+ const marketValue = Math.round((lowValue + highValue) / 2);
  
  const avgPpsf = Math.round(weightedPpsf); // Show weighted avg for display
  let discount = Math.round((1 - h.price / marketValue) * 100);

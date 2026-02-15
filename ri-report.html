@@ -2036,16 +2036,45 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  // Calculate lot buildability (max sqft based on zoning)
  function getLotBuildability(lotSizeSqft) {
- // RI typical: FAR 0.25, max coverage 35%, with setbacks
- const baseFAR = 0.25; // Floor Area Ratio
- const maxCoverage = 0.35; // Ground coverage
- const setbackReduction = 0.80; // ~20% lost to setbacks
+ // RI zoning varies by area - use lot size as proxy for urban vs rural
+ // Urban lots (<10K sqft): FAR ~0.75-1.0, 2-3 story typical
+ // Suburban (10K-43K sqft): FAR ~0.35-0.5
+ // Rural (>1 acre): FAR ~0.25, but larger lots
+ let baseFAR, maxCoverage, maxStories;
  
+ if (lotSizeSqft < 5000) {
+ // Dense urban - small infill lots
+ baseFAR = 1.0; // Can build 2-3 story
+ maxCoverage = 0.60;
+ maxStories = 3;
+ } else if (lotSizeSqft < 10000) {
+ // Urban residential
+ baseFAR = 0.75;
+ maxCoverage = 0.50;
+ maxStories = 2;
+ } else if (lotSizeSqft < 21780) { // < 0.5 acres
+ // Suburban
+ baseFAR = 0.50;
+ maxCoverage = 0.40;
+ maxStories = 2;
+ } else if (lotSizeSqft < 43560) { // < 1 acre
+ // Large suburban
+ baseFAR = 0.35;
+ maxCoverage = 0.35;
+ maxStories = 2;
+ } else {
+ // Rural (1+ acres)
+ baseFAR = 0.25;
+ maxCoverage = 0.25;
+ maxStories = 2;
+ }
+ 
+ const setbackReduction = 0.85; // ~15% lost to setbacks
  const maxBuildable = lotSizeSqft * baseFAR * setbackReduction;
  const maxFootprint = lotSizeSqft * maxCoverage * setbackReduction;
  
- // Estimate room capacity (assume 400 sqft per bedroom + common areas)
- const sqftPerBedroom = 450; // includes share of common space
+ // Estimate room capacity (assume 450 sqft per bedroom + common areas)
+ const sqftPerBedroom = 450;
  const maxRooms = Math.floor(maxBuildable / sqftPerBedroom);
  
  return {
@@ -2053,7 +2082,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  maxFootprint: Math.round(maxFootprint),
  recommendedRooms: Math.min(Math.max(2, maxRooms), 8), // 2-8 BR range
  canBuildMultiple: lotSizeSqft >= 87120, // 2+ acres
- stories: maxBuildable > maxFootprint ? 2 : 1
+ stories: Math.min(maxStories, Math.ceil(maxBuildable / maxFootprint))
  };
  }
  

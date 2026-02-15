@@ -1041,6 +1041,7 @@ Promise.all([
   if (typeof initHouseHunter === 'function') initHouseHunter();
   if (typeof initLandDealFinder === 'function') initLandDealFinder();
   if (typeof initCityHeatmap === 'function') initCityHeatmap();
+  if (typeof initManualCityDropdown === 'function') initManualCityDropdown();
   
   // Update Key Market Insights
   updateInsights();
@@ -1829,7 +1830,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  sel.innerHTML = '<option value="">Select City</option>';
  cities.forEach(c => { const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o); });
  }
- document.addEventListener('DOMContentLoaded', initManualCityDropdown);
+ // Note: initManualCityDropdown called after data loads in loadPropertyData().then()
  
  // Run comp analysis with manual entry
  function runManualComp() {

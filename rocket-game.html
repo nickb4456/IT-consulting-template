@@ -187,13 +187,7 @@
     scene.add(rocketGroup);
     rocketGroup.add(engineLight);
 
-    // Engine flame particles
-    const flameGeo = new THREE.BufferGeometry();
-    const flamePosArr = new Float32Array(30 * 3);
-    flameGeo.setAttribute('position', new THREE.BufferAttribute(flamePosArr, 3));
-    const flameMat = new THREE.PointsMaterial({ color: 0xff6600, size: 0.3, transparent: true, opacity: 0.8 });
-    const flameParticles = new THREE.Points(flameGeo, flameMat);
-    rocketGroup.add(flameParticles);
+    // (flame particles removed)
 
     let rocketPivot = new THREE.Group();
     rocketGroup.add(rocketPivot);
@@ -204,7 +198,7 @@
         const box = new THREE.Box3().setFromObject(rocketModel);
         const size = box.getSize(new THREE.Vector3());
         const maxDim = Math.max(size.x, size.y, size.z);
-        const s = 3.0 / maxDim;
+        const s = 3.8 / maxDim;
         rocketModel.scale.set(s, s, s);
         const center = box.getCenter(new THREE.Vector3());
         rocketModel.position.set(-center.x * s, -center.y * s, -center.z * s);
@@ -542,18 +536,6 @@
                     bullets.splice(i, 1);
                 }
             }
-
-            // Engine flame (always on — rocket is flying)
-            engineLight.intensity = 3;
-            engineLight.color.setHex(0xff6600);
-            flameMat.color.setHex(0xff6600);
-            const fPos = flameParticles.geometry.attributes.position;
-            for (let i = 0; i < 30; i++) {
-                fPos.setX(i, (Math.random() - 0.5) * 0.4);
-                fPos.setY(i, -2 - Math.random() * 1.5);
-                fPos.setZ(i, (Math.random() - 0.5) * 0.4);
-            }
-            fPos.needsUpdate = true;
 
             // Invincibility
             if (invincible > 0) {

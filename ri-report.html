@@ -1143,9 +1143,19 @@ function loadMainData() {
   // Show loading indicator
   document.querySelectorAll('.data-loading').forEach(el => el.style.display = 'block');
   
+  // Expand short keys to full names (saves ~300KB transfer)
+  const expandKeys = p => ({
+    address: p.a, baths: p.b, beds: p.B, city: p.c, dom: p.d,
+    lat: p.la, lng: p.lo, lotSize: p.l, price: p.p, propertyType: p.t,
+    saleType: p.s, soldDate: p.sd, sqft: p.sq, status: p.st,
+    url: p.u, yearBuilt: p.y, zip: p.z
+  });
+  
   Promise.all([
-    // Load data - Cloudflare auto-compresses with Brotli, browser decompresses natively (faster than JS pako)
-    fetch('ri-sales.json?v=' + dataVersion).then(r => r.json()),
+    // Load slim data - Cloudflare Brotli compresses, browser decompresses natively
+    fetch('ri-sales-slim.json?v=' + dataVersion).then(r => r.json()).then(d => ({
+      properties: d.properties.map(expandKeys)
+    })),
     // Load SQL.js WASM
     initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
   ]).then(([data, SQL]) => {

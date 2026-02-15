@@ -16,36 +16,133 @@
       color: #e2e8f0;
     }
     
-    /* Header */
-    .header {
-      background: rgba(15, 23, 42, 0.9);
-      border-bottom: 1px solid rgba(99, 102, 241, 0.3);
-      padding: 1rem 2rem;
+    /* Navigation - matches homepage */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0.75rem 2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(10px);
     }
-    .header h1 {
+    .logo {
       font-size: 1.5rem;
-      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      font-weight: 700;
+      background: linear-gradient(135deg, #4C69F5, #654CF4);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-    }
-    .header a {
-      color: #6366f1;
       text-decoration: none;
     }
-    .header a:hover { text-decoration: underline; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+    .nav-links a:hover {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.1);
+    }
+    .nav-links a.active {
+      color: #6366f1;
+      background: rgba(99, 102, 241, 0.15);
+    }
+    .nav-dropdown {
+      position: relative;
+    }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: rgba(30, 41, 59, 0.98);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 8px;
+      padding: 0.5rem;
+      min-width: 180px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    }
+    .nav-dropdown:hover .dropdown-menu {
+      display: block;
+    }
+    .dropdown-menu a {
+      display: block;
+      padding: 0.5rem 0.75rem;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .dropdown-menu a:hover {
+      color: #fff;
+      background: rgba(99, 102, 241, 0.2);
+    }
+    .nav-cta {
+      background: linear-gradient(135deg, #4C69F5, #654CF4) !important;
+      color: #fff !important;
+      padding: 0.5rem 1rem !important;
+      border-radius: 6px;
+    }
+    
+    /* Mobile nav */
+    .hamburger { display: none; }
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .hamburger {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+      }
+      .hamburger span {
+        width: 24px;
+        height: 2px;
+        background: #94a3b8;
+      }
+    }
     
     /* Main container */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem;
+      padding-top: 5rem; /* Account for fixed nav */
+    }
+    
+    /* Page header */
+    .page-header {
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    .page-header p {
+      color: #94a3b8;
+      font-size: 1.1rem;
     }
     
     /* Search section */
@@ -292,12 +389,41 @@
   </style>
 </head>
 <body>
-  <header class="header">
-    <h1>🔍 Tech Troubleshooting KB</h1>
-    <a href="/">← AIBridges</a>
-  </header>
+  <nav>
+    <div class="nav-container">
+      <a href="/" class="logo">AIBridges</a>
+      <ul class="nav-links">
+        <li><a href="/#services">Services</a></li>
+        <li><a href="/#products">Products</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li class="nav-dropdown">
+          <a href="#">Trends</a>
+          <div class="dropdown-menu">
+            <a href="/youtube-trends">📊 YouTube Trends</a>
+            <a href="/ri-report.html">🏠 RI Real Estate</a>
+          </div>
+        </li>
+        <li class="nav-dropdown">
+          <a href="#">Research</a>
+          <div class="dropdown-menu">
+            <a href="/ouroboros/">📊 Live System</a>
+            <a href="/colony-research.html">🧠 Colony Insights</a>
+            <a href="/ouroboros/research-paper.html">📄 Paper</a>
+            <a href="/kb.html" class="active">📚 Knowledge Base</a>
+          </div>
+        </li>
+        <li><a href="/#contact" class="nav-cta">Contact</a></li>
+      </ul>
+      <button class="hamburger"><span></span><span></span><span></span></button>
+    </div>
+  </nav>
   
   <div class="container">
+    <div class="page-header">
+      <h1>🔍 Tech Troubleshooting KB</h1>
+      <p>179 articles on AWS, Git, JavaScript, Python, Docker, and more</p>
+    </div>
+    
     <section class="search-section">
       <div class="search-row">
         <input type="text" id="searchInput" class="search-input" placeholder="Search errors, problems, techniques...">

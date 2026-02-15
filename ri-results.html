@@ -145,41 +145,41 @@
             <!-- Price Histogram -->
             <div class="chart-card">
                 <div class="chart-title"><span class="emoji">📈</span> Price Distribution</div>
-                <div style="height:160px;position:relative"><canvas id="histogramChart"></canvas></div>
+                <canvas id="histogramChart" height="160"></canvas>
             </div>
             
             <!-- Property Types -->
             <div class="chart-card">
                 <div class="chart-title"><span class="emoji">🏠</span> Property Types</div>
-                <div style="height:160px;position:relative"><canvas id="typeChart"></canvas></div>
+                <canvas id="typeChart" height="160"></canvas>
                 <div class="chart-insight" id="typeInsight"></div>
             </div>
             
             <!-- Bedrooms -->
             <div class="chart-card">
                 <div class="chart-title"><span class="emoji">🛏️</span> Bedrooms Distribution</div>
-                <div style="height:160px;position:relative"><canvas id="bedsChart"></canvas></div>
+                <canvas id="bedsChart" height="160"></canvas>
                 <div class="chart-insight" id="bedsInsight"></div>
             </div>
             
             <!-- DOM Distribution -->
             <div class="chart-card">
                 <div class="chart-title"><span class="emoji">⏱️</span> Days on Market</div>
-                <div style="height:160px;position:relative"><canvas id="domChart"></canvas></div>
+                <canvas id="domChart" height="160"></canvas>
                 <div class="chart-insight" id="domInsight"></div>
             </div>
             
             <!-- Year Built -->
             <div class="chart-card">
                 <div class="chart-title"><span class="emoji">🏗️</span> Year Built</div>
-                <div style="height:160px;position:relative"><canvas id="yearChart"></canvas></div>
+                <canvas id="yearChart" height="160"></canvas>
                 <div class="chart-insight" id="yearInsight"></div>
             </div>
             
             <!-- Monthly Trend (full width) -->
             <div class="chart-card full-width">
                 <div class="chart-title"><span class="emoji">📅</span> Monthly Sales Trend</div>
-                <div style="height:120px;position:relative"><canvas id="trendChart"></canvas></div>
+                <canvas id="trendChart" height="120"></canvas>
             </div>
         </div>
         
@@ -383,7 +383,7 @@
             new Chart(document.getElementById('histogramChart'), {
                 type: 'bar',
                 data: { labels: buckets.map((_, i) => fmt(displayMin + i * bSize)), datasets: [{ data: buckets, backgroundColor: 'rgba(99,102,241,0.7)', borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, font: { size: 9 } } } } }
+                options: { plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, font: { size: 9 } } } } }
             });
             
             // Property Types
@@ -393,7 +393,7 @@
             new Chart(document.getElementById('typeChart'), {
                 type: 'doughnut',
                 data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6'], borderWidth: 0 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } } } }
+                options: { plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } } } }
             });
             // Type insight
             const topType = typeData[0];
@@ -406,7 +406,7 @@
             new Chart(document.getElementById('bedsChart'), {
                 type: 'bar',
                 data: { labels: ['0', '1', '2', '3', '4', '5', '6+'], datasets: [{ data: ['0', '1', '2', '3', '4', '5', '6+'].map(b => beds[b] || 0), backgroundColor: ['#06b6d4', '#10b981', '#22c55e', '#84cc16', '#f59e0b', '#ec4899', '#6366f1'], borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { plugins: { legend: { display: false } } }
             });
             // Beds insight
             const mostCommonBeds = Object.entries(beds).sort((a,b) => b[1] - a[1])[0];
@@ -432,7 +432,7 @@
                 new Chart(document.getElementById('domChart'), {
                     type: 'bar',
                     data: { labels: Object.keys(domBuckets), datasets: [{ data: Object.values(domBuckets), backgroundColor: ['#10b981', '#22c55e', '#f59e0b', '#f97316', '#ef4444'], borderRadius: 6 }] },
-                    options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                    options: { plugins: { legend: { display: false } } }
                 });
                 // DOM insight
                 const fastSales = domBuckets['0-30'] + domBuckets['31-60'];
@@ -454,7 +454,7 @@
             new Chart(document.getElementById('yearChart'), {
                 type: 'bar',
                 data: { labels: Object.keys(decades), datasets: [{ data: Object.values(decades), backgroundColor: '#f59e0b', borderRadius: 6 }] },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+                options: { plugins: { legend: { display: false } } }
             });
             // Year insight
             const totalYears = Object.values(decades).reduce((a,b) => a+b, 0);
@@ -488,7 +488,6 @@
                     ]
                 },
                 options: { 
-                    maintainAspectRatio: false,
                     plugins: { legend: { labels: { boxWidth: 12 } } },
                     scales: { 
                         x: { ticks: { maxRotation: 45, font: { size: 9 } } },

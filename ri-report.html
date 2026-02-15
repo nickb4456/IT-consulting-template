@@ -375,7 +375,7 @@
 
  <h2 id="house-hunter">🏠 House Hunter</h2>
  <div class="sql-section">
- <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes by comparing to <strong style="color:#a5b4fc">nearby sales within 0.5 miles</strong> (not city-wide averages). Uses 25th percentile $/sqft from similar-sized homes that actually sold nearby. Conservative estimates — real equity may be higher.</p>
+ <p style="color:#94a3b8;margin-bottom:1.5rem">Find undervalued homes by comparing to <strong style="color:#a5b4fc">nearby sales within 0.5 miles</strong> (not city-wide averages). Uses 33rd percentile $/sqft minus 6% selling costs. <strong>Conservative estimates</strong> — assumes as-is condition, not renovated.</p>
  
  <!-- Filters -->
  <div class="filters" style="margin-bottom:1.5rem">
@@ -2979,25 +2979,31 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  
  const conservativePpsf = sortedPpsf[p25Index]; // 25th percentile
  const medianPpsf = sortedPpsf[p50Index]; // Median
- const optimisticPpsf = sortedPpsf[p75Index]; // 75th percentile
+ const p33Index = Math.floor(sortedPpsf.length * 0.33);
+ const realisticPpsf = sortedPpsf[p33Index]; // 33rd percentile - realistic for as-is
  
- // Tiered haircut: scales inversely with price
- // NEW: Use MEDIAN as primary estimate (like Redfin), not 25th percentile
- // Small 3% haircut for transaction costs, not the aggressive 10-15%
- const marketValue = Math.round(h.sqft * medianPpsf * 0.97); // Median - 3%
+ // TIGHTER ESTIMATES: Use 33rd percentile (not median) with 6% haircut
+ // 33rd percentile = assumes property is average/below-average condition
+ // 6% haircut = 3% closing + 3% agent fees (realistic selling costs)
+ const haircutPct = 6;
+ const marketValue = Math.round(h.sqft * realisticPpsf * (1 - haircutPct/100));
  
- // Range values for display (like Redfin's $X - $Y range)
- const lowValue = Math.round(h.sqft * conservativePpsf); // 25th percentile, no haircut
- const highValue = Math.round(h.sqft * optimisticPpsf); // 75th percentile
+ // Range values: 25th percentile (low) to median (high) - NOT 75th
+ const lowValue = Math.round(h.sqft * conservativePpsf * 0.94); // 25th - 6%
+ const highValue = Math.round(h.sqft * medianPpsf * 0.97); // median - 3%
  
- const avgPpsf = Math.round(medianPpsf); // Show median for display
- const haircutPct = 3; // Fixed 3% for display
+ const avgPpsf = Math.round(realisticPpsf); // Show 33rd pct for display
  const discount = Math.round((1 - h.price / marketValue) * 100);
  const instantEquity = marketValue - h.price;
  
  // Deal score: discount % + DOM factor
  const domBonus = Math.min(20, Math.floor(h.dom / 15));
  const dealScore = discount + domBonus;
+ 
+ // Scenario values for toggle
+ const worstValue = lowValue; // 25th pct - 6%
+ const expectedValue = Math.round(h.sqft * medianPpsf * 0.97); // median - 3%
+ const bestValue = Math.round(h.sqft * medianPpsf); // median, no discount
  
  return {
  address: h.address,
@@ -3017,12 +3023,19 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  dealScore: dealScore,
  compCount: useComps.length,
  url: h.url,
- // Range values (like Redfin)
+ // Range values
  lowValue: lowValue,
  highValue: highValue,
  lowEquity: lowValue - h.price,
  highEquity: highValue - h.price,
- haircutPct: haircutPct
+ haircutPct: haircutPct,
+ // Scenario values
+ worstValue: worstValue,
+ worstEquity: worstValue - h.price,
+ expectedValue: expectedValue,
+ expectedEquity: expectedValue - h.price,
+ bestValue: bestValue,
+ bestEquity: bestValue - h.price
  };
  }).filter(d => d && d.discount >= minDiscount);
  
@@ -3256,23 +3269,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  value: house.worstValue,
  equity: house.worstEquity,
  label: 'Worst Case',
- desc: '25th percentile − 15% worst-case buffer',
+ desc: '25th percentile − 6% selling costs',
  color: '#ef4444',
  icon: '😰'
  },
  conservative: {
  value: house.marketValue,
  equity: house.instantEquity,
- label: 'Conservative',
- desc: '25th percentile − ' + house.haircutPct + '% tiered buffer',
+ label: 'Realistic',
+ desc: '33rd percentile − 6% selling costs (as-is condition)',
  color: '#10b981',
  icon: '🛡️'
  },
  expected: {
  value: house.expectedValue,
  equity: house.expectedEquity,
- label: 'Expected',
- desc: 'Median comps − reduced buffer',
+ label: 'If Updated',
+ desc: 'Median comps − 3% costs (renovated condition)',
  color: '#3b82f6',
  icon: '📊'
  },
@@ -3280,7 +3293,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  value: house.bestValue,
  equity: house.bestEquity,
  label: 'Best Case',
- desc: '75th percentile − 3% minimal buffer',
+ desc: 'Median comps − no discount (RARE)',
  color: '#f59e0b',
  icon: '🌟'
  }

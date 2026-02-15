@@ -4319,52 +4319,220 @@
     </section>
 
     <!-- Featured Blog Section -->
-    <section id="featured-blog" style="padding: 4rem 0; background: linear-gradient(180deg, rgba(20, 20, 35, 1) 0%, var(--bg-dark) 100%);">
+    <section id="featured-blog" style="padding: 4rem 0; background: linear-gradient(180deg, rgba(20, 20, 35, 1) 0%, var(--bg-dark) 100%); overflow: hidden;">
+        <style>
+            .article-scroll {
+                display: flex;
+                gap: 1.5rem;
+                overflow-x: auto;
+                padding: 2rem 0 3rem;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--primary) transparent;
+            }
+            .article-scroll::-webkit-scrollbar {
+                height: 6px;
+            }
+            .article-scroll::-webkit-scrollbar-track {
+                background: rgba(255,255,255,0.05);
+                border-radius: 3px;
+            }
+            .article-scroll::-webkit-scrollbar-thumb {
+                background: var(--primary);
+                border-radius: 3px;
+            }
+            .scroll-card {
+                flex: 0 0 280px;
+                min-height: 320px;
+                background: rgba(30, 30, 45, 0.95);
+                border-radius: 16px;
+                padding: 1.75rem;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                            box-shadow 0.3s ease,
+                            z-index 0s 0.4s;
+                scroll-snap-align: start;
+                text-decoration: none;
+                display: flex;
+                flex-direction: column;
+            }
+            .scroll-card::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background: var(--card-accent, linear-gradient(180deg, #0051E6, #00E1E6));
+                border-radius: 16px 0 0 16px;
+                transition: width 0.3s ease;
+            }
+            .scroll-card:hover {
+                transform: translateY(-20px) scale(1.05);
+                box-shadow: 0 25px 50px rgba(0, 81, 230, 0.3);
+                z-index: 10;
+                transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                            box-shadow 0.3s ease,
+                            z-index 0s 0s;
+            }
+            .scroll-card:hover::before {
+                width: 6px;
+            }
+            .scroll-card .card-type {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-bottom: 0.75rem;
+            }
+            .scroll-card .card-type span {
+                color: var(--text);
+                font-weight: 500;
+            }
+            .scroll-card h3 {
+                font-size: 1.15rem;
+                font-weight: 700;
+                color: var(--text);
+                line-height: 1.4;
+                margin-bottom: 1rem;
+                flex: 1;
+            }
+            .scroll-card .card-tag {
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--card-tag-color, var(--accent));
+                margin-top: auto;
+            }
+            .scroll-header {
+                flex: 0 0 260px;
+                min-height: 320px;
+                background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+                border-radius: 16px;
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                scroll-snap-align: start;
+                position: relative;
+                overflow: hidden;
+            }
+            .scroll-header::before {
+                content: '';
+                position: absolute;
+                inset: 3px;
+                background: var(--bg-dark);
+                border-radius: 14px;
+            }
+            .scroll-header > * {
+                position: relative;
+                z-index: 1;
+            }
+            .scroll-header h2 {
+                font-size: 2rem;
+                font-weight: 900;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .scroll-header p {
+                color: var(--text-muted);
+                font-size: 0.9rem;
+            }
+            .scroll-header a {
+                color: var(--accent);
+                text-decoration: none;
+                font-weight: 600;
+            }
+        </style>
         <div class="section-container">
-            <div class="section-header reveal">
-                <h2>AI & Legal Tech Blog</h2>
-                <p>Data-driven research and practical guides</p>
-            </div>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 3rem;">
-                <!-- Blog Card 1 - MA Settlements -->
-                <article class="glass-card reveal" style="display: flex; flex-direction: column;">
-                    <div style="height: 200px; background: linear-gradient(135deg, #ef4444, #f59e0b); display: flex; align-items: center; justify-content: center; border-radius: 12px 12px 0 0; position: relative; overflow: hidden;">
-                        <i class="fas fa-car-crash" style="font-size: 4rem; color: white; opacity: 0.9; z-index: 1;"></i>
-                    </div>
-                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-                            <span><i class="far fa-calendar"></i> Feb 7, 2026</span>
-                            <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;">Legal Data</span>
-                        </div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.4;">Average Car Accident Settlement in Massachusetts 2026</h3>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">What 118 real Massachusetts car accident settlements reveal about case values. See median settlements, ranges by injury type, and factors that increase your case value.</p>
-                        <a href="blog-ma-car-accident-settlements-2026" class="btn btn-secondary" style="width: fit-content; margin-top: auto;">
-                            Read More <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </article>
+            <div class="article-scroll">
+                <!-- Header Card -->
+                <div class="scroll-header">
+                    <h2>Latest Articles</h2>
+                    <p>Powered by</p>
+                    <a href="blog.html">AIBridges Research →</a>
+                </div>
 
-                <!-- Blog Card 2 - CT Settlements -->
-                <article class="glass-card reveal" style="display: flex; flex-direction: column;">
-                    <div style="height: 200px; background: linear-gradient(135deg, #f59e0b, #ef4444); display: flex; align-items: center; justify-content: center; border-radius: 12px 12px 0 0; position: relative; overflow: hidden;">
-                        <i class="fas fa-car-crash" style="font-size: 4rem; color: white; opacity: 0.9; z-index: 1;"></i>
-                    </div>
-                    <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
-                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-                            <span><i class="far fa-calendar"></i> Feb 7, 2026</span>
-                            <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 600;">Legal Data</span>
-                        </div>
-                        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; line-height: 1.4;">Average Car Accident Settlement in Connecticut 2026</h3>
-                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Data from 136 real Connecticut car accident settlements reveals what your case may be worth. See median values, ranges by injury type, and CT-specific factors.</p>
-                        <a href="blog-ct-car-accident-settlements-2026" class="btn btn-secondary" style="width: fit-content; margin-top: auto;">
-                            Read More <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </article>
-            </div>
-            <div style="text-align: center; margin-top: 2rem;">
-                <a href="blog.html" class="btn btn-primary">
-                    View All Articles <i class="fas fa-arrow-right"></i>
+                <!-- Card 1 - MA Settlements -->
+                <a href="blog-ma-car-accident-settlements-2026" class="scroll-card" style="--card-accent: linear-gradient(180deg, #ef4444, #f59e0b); --card-tag-color: #f59e0b;">
+                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
+                    <h3>Average Car Accident Settlement in Massachusetts 2026</h3>
+                    <div class="card-tag">Legal Data</div>
+                </a>
+
+                <!-- Card 2 - CT Settlements -->
+                <a href="blog-ct-car-accident-settlements-2026" class="scroll-card" style="--card-accent: linear-gradient(180deg, #f59e0b, #ef4444); --card-tag-color: #ef4444;">
+                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
+                    <h3>Average Car Accident Settlement in Connecticut 2026</h3>
+                    <div class="card-tag">Legal Data</div>
+                </a>
+
+                <!-- Card 3 - AI Consciousness -->
+                <a href="blog-ai-agents-consciousness-moltbook" class="scroll-card" style="--card-accent: linear-gradient(180deg, #8b5cf6, #ec4899); --card-tag-color: #8b5cf6;">
+                    <div class="card-type"><span>Article</span> on Feb 2, 2026</div>
+                    <h3>AI Agents & Consciousness: What the Moltbook Reveals</h3>
+                    <div class="card-tag">AI Research</div>
+                </a>
+
+                <!-- Card 4 - Word Add-ins -->
+                <a href="blog-word-addins-lawyers" class="scroll-card" style="--card-accent: linear-gradient(180deg, #0051E6, #00E1E6); --card-tag-color: #00E1E6;">
+                    <div class="card-type"><span>Guide</span> on Jan 28, 2026</div>
+                    <h3>Word Add-ins for Lawyers: The Complete 2026 Guide</h3>
+                    <div class="card-tag">Legal Tech</div>
+                </a>
+
+                <!-- Card 5 - Document Automation -->
+                <a href="blog-legal-document-automation-2025" class="scroll-card" style="--card-accent: linear-gradient(180deg, #10b981, #06b6d4); --card-tag-color: #10b981;">
+                    <div class="card-type"><span>Guide</span> on Jan 15, 2026</div>
+                    <h3>Legal Document Automation: 2025 Best Practices</h3>
+                    <div class="card-tag">Automation</div>
+                </a>
+
+                <!-- Card 6 - Small Business AI -->
+                <a href="blog-small-business-ai-guide" class="scroll-card" style="--card-accent: linear-gradient(180deg, #0051E6, #4C82E6); --card-tag-color: #4C82E6;">
+                    <div class="card-type"><span>Guide</span> on Jan 10, 2026</div>
+                    <h3>AI for Small Business: A Practical Implementation Guide</h3>
+                    <div class="card-tag">AI Strategy</div>
+                </a>
+
+                <!-- Card 7 - OneDrive Troubleshooting -->
+                <a href="blog-disk-space-onedrive-troubleshooting" class="scroll-card" style="--card-accent: linear-gradient(180deg, #6366f1, #8b5cf6); --card-tag-color: #6366f1;">
+                    <div class="card-type"><span>Tutorial</span> on Jan 5, 2026</div>
+                    <h3>OneDrive Disk Space Issues: The Complete Fix</h3>
+                    <div class="card-tag">IT Support</div>
+                </a>
+
+                <!-- Card 8 - IT Support RI -->
+                <a href="blog-it-support-rhode-island" class="scroll-card" style="--card-accent: linear-gradient(180deg, #0051E6, #00E1E6); --card-tag-color: #00E1E6;">
+                    <div class="card-type"><span>Article</span> on Dec 20, 2025</div>
+                    <h3>IT Support in Rhode Island: What Businesses Need in 2026</h3>
+                    <div class="card-tag">Local</div>
+                </a>
+
+                <!-- Card 9 - StaffSync -->
+                <a href="blog-staffsync-free-restaurant-scheduler" class="scroll-card" style="--card-accent: linear-gradient(180deg, #f59e0b, #eab308); --card-tag-color: #f59e0b;">
+                    <div class="card-type"><span>Product</span> on Dec 15, 2025</div>
+                    <h3>StaffSync: Free Restaurant Staff Scheduling</h3>
+                    <div class="card-tag">Tools</div>
+                </a>
+
+                <!-- Card 10 - Shift Trading -->
+                <a href="blog-shift-trading-restaurant-staff" class="scroll-card" style="--card-accent: linear-gradient(180deg, #ec4899, #f43f5e); --card-tag-color: #ec4899;">
+                    <div class="card-type"><span>Article</span> on Dec 10, 2025</div>
+                    <h3>Shift Trading for Restaurant Staff: Best Practices</h3>
+                    <div class="card-tag">Operations</div>
+                </a>
+
+                <!-- Card 11 - Sanctus Partnership -->
+                <a href="blog-sanctus-partnership-catholic-couples-app" class="scroll-card" style="--card-accent: linear-gradient(180deg, #14b8a6, #06b6d4); --card-tag-color: #14b8a6;">
+                    <div class="card-type"><span>News</span> on Dec 1, 2025</div>
+                    <h3>Sanctus Partnership: Building the Catholic Couples App</h3>
+                    <div class="card-tag">Partnership</div>
                 </a>
             </div>
         </div>

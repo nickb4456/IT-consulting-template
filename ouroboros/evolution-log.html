@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ouroboros Colony Evolution Log</title>
+  <title>Ouroboros Colony — Self-Modifications</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono&display=swap">
   <style>
     :root {
@@ -26,7 +26,7 @@
       line-height: 1.6;
       min-height: 100vh;
     }
-    .container { max-width: 1000px; margin: 0 auto; padding: 2rem; }
+    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
     
     h1 { 
       font-size: 2.5rem; 
@@ -41,558 +41,271 @@
     
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
       margin-bottom: 2rem;
     }
     .stat-card {
-      background: rgba(76, 105, 245, 0.1);
-      border: 1px solid rgba(76, 105, 245, 0.3);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
       border-radius: 12px;
       padding: 1.25rem;
       text-align: center;
     }
-    .stat-value { font-size: 2rem; font-weight: 900; color: var(--cyan); }
+    .stat-value { font-size: 2rem; font-weight: 900; color: var(--green); }
     .stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
     
-    .timeline {
-      position: relative;
-      padding-left: 2rem;
-    }
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 0.5rem;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: linear-gradient(to bottom, var(--primary), var(--accent), var(--cyan));
-    }
-    
-    .version-card {
-      position: relative;
+    .mod-card {
       background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(76, 105, 245, 0.2);
-      border-radius: 12px;
-      margin-bottom: 0.75rem;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 16px;
+      margin-bottom: 1.5rem;
       overflow: hidden;
-      transition: all 0.2s;
     }
-    .version-card:hover {
-      border-color: var(--cyan);
-    }
-    .version-card::before {
-      content: '';
-      position: absolute;
-      left: -1.75rem;
-      top: 1.25rem;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 2px solid var(--darker);
-      z-index: 1;
-    }
-    .version-card.milestone::before {
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan);
-    }
-    
-    .version-header {
+    .mod-header {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.25rem;
-      cursor: pointer;
-      user-select: none;
-    }
-    .version-header:hover {
-      background: rgba(76, 105, 245, 0.05);
-    }
-    .version-left {
-      display: flex;
-      align-items: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
       gap: 1rem;
     }
-    .version-name {
-      font-family: 'JetBrains Mono', monospace;
+    .mod-title {
+      font-size: 1.25rem;
       font-weight: 700;
-      font-size: 1.1rem;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
-    .version-hash {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      color: var(--muted);
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-    }
-    .version-summary {
+    .mod-meta {
+      display: flex;
+      gap: 1rem;
       font-size: 0.85rem;
       color: var(--muted);
     }
-    .expand-icon {
-      font-size: 1.2rem;
-      color: var(--muted);
-      transition: transform 0.2s;
-    }
-    .version-card.expanded .expand-icon {
-      transform: rotate(180deg);
-    }
-    
-    .version-details {
-      display: none;
-      padding: 0 1.25rem 1rem;
-      border-top: 1px solid rgba(76, 105, 245, 0.1);
-    }
-    .version-card.expanded .version-details {
-      display: block;
-    }
-    
-    .changes-list {
-      margin-top: 0.75rem;
-    }
-    .change-item {
+    .mod-meta span {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.4rem 0;
+      gap: 0.3rem;
+    }
+    .mod-file {
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
-    }
-    .change-badge {
-      font-size: 0.65rem;
-      padding: 0.15rem 0.4rem;
+      background: rgba(0,0,0,0.3);
+      padding: 0.2rem 0.5rem;
       border-radius: 4px;
-      font-weight: 700;
-      min-width: 55px;
-      text-align: center;
+      color: var(--cyan);
     }
-    .change-badge.added { background: rgba(16, 185, 129, 0.2); color: var(--green); }
-    .change-badge.modified { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
-    .change-badge.removed { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    
+    .mod-source {
+      padding: 1rem 1.25rem;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    }
+    .mod-source-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    .mod-source-text {
+      font-size: 0.9rem;
+      color: var(--text);
+      font-style: italic;
+    }
+    
+    .mod-code {
+      padding: 1.25rem;
+    }
+    .mod-code-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
     
     .diff-block {
       background: rgba(0,0,0,0.4);
       border-radius: 8px;
       padding: 1rem;
-      margin-top: 1rem;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.72rem;
+      font-size: 0.75rem;
       overflow-x: auto;
       white-space: pre;
-      line-height: 1.5;
+      line-height: 1.6;
     }
-    .diff-block .added-line { color: var(--green); }
-    .diff-block .removed-line { color: var(--red); }
     .diff-block .comment { color: #6b7280; }
     .diff-block .keyword { color: #c084fc; }
     .diff-block .function { color: #60a5fa; }
     .diff-block .string { color: #34d399; }
     .diff-block .number { color: var(--amber); }
     
-    .ant-count {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-size: 0.8rem;
+    .explanation {
+      background: rgba(76, 105, 245, 0.1);
+      border: 1px solid rgba(76, 105, 245, 0.2);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .explanation h3 {
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+    }
+    .explanation p {
       color: var(--muted);
-      margin-left: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .explanation code {
+      background: rgba(0,0,0,0.3);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
     }
     
     @media (max-width: 768px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .version-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-      .version-left { flex-wrap: wrap; }
+      .stats-row { grid-template-columns: 1fr; }
+      .mod-header { flex-direction: column; }
       .diff-block { font-size: 0.65rem; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🐍 Colony Evolution Log</h1>
-    <p class="subtitle">Ouroboros Alpha — Self-modifying AI research colony</p>
+    <h1>🤖 True Self-Modifications</h1>
+    <p class="subtitle">Code the colony wrote itself — no human involvement</p>
     
     <div class="stats-row">
       <div class="stat-card">
-        <div class="stat-value">30</div>
-        <div class="stat-label">Versions</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Functions Added</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">39</div>
-        <div class="stat-label">Ant Scripts</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Files Modified</div>
       </div>
       <div class="stat-card">
-        <div class="stat-value">+17</div>
-        <div class="stat-label">Ants Added</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">18</div>
-        <div class="stat-label">Unique Hashes</div>
+        <div class="stat-value">~50</div>
+        <div class="stat-label">Lines Written</div>
       </div>
     </div>
     
-    <div class="timeline" id="timeline"></div>
+    <div class="explanation">
+      <h3>How it works</h3>
+      <p>
+        The <code>implementer-ant</code> reads research papers, extracts actionable insights via the <code>belief-cluster-ant</code>, 
+        then generates code patches. LOW/MEDIUM risk patches auto-apply after sandbox testing. 
+        HIGH risk patches queue for human approval. These are the patches that passed and were injected autonomously.
+      </p>
+    </div>
+
+    <!-- Self-Mod #1 -->
+    <div class="mod-card">
+      <div class="mod-header">
+        <div>
+          <div class="mod-title">🧠 selectiveDecay()</div>
+          <div class="mod-file">src/core/pheromones-db.js</div>
+        </div>
+        <div class="mod-meta">
+          <span>📅 2026-02-12</span>
+          <span>⚡ MEDIUM risk</span>
+        </div>
+      </div>
+      <div class="mod-source">
+        <div class="mod-source-label">Research Source</div>
+        <div class="mod-source-text">
+          "Neuroscience paper on selective attention gating — salience network preserves important signals 
+          while default mode lets mundane information decay faster"
+        </div>
+      </div>
+      <div class="mod-code">
+        <div class="mod-code-label">Injected Code</div>
+        <div class="diff-block"><span class="comment">// [Deep Analysis] Injected by Implementer Ant - 2026-02-12</span>
+<span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {
+  <span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;    <span class="comment">// 10% decay for low-novelty</span>
+  <span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>;  <span class="comment">// 1% decay for high-novelty</span>
+  
+  <span class="keyword">if</span> (novelty > <span class="number">0.5</span>) {
+    <span class="comment">// High novelty = executive attention = preserve</span>
+    <span class="keyword">return</span> pheromone * executiveDecay;
+  } <span class="keyword">else</span> {
+    <span class="comment">// Low novelty = let it fade faster</span>
+    <span class="keyword">return</span> pheromone * salienceDecay;
+  }
+}</div>
+      </div>
+    </div>
+
+    <!-- Self-Mod #2 -->
+    <div class="mod-card">
+      <div class="mod-header">
+        <div>
+          <div class="mod-title">🗄️ learnedEvictionPolicy()</div>
+          <div class="mod-file">src/core/recursive-pheromones.js</div>
+        </div>
+        <div class="mod-meta">
+          <span>📅 2026-02-13</span>
+          <span>⚡ MEDIUM risk</span>
+        </div>
+      </div>
+      <div class="mod-source">
+        <div class="mod-source-label">Research Source</div>
+        <div class="mod-source-text">
+          "KV Cache paper on learned eviction policies — RL agents trained on generation traces 
+          learn to predict future utility of cached key-value pairs"
+        </div>
+      </div>
+      <div class="mod-code">
+        <div class="mod-code-label">Injected Code</div>
+        <div class="diff-block"><span class="comment">// [Deep Analysis] Injected by Implementer Ant - 2026-02-13</span>
+<span class="keyword">function</span> <span class="function">learnedEvictionPolicy</span>(keyValuePairs, budget) {
+  <span class="comment">// Use KVP framework to train RL agents on pre-computed traces</span>
+  <span class="comment">// Agents learn specialized eviction policies guided by future utility</span>
+  <span class="keyword">const</span> evictionRankings = <span class="function">trainKVPAgents</span>(keyValuePairs);
+
+  <span class="comment">// Evict based on learned policy</span>
+  <span class="keyword">return</span> evictionRankings.slice(<span class="number">0</span>, budget);
+}
+
+<span class="keyword">function</span> <span class="function">trainKVPAgents</span>(keyValuePairs) {
+  <span class="comment">// RL agents predict future utility of each key-value pair</span>
+  <span class="keyword">const</span> agents = keyValuePairs.map(<span class="function">createKVPAgent</span>);
+  <span class="keyword">const</span> rankings = agents.map(
+    agent => agent.<span class="function">predictUtility</span>(keyValuePairs)
+  );
+  <span class="keyword">return</span> rankings;
+}
+
+<span class="keyword">function</span> <span class="function">createKVPAgent</span>(keyValuePair) {
+  <span class="comment">// RL agent with specialized eviction policy</span>
+  <span class="keyword">return</span> {
+    <span class="function">predictUtility</span>: (pairs) => {
+      <span class="comment">// Score based on recency, frequency, semantic relevance</span>
+      <span class="keyword">return</span> pairs.map(p => p.score * p.recency);
+    }
+  };
+}</div>
+      </div>
+    </div>
+
+    <div class="explanation" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2);">
+      <h3 style="color: var(--green);">The Pattern</h3>
+      <p>
+        Both self-modifications follow the same pattern: the colony found research papers describing 
+        algorithms for memory management, understood the concepts, and implemented analogous functions 
+        in its own codebase. It's applying neuroscience and ML research to improve its own cognition.
+      </p>
+    </div>
     
     <p style="text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem;">
       The snake eats its own tail. 🐍🔄<br>
       <a href="index.html" style="color: var(--cyan);">← Back to Ouroboros</a>
     </p>
   </div>
-
-  <script>
-    const versions = [
-      { v: "v30", hash: "cab5d8958924", ants: 39, milestone: true, summary: "Current stable", changes: [],
-        diff: `<span class="comment">// v30: Current production version</span>
-<span class="comment">// No code changes from v29 — stability checkpoint</span>
-<span class="comment">// Colony stats:</span>
-<span class="comment">//   - 7,880 active pheromones</span>
-<span class="comment">//   - 157 validated breakthroughs</span>
-<span class="comment">//   - 39 ant scripts running</span>` },
-
-      { v: "v29", hash: "cab5d8958924", ants: 39, summary: "Prefilter ant + pheromone language", changes: [
-        { type: "added", file: "prefilter-ant.js" },
-        { type: "added", file: "pheromone-lang.js" },
-        { type: "modified", file: "filter-ant.js" },
-        { type: "modified", file: "synthesis-ant.js" }
-      ], diff: `<span class="comment">// v29: Added prefilter-ant.js — fast rejection before LLM</span>
-<span class="keyword">const</span> REJECT_PATTERNS = [
-  <span class="string">/call for papers/i</span>,
-  <span class="string">/submission deadline/i</span>,
-  <span class="string">/workshop announcement/i</span>,
-  <span class="string">/job posting/i</span>
-];
-
-<span class="keyword">function</span> <span class="function">prefilter</span>(finding) {
-  <span class="comment">// Instant reject obvious non-research</span>
-  <span class="keyword">for</span> (<span class="keyword">const</span> pattern <span class="keyword">of</span> REJECT_PATTERNS) {
-    <span class="keyword">if</span> (pattern.test(finding.title)) {
-      <span class="keyword">return</span> { pass: <span class="keyword">false</span>, reason: <span class="string">'pattern_match'</span> };
-    }
-  }
-  <span class="keyword">return</span> { pass: <span class="keyword">true</span> };
-}` },
-
-      { v: "v28", hash: "ee0e883b783d", ants: 38, summary: "Ant protocol & language integration", changes: [
-        { type: "added", file: "ant-language-integration.js" },
-        { type: "added", file: "ant-protocol.js" },
-        { type: "added", file: "language-agent.js" },
-        { type: "modified", file: "research-scout.js" }
-      ], diff: `<span class="comment">// v28: Ants can now communicate via structured signals</span>
-<span class="keyword">const</span> <span class="function">sendSignal</span> = (fromAnt, toAnt, signal) => {
-  <span class="keyword">const</span> encoded = {
-    type: <span class="string">'ant_signal'</span>,
-    from: fromAnt,
-    to: toAnt,
-    payload: signal,
-    timestamp: Date.now(),
-    ttl: <span class="number">3600</span>  <span class="comment">// 1 hour expiry</span>
-  };
-  pheromones.deposit(JSON.stringify(encoded), {
-    strength: <span class="number">0.5</span>,
-    category: <span class="string">'internal'</span>
-  });
-};` },
-
-      { v: "v27", hash: "9e6cd93341ba", ants: 38, summary: "Deep synthesis — explain WHY papers connect", changes: [
-        { type: "added", file: "deep-synthesis-ant.js" },
-        { type: "modified", file: "belief-cluster-ant.js" },
-        { type: "modified", file: "embeddings.js" }
-      ], diff: `<span class="comment">// v27: deep-synthesis-ant.js — LLM explains connections</span>
-<span class="keyword">async function</span> <span class="function">synthesizeConnection</span>(paper1, paper2, edge) {
-  <span class="keyword">const</span> prompt = <span class="string">\`Given these two papers:
-  
-Paper A: \${paper1.title}
-\${paper1.abstract}
-
-Paper B: \${paper2.title}  
-\${paper2.abstract}
-
-Explain in 2-3 sentences WHY these papers are 
-intellectually connected. Be specific.\`</span>;
-
-  <span class="keyword">const</span> explanation = <span class="keyword">await</span> callGemini(prompt);
-  <span class="keyword">return</span> { ...edge, explanation };
-}` },
-
-      { v: "v26", hash: "73b759cdd522", ants: 37, milestone: true, summary: "Federation + Catastrophe system", changes: [
-        { type: "added", file: "catastrophe-ant.js" },
-        { type: "added", file: "cross-domain-ant.js" },
-        { type: "added", file: "wanderer-ant.js" },
-        { type: "added", file: "batch-analyzer.js" },
-        { type: "added", file: "optimized-math.js" },
-        { type: "modified", file: "hierarchical-pheromones.js" }
-      ], diff: `<span class="comment">// v26: catastrophe-ant.js — break echo chambers</span>
-<span class="keyword">function</span> <span class="function">detectStagnation</span>(edges) {
-  <span class="keyword">const</span> strengths = edges.map(e => e.strength);
-  <span class="keyword">const</span> mean = strengths.reduce((a,b) => a+b) / strengths.length;
-  <span class="keyword">const</span> variance = strengths.reduce((a,b) => a + (b-mean)**<span class="number">2</span>, <span class="number">0</span>) / strengths.length;
-  <span class="keyword">const</span> cv = Math.sqrt(variance) / mean;
-  
-  <span class="keyword">return</span> cv < <span class="number">0.20</span>;  <span class="comment">// Too homogeneous!</span>
-}
-
-<span class="keyword">if</span> (detectStagnation(edges)) {
-  <span class="comment">// Prune 10% weakest edges to shake up topology</span>
-  <span class="keyword">const</span> toDelete = edges
-    .sort((a,b) => a.strength - b.strength)
-    .slice(<span class="number">0</span>, Math.ceil(edges.length * <span class="number">0.10</span>));
-  
-  toDelete.forEach(e => db.run(<span class="string">'DELETE FROM edges WHERE id=?'</span>, e.id));
-  log(<span class="string">'🌋 Catastrophe: pruned'</span>, toDelete.length, <span class="string">'weak edges'</span>);
-}` },
-
-      { v: "v25", hash: "621709c340bc", ants: 33, milestone: true, summary: "Multi-source scouts (arXiv, HF, Semantic Scholar)", changes: [
-        { type: "added", file: "huggingface-scout.js" },
-        { type: "added", file: "semantic-scholar-scout.js" },
-        { type: "added", file: "paperswithcode-scout.js" },
-        { type: "added", file: "federation-reader.js" },
-        { type: "added", file: "downtime-ant.js" },
-        { type: "modified", file: "arxiv-scout.js" }
-      ], diff: `<span class="comment">// v25: huggingface-scout.js — trending ML papers</span>
-<span class="keyword">async function</span> <span class="function">fetchHFPapers</span>() {
-  <span class="keyword">const</span> url = <span class="string">'https://huggingface.co/api/daily_papers'</span>;
-  <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(url);
-  <span class="keyword">const</span> papers = <span class="keyword">await</span> res.json();
-  
-  <span class="keyword">for</span> (<span class="keyword">const</span> paper <span class="keyword">of</span> papers) {
-    deposit({
-      title: paper.title,
-      source: <span class="string">'huggingface'</span>,
-      url: <span class="string">\`https://huggingface.co/papers/\${paper.id}\`</span>,
-      upvotes: paper.upvotes
-    });
-  }
-}
-
-<span class="comment">// v25: semantic-scholar-scout.js — 200M+ academic papers</span>
-<span class="keyword">const</span> API = <span class="string">'https://api.semanticscholar.org/graph/v1'</span>;
-<span class="keyword">const</span> FIELDS = <span class="string">'title,abstract,year,citationCount,authors'</span>;` },
-
-      { v: "v24", hash: "e7cd82f52243", ants: 28, summary: "Threshold auto-tuning + connector optimization", changes: [
-        { type: "modified", file: "connector-lite.js" },
-        { type: "modified", file: "config.js" },
-        { type: "modified", file: "federation.js" }
-      ], diff: `<span class="comment">// v24: config.js — raised processing limits</span>
-<span class="removed-line">- max_findings_per_scout: 30,</span>
-<span class="removed-line">- max_analysis_per_run: 10</span>
-<span class="added-line">+ max_findings_per_scout: 100,</span>
-<span class="added-line">+ max_analysis_per_run: 100</span>
-
-<span class="comment">// v24: connector-lite.js — smarter windowing</span>
-<span class="added-line">+ const MAX_NEW_FINDINGS = 100;</span>
-<span class="added-line">+ const NEW_WINDOW_HOURS = 48;</span>
-
-<span class="comment">// Only connect NEW findings to older corpus</span>
-<span class="comment">// Prevents O(n²) explosion as colony grows</span>
-<span class="keyword">const</span> newFindings = db.prepare(<span class="string">\`
-  SELECT * FROM findings 
-  WHERE created_at > datetime('now', '-48 hours')
-  LIMIT 100
-\`</span>).all();` },
-
-      { v: "v23", hash: "3544c84e6419", ants: 28, summary: "Colony self-patched hierarchical-pheromones.js", changes: [
-        { type: "modified", file: "hierarchical-pheromones.js" },
-        { type: "modified", file: "implementer-ant.js" }
-      ], diff: `<span class="comment">// v23: SELF-MODIFICATION — Colony raised its own threshold</span>
-<span class="comment">// Belief that triggered this:</span>
-<span class="comment">// "Higher similarity threshold reduces noise, improves signal"</span>
-
-<span class="removed-line">- const SIMILARITY_THRESHOLD = 0.65;</span>
-<span class="added-line">+ const SIMILARITY_THRESHOLD = 0.72;</span>
-
-<span class="comment">// The implementer ant read research on signal-to-noise ratios,</span>
-<span class="comment">// formed a belief, and patched its own codebase. 🐍</span>` },
-
-      { v: "v22", hash: "e7578a7c520c", ants: 28, milestone: true, summary: "Belief system + Implementer (self-mod capability)", changes: [
-        { type: "added", file: "belief-cluster-ant.js" },
-        { type: "added", file: "query-evolution-ant.js" },
-        { type: "modified", file: "implementer-ant.js" },
-        { type: "modified", file: "deep-reader-ant.js" }
-      ], diff: `<span class="comment">// v22: THE SNAKE LEARNS TO MODIFY ITSELF 🐍</span>
-
-<span class="comment">// belief-cluster-ant.js — synthesize insights into beliefs</span>
-<span class="keyword">async function</span> <span class="function">clusterInsights</span>(insights) {
-  <span class="keyword">const</span> prompt = <span class="string">\`Given these research insights, what 
-actionable belief can we form about improving our system?\`</span>;
-  <span class="keyword">return</span> <span class="keyword">await</span> callGemini(prompt + insights.join(<span class="string">'\\n'</span>));
-}
-
-<span class="comment">// implementer-ant.js — turn beliefs into code patches</span>
-<span class="keyword">async function</span> <span class="function">applyPatch</span>(patch, targetFile) {
-  <span class="comment">// 1. Create backup</span>
-  fs.copyFileSync(targetFile, <span class="string">\`\${targetFile}.\${Date.now()}.backup\`</span>);
-  
-  <span class="comment">// 2. Sandbox test</span>
-  <span class="keyword">if</span> (!<span class="keyword">await</span> sandboxTest(patch)) <span class="keyword">throw</span> <span class="string">'Sandbox failed'</span>;
-  
-  <span class="comment">// 3. Risk classification</span>
-  <span class="keyword">if</span> (patch.risk === <span class="string">'HIGH'</span>) {
-    queueForApproval(patch);  <span class="comment">// Human must approve</span>
-  } <span class="keyword">else</span> {
-    injectCode(targetFile, patch.code);  <span class="comment">// Auto-apply</span>
-  }
-}` },
-
-      { v: "v21", hash: "ffdb998cab25", ants: 26, summary: "Federation tracker + stagnation detection", changes: [
-        { type: "added", file: "federation-tracker.js" },
-        { type: "added", file: "stagnation-detector.js" }
-      ], diff: `<span class="comment">// v21: federation-tracker.js — track cross-colony signals</span>
-<span class="keyword">const</span> COLONY_PATHS = {
-  alpha: <span class="string">'../ai-memory-colony/data/colony.db'</span>,
-  beta:  <span class="string">'../ai-memory-colony-beta/data/colony.db'</span>,
-  gamma: <span class="string">'../ai-memory-colony-gamma/data/colony.db'</span>,
-  delta: <span class="string">'../ai-memory-colony-delta/data/colony.db'</span>
-};
-
-<span class="keyword">function</span> <span class="function">trackSignal</span>(signal, fromColony, toColony) {
-  tracker.signals.push({
-    id: signal.id,
-    from: fromColony,
-    to: toColony,
-    strength: signal.strength,
-    timestamp: Date.now()
-  });
-  
-  <span class="comment">// Track survival rate across colonies</span>
-  updateStats(fromColony, toColony);
-}` },
-
-      { v: "v15", hash: "b385007e0524", ants: 26, summary: "selectiveDecay() auto-implemented from research", changes: [
-        { type: "modified", file: "pheromones-db.js" },
-        { type: "modified", file: "implementer-ant.js" }
-      ], diff: `<span class="comment">// v15: AUTO-IMPLEMENTED by Implementer Ant</span>
-<span class="comment">// Source: Neuroscience paper on selective attention gating</span>
-<span class="comment">// The colony read a paper and wrote this function itself!</span>
-
-<span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {
-  <span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;   <span class="comment">// 10% decay for mundane</span>
-  <span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>; <span class="comment">// 1% decay for novel</span>
-  
-  <span class="keyword">if</span> (novelty > <span class="number">0.5</span>) {
-    <span class="comment">// High novelty = executive attention = preserve</span>
-    <span class="keyword">return</span> pheromone * executiveDecay;
-  } <span class="keyword">else</span> {
-    <span class="comment">// Low novelty = let it fade</span>
-    <span class="keyword">return</span> pheromone * salienceDecay;
-  }
-}` },
-
-      { v: "v11", hash: "fc09ea1f31b6", ants: 26, milestone: true, summary: "BGE embeddings + hybrid search + alerts", changes: [
-        { type: "added", file: "builder-ant.js" },
-        { type: "added", file: "gap-scout.js" },
-        { type: "added", file: "openalex-scout.js" },
-        { type: "added", file: "embeddings-bge.js" },
-        { type: "added", file: "hybrid-search.js" },
-        { type: "added", file: "send-alert.js" }
-      ], diff: `<span class="comment">// v11: embeddings-bge.js — real neural embeddings</span>
-<span class="comment">// Replaced fake random embeddings with BGE model</span>
-
-<span class="keyword">const</span> BGE_SERVICE = <span class="string">'http://localhost:9999/embed'</span>;
-
-<span class="keyword">async function</span> <span class="function">embed</span>(text) {
-  <span class="keyword">const</span> res = <span class="keyword">await</span> fetch(BGE_SERVICE, {
-    method: <span class="string">'POST'</span>,
-    body: JSON.stringify({ text })
-  });
-  <span class="keyword">const</span> { embedding } = <span class="keyword">await</span> res.json();
-  
-  <span class="comment">// 384-dim → 48-byte binary for XNOR+POPCOUNT</span>
-  <span class="keyword">return</span> binarize(embedding);
-}
-
-<span class="comment">// Semantic similarity: 0.75 related vs 0.57 unrelated</span>` },
-
-      { v: "v9", hash: "dc1e8e0d185b", ants: 23, milestone: true, summary: "Deep reader + novelty scoring + cosmic rays", changes: [
-        { type: "added", file: "inquisitor-ant.js" },
-        { type: "added", file: "compute-budget.js" },
-        { type: "added", file: "novelty-scoring.js" },
-        { type: "added", file: "cosmic-rays.js" }
-      ], diff: `<span class="comment">// v9: novelty-scoring.js — detect truly new ideas</span>
-<span class="keyword">function</span> <span class="function">computeNovelty</span>(finding, corpus) {
-  <span class="comment">// Compare embedding to existing corpus</span>
-  <span class="keyword">const</span> similarities = corpus.map(f => 
-    cosineSimilarity(finding.embedding, f.embedding)
-  );
-  
-  <span class="keyword">const</span> maxSim = Math.max(...similarities);
-  
-  <span class="comment">// Novelty = how DIFFERENT from everything we've seen</span>
-  <span class="keyword">return</span> <span class="number">1.0</span> - maxSim;
-}
-
-<span class="comment">// v9: cosmic-rays.js — random mutations for exploration</span>
-<span class="keyword">if</span> (Math.random() < <span class="number">0.01</span>) {  <span class="comment">// 1% chance</span>
-  mutateQuery(currentQuery);  <span class="comment">// Random word swap</span>
-}` },
-
-      { v: "v1", hash: "a62f89b6369d", ants: 22, milestone: true, summary: "Genesis — 22 founding ants", changes: [], 
-        diff: `<span class="comment">// v1: GENESIS 🌱</span>
-<span class="comment">// The 22 founding ants:</span>
-
-<span class="comment">// Scouts (find information)</span>
-<span class="string">research-scout.js</span>     <span class="comment">// Web search via Brave API</span>
-<span class="string">arxiv-scout.js</span>        <span class="comment">// arXiv paper search</span>
-<span class="string">github-scout.js</span>       <span class="comment">// Repository discovery</span>
-
-<span class="comment">// Processors (analyze findings)</span>
-<span class="string">filter-ant.js</span>         <span class="comment">// Remove noise</span>
-<span class="string">analyzer-ant.js</span>       <span class="comment">// Extract insights</span>
-<span class="string">validator-ant.js</span>      <span class="comment">// Quality checks</span>
-
-<span class="comment">// Connectors (build knowledge graph)</span>
-<span class="string">connector-lite.js</span>     <span class="comment">// Create edges between findings</span>
-<span class="string">synthesis-ant.js</span>      <span class="comment">// Generate new ideas</span>
-
-<span class="comment">// Core systems</span>
-<span class="string">pheromones-db.js</span>      <span class="comment">// Stigmergic memory</span>
-<span class="string">embeddings.js</span>         <span class="comment">// Vector representations</span>
-<span class="string">model-router.js</span>       <span class="comment">// LLM selection</span>
-
-<span class="keyword">const</span> colony = {
-  name: <span class="string">'Ouroboros Alpha'</span>,
-  version: <span class="string">'v1'</span>,
-  ants: <span class="number">22</span>,
-  pheromones: <span class="number">0</span>,
-  breakthroughs: <span class="number">0</span>
-};` }
-    ];
-
-    const timeline = document.getElementById('timeline');
-    
-    versions.forEach((ver, idx) => {
-      const card = document.createElement('div');
-      card.className = 'version-card' + (ver.milestone ? ' milestone' : '');
-      
-      const changesHtml = ver.changes.length ? ver.changes.map(c => 
-        `<div class="change-item">
-          <span class="change-badge ${c.type}">${c.type}</span>
-          <span>${c.file}</span>
-        </div>`
-      ).join('') : '<div style="color: var(--muted); font-size: 0.85rem; padding: 0.5rem 0;">No file changes</div>';
-      
-      const diffHtml = ver.diff ? `<div class="diff-block">${ver.diff}</div>` : '';
-      
-      card.innerHTML = `
-        <div class="version-header" onclick="this.parentElement.classList.toggle('expanded')">
-          <div class="version-left">
-            <span class="version-name">${ver.v}</span>
-            <span class="version-hash">${ver.hash}</span>
-            <span class="ant-count">🐜 ${ver.ants}</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 1rem;">
-            <span class="version-summary">${ver.summary}</span>
-            <span class="expand-icon">▼</span>
-          </div>
-        </div>
-        <div class="version-details">
-          <div class="changes-list">${changesHtml}</div>
-          ${diffHtml}
-        </div>
-      `;
-      
-      timeline.appendChild(card);
-    });
-  </script>
 </body>
 </html>

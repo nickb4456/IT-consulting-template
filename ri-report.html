@@ -2285,18 +2285,18 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  const profitPct = (profit / totalCost) * 100;
  const maxOffer = estSalePrice / (1 + targetProfitPct/100) - buildCost * (1 + softCostsPct/100);
  
- // Lot capacity label
+ // Lot capacity label based on recommended rooms
  let lotCapacity;
  if (buildability.canBuildMultiple) {
  lotCapacity = '🏘️ Multi-home';
- } else if (maxRoomsForLot >= 6) {
- lotCapacity = '🏰 6+ BR';
- } else if (maxRoomsForLot >= 4) {
- lotCapacity = '🏠 4-5 BR';
- } else if (maxRoomsForLot >= 3) {
+ } else if (actualRooms >= 5) {
+ lotCapacity = '🏰 5+ BR';
+ } else if (actualRooms >= 4) {
+ lotCapacity = '🏠 4 BR';
+ } else if (actualRooms >= 3) {
  lotCapacity = '🏡 3 BR';
  } else {
- lotCapacity = '🏚️ Small';
+ lotCapacity = '🏚️ 2 BR';
  }
  
  return {

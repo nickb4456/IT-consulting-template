@@ -264,28 +264,29 @@
             margin: { l: 0, r: 0, t: 10, b: 0 }
         };
         
-        Plotly.react('chart', [trace], layout).then(function() {
-            // Attach handlers after chart is rendered (only once)
-            var gd = document.getElementById('chart');
-            if (!gd._clickHandlerAttached) {
-                gd._clickHandlerAttached = true;
-                gd.on('plotly_click', function(data) {
-                    if (data.points && data.points[0] && data.points[0].customdata) {
-                        window.open(data.points[0].customdata, '_blank');
-                    }
-                });
-                gd.on('plotly_hover', function() {
-                    gd.style.cursor = 'pointer';
-                });
-                gd.on('plotly_unhover', function() {
-                    gd.style.cursor = 'default';
-                });
-            }
-        });
+        Plotly.react('chart', [trace], layout);
     }
     
-    // Initial render
+    // Initial render - then attach handlers
     updateChart();
+    
+    // Wait for Plotly to be ready, then attach click handlers
+    setTimeout(function() {
+        var gd = document.getElementById('chart');
+        if (gd && gd.on) {
+            gd.on('plotly_click', function(data) {
+                if (data.points && data.points[0] && data.points[0].customdata) {
+                    window.open(data.points[0].customdata, '_blank');
+                }
+            });
+            gd.on('plotly_hover', function() {
+                gd.style.cursor = 'pointer';
+            });
+            gd.on('plotly_unhover', function() {
+                gd.style.cursor = 'default';
+            });
+        }
+    }, 500);
     </script>
 </body>
 </html>

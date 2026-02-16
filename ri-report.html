@@ -1089,8 +1089,8 @@ function loadMainData() {
     url: p.u, yearBuilt: p.y, zip: p.z
   });
 
-  Promise.all([
-    // Load gzipped slim data - 5.5x smaller (2MB vs 11MB)
+  // Defer data load until after first paint
+  const loadData = () => Promise.all([
     fetch('ri-sales-slim.json.gz?v=' + dataVersion)
       .then(r => r.arrayBuffer())
       .then(buf => {
@@ -1101,9 +1101,11 @@ function loadMainData() {
           properties: d.properties.map(expandKeys)
         };
       }),
-    // Load SQL.js WASM
     initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
-  ]).then(([data, SQL]) => {
+  ]);
+  
+  // Start load after first paint (or immediately if user scrolls)
+  const startLoad = () => loadData().then(([data, SQL]) => {
     // Hide loading indicators
     const loadingBar = document.getElementById('mainLoadingBar');
     if (loadingBar) loadingBar.style.display = 'none';
@@ -1208,14 +1210,25 @@ function loadMainData() {
       statusEl.style.color = '#00E1E6';
     }
   });
+  
+  startLoad();
 }
 
-// Load data AFTER first paint for instant perceived load
+// Trigger data load after first paint (or on user interaction)
+let dataLoading = false;
+const triggerLoad = () => {
+  if (dataLoading) return;
+  dataLoading = true;
+  loadMainData();
+};
+
 if ('requestIdleCallback' in window) {
-  requestIdleCallback(loadMainData, { timeout: 1000 });
+  requestIdleCallback(triggerLoad, { timeout: 2000 });
 } else {
-  setTimeout(loadMainData, 100);
+  setTimeout(triggerLoad, 300);
 }
+window.addEventListener('scroll', triggerLoad, { once: true, passive: true });
+document.addEventListener('click', triggerLoad, { once: true });
 
 function updateInsights() {
   if (!rawData || !rawData.properties || !window.cityStats) return;

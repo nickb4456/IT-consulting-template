@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Audiobook Opportunity Finder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { 
+      font-family: -apple-system, system-ui, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 2rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    h1 { color: #22d3ee; }
+    h2 { color: #a78bfa; margin-top: 2rem; }
+    .bookmarklet {
+      display: inline-block;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      margin: 1rem 0;
+      cursor: grab;
+    }
+    .bookmarklet:hover { opacity: 0.9; }
+    code {
+      background: #1e293b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    .step {
+      background: #1e293b;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      margin: 1rem 0;
+      border-left: 4px solid #6366f1;
+    }
+    .leads {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 8px;
+      margin: 0.5rem 0;
+    }
+    .leads a { color: #22d3ee; }
+    textarea {
+      width: 100%;
+      height: 200px;
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+    }
+    .tag {
+      display: inline-block;
+      background: #22d3ee;
+      color: #0f172a;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin-left: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>📚 Audiobook Opportunity Finder</h1>
+  <p>Find Kindle books without audiobooks → pitch ElevenLabs AI narration</p>
+
+  <h2>Step 1: Install Bookmarklet</h2>
+  <div class="step">
+    <p>Drag this button to your bookmarks bar:</p>
+    <a class="bookmarklet" href="javascript:(function(){const hasAudio=document.body.innerHTML.includes('Audible')||document.body.innerHTML.includes('audiobook')||document.querySelector('[data-action=&quot;audible&quot;]')||document.querySelector('.audibleBadge');const title=document.querySelector('#productTitle')?.textContent?.trim()||'Unknown';const author=document.querySelector('.author a')?.textContent?.trim()||'Unknown';const reviews=document.querySelector('#acrCustomerReviewText')?.textContent?.match(/\d[\d,]*/)?.[0]||'0';const asin=location.pathname.match(/\/dp\/([A-Z0-9]+)/i)?.[1]||'Unknown';const msg=hasAudio?'❌ HAS AUDIOBOOK\n\n&quot;'+title+'&quot;\nby '+author:'✅ NO AUDIOBOOK!\n\n&quot;'+title+'&quot;\nby '+author+'\n'+reviews+' reviews\nASIN: '+asin;if(!hasAudio&&confirm(msg+'\n\nCopy to clipboard?')){navigator.clipboard.writeText(title+'\t'+author+'\t'+reviews+'\t'+asin+'\thttps://amazon.com/dp/'+asin).then(()=>alert('Copied!'))}else{alert(msg)}})();">🎧 Check Audiobook</a>
+    <p style="color:#94a3b8;font-size:0.9em;margin-top:1rem">Can't drag? Right-click → "Add to bookmarks" → paste the code from below</p>
+  </div>
+
+  <h2>Step 2: Find Books to Check</h2>
+  <div class="step">
+    <p>Best categories for simple books (easy AI narration):</p>
+    <div class="leads">
+      <a href="https://www.amazon.com/Best-Sellers-Self-Help/zgbs/books/4736" target="_blank">📖 Self-Help Best Sellers</a>
+      <span class="tag">simple language</span>
+    </div>
+    <div class="leads">
+      <a href="https://www.amazon.com/Best-Sellers-Books-Motivational-Self-Help/zgbs/books/4743" target="_blank">💪 Motivational</a>
+      <span class="tag">inspirational</span>
+    </div>
+    <div class="leads">
+      <a href="https://www.amazon.com/Best-Sellers-Books-Personal-Finance/zgbs/books/2650" target="_blank">💰 Personal Finance</a>
+      <span class="tag">practical</span>
+    </div>
+    <div class="leads">
+      <a href="https://www.amazon.com/Best-Sellers-Small-Business-Entrepreneurship/zgbs/books/2675" target="_blank">🚀 Small Business</a>
+      <span class="tag">how-to guides</span>
+    </div>
+    <div class="leads">
+      <a href="https://www.amazon.com/Best-Sellers-Parenting-Relationships/zgbs/books/20" target="_blank">👨‍👩‍👧 Parenting</a>
+      <span class="tag">conversational</span>
+    </div>
+  </div>
+
+  <h2>Step 3: Check Each Book</h2>
+  <div class="step">
+    <ol>
+      <li>Click a book on Amazon</li>
+      <li>Click the <strong>"🎧 Check Audiobook"</strong> bookmarklet</li>
+      <li>If it says ✅ NO AUDIOBOOK → opportunity!</li>
+      <li>Click "Copy" to save the lead</li>
+    </ol>
+  </div>
+
+  <h2>Step 4: Collect Your Leads</h2>
+  <div class="step">
+    <p>Paste your copied leads here (tab-separated):</p>
+    <textarea id="leads" placeholder="Title&#9;Author&#9;Reviews&#9;ASIN&#9;URL"></textarea>
+    <p style="margin-top:1rem">
+      <button onclick="downloadCSV()" style="background:#10b981;color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer">📥 Download as CSV</button>
+    </p>
+  </div>
+
+  <h2>Outreach Template</h2>
+  <div class="step">
+    <pre style="background:#0f172a;padding:1rem;border-radius:8px;overflow-x:auto;font-size:0.85em">Subject: Audiobook Partnership for [Book Title]
+
+Hi [Author],
+
+I noticed [Book Title] doesn't have an audiobook yet — with 
+[X] reviews, there's clearly demand.
+
+I produce AI-narrated audiobooks using professional-grade 
+voice synthesis. The quality rivals human narration at a 
+fraction of the cost.
+
+I'd love to:
+• Create a free 5-minute sample of your book
+• Discuss a royalty-share or flat-fee arrangement
+
+Would you be open to a quick call this week?
+
+Best,
+[Your name]</pre>
+  </div>
+
+  <script>
+    function downloadCSV() {
+      const text = document.getElementById('leads').value;
+      const lines = text.trim().split('\n').filter(l => l.trim());
+      const csv = 'Title,Author,Reviews,ASIN,URL\n' + 
+        lines.map(l => l.split('\t').map(c => `"${c}"`).join(',')).join('\n');
+      
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'audiobook-leads.csv';
+      a.click();
+    }
+  </script>
+</body>
+</html>

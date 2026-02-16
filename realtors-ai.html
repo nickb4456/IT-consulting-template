@@ -142,16 +142,25 @@
             font-size: 1.3rem;
             color: #aaa;
             margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
         }
-        
+
         .static-text {
             font-style: italic;
             color: #ccc;
-            vertical-align: baseline;
-            margin-right: 0.6em;
         }
-        
+
+        .rotating-wrapper {
+            display: inline-block;
+            height: 1.6em;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+
         .gradient-text {
+            display: inline-block;
             font-weight: 700;
             color: var(--cyan);
             background: linear-gradient(90deg, var(--cyan), var(--primary), var(--cyan));
@@ -160,8 +169,9 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             animation: gradientShift 3s ease-in-out infinite;
+            transition: transform 0.4s ease, opacity 0.4s ease;
         }
-        
+
         @keyframes gradientShift {
             0%, 100% { background-position: 0% center; }
             50% { background-position: 100% center; }
@@ -571,9 +581,12 @@
             <div class="hero-content">
                 <div class="badge">Built for Rhode Island</div>
                 <h1>Your AI Assistant<br>That <span>Actually Knows RI</span></h1>
-                <p class="hero-subtitle">
-                    <span class="static-text">We deliver</span> <span class="gradient-text" id="rotating-benefit">instant lead responses</span>
-                </p>
+                <div class="hero-subtitle">
+                    <span class="static-text">We deliver</span>
+                    <span class="rotating-wrapper">
+                        <span class="gradient-text" id="rotating-benefit">instant lead responses</span>
+                    </span>
+                </div>
                 <script>
                     const benefits = [
                         'instant lead responses',
@@ -589,13 +602,20 @@
                     const benefitEl = document.getElementById('rotating-benefit');
                     setInterval(() => {
                         benefitIndex = (benefitIndex + 1) % benefits.length;
-                        benefitEl.style.opacity = 0;
+                        benefitEl.style.transform = 'translateY(-100%)';
+                        benefitEl.style.opacity = '0';
                         setTimeout(() => {
                             benefitEl.textContent = benefits[benefitIndex];
-                            benefitEl.style.opacity = 1;
-                        }, 300);
+                            benefitEl.style.transform = 'translateY(100%)';
+                            benefitEl.style.opacity = '0';
+                            requestAnimationFrame(() => {
+                                requestAnimationFrame(() => {
+                                    benefitEl.style.transform = 'translateY(0)';
+                                    benefitEl.style.opacity = '1';
+                                });
+                            });
+                        }, 400);
                     }, 2500);
-                    benefitEl.style.transition = 'opacity 0.3s ease';
                 </script>
                 <div class="cta-group">
                     <a href="#pricing" class="btn btn-primary">See Pricing</a>
@@ -611,9 +631,9 @@
                     environment-image="neutral"
                     shadow-intensity="1"
                     exposure="1.2"
-                    camera-orbit="0deg 80deg 180%"
-                    camera-target="0m 0.2m 0m"
-                    field-of-view="35deg"
+                    camera-orbit="0deg 80deg 350%"
+                    camera-target="0m 0.1m 0m"
+                    field-of-view="30deg"
                     min-camera-orbit="auto auto auto"
                     max-camera-orbit="auto auto auto"
                 ></model-viewer>
@@ -623,7 +643,7 @@
                     function swayRobot() {
                         angle += 0.006;
                         const rotation = Math.sin(angle) * 10;
-                        robot.setAttribute('camera-orbit', `${rotation}deg 80deg 180%`);
+                        robot.setAttribute('camera-orbit', `${rotation}deg 80deg 350%`);
                         requestAnimationFrame(swayRobot);
                     }
                     robot.addEventListener('load', swayRobot);

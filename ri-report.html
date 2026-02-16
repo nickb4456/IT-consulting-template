@@ -1175,11 +1175,17 @@ function loadMainData() {
   });
   
   Promise.all([
-    // Load slim data - Cloudflare Brotli compresses, browser decompresses natively
-    fetch('ri-sales-slim.json?v=' + dataVersion).then(r => r.json()).then(d => ({
-      summary: d.summary,
-      properties: d.properties.map(expandKeys)
-    })),
+    // Load gzipped slim data - 5.5x smaller (2MB vs 11MB)
+    fetch('ri-sales-slim.json.gz?v=' + dataVersion)
+      .then(r => r.arrayBuffer())
+      .then(buf => {
+        const decompressed = pako.ungzip(new Uint8Array(buf), { to: 'string' });
+        const d = JSON.parse(decompressed);
+        return {
+          summary: d.summary,
+          properties: d.properties.map(expandKeys)
+        };
+      }),
     // Load SQL.js WASM
     initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${f}` })
   ]).then(([data, SQL]) => {

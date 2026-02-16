@@ -12579,7 +12579,7 @@
             elevationTarget = currentSection.elevation;
             const targetBank = currentSection.bank * (Math.PI / 180); // Convert to radians
             
-            roadCurve += (roadCurveTarget - roadCurve) * delta * 1.5;
+            roadCurve += (roadCurveTarget - roadCurve) * delta * 0.8;
             elevation += (elevationTarget - elevation) * delta * 0.5;
             banking += (targetBank - banking) * delta * 2;
             
@@ -12603,12 +12603,17 @@
                 const distFromPlayer = -seg.position.z;
                 const absDistance = Math.abs(distFromPlayer);
                 
-                // Curve offset: parabolic x = curve * d² * strength
-                // All segments use current roadCurve so they form one continuous parabola
+                // Curve offset: blend segment's spawnCurve with current roadCurve
+                // Near segments use current roadCurve (responsive feel)
+                // Far segments use their spawnCurve (prevents snap when entering curves)
                 const curveStrength = 0.00015;
                 let curveOffset = 0;
-                if (Math.abs(roadCurve) > 0.001) {
-                    curveOffset = roadCurve * absDistance * absDistance * curveStrength;
+                const segCurve = seg.userData.spawnCurve !== undefined ? seg.userData.spawnCurve : roadCurve;
+                // Blend: 0-30 units = mostly roadCurve, 30-150 units = transition, 150+ = spawnCurve
+                const curveLerp = Math.min(1, Math.max(0, (absDistance - 30) / 120));
+                const effectiveCurve = segCurve * curveLerp + roadCurve * (1 - curveLerp);
+                if (Math.abs(effectiveCurve) > 0.001) {
+                    curveOffset = effectiveCurve * absDistance * absDistance * curveStrength;
                     curveOffset = Math.sign(curveOffset) * Math.min(Math.abs(curveOffset), 80);
                 }
                 const baseX = seg.userData.baseX !== undefined ? seg.userData.baseX : 0;
@@ -12644,7 +12649,7 @@
                 // Rotate non-road elements to match curve tangent
                 // Road surfaces use vertex warping instead (smoother)
                 if (!seg.userData.isRoadSurface) {
-                    const tangent = 2 * roadCurve * curveStrength * distFromPlayer;
+                    const tangent = 2 * effectiveCurve * curveStrength * distFromPlayer;
                     seg.rotation.y = Math.atan(tangent);
                 } else {
                     seg.rotation.y = 0;
@@ -12659,14 +12664,17 @@
                 if (seg.userData.isRoadSurface) {
                     const posAttr = seg.geometry.attributes.position;
                     const halfW = seg.geometry.parameters.width / 2;
-                    if (Math.abs(roadCurve) > 0.001) {
+                    if (Math.abs(effectiveCurve) > 0.001) {
                         for (let v = 0; v < posAttr.count; v++) {
                             const origX = (v % 2 === 0) ? -halfW : halfW;
                             const localY = posAttr.getY(v);
                             const vertWorldZ = seg.position.z - localY;
                             const vertDist = -vertWorldZ;
                             const vertAbsDist = Math.abs(vertDist);
-                            let vertCurve = roadCurve * vertAbsDist * vertAbsDist * curveStrength;
+                            // Per-vertex blend uses vertex distance, not segment distance
+                            const vertLerp = Math.min(1, Math.max(0, (vertAbsDist - 30) / 120));
+                            const vertEffCurve = segCurve * vertLerp + roadCurve * (1 - vertLerp);
+                            let vertCurve = vertEffCurve * vertAbsDist * vertAbsDist * curveStrength;
                             vertCurve = Math.sign(vertCurve) * Math.min(Math.abs(vertCurve), 80);
                             posAttr.setX(v, origX - (vertCurve - curveOffset));
                         }
@@ -12679,10 +12687,9 @@
                     posAttr.needsUpdate = true;
                 }
 
-                // Banking on curves — use current global banking for ALL segments
-                // so adjacent segments always have the same bank angle (no seams)
+                // Banking on curves — blend with segment's spawnCurve for smooth transitions
                 if (seg.userData.banking !== undefined) {
-                    const currentBankAngle = banking * Math.sign(roadCurve) * Math.min(1, Math.abs(roadCurve) * 1.5);
+                    const currentBankAngle = banking * Math.sign(effectiveCurve) * Math.min(1, Math.abs(effectiveCurve) * 1.5);
                     seg.rotation.z = currentBankAngle;
                 }
             });
@@ -13310,9 +13317,16 @@
             updateAudio();
             
             // Debug display
-            document.getElementById('debug-info').innerHTML = 
-                `Speed: ${Math.floor(speed)} | Accel: ${isAccel} | Left: ${isLeft} | Right: ${isRight}<br>` +
-                `Running: ${gameRunning} | Delta: ${delta.toFixed(3)} | Boost: ${isBoosting}`;
+            const sectionName = currentSection ? currentSection.name : 'none';
+            document.getElementById('debug-info').innerHTML =
+                `Speed: ${Math.floor(speed)} | Section: ${sectionName}<br>` +
+                `Curve: ${roadCurve.toFixed(3)} → ${roadCurveTarget.toFixed(3)} | Bank: ${(banking * 180/Math.PI).toFixed(1)}° | Elev: ${elevation.toFixed(1)}<br>` +
+                `Segments: ${roadSegments.length} | Delta: ${delta.toFixed(3)}`;
+
+            // Log curve transitions to console
+            if (Math.abs(roadCurveTarget - roadCurve) > 0.05) {
+                console.log(`[CURVE] section="${sectionName}" curve=${roadCurve.toFixed(3)} target=${roadCurveTarget.toFixed(3)} delta=${delta.toFixed(3)} segments=${roadSegments.length}`);
+            }
             
             updateMinimap();
         }

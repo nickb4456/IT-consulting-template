@@ -104,13 +104,14 @@
 
         .hero-image {
             overflow: hidden;
-            max-width: 400px;
-            max-height: 400px;
+            width: 380px;
+            height: 380px;
+            position: relative;
         }
 
         #robot-canvas {
-            width: 100%;
-            height: 400px;
+            width: 380px;
+            height: 380px;
             display: block;
         }
         
@@ -663,7 +664,8 @@
             .hero-content { text-align: center; }
             .hero-image { order: -1; margin-bottom: 24px; }
             .hero-image img { max-height: 280px; }
-            #robot-canvas { height: 300px; }
+            .hero-image { width: 280px; height: 280px; margin: 0 auto; }
+            #robot-canvas { width: 280px; height: 280px; }
             .stats { grid-template-columns: repeat(3, 1fr); gap: 16px; }
             .stat-value { font-size: 1.8rem; }
             .feature-grid { grid-template-columns: 1fr; }
@@ -963,14 +965,17 @@
     (function() {
         const canvas = document.getElementById('robot-canvas');
         if (!canvas) return;
+        const container = canvas.parentElement;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
-        camera.position.set(0, 1.0, 4.0);
-        camera.lookAt(0, 0.9, 0);
+        const W = 380;
+        const H = 380;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.set(0, 1.0, 3.5);
+        camera.lookAt(0, 0.8, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setSize(W, H);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
@@ -1009,22 +1014,35 @@
 
                 currentModel = gltf.scene;
 
-                // Measure raw model size
+                // Reset transforms
+                currentModel.position.set(0, 0, 0);
+                currentModel.scale.set(1, 1, 1);
+                currentModel.rotation.set(0, 0, 0);
+
+                // Measure raw model
                 const box = new THREE.Box3().setFromObject(currentModel);
                 const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
-
-                // Scale to fit in a 2-unit tall space
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 2.0 / maxDim;
-                currentModel.scale.setScalar(scale);
+                console.log('Robot GLB raw size:', size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2), 'max:', maxDim.toFixed(2));
 
-                // Re-measure after scaling and center/ground
-                const box2 = new THREE.Box3().setFromObject(currentModel);
-                const center2 = box2.getCenter(new THREE.Vector3());
-                currentModel.position.x = -center2.x;
-                currentModel.position.z = -center2.z;
-                currentModel.position.y = -box2.min.y;
+                // Scale model to fit within ~2 world units tall
+                // Camera at z=3.5 with FOV 45 shows about 2.9 units vertically
+                const targetHeight = 2.0;
+                const s = targetHeight / size.y;
+                currentModel.scale.setScalar(s);
+
+                // Re-measure after scaling
+                const scaledBox = new THREE.Box3().setFromObject(currentModel);
+                const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
+
+                // Center horizontally, place feet at y=0
+                currentModel.position.set(
+                    -scaledCenter.x,
+                    -scaledBox.min.y,
+                    -scaledCenter.z
+                );
+                console.log('Robot scaled:', s.toFixed(4), 'final height:', (scaledBox.max.y - scaledBox.min.y).toFixed(2));
 
                 scene.add(currentModel);
 
@@ -1069,13 +1087,12 @@
         }
         animate();
 
-        // Resize handler
+        // Resize handler — keep 1:1 aspect
         window.addEventListener('resize', function() {
-            const w = canvas.clientWidth;
-            const h = canvas.clientHeight;
-            camera.aspect = w / h;
+            const w = Math.min(container.clientWidth, 380) || 380;
+            camera.aspect = 1;
             camera.updateProjectionMatrix();
-            renderer.setSize(w, h);
+            renderer.setSize(w, w);
         });
     })();
     </script>

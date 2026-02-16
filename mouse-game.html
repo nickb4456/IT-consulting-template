@@ -571,9 +571,9 @@
     let ants = []; // ant enemies for Level 3
     let cats = []; // cat enemies for Level 4
     let catTemplate = null;
-    const CAT_CHASE_RADIUS = 10; // cat starts chasing when mouse is this close
-    const CAT_SPEED = 0.06; // slower than mouse but persistent
-    const CAT_GIVE_UP_RADIUS = 16; // cat stops chasing if mouse gets this far
+    const CAT_CHASE_RADIUS = 5; // cat only notices mouse when very close
+    const CAT_SPEED = 0.03; // lazy, slow cat
+    const CAT_GIVE_UP_RADIUS = 8; // gives up quickly
     const FLOOR_SIZE = 28;
     const MOUSE_SPEED = 0.27;
 
@@ -1235,8 +1235,8 @@
         loader.load('cat-model.glb', function(gltf) {
             catTemplate = new THREE.Group();
             const model = gltf.scene;
-            // Scale down the cat to game proportions
-            model.scale.set(1.5, 1.5, 1.5);
+            // Scale the cat to game proportions
+            model.scale.set(2.5, 2.5, 2.5);
             // Center and ground the model
             const box = new THREE.Box3().setFromObject(model);
             const minY = box.min.y;
@@ -1300,7 +1300,7 @@
             catGroup.add(leg);
         });
 
-        catGroup.scale.set(1.3, 1.3, 1.3);
+        catGroup.scale.set(2.2, 2.2, 2.2);
         return catGroup;
     }
 
@@ -1336,8 +1336,8 @@
     function updateCats(delta) {
         if (level < 4) return;
 
-        // Spawn cats periodically (max 2 on screen)
-        if (Math.random() < 0.003 && cats.length < 2) {
+        // Spawn one cat
+        if (cats.length < 1) {
             spawnCat();
         }
 
@@ -1348,7 +1348,9 @@
             const dz = mouse3D.position.z - cat.position.z;
             const dist = Math.sqrt(dx * dx + dz * dz);
 
-            cat.userData.walkPhase += delta * 5;
+            const isMoving = cat.userData.chasing || cat.userData.wanderTimer > 0;
+            const walkSpeed = cat.userData.chasing ? 10 : 4;
+            cat.userData.walkPhase += delta * walkSpeed;
 
             if (cat.userData.chasing) {
                 // Chasing the mouse
@@ -1360,10 +1362,8 @@
                 } else if (dist > 0.5) {
                     const nx = dx / dist;
                     const nz = dz / dist;
-                    // Speed up slightly when close
-                    const chaseSpeed = cat.userData.speed * (dist < 5 ? 1.4 : 1.0);
-                    cat.position.x += nx * chaseSpeed;
-                    cat.position.z += nz * chaseSpeed;
+                    cat.position.x += nx * cat.userData.speed;
+                    cat.position.z += nz * cat.userData.speed;
                     cat.rotation.y = Math.atan2(nx, nz);
                 }
             } else {
@@ -1390,8 +1390,43 @@
                 }
             }
 
-            // Walking bob animation
-            cat.position.y = Math.abs(Math.sin(cat.userData.walkPhase)) * 0.08;
+            // Walking animation — body bob, tilt, and leg stride
+            const wp = cat.userData.walkPhase;
+            cat.position.y = Math.abs(Math.sin(wp * 2)) * 0.15; // vertical bounce
+            cat.rotation.z = Math.sin(wp) * 0.06; // side-to-side sway
+            cat.rotation.x = Math.sin(wp * 2) * 0.04; // forward pitch
+
+            // Animate leg meshes if found in model
+            if (!cat.userData.legMeshes) {
+                cat.userData.legMeshes = [];
+                cat.traverse(function(child) {
+                    if (child.isMesh && child.geometry) {
+                        const box = new THREE.Box3().setFromObject(child);
+                        const height = box.max.y - box.min.y;
+                        const width = box.max.x - box.min.x;
+                        // Identify leg-like meshes: tall and thin relative to body
+                        if (height > 0.1 && width < height * 0.6 && box.min.y < 0.3) {
+                            const centerX = (box.min.x + box.max.x) / 2;
+                            const centerZ = (box.min.z + box.max.z) / 2;
+                            cat.userData.legMeshes.push({
+                                mesh: child,
+                                origRotX: child.rotation.x,
+                                side: centerZ > 0 ? 1 : -1, // front vs back
+                                lr: centerX > 0 ? 1 : -1 // left vs right
+                            });
+                        }
+                    }
+                });
+                // If no leg meshes found, mark as checked so we don't re-scan
+                if (cat.userData.legMeshes.length === 0) cat.userData.legMeshes = null;
+            }
+            if (cat.userData.legMeshes) {
+                cat.userData.legMeshes.forEach(function(leg) {
+                    // Diagonal gait: front-left + back-right, then front-right + back-left
+                    const phase = leg.side * leg.lr;
+                    leg.mesh.rotation.x = leg.origRotX + Math.sin(wp + phase * Math.PI / 2) * 0.35;
+                });
+            }
 
             // Check collision with mouse
             if (dist < 1.2 && invincibleTimer <= 0) {
@@ -1509,7 +1544,7 @@
         }
 
         ant.userData = {
-            speed: 0.02 + Math.random() * 0.015,
+            speed: 0.012 + Math.random() * 0.008,
             wobblePhase: Math.random() * Math.PI * 2,
             alive: true
         };
@@ -1522,7 +1557,7 @@
         if (level < 3) return;
 
         // Spawn ants periodically (max 6 on screen)
-        if (Math.random() < 0.008 && ants.length < 6) {
+        if (Math.random() < 0.004 && ants.length < 3) {
             spawnAnt();
         }
 
@@ -2397,11 +2432,12 @@
         document.getElementById('level-up-screen').classList.add('hidden');
         document.getElementById('hud').classList.remove('hidden');
 
-        score = 0; lives = 5; invincibleTimer = 0; level = 1; cheeseForNextLevel = 10;
+        const startLevel = 1;
+        score = 0; lives = 5; invincibleTimer = 0; level = startLevel; cheeseForNextLevel = startLevel * 10 + 10;
         dangerActive = false;
         activeTrap = null;
         document.getElementById('score').textContent = 0;
-        document.getElementById('level-display').textContent = 1;
+        document.getElementById('level-display').textContent = startLevel;
         document.getElementById('danger-overlay').classList.remove('active');
         document.getElementById('danger-text').classList.remove('show');
         updateLivesDisplay();
@@ -2420,8 +2456,8 @@
         scene.background = new THREE.Color(0x1a0e05);
         scene.fog = new THREE.Fog(0x1a0e05, 20, 45);
 
-        // Build level 1
-        buildEnvironment(1);
+        // Build starting level
+        buildEnvironment(level);
 
         // Reset mouse position
         if (mouse3D) {

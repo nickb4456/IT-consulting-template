@@ -188,34 +188,97 @@
         }
         
         .btn {
-            display: inline-block;
-            padding: 16px 32px;
-            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 1em 2em;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.3s;
             font-size: 1rem;
+            cursor: pointer;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            color: #fff;
+            --glow-color: #00E1E6;
+            --glow-spread: rgba(76, 105, 245, 0.5);
+            --btn-bg: #4C69F5;
+            background-color: var(--btn-bg);
+            color: var(--glow-color);
+            border: 0.15em solid var(--glow-color);
+            border-radius: 0.75em;
+            box-shadow: 
+                0 0 1em 0.25em var(--glow-color),
+                0 0 4em 1em var(--glow-spread),
+                inset 0 0 0.75em 0.25em var(--glow-color);
+            text-shadow: 0 0 0.5em var(--glow-color);
+            position: relative;
+            transition: all 0.3s ease;
         }
-        
+
+        .btn-primary::after {
+            pointer-events: none;
+            content: "";
+            position: absolute;
+            top: 120%;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: var(--glow-spread);
+            filter: blur(2em);
+            opacity: 0.7;
+            transform: perspective(1.5em) rotateX(35deg) scale(1, 0.6);
+        }
+
         .btn-primary:hover {
+            color: var(--btn-bg);
+            background-color: var(--glow-color);
+            box-shadow: 
+                0 0 1em 0.25em var(--glow-color),
+                0 0 4em 2em var(--glow-spread),
+                inset 0 0 0.75em 0.25em var(--glow-color);
             transform: translateY(-2px);
-            box-shadow: 0 10px 40px rgba(76, 105, 245, 0.4);
         }
         
         .btn-secondary {
-            background: transparent;
-            border: 2px solid rgba(255,255,255,0.2);
-            color: #fff;
+            --glow-color: #654CF4;
+            --glow-spread: rgba(76, 130, 230, 0.4);
+            --btn-bg: rgba(0, 81, 230, 0.2);
+            background-color: var(--btn-bg);
+            color: var(--glow-color);
+            border: 0.15em solid var(--glow-color);
+            border-radius: 0.75em;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 0.5em 0.1em var(--glow-color),
+                0 0 2em 0.5em var(--glow-spread),
+                inset 0 0 0.5em 0.1em rgba(76, 130, 230, 0.3);
+            text-shadow: 0 0 0.3em var(--glow-color);
+            position: relative;
+            transition: all 0.3s ease;
         }
-        
+
+        .btn-secondary::after {
+            pointer-events: none;
+            content: "";
+            position: absolute;
+            top: 120%;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: var(--glow-spread);
+            filter: blur(1.5em);
+            opacity: 0.5;
+            transform: perspective(1.5em) rotateX(35deg) scale(1, 0.6);
+        }
+
         .btn-secondary:hover {
-            border-color: var(--cyan);
-            color: var(--cyan);
+            color: #0a0a0f;
+            background-color: var(--glow-color);
+            box-shadow: 
+                0 0 1em 0.25em var(--glow-color),
+                0 0 3em 1em var(--glow-spread),
+                inset 0 0 0.5em 0.25em var(--glow-color);
+            transform: translateY(-2px);
         }
         
         /* Stats */
@@ -265,31 +328,75 @@
         }
         
         .feature-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 32px;
-            transition: all 0.3s;
+            position: relative;
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #2E1A47);
+            border-radius: 20px;
+            z-index: -2;
+            transition: all 0.5s ease;
+        }
+
+        .feature-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(315deg, #00E1E6, #2E1A47);
+            border-radius: 20px;
+            filter: blur(25px);
+            opacity: 0.4;
+            z-index: -3;
+            transition: all 0.5s ease;
+        }
+
+        .feature-card-inner {
+            position: absolute;
+            inset: 3px;
+            background: rgba(10, 10, 15, 0.92);
+            border-radius: 18px;
+            z-index: -1;
         }
         
         .feature-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-4px);
+            transform: translateY(-8px);
+        }
+
+        .feature-card:hover::after {
+            filter: blur(35px);
+            opacity: 0.7;
+        }
+
+        .feature-card:hover::before {
+            background: linear-gradient(315deg, #00E1E6, #2E1A47, #654CF4);
         }
         
         .feature-icon {
             font-size: 2.5rem;
             margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
         }
         
         .feature-card h3 {
             font-size: 1.25rem;
             margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
         }
         
         .feature-card p {
             color: #888;
             font-size: 0.95rem;
+            position: relative;
+            z-index: 1;
         }
         
         /* Pricing */
@@ -686,31 +793,37 @@
             <h2>What Your AI Can Do</h2>
             <div class="feature-grid">
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">💬</div>
                     <h3>Smart Text Replies</h3>
                     <p>Automatically responds to leads with property details, pricing, and availability. No more missed texts at 11pm.</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">📅</div>
                     <h3>Showing Scheduler</h3>
                     <p>Checks your calendar, finds open slots, and books showings. Sends confirmations and reminders automatically.</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">🏠</div>
                     <h3>RI Property Expert</h3>
                     <p>Answers questions about any RI property — schools, taxes, flood zones, recent sales. Trained on real MLS data.</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">📱</div>
                     <h3>Website Chat Widget</h3>
                     <p>Embed on your site to capture leads 24/7. Qualifies buyers, answers FAQs, schedules callbacks.</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">📋</div>
                     <h3>Lead → CRM</h3>
                     <p>New leads automatically added to your CRM with conversation history, property interests, and follow-up tasks.</p>
                 </div>
                 <div class="feature-card">
+                    <div class="feature-card-inner"></div>
                     <div class="feature-icon">🎯</div>
                     <h3>Your Voice, Your Brand</h3>
                     <p>Trained on YOUR listings, YOUR style, YOUR way of talking. Clients won't know it's AI.</p>

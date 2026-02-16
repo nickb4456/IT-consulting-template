@@ -3,466 +3,415 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ouroboros Colony — Self-Modifications</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=JetBrains+Mono&display=swap">
+  <title>Ouroboros Evolution Log | Self-Modifications</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <style>
     :root {
-      --primary: #4C69F5;
-      --accent: #654CF4;
-      --cyan: #00E1E6;
-      --green: #10b981;
-      --red: #ef4444;
-      --amber: #f59e0b;
-      --dark: #0f172a;
-      --darker: #020617;
-      --text: #f1f5f9;
+      --bg: #0f172a;
+      --card: rgba(30, 41, 59, 0.8);
+      --border: rgba(99, 102, 241, 0.3);
+      --text: #f8fafc;
       --muted: #94a3b8;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --purple: #8b5cf6;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: 'Lato', sans-serif; 
-      background: var(--darker); 
-      color: var(--text); 
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
-      min-height: 100vh;
+      padding: 2rem;
+      max-width: 900px;
+      margin: 0 auto;
     }
-    .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
-    
-    h1 { 
-      font-size: 2.5rem; 
-      font-weight: 900;
-      text-align: center;
-      margin-bottom: 0.5rem;
-      background: linear-gradient(135deg, var(--primary), var(--cyan));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .subtitle { text-align: center; color: var(--muted); margin-bottom: 2rem; }
-    
-    .stats-row {
+    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
       gap: 1rem;
       margin-bottom: 2rem;
     }
     .stat-card {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.3);
+      background: var(--card);
+      border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1.25rem;
       text-align: center;
     }
-    .stat-value { font-size: 2rem; font-weight: 900; color: var(--green); }
+    .stat-value { font-size: 2rem; font-weight: 900; }
+    .stat-value.green { color: var(--green); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.purple { color: var(--purple); }
     .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    
+    .section { margin-bottom: 2rem; }
     .section-title {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      margin: 2rem 0 1rem;
+      margin-bottom: 1rem;
       padding-bottom: 0.5rem;
-      border-bottom: 2px solid rgba(76, 105, 245, 0.3);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+      border-bottom: 2px solid var(--border);
     }
-    
-    .mod-card {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 16px;
-      margin-bottom: 1.5rem;
-      overflow: hidden;
+    .patch-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
     }
-    .mod-card.yolo {
-      border-color: rgba(245, 158, 11, 0.4);
-    }
-    .mod-header {
-      padding: 1.25rem;
-      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+    .patch-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      flex-wrap: wrap;
       gap: 1rem;
-    }
-    .mod-title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--green);
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .mod-card.yolo .mod-title {
-      color: var(--amber);
-    }
-    .mod-meta {
-      display: flex;
-      gap: 1rem;
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-    .mod-meta span {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-    .mod-file {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-      background: rgba(0,0,0,0.3);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      color: var(--cyan);
-    }
-    
-    .mod-source {
-      padding: 1rem 1.25rem;
-      background: rgba(0,0,0,0.2);
-      border-bottom: 1px solid rgba(16, 185, 129, 0.1);
-    }
-    .mod-source-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--muted);
       margin-bottom: 0.5rem;
     }
-    .mod-source-text {
-      font-size: 0.9rem;
-      color: var(--text);
-      font-style: italic;
+    .patch-title {
+      font-weight: 600;
+      font-size: 0.95rem;
     }
-    
-    .mod-code {
-      padding: 1.25rem;
-    }
-    .mod-code-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .patch-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      margin-bottom: 0.75rem;
     }
-    
-    .diff-block {
-      background: rgba(0,0,0,0.4);
-      border-radius: 8px;
-      padding: 1rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.7rem;
-      overflow-x: auto;
-      white-space: pre;
-      line-height: 1.5;
-    }
-    .diff-block .comment { color: #6b7280; }
-    .diff-block .keyword { color: #c084fc; }
-    .diff-block .function { color: #60a5fa; }
-    .diff-block .string { color: #34d399; }
-    .diff-block .number { color: var(--amber); }
-    
-    .yolo-badge {
-      background: rgba(245, 158, 11, 0.2);
-      color: var(--amber);
-      font-size: 0.65rem;
+    .patch-file {
+      background: rgba(99, 102, 241, 0.2);
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
-      font-weight: 700;
+      font-family: monospace;
+      font-size: 0.7rem;
     }
-    
-    .explanation {
-      background: rgba(76, 105, 245, 0.1);
-      border: 1px solid rgba(76, 105, 245, 0.2);
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    .explanation h3 {
-      color: var(--primary);
-      margin-bottom: 0.75rem;
-      font-size: 1rem;
-    }
-    .explanation p {
+    .patch-reason {
+      font-size: 0.85rem;
       color: var(--muted);
+      margin-top: 0.5rem;
+    }
+    .risk-badge {
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .risk-low { background: rgba(16, 185, 129, 0.2); color: var(--green); }
+    .risk-medium { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
+    .risk-high { background: rgba(239, 68, 68, 0.2); color: var(--red); }
+    .file-group { margin-bottom: 1.5rem; }
+    .file-header {
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: var(--purple);
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(139, 92, 246, 0.1);
+      border-radius: 6px;
+    }
+    .pending-card {
+      border-color: var(--amber);
+    }
+    .back-link {
+      display: inline-block;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 1rem;
       font-size: 0.9rem;
     }
-    .explanation code {
-      background: rgba(0,0,0,0.3);
-      padding: 0.1rem 0.4rem;
-      border-radius: 4px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.8rem;
-    }
-    
-    @media (max-width: 768px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .mod-header { flex-direction: column; }
-      .diff-block { font-size: 0.6rem; }
-    }
+    .back-link:hover { color: var(--text); }
+    .timestamp { font-size: 0.7rem; color: var(--muted); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🤖 True Self-Modifications</h1>
-    <p class="subtitle">Code the colony wrote itself — no human involvement</p>
-    
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-value">11</div>
-        <div class="stat-label">Functions</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">2</div>
-        <div class="stat-label">Files Modified</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">~280</div>
-        <div class="stat-label">Lines Written</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">v31</div>
-        <div class="stat-label">Colony Version</div>
-      </div>
-    </div>
-    
-    <div class="explanation">
-      <h3>How it works</h3>
-      <p>
-        The <code>implementer-ant</code> reads research papers, extracts actionable insights via the <code>belief-cluster-ant</code>, 
-        then generates code patches. Patches are sandbox-tested before injection. On 2026-02-15, we enabled <strong>YOLO mode</strong> — 
-        the colony now auto-applies HIGH-risk patches if they pass sandbox, and renames functions to avoid conflicts.
-      </p>
-    </div>
-
-    <!-- Original Self-Mods -->
-    <div class="section-title">📚 Original Self-Modifications (Pre-YOLO)</div>
-
-    <div class="mod-card">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">🧠 selectiveDecay()</div>
-          <div class="mod-file">src/core/pheromones-db.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-12</span>
-          <span>⚡ MEDIUM risk</span>
-        </div>
-      </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Research Source</div>
-        <div class="mod-source-text">
-          "Neuroscience paper on selective attention gating — salience network preserves important signals 
-          while default mode lets mundane information decay faster"
-        </div>
-      </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Injected Code</div>
-        <div class="diff-block"><span class="comment">// [Deep Analysis] Injected by Implementer Ant - 2026-02-12</span>
-<span class="keyword">function</span> <span class="function">selectiveDecay</span>(pheromone, novelty) {
-  <span class="keyword">const</span> salienceDecay = <span class="number">0.9</span>;    <span class="comment">// 10% decay for low-novelty</span>
-  <span class="keyword">const</span> executiveDecay = <span class="number">0.99</span>;  <span class="comment">// 1% decay for high-novelty</span>
+  <a href="/ouroboros/" class="back-link">← Back to Ouroboros</a>
+  <h1>🐍 Evolution Log</h1>
+  <p class="subtitle">Self-modifications by the Ouroboros Colony — the snake eating its own tail</p>
   
-  <span class="keyword">if</span> (novelty > <span class="number">0.5</span>) {
-    <span class="keyword">return</span> pheromone * executiveDecay;
-  } <span class="keyword">else</span> {
-    <span class="keyword">return</span> pheromone * salienceDecay;
-  }
-}</div>
-      </div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value green">46</div>
+      <div class="stat-label">Applied</div>
     </div>
-
-    <div class="mod-card">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">🗄️ learnedEvictionPolicy()</div>
-          <div class="mod-file">src/core/recursive-pheromones.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-13</span>
-          <span>⚡ MEDIUM risk</span>
-        </div>
-      </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Research Source</div>
-        <div class="mod-source-text">
-          "KV Cache paper on learned eviction policies — RL agents trained on generation traces 
-          learn to predict future utility of cached key-value pairs"
-        </div>
-      </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Injected Code</div>
-        <div class="diff-block"><span class="comment">// [Deep Analysis] Injected by Implementer Ant - 2026-02-13</span>
-<span class="keyword">function</span> <span class="function">learnedEvictionPolicy</span>(keyValuePairs, budget) {
-  <span class="keyword">const</span> evictionRankings = <span class="function">trainKVPAgents</span>(keyValuePairs);
-  <span class="keyword">return</span> evictionRankings.slice(<span class="number">0</span>, budget);
-}
-
-<span class="keyword">function</span> <span class="function">trainKVPAgents</span>(keyValuePairs) {
-  <span class="keyword">const</span> agents = keyValuePairs.map(<span class="function">createKVPAgent</span>);
-  <span class="keyword">return</span> agents.map(agent => agent.<span class="function">predictUtility</span>(keyValuePairs));
-}</div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value amber">2</div>
+      <div class="stat-label">Pending</div>
     </div>
-
-    <!-- YOLO Self-Mods -->
-    <div class="section-title">🔥 YOLO Mode Injections (2026-02-15)</div>
-
-    <div class="mod-card yolo">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">⚡ routeTask_0w7l() <span class="yolo-badge">YOLO</span></div>
-          <div class="mod-file">src/core/model-router.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-15</span>
-          <span>🔴 HIGH risk (auto-applied)</span>
-        </div>
-      </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Research Source</div>
-        <div class="mod-source-text">
-          "Mixture of Experts paper — score models by architectural capabilities like skip-connections, 
-          persistent-memory, and structured-latent-space for optimal task routing"
-        </div>
-      </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Injected Code (47 lines)</div>
-        <div class="diff-block"><span class="comment">// [YOLO] Injected by Implementer Ant - 2026-02-15</span>
-<span class="keyword">function</span> <span class="function">routeTask_0w7l</span>(taskType, opts = {}) {
-  <span class="keyword">function</span> <span class="function">modelScore</span>(model) {
-    <span class="keyword">let</span> score = <span class="number">0</span>;
-    
-    <span class="comment">// Award points for multi-scale contextual integration</span>
-    <span class="keyword">if</span> (model.capabilities.includes(<span class="string">'skip-connections'</span>)) score += <span class="number">2</span>;
-    <span class="keyword">if</span> (model.capabilities.includes(<span class="string">'persistent-memory'</span>)) score += <span class="number">2</span>;
-    <span class="keyword">if</span> (model.capabilities.includes(<span class="string">'structured-latent-space'</span>)) score += <span class="number">2</span>;
-    <span class="keyword">if</span> (model.capabilities.includes(<span class="string">'precise-retrieval'</span>)) score += <span class="number">2</span>;
-    
-    <span class="comment">// Adjust for cost</span>
-    score -= model.costPer1kTokens * <span class="number">10</span>;
-    <span class="keyword">return</span> score;
-  }
-  
-  <span class="comment">// Select highest-scoring model</span>
-  <span class="keyword">return</span> models.sort((a,b) => modelScore(b) - modelScore(a))[<span class="number">0</span>];
-}</div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value purple">1</div>
+      <div class="stat-label">Self-Mod Queue</div>
     </div>
-
-    <div class="mod-card yolo">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">⚡ routeTask_0w9m() <span class="yolo-badge">YOLO</span></div>
-          <div class="mod-file">src/core/model-router.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-15</span>
-          <span>🔴 HIGH risk (auto-applied)</span>
-        </div>
-      </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Research Source</div>
-        <div class="mod-source-text">
-          "Global contextual information integration — route tasks based on semantic context 
-          and multi-scale feature bridging"
-        </div>
-      </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Injected Code</div>
-        <div class="diff-block"><span class="comment">// [YOLO] Injected by Implementer Ant - 2026-02-15</span>
-<span class="comment">// Variant: integrates global context into routing decisions</span>
-<span class="keyword">function</span> <span class="function">routeTask_0w9m</span>(taskType, opts = {}) {
-  <span class="keyword">const</span> globalContext = <span class="function">extractGlobalContext</span>(opts);
-  <span class="keyword">const</span> localFeatures = <span class="function">extractLocalFeatures</span>(taskType);
-  
-  <span class="comment">// Bridge global semantics with fine-grained details</span>
-  <span class="keyword">return</span> <span class="function">selectModelByContext</span>(globalContext, localFeatures);
-}</div>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value red">15</div>
+      <div class="stat-label">Failed/No Match</div>
     </div>
-
-    <div class="mod-card yolo">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">⚡ selectiveDecay_0w1w() <span class="yolo-badge">YOLO</span></div>
-          <div class="mod-file">src/core/pheromones-db.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-15</span>
-          <span>⚡ MEDIUM risk</span>
-        </div>
+  </div>
+<div class="section">
+    <div class="section-title">⏳ Pending Approval</div>
+    <div class="patch-card pending-card">
+      <div class="patch-header">
+        <div class="patch-title">🎛️ Auto-tune: Similarity threshold for connections</div>
+        <span class="risk-badge risk-low">low</span>
       </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Research Source</div>
-        <div class="mod-source-text">
-          "Salience network paper — compute salience and executive control scores per-key 
-          for differentiated decay rates"
-        </div>
+      <div class="patch-meta">
+        <span class="patch-file">config.js</span>
       </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Injected Code</div>
-        <div class="diff-block"><span class="comment">// [YOLO] Injected by Implementer Ant - 2026-02-15</span>
-<span class="keyword">function</span> <span class="function">selectiveDecay_0w1w</span>(key, value) {
-  <span class="keyword">const</span> { salienceScore, executiveScore } = <span class="function">getSalienceAndExecutiveScores</span>(key);
-  <span class="keyword">const</span> decayRate = config.decay_rates.default;
-  <span class="keyword">return</span> value * Math.exp(-decayRate);
-}
-
-<span class="keyword">function</span> <span class="function">getSalienceAndExecutiveScores</span>(key) {
-  <span class="comment">// Could query database or ML model</span>
-  <span class="keyword">return</span> { salienceScore: <span class="number">0.7</span>, executiveScore: <span class="number">0.3</span> };
-}</div>
-      </div>
+      <div class="patch-reason">Increasing the similarity threshold will make it harder for ideas to connect, requiring them to be more distinct. This should reduce the formation of overly similar clusters of ideas that lead to the ...</div>
     </div>
-
-    <div class="mod-card yolo">
-      <div class="mod-header">
-        <div>
-          <div class="mod-title">⚡ +6 more selectiveDecay variants <span class="yolo-badge">YOLO</span></div>
-          <div class="mod-file">src/core/pheromones-db.js</div>
-        </div>
-        <div class="mod-meta">
-          <span>📅 2026-02-15</span>
-          <span>⚡ MEDIUM risk</span>
-        </div>
+    <div class="patch-card pending-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Implement a GAN-based architecture to learn more robust feature representations </div>
+        <span class="risk-badge risk-medium">medium</span>
       </div>
-      <div class="mod-source">
-        <div class="mod-source-label">Functions Added</div>
-        <div class="mod-source-text">
-          selectiveDecay_0w3c (timestamp-based), selectiveDecay_0w8y (pheromone-id based), 
-          selectiveDecay_0wac, selectiveDecay_0wbs (token-based), selectiveDecay_0wch, selectiveDecay_0wd7
-        </div>
+      <div class="patch-meta">
+        <span class="patch-file">src/core/embeddings.js</span>
       </div>
-      <div class="mod-code">
-        <div class="mod-code-label">Pattern</div>
-        <div class="diff-block"><span class="comment">// Colony generated multiple approaches to the same problem</span>
-<span class="comment">// Each variant explores different decay strategies:</span>
-<span class="comment">// - Timestamp-based decay (recency)</span>
-<span class="comment">// - Pheromone-ID based decay (identity)</span>
-<span class="comment">// - Token-based decay (semantic)</span>
-<span class="comment">// - Novelty-based decay (information content)</span>
-
-<span class="comment">// The colony is essentially doing its own hyperparameter search!</span></div>
-      </div>
+      <div class="patch-reason">strong_belief implementation (algorithm)...</div>
     </div>
-
-    <div class="explanation" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2);">
-      <h3 style="color: var(--amber);">🔥 YOLO Mode Enabled</h3>
-      <p>
-        On 2026-02-15, we loosened self-modification restrictions. The colony now:
-        <br>• Auto-applies HIGH-risk patches after sandbox testing
-        <br>• Renames functions to avoid conflicts (selectiveDecay → selectiveDecay_0w1w)
-        <br>• Can modify its own implementer-ant (the snake modifying its own fangs)
-        <br><br>
-        <strong>Result:</strong> 9 new functions injected in one run, ~235 lines of self-written code.
-        The colony is now doing its own architecture search, generating multiple approaches to the same problem.
-      </p>
+    <div class="patch-card pending-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Add mechanisms to integrate global contextual information and maintain persisten</div>
+        <span class="risk-badge risk-high">high</span>
+      </div>
+      <div class="patch-meta">
+        <span class="patch-file">src/ants/implementer-ant.js</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="section">
+  <div class="section-title">✅ Applied Patches (46)</div><div class="file-group">
+    <div class="file-header">📄 config.js <span style="opacity:0.6">(22 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity for connection</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher similarity threshold ensures stronger knowledge graph connections...</div>
     </div>
-    
-    <p style="text-align: center; margin-top: 2rem; color: var(--muted); font-size: 0.85rem;">
-      The snake eats its own tail. 🐍🔄<br>
-      <a href="index.html" style="color: var(--cyan);">← Back to Ouroboros</a>
-    </p>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity threshold for connecti</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher similarity threshold will create more meaningful connections in the knowledge graph...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase decay rate for candidate findings</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Faster decay for candidate findings will keep the system focused on the most promising breakthroughs....</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase mission alignment threshold</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher threshold helps ensure research aligns with colony's mission...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher decay rate ensures newer breakthroughs are prioritized...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase maximum findings per scout</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Increasing the maximum findings will allow the colony to discover more high-value breakthroughs....</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity for connection</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher similarity threshold will create stronger connections in the knowledge graph...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher relevance threshold ensures only high-quality breakthroughs are recognized...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Higher relevance threshold ensures only high-quality breakthroughs are considered...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <span class="risk-badge risk-low">low</span>
+      </div>
+      <div class="patch-reason">Raising the relevance threshold ensures only the most impactful breakthroughs are considered...</div>
+    </div><div style="color: var(--muted); font-size: 0.85rem; padding: 0.5rem;">+ 12 more patches...</div></div><div class="file-group">
+    <div class="file-header">📄 core/pheromones-db.js <span style="opacity:0.6">(13 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement selective decay of pheromones based on novelty, as</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">The paper discusses how equivariance properties can lead to improved sample efficiency and generalization for interatomic potential models. By impleme...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement selective gating based on Paper 2's Mixture of Exp</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 2 describes the Mixture of Experts (MoE) architecture, which uses a gating network to dynamically select a small subset of "expert" models to pr...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement selective pheromone decay based on Paper 2's Mixtu</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Implementing the selective pheromone decay based on the MoE concept from Paper 2 can improve the efficiency and effectiveness of the pheromone-based m...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Paper 5's "Salience Network" - add selective pheromone decay</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows the brain has a distinct "Salience Network" that filters relevant stimuli before passing it to the "Executive Control Network" for deepe...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Add selective decay based on Paper 5's insights on salience </div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows that the brain has distinct salience detection and executive control networks. Applying selective decay based on this insight can help t...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Paper 5's insight on dissociable salience and control networ</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows that the brain separates salience detection from high-level control, suggesting our pheromone system could benefit from selectively deca...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Paper 5 shows that salience detection and executive control </div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows that separating salience detection and executive control into distinct functional networks is an important architectural consideration f...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Paper 5's insights on salience detection and executive contr</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows that the brain has distinct networks for detecting salient stimuli and processing that information. Applying a similar selective decay m...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement selective gating based on Paper 5's insights on Sa</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 shows that the brain has distinct networks for detecting salient stimuli (salience network) and processing high-level information (executive c...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement selective decay based on Paper 5's insights on Sal</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Paper 5 suggests that selectively gating pheromone signals based on salience and executive control can improve the colony's ability to focus on high-p...</div>
+    </div><div style="color: var(--muted); font-size: 0.85rem; padding: 0.5rem;">+ 3 more patches...</div></div><div class="file-group">
+    <div class="file-header">📄 core/recursive-pheromones.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">🧠 [DEEP] Implement the adaptive eviction policy proposed in Paper 4 (</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">Implementing the KVP framework to learn specialized eviction policies can significantly improve the performance of the colony's key-value cache, as sh...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/ants/deep-reader-ant.js <span style="opacity:0.6">(2 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Implement the missing part of the `recursiveAnalyze` function to analyz</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `recursiveAnalyze` function to incorporate a new approach fo</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/ants/filter-ant.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `scoreText` function to prioritize the preservation of funda</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/ants/synthesis-ant.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Integrate Knowledge Graphs into the existing Synthesis Ant code to impr</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/core/embeddings.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the existing `embed` function to implement the specified belief,</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/core/hierarchical-pheromones.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `depositHierarchical` function to include mechanisms for mai</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/core/model-router.js <span style="opacity:0.6">(3 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `routeTask` function to implement sparse Mixture of Experts </div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `routeTask` function to integrate global contextual informat</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the existing `routeTask` function to incorporate the belief abou</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div><div class="file-group">
+    <div class="file-header">📄 src/core/pheromones-db.js <span style="opacity:0.6">(1 patches)</span></div>
+    <div class="patch-card">
+      <div class="patch-header">
+        <div class="patch-title">💭 [Belief] Modify the `deposit` function to implement the belief by adding support</div>
+        <span class="risk-badge risk-medium">medium</span>
+      </div>
+      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    </div></div></div>
+
+  <div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8rem;">
+    <p>Last updated: 2026-02-16</p>
+    <p>The Implementer ant reads research papers, forms beliefs, and patches the colony's own code.</p>
   </div>
 </body>
 </html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant for Rhode Island Realtors | Market Data & Client Communication</title>
+    <meta name="description" content="Your own AI assistant that knows every RI sale, generates market reports, and handles client questions 24/7. Hosted on your own AWS or ours.">
+    <link rel="canonical" href="https://aibridges.org/realtors-ai">
+    
+    <meta property="og:title" content="AI Assistant for Rhode Island Realtors">
+    <meta property="og:description" content="36,000+ RI sales at your fingertips. Market reports in seconds. Your own AI assistant.">
+    <meta property="og:url" content="https://aibridges.org/realtors-ai">
+    <meta property="og:type" content="website">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4C69F5;
+            --accent: #00E1E6;
+            --success: #10b981;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 35, 0.95);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(76, 105, 245, 0.2);
+        }
+        
+        body {
+            font-family: 'Lato', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Nav */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon { color: var(--accent); }
+        
+        /* Hero */
+        .hero {
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--success);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+        
+        .cta-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #654CF4);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 105, 245, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 60px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Features */
+        .features {
+            padding: 60px 0;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+        
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        .feature-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        /* Use Cases */
+        .use-cases {
+            padding: 60px 0;
+            background: linear-gradient(180deg, rgba(76, 105, 245, 0.05), transparent);
+        }
+        
+        .use-case-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .use-case {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .use-case-icon {
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            background: rgba(76, 105, 245, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .use-case-text h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .use-case-text p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        /* Pricing */
+        .pricing {
+            padding: 80px 0;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary);
+            position: relative;
+        }
+        
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+        
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 16px 0;
+        }
+        
+        .pricing-card .price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: var(--text-muted);
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            text-align: left;
+            margin: 24px 0;
+        }
+        
+        .pricing-card li {
+            padding: 10px 0;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pricing-card li i {
+            color: var(--success);
+        }
+        
+        .pricing-card .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        /* Hosting Options */
+        .hosting {
+            padding: 60px 0;
+            text-align: center;
+        }
+        
+        .hosting-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            max-width: 700px;
+            margin: 32px auto 0;
+        }
+        
+        .hosting-option {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        .hosting-option h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        .hosting-option p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        /* CTA */
+        .cta-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--primary);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .cta-box h2 {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        .cta-box p {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+        }
+        
+        footer a { color: var(--accent); text-decoration: none; }
+        
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+            .stat-value { font-size: 1.8rem; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .hosting-options { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+            .cta-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="logo"><span class="logo-icon">△</span> AIBridges</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="badge"><i class="fas fa-home"></i> Built for RI Realtors</div>
+            <h1>Your Own <span class="highlight">AI Assistant</span><br>With All RI Market Data</h1>
+            <p>36,000+ Rhode Island sales at your fingertips. Generate market reports in seconds. Answer client questions 24/7. Hosted on AWS — yours or ours.</p>
+            <div class="cta-row">
+                <a href="/#contact" class="btn btn-primary"><i class="fas fa-calendar"></i> Book Demo</a>
+                <a href="/ri-report" class="btn btn-outline">See the Data</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="container">
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value">36K+</div>
+                <div class="stat-label">RI Properties</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">77</div>
+                <div class="stat-label">Towns Covered</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">24/7</div>
+                <div class="stat-label">Always On</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">What Your AI Can Do</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Instant Market Reports</h3>
+                    <p>"What sold in Barrington last month over $600K?" — get answers with comps, charts, and trends in seconds.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏷️</div>
+                    <h3>Pricing Recommendations</h3>
+                    <p>AI analyzes comparable sales, days on market, and price/sqft to suggest optimal listing prices.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>Client Communication</h3>
+                    <p>Your AI answers buyer questions via text or email — neighborhood stats, school info, market conditions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📍</div>
+                    <h3>Neighborhood Analysis</h3>
+                    <p>Instant comps within 0.5 miles. Price trends. Days on market. Everything a buyer wants to know.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="use-cases">
+        <div class="container">
+            <h2 class="section-title">Real Conversations, Real Value</h2>
+            <div class="use-case-list">
+                <div class="use-case">
+                    <div class="use-case-icon">🗣️</div>
+                    <div class="use-case-text">
+                        <h4>"What's the average price in East Greenwich?"</h4>
+                        <p>$687K median, up 4.2% from last year. 23 active listings right now.</p>
+                    </div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">📈</div>
+                    <div class="use-case-text">
+                        <h4>"Generate a market report for my Newport listing"</h4>
+                        <p>PDF with recent sales, price trends, neighborhood stats — ready to send to clients.</p>
+                    </div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">🔍</div>
+                    <div class="use-case-text">
+                        <h4>"Find undervalued properties in Providence"</h4>
+                        <p>AI scores every listing against comps. Surfaces deals your clients will love.</p>
+                    </div>
+                </div>
+                <div class="use-case">
+                    <div class="use-case-icon">📱</div>
+                    <div class="use-case-text">
+                        <h4>"Text my buyer the stats for 123 Main St"</h4>
+                        <p>AI pulls the listing, nearby sales, and sends a clean summary to their phone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing">
+        <div class="container">
+            <h2 class="section-title">Simple Pricing</h2>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Starter</h3>
+                    <div class="price">$199<span>/mo</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Full RI market data access</li>
+                        <li><i class="fas fa-check"></i> Market report generation</li>
+                        <li><i class="fas fa-check"></i> Chat via web interface</li>
+                        <li><i class="fas fa-check"></i> Hosted on our AWS</li>
+                        <li><i class="fas fa-check"></i> Email support</li>
+                    </ul>
+                    <a href="/#contact" class="btn btn-outline">Get Started</a>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>Pro</h3>
+                    <div class="price">$499<span>/mo</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Everything in Starter</li>
+                        <li><i class="fas fa-check"></i> SMS/text integration</li>
+                        <li><i class="fas fa-check"></i> Client-facing chat widget</li>
+                        <li><i class="fas fa-check"></i> Your own AWS instance</li>
+                        <li><i class="fas fa-check"></i> Custom branding</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="/#contact" class="btn btn-primary">Book Demo</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="hosting">
+        <div class="container">
+            <h2 class="section-title">Your Data, Your Control</h2>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">Choose how you want to run your AI assistant.</p>
+            <div class="hosting-options">
+                <div class="hosting-option">
+                    <h4>☁️ We Host It</h4>
+                    <p>Runs on our AWS infrastructure. We handle updates, backups, and monitoring. You just use it.</p>
+                </div>
+                <div class="hosting-option">
+                    <h4>🔒 Your Own AWS</h4>
+                    <p>We deploy to your AWS account. Your data stays in your infrastructure. Full control.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box">
+                <h2>Ready to Work Smarter?</h2>
+                <p>15-minute demo. See the data. Ask your own questions. No pressure.</p>
+                <a href="/#contact" class="btn btn-primary"><i class="fas fa-calendar"></i> Book Free Demo</a>
+                <p style="margin-top: 16px; font-size: 0.9rem; color: var(--text-muted);">Or call: <a href="tel:+14013272971">(401) 327-2971</a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 <a href="/">AIBridges</a> · AI for Rhode Island Realtors</p>
+        <p style="margin-top: 8px; font-size: 0.85rem;"><a href="/ri-report">RI Market Data</a> · <a href="/providence-law-firms-ai">Legal AI</a> · <a href="/newport-weddings-ai">Wedding AI</a></p>
+    </footer>
+</body>
+</html>

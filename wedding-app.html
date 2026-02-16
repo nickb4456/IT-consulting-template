@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Newport Wedding AI | Timeline & Vendor Coordination</title>
-    <meta name="description" content="AI-powered wedding logistics for Newport planners and venues.">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="/wedding-manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newport Wedding AI | Join the Waitlist</title>
+    <meta name="description" content="AI-powered wedding logistics for Newport planners and venues. Join the waitlist for early access.">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,8 +25,6 @@
             --text-muted: #94a3b8;
             --border: rgba(76, 105, 245, 0.2);
             --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
         }
         
         body {
@@ -38,563 +33,119 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 100;
-            background: rgba(10, 10, 15, 0.95);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 12px 16px;
-        }
-        
-        .header-content {
-            max-width: 600px;
-            margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
         }
         
         .logo {
-            font-weight: 900;
-            font-size: 1.1rem;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo i { color: var(--accent); }
-        
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .btn-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-muted);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
+            gap: 10px;
+            margin-bottom: 40px;
+            font-size: 1.3rem;
+            font-weight: 700;
         }
         
-        .btn-icon:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
+        .logo i { color: var(--accent); font-size: 1.5rem; }
         
-        /* Main Content */
-        .main {
-            padding: 80px 16px 100px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        /* Wedding Info Card */
-        .wedding-card {
-            background: linear-gradient(135deg, var(--primary), #654CF4);
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .wedding-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-        }
-        
-        .wedding-card h2 {
-            font-size: 1.5rem;
-            font-weight: 900;
-            margin-bottom: 4px;
-            position: relative;
-        }
-        
-        .wedding-card .date {
-            font-size: 1rem;
-            opacity: 0.9;
-            margin-bottom: 16px;
-            position: relative;
-        }
-        
-        .wedding-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            position: relative;
-        }
-        
-        .stat {
-            text-align: center;
-            background: rgba(255,255,255,0.15);
-            border-radius: 12px;
-            padding: 12px 8px;
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 900;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            opacity: 0.8;
-        }
-        
-        /* Tab Navigation */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 12px 16px;
-            border-radius: 12px;
+        .badge {
+            display: inline-block;
+            background: rgba(76, 105, 245, 0.15);
             border: 1px solid var(--border);
-            background: var(--bg-card);
-            color: var(--text-muted);
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            white-space: nowrap;
-        }
-        
-        .tab i { font-size: 1.2rem; }
-        
-        .tab.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .tab:not(.active):hover {
-            border-color: var(--primary);
-            color: var(--text);
-        }
-        
-        /* Tab Content */
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Section Headers */
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-        
-        .btn-add {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
-        }
-        
-        .btn-add:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-        
-        /* Timeline Items */
-        .timeline {
-            position: relative;
-        }
-        
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--border);
-        }
-        
-        .timeline-item {
-            position: relative;
-            padding-left: 50px;
-            padding-bottom: 20px;
-        }
-        
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: 14px;
-            top: 4px;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: var(--primary);
-            border: 3px solid var(--bg-dark);
-        }
-        
-        .timeline-item.done::before {
-            background: var(--success);
-        }
-        
-        .timeline-item.current::before {
-            background: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
-        }
-        
-        .timeline-time {
+            padding: 6px 16px;
+            border-radius: 20px;
             font-size: 0.85rem;
             color: var(--accent);
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        
+        .highlight {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+            text-align: left;
+        }
+        
+        .feature {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+        
+        .feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .feature h3 {
+            font-size: 0.95rem;
             font-weight: 700;
             margin-bottom: 4px;
         }
         
-        .timeline-title {
-            font-weight: 700;
-            margin-bottom: 2px;
+        .feature p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
         }
         
-        .timeline-desc {
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+        }
+        
+        .form-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .form-subtitle {
             font-size: 0.9rem;
             color: var(--text-muted);
+            margin-bottom: 24px;
         }
         
-        .timeline-vendor {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 8px;
-        }
-        
-        /* Vendor Cards */
-        .vendor-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .vendor-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        
-        .vendor-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-        
-        .vendor-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .vendor-name {
-            font-weight: 700;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .vendor-role {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-        
-        .vendor-status {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-        
-        .vendor-status.confirmed {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-        }
-        
-        .vendor-status.pending {
-            background: rgba(245, 158, 11, 0.15);
-            color: var(--warning);
-        }
-        
-        .vendor-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .vendor-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .vendor-btn:hover {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        /* Guest FAQ */
-        .faq-chat {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-        
-        .faq-messages {
-            padding: 16px;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .faq-message {
-            margin-bottom: 16px;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .faq-message.guest {
-            flex-direction: row-reverse;
-        }
-        
-        .faq-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            flex-shrink: 0;
-        }
-        
-        .faq-message.guest .faq-avatar {
-            background: var(--accent);
-        }
-        
-        .faq-bubble {
-            background: var(--bg-input);
-            padding: 12px 16px;
-            border-radius: 16px;
-            max-width: 80%;
-            font-size: 0.95rem;
-        }
-        
-        .faq-message.guest .faq-bubble {
-            background: var(--primary);
-        }
-        
-        .faq-input-container {
-            border-top: 1px solid var(--border);
-            padding: 12px;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .faq-input {
-            flex: 1;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-        }
-        
-        .faq-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        
-        .faq-send {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--primary);
-            border: none;
-            color: white;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .faq-send:hover {
-            background: var(--primary-dark);
-        }
-        
-        /* Quick Questions */
-        .quick-questions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .quick-q {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-q:hover {
-            border-color: var(--primary);
-            color: var(--text);
-        }
-        
-        /* AI Generate Button */
-        .ai-generate {
-            background: linear-gradient(135deg, var(--primary), #654CF4);
-            border: none;
-            border-radius: 16px;
-            padding: 20px;
-            width: 100%;
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 1rem;
-            font-weight: 700;
-            font-family: inherit;
-        }
-        
-        .ai-generate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(76, 105, 245, 0.3);
-        }
-        
-        .ai-generate i {
-            font-size: 1.3rem;
-        }
-        
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(10, 10, 15, 0.98);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--border);
-            padding: 8px 16px;
-            padding-bottom: max(8px, env(safe-area-inset-bottom));
-        }
-        
-        .bottom-nav-inner {
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-around;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: var(--text-muted);
-            text-decoration: none;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 8px 16px;
-            border-radius: 12px;
-            transition: all 0.2s;
-        }
-        
-        .nav-item i { font-size: 1.3rem; }
-        
-        .nav-item.active {
-            color: var(--primary);
-            background: rgba(76, 105, 245, 0.1);
-        }
-        
-        /* Forms */
         .form-group {
             margin-bottom: 16px;
+            text-align: left;
         }
         
         .form-label {
@@ -605,11 +156,11 @@
             margin-bottom: 6px;
         }
         
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             background: var(--bg-input);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 14px 16px;
             color: var(--text);
             font-size: 1rem;
@@ -617,78 +168,18 @@
             transition: border-color 0.2s;
         }
         
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--primary);
         }
         
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            z-index: 200;
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-        }
-        
-        .modal-overlay.active {
-            display: flex;
-        }
-        
-        .modal {
-            background: var(--bg-dark);
-            border-radius: 24px 24px 0 0;
-            padding: 24px;
-            width: 100%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-title {
-            font-size: 1.3rem;
-            font-weight: 900;
-        }
-        
-        .modal-close {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: none;
-            background: var(--bg-card);
-            color: var(--text-muted);
+        .form-select {
             cursor: pointer;
-            font-size: 1.2rem;
         }
         
         .btn-primary {
             width: 100%;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), #654CF4);
             border: none;
             border-radius: 12px;
             padding: 16px;
@@ -697,567 +188,185 @@
             font-weight: 700;
             font-family: inherit;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .btn-primary:hover {
-            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 105, 245, 0.3);
         }
         
-        /* Empty State */
-        .empty-state {
+        .success-message {
+            display: none;
             text-align: center;
-            padding: 40px 20px;
+            padding: 24px;
+        }
+        
+        .success-message.show {
+            display: block;
+        }
+        
+        .success-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 16px;
+        }
+        
+        .success-message h3 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+        
+        .success-message p {
             color: var(--text-muted);
         }
         
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
+        .back-link {
+            margin-top: 32px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
         }
         
-        .empty-state h3 {
-            color: var(--text);
-            margin-bottom: 8px;
+        .back-link:hover {
+            color: var(--accent);
+        }
+        
+        @media (max-width: 500px) {
+            h1 { font-size: 2rem; }
+            .features { grid-template-columns: 1fr; }
+            .form-card { padding: 24px; }
         }
     </style>
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="logo">
-                <i class="fas fa-gem"></i>
-                Newport Wedding AI
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-gem"></i>
+            Newport Wedding AI
+        </div>
+        
+        <span class="badge">🚀 Coming Soon</span>
+        
+        <h1>AI for <span class="highlight">Newport Weddings</span></h1>
+        
+        <p class="subtitle">Timeline automation, vendor coordination, and guest logistics — built for planners and venues.</p>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📋</div>
+                <h3>AI Timelines</h3>
+                <p>Auto-generate day-of schedules</p>
             </div>
-            <div class="header-actions">
-                <button class="btn-icon" onclick="openSettings()">
-                    <i class="fas fa-cog"></i>
-                </button>
+            <div class="feature">
+                <div class="feature-icon">📡</div>
+                <h3>Vendor Hub</h3>
+                <p>Notify all vendors instantly</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💬</div>
+                <h3>Guest FAQ Bot</h3>
+                <p>24/7 answers for guests</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🚨</div>
+                <h3>Day-Of Alerts</h3>
+                <p>Emergency backup plans</p>
             </div>
         </div>
-    </header>
-
-    <main class="main">
-        <!-- Wedding Summary Card -->
-        <div class="wedding-card" id="weddingCard" style="display: none;">
-            <h2 id="coupleName">Sarah & Michael</h2>
-            <div class="date" id="weddingDate">June 15, 2026 • Castle Hill Inn</div>
-            <div class="wedding-stats">
-                <div class="stat">
-                    <div class="stat-value" id="statVendors">0</div>
-                    <div class="stat-label">Vendors</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="statGuests">0</div>
-                    <div class="stat-label">Guests</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-value" id="statDays">0</div>
-                    <div class="stat-label">Days Left</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Setup Prompt -->
-        <div id="setupPrompt">
-            <div class="empty-state">
-                <i class="fas fa-rings-wedding"></i>
-                <h3>Welcome to Newport Wedding AI</h3>
-                <p>Let's set up your wedding details to get started.</p>
-            </div>
-            <button class="ai-generate" onclick="openSetupModal()">
-                <i class="fas fa-magic"></i>
-                Create Your Wedding
-            </button>
-        </div>
-
-        <!-- Tab Navigation -->
-        <div class="tabs" id="mainTabs" style="display: none;">
-            <button class="tab active" data-tab="timeline">
-                <i class="fas fa-clock"></i>
-                Timeline
-            </button>
-            <button class="tab" data-tab="vendors">
-                <i class="fas fa-users"></i>
-                Vendors
-            </button>
-            <button class="tab" data-tab="faq">
-                <i class="fas fa-comments"></i>
-                Guest FAQ
-            </button>
-        </div>
-
-        <!-- Timeline Tab -->
-        <div class="tab-content active" id="tab-timeline" style="display: none;">
-            <button class="ai-generate" onclick="generateTimeline()">
-                <i class="fas fa-wand-magic-sparkles"></i>
-                Generate AI Timeline
-            </button>
-            
-            <div class="section-header">
-                <h3 class="section-title">Wedding Day Timeline</h3>
-                <button class="btn-add" onclick="openAddEvent()">
-                    <i class="fas fa-plus"></i> Add
-                </button>
-            </div>
-            
-            <div class="timeline" id="timelineList">
-                <!-- Timeline items will be inserted here -->
-            </div>
-        </div>
-
-        <!-- Vendors Tab -->
-        <div class="tab-content" id="tab-vendors">
-            <div class="section-header">
-                <h3 class="section-title">Your Vendors</h3>
-                <button class="btn-add" onclick="openAddVendor()">
-                    <i class="fas fa-plus"></i> Add
-                </button>
-            </div>
-            
-            <div class="vendor-list" id="vendorList">
-                <!-- Vendor cards will be inserted here -->
-            </div>
-        </div>
-
-        <!-- Guest FAQ Tab -->
-        <div class="tab-content" id="tab-faq">
-            <div class="section-header">
-                <h3 class="section-title">Guest FAQ Bot</h3>
-            </div>
-            
-            <div class="quick-questions">
-                <button class="quick-q" onclick="askQuestion('Where do I park?')">🅿️ Parking</button>
-                <button class="quick-q" onclick="askQuestion('What is the dress code?')">👔 Dress Code</button>
-                <button class="quick-q" onclick="askQuestion('Is there a shuttle?')">🚌 Shuttle</button>
-                <button class="quick-q" onclick="askQuestion('Can I bring a plus one?')">💑 Plus One</button>
-            </div>
-            
-            <div class="faq-chat">
-                <div class="faq-messages" id="faqMessages">
-                    <div class="faq-message">
-                        <div class="faq-avatar"><i class="fas fa-robot"></i></div>
-                        <div class="faq-bubble">Hi! I'm your wedding FAQ assistant. I can answer questions about parking, dress code, timing, and more. Try asking something!</div>
-                    </div>
-                </div>
-                <div class="faq-input-container">
-                    <input type="text" class="faq-input" id="faqInput" placeholder="Ask a question..." onkeypress="if(event.key==='Enter')sendFaq()">
-                    <button class="faq-send" onclick="sendFaq()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-        <div class="bottom-nav-inner">
-            <a href="#" class="nav-item active" data-nav="home">
-                <i class="fas fa-home"></i>
-                Home
-            </a>
-            <a href="#" class="nav-item" data-nav="timeline">
-                <i class="fas fa-calendar"></i>
-                Timeline
-            </a>
-            <a href="#" class="nav-item" data-nav="vendors">
-                <i class="fas fa-address-book"></i>
-                Vendors
-            </a>
-            <a href="#" class="nav-item" data-nav="chat">
-                <i class="fas fa-comment-dots"></i>
-                Chat
-            </a>
-        </div>
-    </nav>
-
-    <!-- Setup Modal -->
-    <div class="modal-overlay" id="setupModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Wedding Details</h2>
-                <button class="modal-close" onclick="closeModal('setupModal')">×</button>
-            </div>
-            <form onsubmit="saveWedding(event)">
-                <div class="form-group">
-                    <label class="form-label">Couple Names</label>
-                    <input type="text" class="form-input" id="inputCouple" placeholder="Sarah & Michael" required>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Wedding Date</label>
-                        <input type="date" class="form-input" id="inputDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Ceremony Time</label>
-                        <input type="time" class="form-input" id="inputTime" value="17:00" required>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Venue</label>
-                    <select class="form-input" id="inputVenue">
-                        <option value="castle-hill">Castle Hill Inn</option>
-                        <option value="rosecliff">Rosecliff Mansion</option>
-                        <option value="belle-mer">Belle Mer</option>
-                        <option value="chanler">The Chanler</option>
-                        <option value="oceancliff">OceanCliff</option>
-                        <option value="marble-house">Marble House</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Expected Guests</label>
-                    <input type="number" class="form-input" id="inputGuests" placeholder="150" required>
-                </div>
-                <button type="submit" class="btn-primary">Create Wedding</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Add Vendor Modal -->
-    <div class="modal-overlay" id="vendorModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Add Vendor</h2>
-                <button class="modal-close" onclick="closeModal('vendorModal')">×</button>
-            </div>
-            <form onsubmit="saveVendor(event)">
-                <div class="form-group">
-                    <label class="form-label">Vendor Name</label>
-                    <input type="text" class="form-input" id="vendorName" placeholder="Newport Catering Co." required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Role</label>
-                    <select class="form-input" id="vendorRole">
-                        <option value="caterer">Caterer</option>
-                        <option value="photographer">Photographer</option>
-                        <option value="videographer">Videographer</option>
-                        <option value="florist">Florist</option>
-                        <option value="dj">DJ / Band</option>
-                        <option value="officiant">Officiant</option>
-                        <option value="hair-makeup">Hair & Makeup</option>
-                        <option value="transportation">Transportation</option>
-                        <option value="cake">Cake / Dessert</option>
-                        <option value="rentals">Rentals</option>
-                        <option value="planner">Wedding Planner</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Phone</label>
-                        <input type="tel" class="form-input" id="vendorPhone" placeholder="(401) 555-1234">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-input" id="vendorEmail" placeholder="info@vendor.com">
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary">Add Vendor</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        // State
-        let wedding = JSON.parse(localStorage.getItem('wedding')) || null;
-        let vendors = JSON.parse(localStorage.getItem('vendors')) || [];
-        let timeline = JSON.parse(localStorage.getItem('timeline')) || [];
         
-        // Icons for vendor roles
-        const vendorIcons = {
-            caterer: '🍽️',
-            photographer: '📷',
-            videographer: '🎥',
-            florist: '💐',
-            dj: '🎵',
-            officiant: '💒',
-            'hair-makeup': '💄',
-            transportation: '🚗',
-            cake: '🎂',
-            rentals: '🎪',
-            planner: '📋',
-            other: '✨'
-        };
-        
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            initTabs();
-            if (wedding) {
-                showWedding();
-            }
-        });
-        
-        // Tab switching
-        function initTabs() {
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabId = tab.dataset.tab;
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(`tab-${tabId}`).classList.add('active');
-                });
-            });
-        }
-        
-        // Modal helpers
-        function openModal(id) {
-            document.getElementById(id).classList.add('active');
-        }
-        
-        function closeModal(id) {
-            document.getElementById(id).classList.remove('active');
-        }
-        
-        function openSetupModal() {
-            openModal('setupModal');
-        }
-        
-        function openAddVendor() {
-            openModal('vendorModal');
-        }
-        
-        // Save wedding
-        function saveWedding(e) {
-            e.preventDefault();
-            wedding = {
-                couple: document.getElementById('inputCouple').value,
-                date: document.getElementById('inputDate').value,
-                time: document.getElementById('inputTime').value,
-                venue: document.getElementById('inputVenue').value,
-                guests: parseInt(document.getElementById('inputGuests').value)
-            };
-            localStorage.setItem('wedding', JSON.stringify(wedding));
-            closeModal('setupModal');
-            showWedding();
-        }
-        
-        // Show wedding UI
-        function showWedding() {
-            document.getElementById('setupPrompt').style.display = 'none';
-            document.getElementById('weddingCard').style.display = 'block';
-            document.getElementById('mainTabs').style.display = 'flex';
-            document.getElementById('tab-timeline').style.display = 'block';
-            
-            // Update card
-            document.getElementById('coupleName').textContent = wedding.couple;
-            const venueNames = {
-                'castle-hill': 'Castle Hill Inn',
-                'rosecliff': 'Rosecliff Mansion',
-                'belle-mer': 'Belle Mer',
-                'chanler': 'The Chanler',
-                'oceancliff': 'OceanCliff',
-                'marble-house': 'Marble House',
-                'other': 'Custom Venue'
-            };
-            const dateObj = new Date(wedding.date + 'T12:00:00');
-            const dateStr = dateObj.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            document.getElementById('weddingDate').textContent = `${dateStr} • ${venueNames[wedding.venue]}`;
-            
-            // Stats
-            document.getElementById('statVendors').textContent = vendors.length;
-            document.getElementById('statGuests').textContent = wedding.guests;
-            const daysLeft = Math.ceil((dateObj - new Date()) / (1000 * 60 * 60 * 24));
-            document.getElementById('statDays').textContent = daysLeft > 0 ? daysLeft : '🎉';
-            
-            renderVendors();
-            renderTimeline();
-        }
-        
-        // Save vendor
-        function saveVendor(e) {
-            e.preventDefault();
-            const vendor = {
-                id: Date.now(),
-                name: document.getElementById('vendorName').value,
-                role: document.getElementById('vendorRole').value,
-                phone: document.getElementById('vendorPhone').value,
-                email: document.getElementById('vendorEmail').value,
-                status: 'pending'
-            };
-            vendors.push(vendor);
-            localStorage.setItem('vendors', JSON.stringify(vendors));
-            closeModal('vendorModal');
-            document.getElementById('vendorName').value = '';
-            document.getElementById('vendorPhone').value = '';
-            document.getElementById('vendorEmail').value = '';
-            showWedding();
-        }
-        
-        // Render vendors
-        function renderVendors() {
-            const container = document.getElementById('vendorList');
-            if (vendors.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-address-book"></i>
-                        <h3>No vendors yet</h3>
-                        <p>Add your first vendor to get started.</p>
-                    </div>
-                `;
-                return;
-            }
-            container.innerHTML = vendors.map(v => `
-                <div class="vendor-card">
-                    <div class="vendor-avatar">${vendorIcons[v.role] || '✨'}</div>
-                    <div class="vendor-info">
-                        <div class="vendor-name">${v.name}</div>
-                        <div class="vendor-role">${v.role.charAt(0).toUpperCase() + v.role.slice(1).replace('-', ' & ')}</div>
-                    </div>
-                    <span class="vendor-status ${v.status}">${v.status}</span>
-                    <div class="vendor-actions">
-                        <button class="vendor-btn" onclick="callVendor('${v.phone}')"><i class="fas fa-phone"></i></button>
-                        <button class="vendor-btn" onclick="emailVendor('${v.email}')"><i class="fas fa-envelope"></i></button>
-                    </div>
-                </div>
-            `).join('');
-        }
-        
-        // Render timeline
-        function renderTimeline() {
-            const container = document.getElementById('timelineList');
-            if (timeline.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-clock"></i>
-                        <h3>No timeline yet</h3>
-                        <p>Click "Generate AI Timeline" to create your wedding day schedule.</p>
-                    </div>
-                `;
-                return;
-            }
-            container.innerHTML = timeline.map((item, i) => `
-                <div class="timeline-item ${i === 0 ? 'current' : ''}">
-                    <div class="timeline-time">${item.time}</div>
-                    <div class="timeline-title">${item.title}</div>
-                    <div class="timeline-desc">${item.desc}</div>
-                    ${item.vendor ? `<span class="timeline-vendor"><i class="fas fa-user"></i> ${item.vendor}</span>` : ''}
-                </div>
-            `).join('');
-        }
-        
-        // Generate AI timeline
-        async function generateTimeline() {
-            if (!wedding) return;
-            
-            // Get ceremony time
-            const [hours, mins] = wedding.time.split(':').map(Number);
-            
-            // Generate timeline based on ceremony time
-            const baseTimeline = [
-                { offset: -6, title: 'Vendor Setup Begins', desc: 'Florist, caterer, and rentals arrive', vendor: null },
-                { offset: -5, title: 'Hair & Makeup - Bridal Party', desc: 'Getting ready begins', vendor: 'Hair & Makeup' },
-                { offset: -3, title: 'Photographer Arrives', desc: 'Getting ready photos', vendor: 'Photographer' },
-                { offset: -2, title: 'First Look', desc: 'Private moment for couple (optional)', vendor: 'Photographer' },
-                { offset: -1.5, title: 'Wedding Party Photos', desc: 'Bridesmaids, groomsmen, family', vendor: 'Photographer' },
-                { offset: -0.5, title: 'Guests Arrive', desc: 'Cocktail welcome, seating begins', vendor: null },
-                { offset: 0, title: 'Ceremony Begins', desc: 'The main event!', vendor: 'Officiant' },
-                { offset: 0.5, title: 'Cocktail Hour', desc: 'Drinks and appetizers while couple takes photos', vendor: 'Caterer' },
-                { offset: 1.5, title: 'Reception Entrance', desc: 'Grand entrance of newlyweds', vendor: 'DJ' },
-                { offset: 1.75, title: 'First Dance', desc: 'Couple\'s first dance as married', vendor: 'DJ' },
-                { offset: 2, title: 'Dinner Service', desc: 'First course served', vendor: 'Caterer' },
-                { offset: 2.5, title: 'Toasts & Speeches', desc: 'Best man, maid of honor', vendor: null },
-                { offset: 3, title: 'Cake Cutting', desc: 'Sweet tradition', vendor: 'Cake' },
-                { offset: 3.25, title: 'Parent Dances', desc: 'Father-daughter, mother-son', vendor: 'DJ' },
-                { offset: 3.5, title: 'Open Dancing', desc: 'Party time!', vendor: 'DJ' },
-                { offset: 5, title: 'Last Dance', desc: 'Final song of the night', vendor: 'DJ' },
-                { offset: 5.25, title: 'Send-Off', desc: 'Sparklers, bubbles, or grand exit', vendor: null }
-            ];
-            
-            timeline = baseTimeline.map(item => {
-                const eventHour = hours + item.offset;
-                const h = Math.floor(eventHour);
-                const m = (eventHour - h) * 60 + mins;
-                const finalH = h + Math.floor(m / 60);
-                const finalM = m % 60;
-                const ampm = finalH >= 12 ? 'PM' : 'AM';
-                const displayH = finalH > 12 ? finalH - 12 : finalH === 0 ? 12 : finalH;
+        <div class="form-card">
+            <form id="waitlistForm" onsubmit="submitWaitlist(event)">
+                <h2 class="form-title">Join the Waitlist</h2>
+                <p class="form-subtitle">Be first to get early access when we launch.</p>
                 
-                return {
-                    time: `${displayH}:${String(Math.round(finalM)).padStart(2, '0')} ${ampm}`,
-                    title: item.title,
-                    desc: item.desc,
-                    vendor: item.vendor
-                };
-            });
-            
-            localStorage.setItem('timeline', JSON.stringify(timeline));
-            renderTimeline();
-        }
-        
-        // FAQ Bot
-        function askQuestion(q) {
-            document.getElementById('faqInput').value = q;
-            sendFaq();
-        }
-        
-        async function sendFaq() {
-            const input = document.getElementById('faqInput');
-            const q = input.value.trim();
-            if (!q) return;
-            
-            const messagesEl = document.getElementById('faqMessages');
-            
-            // Add user message
-            messagesEl.innerHTML += `
-                <div class="faq-message guest">
-                    <div class="faq-avatar"><i class="fas fa-user"></i></div>
-                    <div class="faq-bubble">${q}</div>
+                <div class="form-group">
+                    <label class="form-label">Your Name</label>
+                    <input type="text" class="form-input" id="name" placeholder="Sarah Johnson" required>
                 </div>
-            `;
+                
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="email" placeholder="sarah@example.com" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">I am a...</label>
+                    <select class="form-select" id="role" required>
+                        <option value="">Select your role</option>
+                        <option value="planner">Wedding Planner</option>
+                        <option value="venue">Venue Manager</option>
+                        <option value="vendor">Vendor (Caterer, Photo, etc.)</option>
+                        <option value="couple">Engaged Couple</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Business/Venue Name (optional)</label>
+                    <input type="text" class="form-input" id="business" placeholder="Castle Hill Inn">
+                </div>
+                
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-bell"></i>
+                    Join Waitlist
+                </button>
+            </form>
             
-            input.value = '';
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h3>You're on the list!</h3>
+                <p>We'll email you when Newport Wedding AI launches.</p>
+            </div>
+        </div>
+        
+        <a href="/newport-weddings-ai" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Learn more about Newport Wedding AI
+        </a>
+    </div>
+    
+    <script>
+        function submitWaitlist(e) {
+            e.preventDefault();
             
-            // Simple FAQ responses (would be AI-powered in production)
-            const responses = {
-                'parking': `Parking is available at ${wedding?.venue || 'the venue'}. Valet service is complimentary for all guests. Self-parking is also available in the main lot.`,
-                'dress': 'The dress code is cocktail attire. Gentlemen: suit and tie recommended. Ladies: cocktail dress or dressy separates. The ceremony is outdoors, so comfortable heels are suggested.',
-                'shuttle': 'Shuttle service will run between the Newport Marriott and the venue from 4:00 PM to midnight. Shuttles depart every 30 minutes.',
-                'plus one': 'Please check your invitation for "and guest" - if included, you\'re welcome to bring a plus one! Please RSVP with their name by the deadline.',
-                'time': `The ceremony begins at ${wedding?.time || '5:00 PM'}. We recommend arriving 15-20 minutes early for seating.`,
-                'gift': 'Your presence is the greatest gift! If you wish to give, we\'re registered at Crate & Barrel and have a honeymoon fund.',
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                role: document.getElementById('role').value,
+                business: document.getElementById('business').value,
+                timestamp: new Date().toISOString(),
+                source: 'wedding-app-waitlist'
             };
             
-            let response = "I don't have specific information about that yet. Please contact the couple or wedding planner directly for details!";
+            // Store locally for now (would be API call in production)
+            const waitlist = JSON.parse(localStorage.getItem('wedding-waitlist') || '[]');
+            waitlist.push(data);
+            localStorage.setItem('wedding-waitlist', JSON.stringify(waitlist));
             
-            const qLower = q.toLowerCase();
-            for (const [key, val] of Object.entries(responses)) {
-                if (qLower.includes(key)) {
-                    response = val;
-                    break;
-                }
-            }
+            // Show success
+            document.getElementById('waitlistForm').style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
             
-            // Simulate typing delay
-            setTimeout(() => {
-                messagesEl.innerHTML += `
-                    <div class="faq-message">
-                        <div class="faq-avatar"><i class="fas fa-robot"></i></div>
-                        <div class="faq-bubble">${response}</div>
-                    </div>
-                `;
-                messagesEl.scrollTop = messagesEl.scrollHeight;
-            }, 500);
-        }
-        
-        // Vendor actions
-        function callVendor(phone) {
-            if (phone) window.location.href = `tel:${phone}`;
-        }
-        
-        function emailVendor(email) {
-            if (email) window.location.href = `mailto:${email}`;
-        }
-        
-        function openSettings() {
-            // Could open settings modal
-            if (confirm('Reset all wedding data?')) {
-                localStorage.clear();
-                location.reload();
-            }
+            // Could also send to an API endpoint here
+            console.log('Waitlist signup:', data);
         }
     </script>
 </body>

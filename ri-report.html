@@ -763,26 +763,6 @@
  </div>
  </div>
 
- <h2>Price Analysis</h2>
- <div class="chart-grid">
- <div class="chart-card">
- <div class="chart-title">Price Distribution (Histogram)</div>
- <div style="position:relative;height:250px"><canvas id="histogramChart"></canvas></div>
- </div>
- <div class="chart-card">
- <div class="chart-title">Price per Sq Ft by City</div>
- <div style="position:relative;height:250px"><canvas id="ppsqftChart"></canvas></div>
- </div>
- <div class="chart-card">
- <div class="chart-title">Property Type Breakdown</div>
- <div style="position:relative;height:250px"><canvas id="typeChart"></canvas></div>
- </div>
- <div class="chart-card">
- <div class="chart-title">Days on Market by Price Range</div>
- <div style="position:relative;height:250px"><canvas id="domChart"></canvas></div>
- </div>
- </div>
-
  <h2>Market Overview</h2>
  <div class="chart-card full" style="padding:0;overflow:hidden">
  <iframe src="ri-dashboard-charts.html" style="width:100%;height:480px;border:none;border-radius:12px"></iframe>
@@ -4159,45 +4139,7 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
    }
  });
 
- // Price histogram
- const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];
- const priceBuckets = [0,0,0,0,0,0,0];
- rawData.properties.forEach(p => {
- if (p.price < 300000) priceBuckets[0]++;
- else if (p.price < 400000) priceBuckets[1]++;
- else if (p.price < 500000) priceBuckets[2]++;
- else if (p.price < 600000) priceBuckets[3]++;
- else if (p.price < 750000) priceBuckets[4]++;
- else if (p.price < 1000000) priceBuckets[5]++;
- else priceBuckets[6]++;
- });
- new Chart(document.getElementById('histogramChart'), { type: 'bar', data: { labels: priceRanges, datasets: [{ data: priceBuckets, backgroundColor: [chartColors.cyan, chartColors.green, chartColors.green, chartColors.amber, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
-
- // Price per sqft by city
- const ppsqft = {};
- rawData.properties.filter(p => p.sqft > 0).forEach(p => { if (!ppsqft[p.city]) ppsqft[p.city] = []; ppsqft[p.city].push(p.price / p.sqft); });
- const ppsqftData = Object.entries(ppsqft).map(([city, vals]) => ({ city, avg: vals.reduce((a,b)=>a+b,0)/vals.length })).sort((a,b) => b.avg - a.avg).slice(0, 12);
- new Chart(document.getElementById('ppsqftChart'), { type: 'bar', data: { labels: ppsqftData.map(d => d.city), datasets: [{ data: ppsqftData.map(d => Math.round(d.avg)), backgroundColor: chartColors.green, borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '$'+v } } } } });
-
- // Property type
- const types = {};
- rawData.properties.forEach(p => { const t = p.propertyType.split(' ')[0]; types[t] = (types[t]||0) + 1; });
- const typeData = Object.entries(types).sort((a,b) => b[1] - a[1]).slice(0, 6);
- new Chart(document.getElementById('typeChart'), { type: 'doughnut', data: { labels: typeData.map(t => t[0]), datasets: [{ data: typeData.map(t => t[1]), backgroundColor: [chartColors.purple, chartColors.pink, chartColors.green, chartColors.amber, chartColors.cyan, '#6366f1'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '50%', plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, padding: 8, font: { size: 11 } } } } } });
-
- // DOM by price range
- const domByPrice = { '<$300K': [], '$300-500K': [], '$500-750K': [], '$750K-1M': [], '$1M+': [] };
- rawData.properties.filter(p => p.dom > 0).forEach(p => {
- if (p.price < 300000) domByPrice['<$300K'].push(p.dom);
- else if (p.price < 500000) domByPrice['$300-500K'].push(p.dom);
- else if (p.price < 750000) domByPrice['$500-750K'].push(p.dom);
- else if (p.price < 1000000) domByPrice['$750K-1M'].push(p.dom);
- else domByPrice['$1M+'].push(p.dom);
- });
- const domAvg = Object.entries(domByPrice).map(([k,v]) => ({ range: k, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0 }));
- new Chart(document.getElementById('domChart'), { type: 'bar', data: { labels: domAvg.map(d => d.range), datasets: [{ data: domAvg.map(d => d.avg), backgroundColor: [chartColors.cyan, chartColors.green, chartColors.amber, chartColors.pink, chartColors.purple], borderRadius: 6 }] }, options: { ...chartOpts, plugins: { legend: { display: false } } } });
-
- // Old property characteristic charts removed - now using Plotly dashboard iframe
+ // Price Analysis charts now in Plotly dashboard iframe (ri-dashboard-charts.html)
  } catch(e) { console.error('Chart init error:', e); }
  }
  // Charts initialized after data loads (see loadPropertyData().then())

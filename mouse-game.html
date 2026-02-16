@@ -158,6 +158,7 @@
 
         #start-screen {
             background: radial-gradient(ellipse at 50% 40%, #3d2510 0%, #1a0e05 70%);
+            cursor: auto;
         }
 
         .title-mouse {
@@ -238,6 +239,7 @@
 
         #game-over-screen {
             background: radial-gradient(ellipse at 50% 40%, rgba(60,20,10,0.95) 0%, rgba(20,8,2,0.98) 70%);
+            cursor: auto;
         }
 
         #level-up-screen {
@@ -598,7 +600,10 @@
         clock = new THREE.Clock();
 
         window.addEventListener('resize', onResize);
-        window.addEventListener('keydown', e => { keys[e.code] = true; e.preventDefault(); });
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (isPlaying) e.preventDefault();
+        });
         window.addEventListener('keyup', e => keys[e.code] = false);
 
         setupTouchControls();

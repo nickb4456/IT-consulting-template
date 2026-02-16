@@ -33,7 +33,7 @@
  <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
  <!-- Defer non-critical scripts -->
  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
- <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js" defer></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
  <style>
  :root {
   --primary: #6366f1;
@@ -102,14 +102,14 @@
    display: block;
    color: #22d3ee;
    font-weight: 600;
-   animation: rotateWords 12s infinite;
+   animation: rotateWords 15s infinite;
  }
  @keyframes rotateWords {
-   0%, 15% { transform: translateY(0); }
-   20%, 35% { transform: translateY(-100%); }
-   40%, 55% { transform: translateY(-200%); }
-   60%, 75% { transform: translateY(-300%); }
-   80%, 95% { transform: translateY(-400%); }
+   0%, 18% { transform: translateY(0); }
+   20%, 38% { transform: translateY(-100%); }
+   40%, 58% { transform: translateY(-200%); }
+   60%, 78% { transform: translateY(-300%); }
+   80%, 98% { transform: translateY(-400%); }
    100% { transform: translateY(0); }
  }
  @media (max-width: 768px) {
@@ -347,7 +347,7 @@
  <div class="hero" style="padding:2rem 2rem 1.5rem">
  <h1 class="shimmer-title">Rhode Island Real Estate Hub</h1>
 
- <p class="hero-tagline">Your source for <span class="rotating-text"><span>market data<br>price trends<br>neighborhood insights<br>deal finding<br>investment analysis</span></span></p>
+ <p class="hero-tagline">Your source for <span class="rotating-text"><span>market data<br>price comps<br>deal hunting<br>trend analysis<br>local insights</span></span></p>
 
  <p class="subtitle" id="heroSubtitle" style="margin-top:1rem">36,000+ MLS Listings • 77 Towns • Updated Daily</p>
  </div>
@@ -1214,24 +1214,22 @@ function loadMainData() {
   startLoad();
 }
 
-// Trigger data load after scripts ready + first paint
+// Trigger data load after first paint
 let dataLoading = false;
 const triggerLoad = () => {
-  if (dataLoading || typeof initSqlJs === 'undefined') return;
+  if (dataLoading) return;
   dataLoading = true;
   loadMainData();
 };
 
-// Wait for DOMContentLoaded (deferred scripts loaded), then defer further
-document.addEventListener('DOMContentLoaded', () => {
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(triggerLoad, { timeout: 1500 });
-  } else {
-    setTimeout(triggerLoad, 200);
-  }
-  window.addEventListener('scroll', triggerLoad, { once: true, passive: true });
-  document.addEventListener('click', triggerLoad, { once: true });
-});
+// Load on idle, scroll, or click (whichever first)
+if ('requestIdleCallback' in window) {
+  requestIdleCallback(triggerLoad, { timeout: 1500 });
+} else {
+  setTimeout(triggerLoad, 300);
+}
+window.addEventListener('scroll', triggerLoad, { once: true, passive: true });
+document.addEventListener('click', triggerLoad, { once: true });
 
 function updateInsights() {
   if (!rawData || !rawData.properties || !window.cityStats) return;

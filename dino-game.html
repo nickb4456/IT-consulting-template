@@ -310,7 +310,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js"></script>
     <script>
+    // ============ SHARED GLTF LOADER WITH DRACO ============
+    const gltfLoader = new THREE.GLTFLoader();
+    const dracoLoader = new THREE.DRACOLoader();
+    dracoLoader.setDecoderPath('https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/');
+    gltfLoader.setDRACOLoader(dracoLoader);
+
     // ============ GAME STATE ============
     let scene, camera, renderer, clock;
     let trexGroup, trexPivot, trexModel;
@@ -342,9 +349,6 @@
     let roarCooldown = 0;
     let audioCtx;
 
-    // Prehistoric GLB trees
-    let glbTreeTemplate1 = null;
-    let glbTreeTemplate2 = null;
 
     // Raptor packs
     let raptorPacks = [];
@@ -560,7 +564,6 @@
         buildTerrain();
         buildTrex();
         populateWorld();
-        loadGLBTrees();
         loadRaptorTemplate();
         loadTriceratopsTemplate();
         loadEggTemplates();
@@ -611,86 +614,76 @@
 
     let skyPlanets = [];
     function buildSkyPlanets() {
-        // Saturn — with rings
+        // Saturn — with rings (fog disabled so visible in sky)
         const saturnGroup = new THREE.Group();
         const saturnGeo = new THREE.SphereGeometry(8, 24, 16);
         const saturnMat = new THREE.MeshPhongMaterial({
             color: 0xDAA520,
-            emissive: 0x332200,
-            emissiveIntensity: 0.3,
-            shininess: 30
+            emissive: 0x665500,
+            emissiveIntensity: 0.5,
+            shininess: 30,
+            fog: false
         });
         const saturn = new THREE.Mesh(saturnGeo, saturnMat);
         saturnGroup.add(saturn);
 
-        // Saturn rings
         const ringGeo = new THREE.RingGeometry(11, 18, 48, 3);
         const ringMat = new THREE.MeshBasicMaterial({
-            color: 0xCCBB88,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.6
+            color: 0xCCBB88, side: THREE.DoubleSide,
+            transparent: true, opacity: 0.6, fog: false
         });
         const ring = new THREE.Mesh(ringGeo, ringMat);
         ring.rotation.x = Math.PI * 0.4;
         saturnGroup.add(ring);
 
-        // Inner ring (darker)
         const innerRingGeo = new THREE.RingGeometry(9.5, 11, 48, 2);
         const innerRingMat = new THREE.MeshBasicMaterial({
-            color: 0x998866,
-            side: THREE.DoubleSide,
-            transparent: true,
-            opacity: 0.4
+            color: 0x998866, side: THREE.DoubleSide,
+            transparent: true, opacity: 0.4, fog: false
         });
         const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
         innerRing.rotation.x = Math.PI * 0.4;
         saturnGroup.add(innerRing);
 
-        saturnGroup.position.set(-150, 180, -200);
+        saturnGroup.position.set(-80, 120, -100);
         scene.add(saturnGroup);
-        skyPlanets.push({ group: saturnGroup, rotSpeed: 0.05, orbitSpeed: 0.002, orbitRadius: 0, basePos: saturnGroup.position.clone() });
+        skyPlanets.push({ group: saturnGroup, rotSpeed: 0.05, orbitSpeed: 0.002, basePos: saturnGroup.position.clone() });
 
         // Mars — reddish, smaller
         const marsGroup = new THREE.Group();
         const marsGeo = new THREE.SphereGeometry(5, 20, 14);
         const marsMat = new THREE.MeshPhongMaterial({
             color: 0xCC4422,
-            emissive: 0x441100,
-            emissiveIntensity: 0.3,
-            shininess: 15
+            emissive: 0x882200,
+            emissiveIntensity: 0.5,
+            shininess: 15,
+            fog: false
         });
         const mars = new THREE.Mesh(marsGeo, marsMat);
         marsGroup.add(mars);
 
-        // Mars polar ice cap (white spot on top)
         const capGeo = new THREE.SphereGeometry(2.2, 12, 6, 0, Math.PI * 2, 0, Math.PI * 0.25);
         const capMat = new THREE.MeshPhongMaterial({
-            color: 0xeeeeff,
-            emissive: 0x333344,
-            emissiveIntensity: 0.2
+            color: 0xeeeeff, emissive: 0x666677,
+            emissiveIntensity: 0.4, fog: false
         });
         const cap = new THREE.Mesh(capGeo, capMat);
-        cap.position.y = 0;
         marsGroup.add(cap);
 
-        marsGroup.position.set(180, 150, -120);
+        marsGroup.position.set(100, 100, -60);
         scene.add(marsGroup);
-        skyPlanets.push({ group: marsGroup, rotSpeed: 0.08, orbitSpeed: 0.003, orbitRadius: 0, basePos: marsGroup.position.clone() });
+        skyPlanets.push({ group: marsGroup, rotSpeed: 0.08, orbitSpeed: 0.003, basePos: marsGroup.position.clone() });
 
         // Jupiter — large, banded
         const jupiterGroup = new THREE.Group();
         const jupiterGeo = new THREE.SphereGeometry(12, 32, 20);
 
-        // Create a canvas texture for Jupiter's bands
         const jupCanvas = document.createElement('canvas');
         jupCanvas.width = 256;
         jupCanvas.height = 128;
         const jupCtx = jupCanvas.getContext('2d');
-        // Base color
         jupCtx.fillStyle = '#C4A882';
         jupCtx.fillRect(0, 0, 256, 128);
-        // Horizontal bands
         const bandColors = ['#B8956A', '#D4B896', '#A07850', '#C8AA78', '#8B6B48', '#DCC8A0', '#9B7B58', '#C4A882'];
         for (let b = 0; b < bandColors.length; b++) {
             jupCtx.fillStyle = bandColors[b];
@@ -698,7 +691,6 @@
             const h = 128 / bandColors.length + (Math.random() - 0.5) * 6;
             jupCtx.fillRect(0, y, 256, h);
         }
-        // Great Red Spot
         jupCtx.fillStyle = '#AA4422';
         jupCtx.beginPath();
         jupCtx.ellipse(180, 70, 18, 10, 0.1, 0, Math.PI * 2);
@@ -711,16 +703,17 @@
         const jupTexture = new THREE.CanvasTexture(jupCanvas);
         const jupiterMat = new THREE.MeshPhongMaterial({
             map: jupTexture,
-            emissive: 0x221100,
-            emissiveIntensity: 0.2,
-            shininess: 20
+            emissive: 0x443300,
+            emissiveIntensity: 0.4,
+            shininess: 20,
+            fog: false
         });
         const jupiter = new THREE.Mesh(jupiterGeo, jupiterMat);
         jupiterGroup.add(jupiter);
 
-        jupiterGroup.position.set(80, 200, 180);
+        jupiterGroup.position.set(40, 140, 90);
         scene.add(jupiterGroup);
-        skyPlanets.push({ group: jupiterGroup, rotSpeed: 0.12, orbitSpeed: 0.001, orbitRadius: 0, basePos: jupiterGroup.position.clone() });
+        skyPlanets.push({ group: jupiterGroup, rotSpeed: 0.12, orbitSpeed: 0.001, basePos: jupiterGroup.position.clone() });
     }
 
     function updateSkyPlanets(delta) {
@@ -1012,83 +1005,6 @@
         }
     }
 
-    // ============ GLB PREHISTORIC TREES ============
-    function loadGLBTrees() {
-        const loader = new THREE.GLTFLoader();
-        let loaded = 0;
-
-        loader.load('prehistoric-tree-1.glb', function(gltf) {
-            glbTreeTemplate1 = new THREE.Group();
-            const model = gltf.scene;
-            prepareModelTemplate(model, 10);
-            model.traverse(function(child) { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
-            glbTreeTemplate1.add(model);
-            loaded++;
-            if (loaded === 2) spawnGLBTrees();
-        }, undefined, function(error) {
-            console.warn('Tree GLB 1 load failed:', error);
-            loaded++;
-            if (loaded === 2) spawnGLBTrees();
-        });
-
-        loader.load('prehistoric-tree-2.glb', function(gltf) {
-            glbTreeTemplate2 = new THREE.Group();
-            const model = gltf.scene;
-            prepareModelTemplate(model, 12);
-            model.traverse(function(child) { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
-            glbTreeTemplate2.add(model);
-            loaded++;
-            if (loaded === 2) spawnGLBTrees();
-        }, undefined, function(error) {
-            console.warn('Tree GLB 2 load failed:', error);
-            loaded++;
-            if (loaded === 2) spawnGLBTrees();
-        });
-    }
-
-    function spawnGLBTrees() {
-        if (!glbTreeTemplate1 && !glbTreeTemplate2) {
-            console.warn('No GLB tree templates loaded');
-            return;
-        }
-
-        // Scatter 60 GLB trees across the map
-        for (let i = 0; i < 60; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const dist = 12 + Math.random() * (MAP_SIZE * 0.8 - 15);
-            const x = Math.cos(angle) * dist;
-            const z = Math.sin(angle) * dist;
-
-            // Check not too close to existing trees/rocks
-            let tooClose = false;
-            for (let t = 0; t < trees.length; t++) {
-                const dx = x - trees[t].position.x;
-                const dz = z - trees[t].position.z;
-                if (Math.sqrt(dx * dx + dz * dz) < 4) { tooClose = true; break; }
-            }
-            if (tooClose) continue;
-
-            const template = (i % 2 === 0 && glbTreeTemplate1) ? glbTreeTemplate1 :
-                             (glbTreeTemplate2 ? glbTreeTemplate2 : glbTreeTemplate1);
-            if (!template) continue;
-
-            const tree = cloneWithUniqueGeometry(template);
-            const terrainY = getTerrainHeight(x, z);
-            tree.position.set(x, terrainY, z);
-            tree.rotation.y = Math.random() * Math.PI * 2;
-
-            // Vary the scale a bit for natural look
-            const s = 0.7 + Math.random() * 0.6;
-            tree.scale.set(s, s, s);
-
-            tree.userData = { type: 'tree', radius: 2.5 };
-            scene.add(tree);
-            trees.push(tree);
-        }
-
-        if (DEBUG) console.log('GLB trees spawned, total trees now: ' + trees.length);
-    }
-
     // ============ MODEL POSITIONING HELPER ============
     // Finds the true world-space lowest Y vertex after scaling,
     // then positions model so feet sit exactly at y=0 in its parent group.
@@ -1148,8 +1064,7 @@
     let raptorYOffset = 0;
 
     function loadRaptorTemplate() {
-        const loader = new THREE.GLTFLoader();
-        loader.load('raptor-model.glb', function(gltf) {
+        gltfLoader.load('raptor-model.glb', function(gltf) {
             raptorTemplate = new THREE.Group();
             const model = gltf.scene;
 
@@ -1380,8 +1295,7 @@
 
     // ============ TRICERATOPS HERDS ============
     function loadTriceratopsTemplate() {
-        const loader = new THREE.GLTFLoader();
-        loader.load('triceratops-model.glb', function(gltf) {
+        gltfLoader.load('triceratops-model.glb', function(gltf) {
             triceratopsTemplate = new THREE.Group();
             const model = gltf.scene;
 
@@ -1571,10 +1485,10 @@
 
     // ============ DINOSAUR EGG NESTS ============
     function loadEggTemplates() {
-        const loader = new THREE.GLTFLoader();
+        /* using shared gltfLoader */
         let loaded = 0;
 
-        loader.load('dino-eggs-1.glb', function(gltf) {
+        gltfLoader.load('dino-eggs-1.glb', function(gltf) {
             eggTemplate1 = new THREE.Group();
             const model = gltf.scene;
             prepareModelTemplate(model, 4);
@@ -1587,7 +1501,7 @@
             if (loaded === 2) spawnEggNests();
         });
 
-        loader.load('dino-eggs-2.glb', function(gltf) {
+        gltfLoader.load('dino-eggs-2.glb', function(gltf) {
             eggTemplate2 = new THREE.Group();
             const model = gltf.scene;
             prepareModelTemplate(model, 4);
@@ -1741,8 +1655,7 @@
 
     // ============ PTERODACTYLS ============
     function loadPterodactylTemplate() {
-        const loader = new THREE.GLTFLoader();
-        loader.load('pterodactyl-model.glb', function(gltf) {
+        gltfLoader.load('pterodactyl-model.glb', function(gltf) {
             pteroTemplate = new THREE.Group();
             const model = gltf.scene;
             pteroYOffset = prepareModelTemplate(model, 5);
@@ -1950,10 +1863,10 @@
         scene.add(trexGroup);
 
         // Load GLB
-        const loader = new THREE.GLTFLoader();
+        /* using shared gltfLoader */
         document.getElementById('loading-screen').classList.remove('hidden');
 
-        loader.load('trex-model.glb', function(gltf) {
+        gltfLoader.load('trex-model.glb', function(gltf) {
             trexModel = gltf.scene;
 
             trexYOffset = prepareModelTemplate(trexModel, 5);

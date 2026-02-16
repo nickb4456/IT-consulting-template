@@ -83,46 +83,56 @@
    100% { background-position: -100% 0; }
  }
  
- /* Rotating text effect */
- .rotating-text {
-   font-size: 1.4rem;
+ /* Slide-reveal text effect */
+ .hero-tagline {
+   font-size: 1.5rem;
    color: #94a3b8;
+   margin-top: 0.75rem;
    display: flex;
    justify-content: center;
-   align-items: center;
-   gap: 0.25em;
-   margin-top: 0.75rem;
+   white-space: nowrap;
  }
- .static-text {
-   color: #94a3b8;
- }
- .rotating-wrapper {
+ .hero-tagline div {
+   display: inline-block;
    overflow: hidden;
-   height: 1.5em;
-   position: relative;
+   white-space: nowrap;
  }
- .rotating-words {
-   display: block;
-   position: relative;
-   animation: rotateWords 10s infinite;
+ .hero-tagline .tagline-static {
+   animation: showup 7s infinite;
  }
- .rotating-words span {
-   display: block;
-   height: 1.5em;
-   line-height: 1.5em;
+ .hero-tagline .tagline-reveal {
+   width: 0px;
+   animation: reveal 7s infinite;
+ }
+ .hero-tagline .tagline-reveal span {
    color: #22d3ee;
    font-weight: 600;
+   margin-left: -355px;
+   animation: slidein 7s infinite;
  }
- @keyframes rotateWords {
-   0%, 16% { transform: translateY(0); }
-   20%, 36% { transform: translateY(-1.5em); }
-   40%, 56% { transform: translateY(-3em); }
-   60%, 76% { transform: translateY(-4.5em); }
-   80%, 96% { transform: translateY(-6em); }
-   100% { transform: translateY(0); }
+ @keyframes showup {
+   0% { opacity: 0; }
+   20% { opacity: 1; }
+   80% { opacity: 1; }
+   100% { opacity: 0; }
+ }
+ @keyframes slidein {
+   0% { margin-left: -355px; }
+   20% { margin-left: -355px; }
+   35% { margin-left: 0px; }
+   100% { margin-left: 0px; }
+ }
+ @keyframes reveal {
+   0% { opacity: 0; width: 0px; }
+   20% { opacity: 1; width: 0px; }
+   30% { width: 355px; }
+   80% { opacity: 1; }
+   100% { opacity: 0; width: 355px; }
  }
  @media (max-width: 768px) {
-   .rotating-text { font-size: 1.1rem; flex-direction: column; gap: 0.2em; }
+   .hero-tagline { font-size: 1.1rem; flex-direction: column; }
+   .hero-tagline .tagline-reveal { width: auto !important; animation: showup 7s infinite; }
+   .hero-tagline .tagline-reveal span { margin-left: 0 !important; animation: none; }
  }
  .subtitle { color: #94a3b8; font-size: 1.1rem; margin-top: 0.5rem; }
  
@@ -356,18 +366,12 @@
  <div class="hero" style="padding:2rem 2rem 1.5rem">
  <h1 class="shimmer-title">Rhode Island Real Estate Hub</h1>
  
- <!-- Rotating text effect -->
- <div class="rotating-text">
-   <span class="static-text">Your source for</span>
-   <span class="rotating-wrapper">
-     <span class="rotating-words">
-       <span>market data</span>
-       <span>price trends</span>
-       <span>neighborhood insights</span>
-       <span>deal finding</span>
-       <span>investment analysis</span>
-     </span>
-   </span>
+ <!-- Slide-reveal text effect -->
+ <div class="hero-tagline">
+   <div class="tagline-static">Your source for</div>
+   <div class="tagline-reveal">
+     <span>real estate intelligence</span>
+   </div>
  </div>
  
  <p class="subtitle" id="heroSubtitle" style="margin-top:1rem">36,000+ MLS Listings • 77 Towns • Updated Daily</p>

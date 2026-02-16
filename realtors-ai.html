@@ -646,6 +646,138 @@
             text-decoration: none;
         }
         
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0f 100%);
+            border: 1px solid var(--cyan);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 0 60px rgba(0, 225, 230, 0.2);
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: #fff;
+        }
+        
+        .quote-step {
+            text-align: center;
+        }
+        
+        .quote-step.hidden {
+            display: none;
+        }
+        
+        .step-indicator {
+            color: var(--cyan);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .quote-step h3 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option-btn:hover {
+            border-color: var(--cyan);
+            background: rgba(0, 225, 230, 0.1);
+        }
+        
+        .quote-result {
+            background: rgba(0, 225, 230, 0.1);
+            border: 2px solid var(--cyan);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        
+        .quote-plan {
+            color: var(--cyan);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        
+        .quote-price {
+            margin-bottom: 5px;
+        }
+        
+        .quote-setup {
+            font-size: 3rem;
+            font-weight: 900;
+        }
+        
+        .quote-label {
+            color: #888;
+            font-size: 1rem;
+        }
+        
+        .quote-monthly {
+            color: var(--cyan);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .quote-note {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
         /* Mobile */
         @media (max-width: 900px) {
             .hero .container {
@@ -747,7 +879,7 @@
                     }, 2500);
                 </script>
                 <div class="cta-group">
-                    <a href="#pricing" class="btn btn-primary">See Pricing</a>
+                    <button class="btn btn-primary" onclick="openQuoteModal()">Get My Quote</button>
                     <a href="/ri-report" class="btn btn-secondary">See the Data</a>
                 </div>
             </div>
@@ -843,60 +975,82 @@
     </section>
 
     <section class="pricing" id="pricing">
-        <div class="container">
-            <h2>Transparent Pricing</h2>
-            <p>No hidden fees. You see exactly what you're paying for.</p>
-            
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <h3>Self-Hosted</h3>
-                    <p class="subtitle">You run it on your infrastructure</p>
-                    <div class="price">
-                        <div class="price-setup">$400 <span>setup</span></div>
-                        <div class="price-monthly">+ ~$79/mo operating costs</div>
-                    </div>
-                    <div class="price-breakdown">
-                        <div><span>Claude API</span><span>~$30-50</span></div>
-                        <div><span>Your hosting</span><span>~$20</span></div>
-                        <div><span>Twilio SMS</span><span>~$10</span></div>
-                        <div><span>Total</span><span>~$60-80/mo</span></div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>Full source code access</li>
-                        <li>Custom training session</li>
-                        <li>N8n workflow templates</li>
-                        <li>Setup documentation</li>
-                        <li>Email support</li>
-                    </ul>
-                    <a href="mailto:nick@aibridges.org?subject=Self-Hosted AI Assistant" class="btn btn-secondary">Get Started</a>
-                </div>
-                
-                <div class="pricing-card featured">
-                    <h3>Fully Managed</h3>
-                    <p class="subtitle">We host & maintain everything</p>
-                    <div class="price">
-                        <div class="price-setup">$600 <span>setup</span></div>
-                        <div class="price-monthly">+ ~$119/mo all-in</div>
-                    </div>
-                    <div class="price-breakdown">
-                        <div><span>Claude API</span><span>~$30-50</span></div>
-                        <div><span>AWS hosting</span><span>~$25</span></div>
-                        <div><span>Twilio SMS</span><span>~$10</span></div>
-                        <div><span>Support fee</span><span>$39</span></div>
-                        <div><span>Total</span><span>~$105-125/mo</span></div>
-                    </div>
-                    <ul class="pricing-features">
-                        <li>Everything in Self-Hosted</li>
-                        <li>Hosted on our AWS</li>
-                        <li>We handle all updates</li>
-                        <li>Priority support</li>
-                        <li>Monthly performance reports</li>
-                    </ul>
-                    <a href="mailto:nick@aibridges.org?subject=Managed AI Assistant" class="btn btn-primary">Get Started</a>
-                </div>
-            </div>
+        <div class="container" style="text-align: center;">
+            <h2>Get Your Custom Quote</h2>
+            <p style="max-width: 500px; margin: 0 auto 40px;">Answer a few quick questions and we'll calculate the perfect plan for your business.</p>
+            <button class="btn btn-primary" onclick="openQuoteModal()">Get My Quote →</button>
         </div>
     </section>
+
+    <!-- Quote Modal -->
+    <div id="quoteModal" class="modal-overlay" onclick="if(event.target===this)closeQuoteModal()">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeQuoteModal()">×</button>
+            
+            <!-- Step 1 -->
+            <div class="quote-step" id="step1">
+                <div class="step-indicator">1 of 4</div>
+                <h3>How many leads do you get per month?</h3>
+                <div class="option-grid">
+                    <button class="option-btn" onclick="selectOption(1, 'leads', '1-20')">1-20</button>
+                    <button class="option-btn" onclick="selectOption(1, 'leads', '20-50')">20-50</button>
+                    <button class="option-btn" onclick="selectOption(1, 'leads', '50-100')">50-100</button>
+                    <button class="option-btn" onclick="selectOption(1, 'leads', '100+')">100+</button>
+                </div>
+            </div>
+            
+            <!-- Step 2 -->
+            <div class="quote-step hidden" id="step2">
+                <div class="step-indicator">2 of 4</div>
+                <h3>How many showings per week?</h3>
+                <div class="option-grid">
+                    <button class="option-btn" onclick="selectOption(2, 'showings', '1-5')">1-5</button>
+                    <button class="option-btn" onclick="selectOption(2, 'showings', '5-15')">5-15</button>
+                    <button class="option-btn" onclick="selectOption(2, 'showings', '15-30')">15-30</button>
+                    <button class="option-btn" onclick="selectOption(2, 'showings', '30+')">30+</button>
+                </div>
+            </div>
+            
+            <!-- Step 3 -->
+            <div class="quote-step hidden" id="step3">
+                <div class="step-indicator">3 of 4</div>
+                <h3>Do you have technical staff?</h3>
+                <p style="color: #888; margin-bottom: 20px;">This helps us recommend self-hosted vs managed.</p>
+                <div class="option-grid">
+                    <button class="option-btn" onclick="selectOption(3, 'technical', 'yes')">Yes, I can host it</button>
+                    <button class="option-btn" onclick="selectOption(3, 'technical', 'no')">No, host it for me</button>
+                </div>
+            </div>
+            
+            <!-- Step 4 -->
+            <div class="quote-step hidden" id="step4">
+                <div class="step-indicator">4 of 4</div>
+                <h3>How many agents on your team?</h3>
+                <div class="option-grid">
+                    <button class="option-btn" onclick="selectOption(4, 'agents', '1')">Just me</button>
+                    <button class="option-btn" onclick="selectOption(4, 'agents', '2-5')">2-5</button>
+                    <button class="option-btn" onclick="selectOption(4, 'agents', '5-10')">5-10</button>
+                    <button class="option-btn" onclick="selectOption(4, 'agents', '10+')">10+</button>
+                </div>
+            </div>
+            
+            <!-- Results -->
+            <div class="quote-step hidden" id="stepResults">
+                <h3>Your Personalized Quote</h3>
+                <div class="quote-result">
+                    <div class="quote-plan" id="quotePlan">Fully Managed</div>
+                    <div class="quote-price">
+                        <span class="quote-setup" id="quoteSetup">$600</span>
+                        <span class="quote-label">setup</span>
+                    </div>
+                    <div class="quote-monthly" id="quoteMonthly">+ ~$119/mo</div>
+                    <p class="quote-note" id="quoteNote">Based on your volume, we recommend our managed plan with priority support.</p>
+                </div>
+                <a href="mailto:nick@aibridges.org?subject=AI Assistant Quote Request" class="btn btn-primary" style="width: 100%; margin-top: 20px;">Let's Talk →</a>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 12px;" onclick="resetQuote()">Start Over</button>
+            </div>
+        </div>
+    </div>
 
     <section class="how-it-works">
         <div class="container">
@@ -951,5 +1105,92 @@
             <p>© 2026 AIBridges · Providence, Rhode Island · <a href="mailto:nick@aibridges.org">nick@aibridges.org</a></p>
         </div>
     </footer>
+    <script>
+        // Quote Modal Logic
+        const quoteData = {};
+        
+        function openQuoteModal() {
+            document.getElementById('quoteModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeQuoteModal() {
+            document.getElementById('quoteModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        
+        function selectOption(step, key, value) {
+            quoteData[key] = value;
+            
+            // Hide current step, show next
+            document.getElementById('step' + step).classList.add('hidden');
+            
+            if (step < 4) {
+                document.getElementById('step' + (step + 1)).classList.remove('hidden');
+            } else {
+                calculateQuote();
+                document.getElementById('stepResults').classList.remove('hidden');
+            }
+        }
+        
+        function calculateQuote() {
+            const technical = quoteData.technical === 'yes';
+            const leads = quoteData.leads;
+            const agents = quoteData.agents;
+            
+            let setup, monthly, plan, note;
+            
+            if (technical) {
+                plan = 'Self-Hosted';
+                setup = '$400';
+                
+                if (leads === '100+' || agents === '10+') {
+                    monthly = '~$100-150/mo';
+                    note = 'High volume usage. You\'ll handle hosting, we provide the code and training.';
+                } else if (leads === '50-100' || agents === '5-10') {
+                    monthly = '~$70-100/mo';
+                    note = 'Moderate volume. Self-hosting saves you money with your technical skills.';
+                } else {
+                    monthly = '~$50-80/mo';
+                    note = 'Light usage. Self-hosting is very cost-effective for your needs.';
+                }
+            } else {
+                plan = 'Fully Managed';
+                setup = '$600';
+                
+                if (leads === '100+' || agents === '10+') {
+                    monthly = '~$150-200/mo';
+                    note = 'High volume plan with priority support and dedicated resources.';
+                } else if (leads === '50-100' || agents === '5-10') {
+                    monthly = '~$119-150/mo';
+                    note = 'Our most popular plan. We handle everything so you can focus on selling.';
+                } else {
+                    monthly = '~$99-119/mo';
+                    note = 'Perfect for solo agents. Full support, no technical hassle.';
+                }
+            }
+            
+            document.getElementById('quotePlan').textContent = plan;
+            document.getElementById('quoteSetup').textContent = setup;
+            document.getElementById('quoteMonthly').textContent = '+ ' + monthly;
+            document.getElementById('quoteNote').textContent = note;
+        }
+        
+        function resetQuote() {
+            // Reset data
+            Object.keys(quoteData).forEach(key => delete quoteData[key]);
+            
+            // Hide all steps
+            document.querySelectorAll('.quote-step').forEach(el => el.classList.add('hidden'));
+            
+            // Show step 1
+            document.getElementById('step1').classList.remove('hidden');
+        }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeQuoteModal();
+        });
+    </script>
 </body>
 </html>

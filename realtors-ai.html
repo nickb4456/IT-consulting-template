@@ -101,6 +101,13 @@
             max-height: 400px;
             filter: drop-shadow(0 20px 40px rgba(76, 105, 245, 0.3));
         }
+
+        #robot-canvas {
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            border-radius: 16px;
+        }
         
         .badge {
             display: inline-flex;
@@ -447,6 +454,7 @@
             .hero-content { text-align: center; }
             .hero-image { order: -1; margin-bottom: 24px; }
             .hero-image img { max-height: 280px; }
+            #robot-canvas { height: 300px; }
             .stats { grid-template-columns: repeat(3, 1fr); gap: 16px; }
             .stat-value { font-size: 1.8rem; }
             .feature-grid { grid-template-columns: 1fr; }
@@ -478,7 +486,7 @@
                     </div>
                 </div>
                 <div class="hero-image">
-                    <img src="/img/realtor-robot.png" alt="AI Realtor Assistant" />
+                    <canvas id="robot-canvas"></canvas>
                 </div>
             </div>
         </div>
@@ -630,5 +638,124 @@
         <p>© 2026 <a href="/">AIBridges</a> · AI for Rhode Island Realtors</p>
         <p style="margin-top: 8px; font-size: 0.85rem;"><a href="/ri-report">RI Market Data</a> · <a href="/providence-law-firms-ai">Legal AI</a> · <a href="/newport-weddings-ai">Wedding AI</a></p>
     </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+    (function() {
+        const canvas = document.getElementById('robot-canvas');
+        if (!canvas) return;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(35, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
+        camera.position.set(0, 1.0, 3.5);
+        camera.lookAt(0, 0.8, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+
+        // Lighting
+        scene.add(new THREE.AmbientLight(0x8899bb, 0.6));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        keyLight.position.set(3, 5, 4);
+        scene.add(keyLight);
+        const fillLight = new THREE.DirectionalLight(0x4c69f5, 0.4);
+        fillLight.position.set(-3, 3, -2);
+        scene.add(fillLight);
+        const rimLight = new THREE.DirectionalLight(0x10b981, 0.3);
+        rimLight.position.set(0, 2, -4);
+        scene.add(rimLight);
+
+        // Animation state
+        const animations = [
+            'Meshy_AI_biped/Meshy_AI_Animation_Phone_Conversation_withSkin.glb',
+            'Meshy_AI_biped/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
+            'Meshy_AI_biped/Meshy_AI_Animation_Walking_withSkin.glb',
+            'Meshy_AI_biped/Meshy_AI_Animation_Cheer_with_Both_Hands_withSkin.glb'
+        ];
+        let currentModel = null;
+        let mixer = null;
+        let currentIndex = 0;
+        let switchTimer = 0;
+        const SWITCH_INTERVAL = 6; // seconds per animation
+        const loader = new THREE.GLTFLoader();
+        const clock = new THREE.Clock();
+
+        function loadAnimation(index) {
+            loader.load(animations[index], function(gltf) {
+                // Remove old model
+                if (currentModel) scene.remove(currentModel);
+
+                currentModel = gltf.scene;
+
+                // Center and ground the model
+                const box = new THREE.Box3().setFromObject(currentModel);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+                currentModel.position.x = -center.x;
+                currentModel.position.z = -center.z;
+                currentModel.position.y = -box.min.y;
+
+                // Scale to fit nicely
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 1.8 / maxDim;
+                currentModel.scale.setScalar(scale);
+                currentModel.position.y *= scale;
+
+                scene.add(currentModel);
+
+                // Play animation if available
+                if (gltf.animations && gltf.animations.length > 0) {
+                    mixer = new THREE.AnimationMixer(currentModel);
+                    const action = mixer.clipAction(gltf.animations[0]);
+                    action.play();
+                } else {
+                    mixer = null;
+                }
+
+                switchTimer = 0;
+            }, undefined, function(error) {
+                console.warn('GLB load error:', error);
+            });
+        }
+
+        // Start with first animation
+        loadAnimation(0);
+
+        // Animate
+        function animate() {
+            requestAnimationFrame(animate);
+            const delta = clock.getDelta();
+
+            if (mixer) mixer.update(delta);
+
+            // Gentle rotation
+            if (currentModel) {
+                currentModel.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
+            }
+
+            // Cycle animations
+            switchTimer += delta;
+            if (switchTimer >= SWITCH_INTERVAL) {
+                currentIndex = (currentIndex + 1) % animations.length;
+                loadAnimation(currentIndex);
+            }
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Resize handler
+        window.addEventListener('resize', function() {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+    })();
+    </script>
 </body>
 </html>

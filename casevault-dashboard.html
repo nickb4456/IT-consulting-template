@@ -69,13 +69,34 @@
     </style>
 </head>
 <body>
+    <!-- Access Gate Message -->
+    <div id="access-gate" style="display: none; position: fixed; inset: 0; background: #0f172a; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center; max-width: 500px; padding: 40px;">
+            <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+            <h2 style="font-size: 24px; margin-bottom: 16px;">Dashboard Access Requires Contribution</h2>
+            <p style="color: #94a3b8; margin-bottom: 24px; line-height: 1.6;">
+                The full dashboard with settlement data is available to attorneys who contribute their own case outcomes. 
+                This keeps the data accurate and helps the legal community.
+            </p>
+            <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+                Share one anonymized settlement → Get full access to 2,500+ cases.
+            </p>
+            <a href="casevault-contribute.html" style="display: inline-block; background: linear-gradient(135deg, #9B59B6, #a78bfa); color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 600;">Contribute a Case →</a>
+            <p style="margin-top: 16px;">
+                <a href="casevault-calculator.html" style="color: #9B59B6; text-decoration: none; font-size: 14px;">Or use the free calculator instead</a>
+            </p>
+        </div>
+    </div>
+
     <script>
-        // Auth check - redirect to intake if not authenticated
+        // Auth check - show gate message if not authenticated
         (function() {
             const token = localStorage.getItem('casevault_token');
             const expires = localStorage.getItem('casevault_expires');
             if (!token || !expires || Date.now() >= parseInt(expires)) {
-                window.location.href = 'casevault-intake.html';
+                document.getElementById('access-gate').style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                return; // Don't redirect, just show the message
             }
         })();
         

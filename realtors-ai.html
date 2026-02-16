@@ -967,18 +967,35 @@
         if (!canvas) return;
         const container = canvas.parentElement;
 
+        // =====================================================
+        // BULLETPROOF APPROACH:
+        // 1. Camera at fixed position with normal FOV
+        // 2. Every loaded model normalized to fit 1x1x1 cube
+        // 3. Camera framed to see a ~1-unit tall object
+        // =====================================================
+
         const scene = new THREE.Scene();
+
+        // Fixed canvas size — match CSS exactly to avoid CSS upscaling
         const W = 380;
         const H = 380;
-        const camera = new THREE.PerspectiveCamera(2, 1, 0.1, 1000);
-        camera.position.set(0, 0.01, 5);
-        camera.lookAt(0, 0.01, 0);
+
+        // Normal perspective camera: FOV 50, aspect 1:1
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
+        // Position camera to frame a 1-unit tall object centered at (0, 0.5, 0)
+        // At FOV 50, distance ~1.4 frames ~1 unit of height nicely
+        camera.position.set(0, 0.5, 1.8);
+        camera.lookAt(0, 0.4, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setSize(W, H);
+        // Set pixel size to match CSS size exactly — prevents CSS upscaling
+        renderer.setSize(W, H, false); // false = don't touch canvas.style
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.2;
+        renderer.outputEncoding = THREE.sRGBEncoding;
 
         // Lighting
         scene.add(new THREE.AmbientLight(0x8899bb, 0.6));
@@ -1003,77 +1020,101 @@
         let mixer = null;
         let currentIndex = 0;
         let switchTimer = 0;
-        const SWITCH_INTERVAL = 6; // seconds per animation
+        const SWITCH_INTERVAL = 6;
         const loader = new THREE.GLTFLoader();
         const clock = new THREE.Clock();
 
+        // Container group: we put the model inside this so we can
+        // rotate the container without messing up the normalization
+        let modelContainer = new THREE.Group();
+        scene.add(modelContainer);
+
+        function normalizeAndAdd(gltf) {
+            // Clear the container
+            while (modelContainer.children.length) {
+                modelContainer.remove(modelContainer.children[0]);
+            }
+
+            const model = gltf.scene;
+
+            // Reset model transforms to identity
+            model.position.set(0, 0, 0);
+            model.scale.set(1, 1, 1);
+            model.rotation.set(0, 0, 0);
+            model.updateMatrixWorld(true);
+
+            // Measure the raw bounding box
+            const box = new THREE.Box3().setFromObject(model);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+
+            console.log('[Robot] Raw bounding box — size:',
+                size.x.toFixed(3), size.y.toFixed(3), size.z.toFixed(3),
+                '| maxDim:', maxDim.toFixed(3),
+                '| center:', center.x.toFixed(3), center.y.toFixed(3), center.z.toFixed(3));
+
+            if (maxDim === 0) {
+                console.warn('[Robot] Model has zero size, skipping');
+                return;
+            }
+
+            // NORMALIZE: scale so largest dimension = 1
+            const normScale = 1.0 / maxDim;
+            model.scale.setScalar(normScale);
+
+            // After scaling, re-measure to get precise placement
+            model.updateMatrixWorld(true);
+            const normBox = new THREE.Box3().setFromObject(model);
+            const normCenter = normBox.getCenter(new THREE.Vector3());
+            const normSize = normBox.getSize(new THREE.Vector3());
+
+            console.log('[Robot] Normalized size:',
+                normSize.x.toFixed(3), normSize.y.toFixed(3), normSize.z.toFixed(3),
+                '| normScale:', normScale.toFixed(6));
+
+            // Position: center X/Z, and place feet (bottom of bbox) at y=0
+            model.position.set(
+                -normCenter.x,
+                -normBox.min.y,
+                -normCenter.z
+            );
+
+            modelContainer.add(model);
+            currentModel = model;
+
+            // Play animation
+            if (gltf.animations && gltf.animations.length > 0) {
+                mixer = new THREE.AnimationMixer(model);
+                const action = mixer.clipAction(gltf.animations[0]);
+                action.play();
+            } else {
+                mixer = null;
+            }
+
+            switchTimer = 0;
+        }
+
         function loadAnimation(index) {
             loader.load(animations[index], function(gltf) {
-                // Remove old model
-                if (currentModel) scene.remove(currentModel);
-
-                currentModel = gltf.scene;
-
-                // Reset transforms
-                currentModel.position.set(0, 0, 0);
-                currentModel.scale.set(1, 1, 1);
-                currentModel.rotation.set(0, 0, 0);
-
-                // Measure raw model
-                const box = new THREE.Box3().setFromObject(currentModel);
-                const size = box.getSize(new THREE.Vector3());
-                const center = box.getCenter(new THREE.Vector3());
-                const maxDim = Math.max(size.x, size.y, size.z);
-                console.log('Robot GLB raw size:', size.x.toFixed(2), size.y.toFixed(2), size.z.toFixed(2), 'max:', maxDim.toFixed(2));
-
-                // Scale model down aggressively
-                const targetHeight = 0.02;
-                const s = targetHeight / size.y;
-                currentModel.scale.setScalar(s);
-
-                // Re-measure after scaling
-                const scaledBox = new THREE.Box3().setFromObject(currentModel);
-                const scaledCenter = scaledBox.getCenter(new THREE.Vector3());
-
-                // Center horizontally, place feet at y=0
-                currentModel.position.set(
-                    -scaledCenter.x,
-                    -scaledBox.min.y,
-                    -scaledCenter.z
-                );
-                console.log('Robot scaled:', s.toFixed(4), 'final height:', (scaledBox.max.y - scaledBox.min.y).toFixed(2));
-
-                scene.add(currentModel);
-
-                // Play animation if available
-                if (gltf.animations && gltf.animations.length > 0) {
-                    mixer = new THREE.AnimationMixer(currentModel);
-                    const action = mixer.clipAction(gltf.animations[0]);
-                    action.play();
-                } else {
-                    mixer = null;
-                }
-
-                switchTimer = 0;
+                normalizeAndAdd(gltf);
             }, undefined, function(error) {
-                console.warn('GLB load error:', error);
+                console.warn('[Robot] GLB load error:', error);
             });
         }
 
-        // Start with first animation
+        // Start
         loadAnimation(0);
 
-        // Animate
+        // Render loop
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
 
             if (mixer) mixer.update(delta);
 
-            // Gentle rotation
-            if (currentModel) {
-                currentModel.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
-            }
+            // Gentle Y rotation on the container (not the model, so normalization stays clean)
+            modelContainer.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
 
             // Cycle animations
             switchTimer += delta;
@@ -1086,12 +1127,16 @@
         }
         animate();
 
-        // Resize handler — keep 1:1 aspect
+        // Resize — maintain 1:1 aspect, match CSS size
         window.addEventListener('resize', function() {
-            const w = Math.min(container.clientWidth, 380) || 380;
+            var w = container.clientWidth;
+            if (w > 380) w = 380;
+            if (w < 100) w = 380;
+            canvas.style.width = w + 'px';
+            canvas.style.height = w + 'px';
+            renderer.setSize(w, w, false);
             camera.aspect = 1;
             camera.updateProjectionMatrix();
-            renderer.setSize(w, w);
         });
     })();
     </script>

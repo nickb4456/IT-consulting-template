@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI for Newport Weddings | Vendor Coordination & Timeline Automation | AIBridges</title>
+    <meta name="description" content="AI-powered wedding logistics for Newport planners and venues. Vendor coordination, timeline automation, and guest communication for mansion weddings.">
+    <meta name="keywords" content="Newport wedding planner AI, wedding vendor coordination, mansion wedding logistics, Rosecliff wedding technology, Castle Hill wedding planning">
+    <meta name="geo.region" content="US-RI">
+    <meta name="geo.placename" content="Newport, Rhode Island">
+    <link rel="canonical" href="https://aibridges.org/newport-weddings-ai">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="AI for Newport Weddings | AIBridges">
+    <meta property="og:description" content="Vendor coordination, timeline automation, and guest logistics for Newport's wedding industry.">
+    <meta property="og:url" content="https://aibridges.org/newport-weddings-ai">
+    <meta property="og:image" content="https://aibridges.org/img/newport-sailboats.jpg">
+    <meta property="og:type" content="website">
+    
+    <!-- Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfessionalService",
+        "name": "AIBridges - Newport Wedding AI",
+        "description": "AI-powered logistics and coordination tools for Newport wedding planners, venues, and vendors.",
+        "url": "https://aibridges.org/newport-weddings-ai",
+        "telephone": "+1-401-327-2971",
+        "areaServed": {
+            "@type": "City",
+            "name": "Newport",
+            "containedInPlace": { "@type": "State", "name": "Rhode Island" }
+        },
+        "serviceType": ["Wedding Technology", "Event Logistics", "Vendor Coordination"]
+    }
+    </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "How can AI help Newport wedding planners?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "AI automates vendor coordination (sending timeline updates to all 15+ vendors at once), generates day-of timelines based on venue rules and sunset times, and handles guest FAQ questions 24/7. Planners save 8-12 hours per wedding."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Does AI work with Newport mansion venues?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. Our AI is trained on Newport-specific venue rules including load-in restrictions, noise ordinances, parking logistics, and sunset times for Rosecliff, Castle Hill, Belle Mer, and other popular venues."
+                }
+            }
+        ]
+    }
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4C69F5;
+            --accent: #00E1E6;
+            --gold: #D4AF37;
+            --gold-light: #F4E4BC;
+            --blush: #F8E8E8;
+            --sage: #9CAF88;
+            --navy: #1a1a2e;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 35, 0.8);
+            --text: #f8fafc;
+            --text-muted: #a1afc4;
+            --border: rgba(212, 175, 55, 0.2);
+        }
+        
+        body {
+            font-family: 'Lato', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .elegant { font-family: 'Playfair Display', serif; }
+        
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+        
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo-icon { color: var(--accent); }
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-left: 2rem;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--gold); }
+        
+        /* Hero */
+        .hero {
+            min-height: 90vh;
+            padding: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: url('/img/newport-sailboats.jpg') center center / cover no-repeat;
+            text-align: center;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 10, 20, 0.5) 0%,
+                rgba(10, 10, 20, 0.7) 50%,
+                rgba(10, 10, 20, 0.95) 100%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            max-width: 800px;
+            padding: 120px 24px 60px;
+        }
+        
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(212, 175, 55, 0.15);
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--gold);
+            margin-bottom: 28px;
+            backdrop-filter: blur(10px);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 600;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .highlight-gold { 
+            color: var(--gold);
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 36px;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #B8960C);
+            color: var(--navy);
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--text);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            background: rgba(212, 175, 55, 0.05);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 40px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            text-align: center;
+        }
+        
+        .stat-item h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        
+        .stat-item p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* Pain Points */
+        .pain-section {
+            padding: 100px 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-tag {
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: block;
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .section-subtitle {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .pain-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .pain-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--gold);
+        }
+        
+        .pain-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .pain-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .pain-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        /* Solutions */
+        .solutions-section {
+            padding: 100px 0;
+            background: linear-gradient(180deg, rgba(212, 175, 55, 0.03) 0%, transparent 100%);
+        }
+        
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+        }
+        
+        .solution-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            display: flex;
+            gap: 24px;
+        }
+        
+        .solution-icon {
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .solution-content h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+        }
+        
+        .solution-content p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        
+        .solution-stat {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--gold);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        /* Venues Section */
+        .venues-section {
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .venues-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        .venue-logos {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            opacity: 0.6;
+        }
+        
+        .venue-logos span {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+        
+        /* Pricing */
+        .pricing-section {
+            padding: 100px 0;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px 32px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gold);
+            color: var(--navy);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .pricing-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin: 16px 0;
+        }
+        
+        .pricing-card .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin: 24px 0;
+            text-align: left;
+        }
+        
+        .pricing-card li {
+            padding: 8px 0;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pricing-card li i {
+            color: var(--gold);
+        }
+        
+        /* CTA */
+        .cta-section {
+            padding: 100px 0;
+            text-align: center;
+            background: linear-gradient(180deg, transparent, rgba(212, 175, 55, 0.05));
+        }
+        
+        .cta-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 60px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .cta-box h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .cta-box p {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        footer a { color: var(--gold); text-decoration: none; }
+        
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .pain-grid { grid-template-columns: 1fr; }
+            .solution-grid { grid-template-columns: 1fr; }
+            .solution-card { flex-direction: column; text-align: center; }
+            .pricing-grid { grid-template-columns: 1fr; }
+            .pricing-card.featured { transform: none; }
+            .nav-links { display: none; }
+            .cta-row { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+            .hero { min-height: 100vh; }
+            h1 { font-size: 2.2rem; }
+            .cta-box { padding: 40px 24px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="/" class="logo"><span class="logo-icon">△</span> AIBridges</a>
+            <div class="nav-links">
+                <a href="/newport-hospitality-ai">Hospitality</a>
+                <a href="/#services">Services</a>
+                <a href="/#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge"><i class="fas fa-gem"></i> Newport Wedding Technology</div>
+            <h1 class="elegant">AI for <span class="highlight-gold">Newport Weddings</span></h1>
+            <p>Vendor coordination, timeline automation, and guest logistics — built for planners and venues hosting unforgettable celebrations.</p>
+            <div class="cta-row">
+                <a href="/#contact" class="btn btn-gold"><i class="fas fa-calendar"></i> Book Demo</a>
+                <a href="#pricing" class="btn btn-outline">View Pricing</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-bar">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>1,000+</h3>
+                    <p>Newport weddings per year</p>
+                </div>
+                <div class="stat-item">
+                    <h3>15+</h3>
+                    <p>Vendors per wedding</p>
+                </div>
+                <div class="stat-item">
+                    <h3>8 hrs</h3>
+                    <p>Saved per wedding</p>
+                </div>
+                <div class="stat-item">
+                    <h3>$75K+</h3>
+                    <p>Average wedding budget</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pain-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">The Challenge</span>
+                <h2 class="section-title">Wedding Logistics Are Chaos</h2>
+                <p class="section-subtitle">Every planner knows the stress. AI can help.</p>
+            </div>
+            <div class="pain-grid">
+                <div class="pain-card">
+                    <div class="pain-icon">📋</div>
+                    <h3>Vendor Coordination</h3>
+                    <p>15+ vendors, constant updates, everyone needs the timeline. One change means 15 emails.</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">⏰</div>
+                    <h3>Timeline Chaos</h3>
+                    <p>Sunset at 7:42pm. Load-in at 2pm. Ceremony at 5pm. One delay cascades through everything.</p>
+                </div>
+                <div class="pain-card">
+                    <div class="pain-icon">💬</div>
+                    <h3>Guest Questions</h3>
+                    <p>"Where do I park?" "What's the dress code?" "Is there a shuttle?" Same questions, 150 times.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="solutions-section">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">The Solution</span>
+                <h2 class="section-title">AI That Handles the Details</h2>
+            </div>
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <div class="solution-icon">🤖</div>
+                    <div class="solution-content">
+                        <h3>Smart Timeline Generator</h3>
+                        <p>Input your venue, vendor list, and ceremony time. AI builds a minute-by-minute timeline accounting for Newport sunset times, mansion load-in rules, and traffic patterns.</p>
+                        <span class="solution-stat">2 hours → 10 minutes</span>
+                    </div>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">📡</div>
+                    <div class="solution-content">
+                        <h3>Vendor Hub</h3>
+                        <p>All vendors in one dashboard. Change the ceremony time and AI notifies caterer, florist, DJ, photographer, and transportation automatically.</p>
+                        <span class="solution-stat">Zero email chains</span>
+                    </div>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">💬</div>
+                    <div class="solution-content">
+                        <h3>Guest FAQ Bot</h3>
+                        <p>24/7 text and web assistant answers parking, dress code, shuttle, and logistics questions. Integrates with your RSVP system.</p>
+                        <span class="solution-stat">200+ questions handled</span>
+                    </div>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">🚨</div>
+                    <div class="solution-content">
+                        <h3>Day-Of Emergency AI</h3>
+                        <p>Vendor no-show? Weather change? AI has backup vendor contacts and suggests indoor alternatives. Timeline slipping? Auto-recalculates and notifies everyone.</p>
+                        <span class="solution-stat">Peace of mind</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="venues-section">
+        <div class="container">
+            <h2>Trained on Newport's Premier Venues</h2>
+            <div class="venue-logos">
+                <span>Rosecliff</span>
+                <span>Castle Hill Inn</span>
+                <span>Belle Mer</span>
+                <span>The Chanler</span>
+                <span>Marble House</span>
+                <span>OceanCliff</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="pricing-section" id="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Pricing</span>
+                <h2 class="section-title">Plans for Every Wedding Pro</h2>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Couple</h3>
+                    <div class="price">$149<span> one-time</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Timeline generator</li>
+                        <li><i class="fas fa-check"></i> Guest FAQ bot</li>
+                        <li><i class="fas fa-check"></i> RSVP integration</li>
+                        <li><i class="fas fa-check"></i> Day-of access</li>
+                    </ul>
+                    <a href="/#contact" class="btn btn-outline" style="width: 100%;">Get Started</a>
+                </div>
+                <div class="pricing-card featured">
+                    <h3>Planner Pro</h3>
+                    <div class="price">$199<span>/month</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Unlimited weddings</li>
+                        <li><i class="fas fa-check"></i> Vendor coordination hub</li>
+                        <li><i class="fas fa-check"></i> Timeline generator</li>
+                        <li><i class="fas fa-check"></i> Guest FAQ bot</li>
+                        <li><i class="fas fa-check"></i> Emergency AI backup</li>
+                        <li><i class="fas fa-check"></i> Priority support</li>
+                    </ul>
+                    <a href="/#contact" class="btn btn-gold" style="width: 100%;">Start Free Trial</a>
+                </div>
+                <div class="pricing-card">
+                    <h3>Venue</h3>
+                    <div class="price">$499<span>/month</span></div>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Everything in Planner</li>
+                        <li><i class="fas fa-check"></i> Multi-event calendar</li>
+                        <li><i class="fas fa-check"></i> Vendor network access</li>
+                        <li><i class="fas fa-check"></i> Custom branding</li>
+                        <li><i class="fas fa-check"></i> API integrations</li>
+                    </ul>
+                    <a href="/#contact" class="btn btn-outline" style="width: 100%;">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-box">
+                <h2 class="elegant">Ready to Simplify Your Weddings?</h2>
+                <p>Free 30-minute demo. See how AI handles the logistics so you can focus on creating magic.</p>
+                <a href="/#contact" class="btn btn-gold"><i class="fas fa-calendar"></i> Book Free Demo</a>
+                <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">Or call: <a href="tel:+14013272971">(401) 327-2971</a></p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 <a href="/">AIBridges</a> · AI for Newport Weddings</p>
+            <p style="margin-top: 8px; font-size: 0.8rem;">
+                <a href="/newport-hospitality-ai">Newport Hospitality</a> · 
+                <a href="/providence-law-firms-ai">Providence Law Firms</a> · 
+                <a href="/cranston-ri">Cranston</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

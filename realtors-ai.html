@@ -93,26 +93,15 @@
         .hero-image {
             display: flex;
             justify-content: center;
-        }
-        
-        .hero-image img {
-            max-width: 100%;
-            height: auto;
-            max-height: 400px;
-            filter: drop-shadow(0 20px 40px rgba(76, 105, 245, 0.3));
-        }
-
-        .hero-image {
-            overflow: hidden;
+            align-items: center;
             width: 380px;
             height: 380px;
-            position: relative;
         }
 
-        #robot-canvas {
+        .hero-image model-viewer {
             width: 380px;
             height: 380px;
-            display: block;
+            --poster-color: transparent;
         }
         
         .badge {
@@ -662,10 +651,8 @@
         @media (max-width: 768px) {
             .hero-grid { grid-template-columns: 1fr; text-align: center; }
             .hero-content { text-align: center; }
-            .hero-image { order: -1; margin-bottom: 24px; }
-            .hero-image img { max-height: 280px; }
-            .hero-image { width: 280px; height: 280px; margin: 0 auto; }
-            #robot-canvas { width: 280px; height: 280px; }
+            .hero-image { order: -1; margin-bottom: 24px; width: 280px; height: 280px; margin: 0 auto; }
+            .hero-image model-viewer { width: 280px; height: 280px; }
             .stats { grid-template-columns: repeat(3, 1fr); gap: 16px; }
             .stat-value { font-size: 1.8rem; }
             .feature-grid { grid-template-columns: 1fr; }
@@ -697,7 +684,19 @@
                     </div>
                 </div>
                 <div class="hero-image">
-                    <canvas id="robot-canvas"></canvas>
+                    <model-viewer
+                        id="robot-viewer"
+                        src="Meshy_AI_biped/Meshy_AI_Animation_Phone_Conversation_withSkin.glb"
+                        autoplay
+                        camera-orbit="0deg 75deg 2m"
+                        field-of-view="45deg"
+                        auto-rotate
+                        auto-rotate-delay="0"
+                        rotation-per-second="10deg"
+                        shadow-intensity="0"
+                        exposure="1.2"
+                        style="background: transparent;"
+                    ></model-viewer>
                 </div>
             </div>
         </div>
@@ -959,185 +958,22 @@
         <p>© 2026 <a href="/">AIBridges</a> · AI for Rhode Island Realtors</p>
         <p style="margin-top: 8px; font-size: 0.85rem;"><a href="/ri-report">RI Market Data</a> · <a href="/providence-law-firms-ai">Legal AI</a> · <a href="/newport-weddings-ai">Wedding AI</a></p>
     </footer>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
     <script>
     (function() {
-        const canvas = document.getElementById('robot-canvas');
-        if (!canvas) return;
-        const container = canvas.parentElement;
-
-        // =====================================================
-        // BULLETPROOF APPROACH:
-        // 1. Camera at fixed position with normal FOV
-        // 2. Every loaded model normalized to fit 1x1x1 cube
-        // 3. Camera framed to see a ~1-unit tall object
-        // =====================================================
-
-        const scene = new THREE.Scene();
-
-        // Fixed canvas size — match CSS exactly to avoid CSS upscaling
-        const W = 380;
-        const H = 380;
-
-        // Normal perspective camera: FOV 50, aspect 1:1
-        const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 100);
-        // Position camera to frame a 1-unit tall object centered at (0, 0.5, 0)
-        // At FOV 50, distance ~1.4 frames ~1 unit of height nicely
-        camera.position.set(0, 0.5, 1.8);
-        camera.lookAt(0, 0.4, 0);
-
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        // Set pixel size to match CSS size exactly — prevents CSS upscaling
-        renderer.setSize(W, H, false); // false = don't touch canvas.style
-        canvas.style.width = W + 'px';
-        canvas.style.height = H + 'px';
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2;
-        renderer.outputEncoding = THREE.sRGBEncoding;
-
-        // Lighting
-        scene.add(new THREE.AmbientLight(0x8899bb, 0.6));
-        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
-        keyLight.position.set(3, 5, 4);
-        scene.add(keyLight);
-        const fillLight = new THREE.DirectionalLight(0x4c69f5, 0.4);
-        fillLight.position.set(-3, 3, -2);
-        scene.add(fillLight);
-        const rimLight = new THREE.DirectionalLight(0x10b981, 0.3);
-        rimLight.position.set(0, 2, -4);
-        scene.add(rimLight);
-
-        // Animation state
-        const animations = [
+        const viewer = document.getElementById('robot-viewer');
+        if (!viewer) return;
+        const glbs = [
             'Meshy_AI_biped/Meshy_AI_Animation_Phone_Conversation_withSkin.glb',
             'Meshy_AI_biped/Meshy_AI_Animation_Agree_Gesture_withSkin.glb',
             'Meshy_AI_biped/Meshy_AI_Animation_Walking_withSkin.glb',
             'Meshy_AI_biped/Meshy_AI_Animation_Cheer_with_Both_Hands_withSkin.glb'
         ];
-        let currentModel = null;
-        let mixer = null;
-        let currentIndex = 0;
-        let switchTimer = 0;
-        const SWITCH_INTERVAL = 6;
-        const loader = new THREE.GLTFLoader();
-        const clock = new THREE.Clock();
-
-        // Container group: we put the model inside this so we can
-        // rotate the container without messing up the normalization
-        let modelContainer = new THREE.Group();
-        scene.add(modelContainer);
-
-        function normalizeAndAdd(gltf) {
-            // Clear the container
-            while (modelContainer.children.length) {
-                modelContainer.remove(modelContainer.children[0]);
-            }
-
-            const model = gltf.scene;
-
-            // Reset model transforms to identity
-            model.position.set(0, 0, 0);
-            model.scale.set(1, 1, 1);
-            model.rotation.set(0, 0, 0);
-            model.updateMatrixWorld(true);
-
-            // Measure the raw bounding box
-            const box = new THREE.Box3().setFromObject(model);
-            const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z);
-
-            console.log('[Robot] Raw bounding box — size:',
-                size.x.toFixed(3), size.y.toFixed(3), size.z.toFixed(3),
-                '| maxDim:', maxDim.toFixed(3),
-                '| center:', center.x.toFixed(3), center.y.toFixed(3), center.z.toFixed(3));
-
-            if (maxDim === 0) {
-                console.warn('[Robot] Model has zero size, skipping');
-                return;
-            }
-
-            // NORMALIZE: scale so largest dimension = 1
-            const normScale = 1.0 / maxDim;
-            model.scale.setScalar(normScale);
-
-            // After scaling, re-measure to get precise placement
-            model.updateMatrixWorld(true);
-            const normBox = new THREE.Box3().setFromObject(model);
-            const normCenter = normBox.getCenter(new THREE.Vector3());
-            const normSize = normBox.getSize(new THREE.Vector3());
-
-            console.log('[Robot] Normalized size:',
-                normSize.x.toFixed(3), normSize.y.toFixed(3), normSize.z.toFixed(3),
-                '| normScale:', normScale.toFixed(6));
-
-            // Position: center X/Z, and place feet (bottom of bbox) at y=0
-            model.position.set(
-                -normCenter.x,
-                -normBox.min.y,
-                -normCenter.z
-            );
-
-            modelContainer.add(model);
-            currentModel = model;
-
-            // Play animation
-            if (gltf.animations && gltf.animations.length > 0) {
-                mixer = new THREE.AnimationMixer(model);
-                const action = mixer.clipAction(gltf.animations[0]);
-                action.play();
-            } else {
-                mixer = null;
-            }
-
-            switchTimer = 0;
-        }
-
-        function loadAnimation(index) {
-            loader.load(animations[index], function(gltf) {
-                normalizeAndAdd(gltf);
-            }, undefined, function(error) {
-                console.warn('[Robot] GLB load error:', error);
-            });
-        }
-
-        // Start
-        loadAnimation(0);
-
-        // Render loop
-        function animate() {
-            requestAnimationFrame(animate);
-            const delta = clock.getDelta();
-
-            if (mixer) mixer.update(delta);
-
-            // Gentle Y rotation on the container (not the model, so normalization stays clean)
-            modelContainer.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
-
-            // Cycle animations
-            switchTimer += delta;
-            if (switchTimer >= SWITCH_INTERVAL) {
-                currentIndex = (currentIndex + 1) % animations.length;
-                loadAnimation(currentIndex);
-            }
-
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        // Resize — maintain 1:1 aspect, match CSS size
-        window.addEventListener('resize', function() {
-            var w = container.clientWidth;
-            if (w > 380) w = 380;
-            if (w < 100) w = 380;
-            canvas.style.width = w + 'px';
-            canvas.style.height = w + 'px';
-            renderer.setSize(w, w, false);
-            camera.aspect = 1;
-            camera.updateProjectionMatrix();
-        });
+        let idx = 0;
+        setInterval(function() {
+            idx = (idx + 1) % glbs.length;
+            viewer.src = glbs[idx];
+        }, 6000);
     })();
     </script>
 </body>

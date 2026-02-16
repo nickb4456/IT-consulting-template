@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Build & Deploy | AIBridges — Cranston, RI</title>
+    <meta name="description" content="Custom AI agents built for your specific workflows. Email triage, document processing, data entry, scheduling — we build it, test it, and deploy it.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4C69F5;
+            --accent: #00E1E6;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 35, 0.8);
+            --text: #f8fafc;
+            --text-muted: #a1afc4;
+            --border: rgba(76, 105, 245, 0.15);
+        }
+        
+        body {
+            font-family: 'Lato', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            transition: color 0.3s;
+        }
+        
+        .back-link:hover { color: var(--accent); }
+        
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--bg-dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        
+        .price-tag {
+            font-size: 1.5rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 2rem;
+        }
+        
+        .lead {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            margin: 3rem 0 1rem;
+            color: var(--text);
+        }
+        
+        p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        .highlight-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .highlight-box h3 {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        
+        ul {
+            color: var(--text-muted);
+            margin-left: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .example-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .example-card h4 {
+            color: var(--text);
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .example-card p {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        
+        .example-card .emoji {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, rgba(76, 105, 245, 0.1), rgba(0, 225, 230, 0.1));
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            margin: 3rem 0;
+        }
+        
+        .cta-section h2 {
+            margin-top: 0;
+            color: var(--text);
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(76, 105, 245, 0.3);
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+            border-left: 2px solid var(--border);
+            margin: 2rem 0;
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+        
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.4rem;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        
+        .timeline-item h4 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .timeline-item p {
+            margin-bottom: 0;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← Back to AIBridges</a>
+        
+        <span class="badge">Custom Development</span>
+        <h1>Agent Build & Deploy</h1>
+        <div class="price-tag">Starting at $2,500</div>
+        
+        <p class="lead">
+            This is where the magic happens. You've identified a task that's eating your time — now we build an AI agent that handles it for you, automatically, every single day.
+        </p>
+        
+        <p>
+            Not a generic chatbot. Not an off-the-shelf tool you'll have to wrestle into submission. A custom agent built around <em>your</em> workflow, <em>your</em> systems, <em>your</em> edge cases.
+        </p>
+        
+        <h2>What Can We Build?</h2>
+        
+        <p>Here are some agents we've deployed for businesses like yours:</p>
+        
+        <div class="examples-grid">
+            <div class="example-card">
+                <div class="emoji">📧</div>
+                <h4>Email Triage Agent</h4>
+                <p>Reads incoming emails, categorizes them, drafts responses for common questions, flags urgent items for your attention.</p>
+            </div>
+            
+            <div class="example-card">
+                <div class="emoji">📄</div>
+                <h4>Document Processor</h4>
+                <p>Extracts data from invoices, contracts, or forms. Populates your systems automatically. No more copy-paste.</p>
+            </div>
+            
+            <div class="example-card">
+                <div class="emoji">📅</div>
+                <h4>Scheduling Assistant</h4>
+                <p>Handles appointment requests, checks availability, sends confirmations. Works while you sleep.</p>
+            </div>
+            
+            <div class="example-card">
+                <div class="emoji">🔍</div>
+                <h4>Research Agent</h4>
+                <p>Gathers information from multiple sources, summarizes findings, delivers daily or weekly briefs.</p>
+            </div>
+            
+            <div class="example-card">
+                <div class="emoji">📊</div>
+                <h4>Data Entry Agent</h4>
+                <p>Takes unstructured input (emails, PDFs, voice notes) and enters it into your CRM, spreadsheet, or database.</p>
+            </div>
+            
+            <div class="example-card">
+                <div class="emoji">🤝</div>
+                <h4>Customer Follow-up</h4>
+                <p>Sends personalized check-ins, review requests, or renewal reminders based on your rules.</p>
+            </div>
+        </div>
+        
+        <h2>How It Works</h2>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <h4>Week 1: Specification</h4>
+                <p>We define exactly what the agent does — inputs, outputs, edge cases, integrations. You'll approve the spec before we write a line of code.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Week 2-3: Build</h4>
+                <p>I build the agent, test it with real data (yours or simulated), and iron out the bugs. You'll see progress demos along the way.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Week 4: Deploy & Train</h4>
+                <p>We deploy to your environment, connect it to your systems, and I train you (or your team) on how to monitor it, adjust it, and handle exceptions.</p>
+            </div>
+            
+            <div class="timeline-item">
+                <h4>Week 5-8: Stabilization</h4>
+                <p>30 days of support included. We tweak, tune, and fix anything that comes up in real-world use. By the end, it's running smoothly.</p>
+            </div>
+        </div>
+        
+        <h2>What's Included</h2>
+        
+        <ul>
+            <li><strong>Custom Agent Development</strong> — Built from scratch for your use case</li>
+            <li><strong>Integration with Your Tools</strong> — Gmail, Outlook, Google Sheets, Airtable, your CRM, whatever you use</li>
+            <li><strong>Error Handling & Guardrails</strong> — So it doesn't go rogue or spam your clients</li>
+            <li><strong>30 Days of Post-Launch Support</strong> — Tweaks, fixes, adjustments as you use it</li>
+            <li><strong>Documentation</strong> — How it works, how to monitor it, how to turn it off if needed</li>
+        </ul>
+        
+        <h2>Pricing</h2>
+        
+        <div class="highlight-box">
+            <h3>Starting at $2,500</h3>
+            <p>Final price depends on complexity:</p>
+            <ul style="margin-bottom: 0;">
+                <li><strong>Simple Agent</strong> ($2,500-$4,000) — Single task, 1-2 integrations, straightforward logic</li>
+                <li><strong>Medium Agent</strong> ($4,000-$7,000) — Multiple steps, 3-4 integrations, some decision-making</li>
+                <li><strong>Complex Agent</strong> ($7,000-$12,000) — Multi-stage workflows, many integrations, advanced logic</li>
+            </ul>
+        </div>
+        
+        <p>
+            You'll know the exact price before we start. No hourly billing, no scope creep surprises. Fixed price, fixed scope.
+        </p>
+        
+        <div class="cta-section">
+            <h2>Let's Build Something</h2>
+            <p>Tell me what's eating your time. I'll tell you if an agent can fix it — and what it'll cost.</p>
+            <a href="index.html#contact" class="btn">Start a Project →</a>
+        </div>
+        
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+            Based in Cranston, RI. Serving businesses across Rhode Island and beyond.
+        </p>
+    </div>
+</body>
+</html>

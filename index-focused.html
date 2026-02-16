@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private AI for Business | AIBridges — Cranston, RI</title>
+    <meta name="description" content="Private AI that never leaves your building. OpenClaw workflow automation for billing, real estate, and cold outreach. Based in Cranston, RI.">
+    <meta name="keywords" content="private AI, local AI deployment, OpenClaw, AI workflow automation, billing automation, real estate AI, cold outreach AI, Rhode Island AI consulting">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aibridges.org/">
+    <meta property="og:title" content="Private AI for Business | AIBridges">
+    <meta property="og:description" content="Private AI that never leaves your building. Workflow automation for billing, real estate, and outreach.">
+    
+    <meta name="geo.region" content="US-RI">
+    <meta name="geo.placename" content="Cranston, Rhode Island">
+    <meta name="theme-color" content="#0a0a0f">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4C69F5;
+            --primary-light: #654CF4;
+            --accent: #00E1E6;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 35, 0.9);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(76, 105, 245, 0.2);
+        }
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Lato', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.7;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 0;
+            background: rgba(10, 10, 15, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .logo span { color: var(--primary); }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--accent); }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(76, 105, 245, 0.3);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        /* HERO with Newport Bridge */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            position: relative;
+            background: url('newport-bridge.png') center center / cover no-repeat;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 10, 15, 0.3) 0%,
+                rgba(10, 10, 15, 0.6) 40%,
+                rgba(10, 10, 15, 0.95) 100%
+            );
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero-content {
+            max-width: 700px;
+        }
+        
+        .hero-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(76, 105, 245, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 550px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        /* TRUST BAR */
+        .trust-bar {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .trust-bar .container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
+        
+        .trust-item {
+            text-align: center;
+        }
+        
+        .trust-item .number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        
+        .trust-item .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        /* SECTIONS */
+        section {
+            padding: 6rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .section-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(76, 105, 245, 0.1);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* PRIVATE AI SECTION */
+        .private-ai {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(20, 20, 35, 1) 100%);
+        }
+        
+        .private-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .private-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .private-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+        
+        .private-card .icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .private-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .private-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        /* WORKFLOWS SECTION */
+        .workflows {
+            background: var(--bg-dark);
+        }
+        
+        .workflow-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .workflow-grid { grid-template-columns: 1fr; }
+        }
+        
+        .workflow-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .workflow-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(0, 225, 230, 0.1);
+        }
+        
+        .workflow-card .emoji {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .workflow-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .workflow-card p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+        
+        .workflow-card ul {
+            text-align: left;
+            list-style: none;
+            margin-bottom: 1.5rem;
+        }
+        
+        .workflow-card li {
+            padding: 0.5rem 0;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .workflow-card li:last-child { border-bottom: none; }
+        
+        .workflow-card li::before {
+            content: '✓';
+            color: var(--accent);
+            margin-right: 0.75rem;
+        }
+        
+        /* OPENCLAW SECTION */
+        .openclaw-section {
+            background: linear-gradient(180deg, rgba(20, 20, 35, 1) 0%, var(--bg-dark) 100%);
+        }
+        
+        .openclaw-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        
+        @media (max-width: 900px) {
+            .openclaw-content { grid-template-columns: 1fr; }
+        }
+        
+        .openclaw-text h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .openclaw-text p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+        
+        .openclaw-features {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .openclaw-features li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .openclaw-features li::before {
+            content: '→';
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .openclaw-visual {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+        }
+        
+        .terminal {
+            background: #0d0d14;
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .terminal-header {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .terminal-dot.red { background: #ff5f56; }
+        .terminal-dot.yellow { background: #ffbd2e; }
+        .terminal-dot.green { background: #27ca40; }
+        
+        .terminal-line {
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        
+        .terminal-line .cmd { color: var(--accent); }
+        .terminal-line .output { color: var(--primary); }
+        
+        /* PRICING */
+        .pricing {
+            background: var(--bg-dark);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--primary);
+            position: relative;
+        }
+        
+        .pricing-card.featured::before {
+            content: 'Most Popular';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            padding: 0.25rem 1rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .pricing-card .price span {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        
+        .pricing-card .desc {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .pricing-card ul {
+            text-align: left;
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        
+        .pricing-card li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pricing-card li:last-child { border-bottom: none; }
+        
+        .pricing-card li::before {
+            content: '✓';
+            color: var(--accent);
+            margin-right: 0.75rem;
+        }
+        
+        /* CTA */
+        .cta {
+            padding: 6rem 0;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, rgba(76, 105, 245, 0.05) 100%);
+        }
+        
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* FOOTER */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+            color: var(--text-muted);
+        }
+        
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .section-header h2 { font-size: 2rem; }
+            .nav-links { display: none; }
+            .trust-bar .container { gap: 2rem; }
+            .openclaw-content { gap: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">AI<span>Bridges</span></a>
+            <ul class="nav-links">
+                <li><a href="#private-ai">Private AI</a></li>
+                <li><a href="#workflows">Workflows</a></li>
+                <li><a href="#openclaw">OpenClaw</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+            </ul>
+            <a href="#contact" class="btn">Free Strategy Call</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <span class="hero-badge">🔒 Your Data Never Leaves Your Building</span>
+                <h1>Private AI That <span class="gradient">Actually Stays Private</span></h1>
+                <p>AI workflow automation for billing, real estate, and cold outreach — running on your hardware, under your control. No cloud. No data leaks. No surprises.</p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn">Book Free Strategy Call</a>
+                    <a href="#workflows" class="btn btn-outline">See Workflows</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TRUST BAR -->
+    <div class="trust-bar">
+        <div class="container">
+            <div class="trust-item">
+                <div class="number">0</div>
+                <div class="label">Data sent to cloud</div>
+            </div>
+            <div class="trust-item">
+                <div class="number">24/7</div>
+                <div class="label">Automated workflows</div>
+            </div>
+            <div class="trust-item">
+                <div class="number">100%</div>
+                <div class="label">On your hardware</div>
+            </div>
+            <div class="trust-item">
+                <div class="number">RI</div>
+                <div class="label">Local support</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIVATE AI SECTION -->
+    <section id="private-ai" class="private-ai">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Why Private AI</span>
+                <h2>Your Data. Your Hardware. Your Control.</h2>
+                <p>ChatGPT and cloud AI services send your data to external servers. We deploy models that run entirely on your own machines.</p>
+            </div>
+            
+            <div class="private-grid">
+                <div class="private-card">
+                    <div class="icon">🔐</div>
+                    <h3>Zero Data Exposure</h3>
+                    <p>Client files, patient records, financial data — nothing ever touches an external API. Your data stays in your building.</p>
+                </div>
+                <div class="private-card">
+                    <div class="icon">⚡</div>
+                    <h3>No Per-Token Fees</h3>
+                    <p>Run unlimited queries. No API costs. No rate limits. Your local model responds instantly, as many times as you need.</p>
+                </div>
+                <div class="private-card">
+                    <div class="icon">🏛️</div>
+                    <h3>Built for Regulated Industries</h3>
+                    <p>Law firms, medical practices, financial advisors — industries where data can't leave the building. We configure air-gapped deployments.</p>
+                </div>
+                <div class="private-card">
+                    <div class="icon">🛠️</div>
+                    <h3>Models That Actually Work</h3>
+                    <p>Llama 3, Mistral, DeepSeek, Phi-4 — we deploy the right model for your use case, optimized for your hardware.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- WORKFLOWS SECTION -->
+    <section id="workflows" class="workflows">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Workflow Automation</span>
+                <h2>AI Workflows for Your Industry</h2>
+                <p>We build automated pipelines that handle the repetitive work while you focus on what matters.</p>
+            </div>
+            
+            <div class="workflow-grid">
+                <div class="workflow-card">
+                    <div class="emoji">💰</div>
+                    <h3>Billing & Invoicing</h3>
+                    <p>Automate invoice processing, payment reminders, and reconciliation.</p>
+                    <ul>
+                        <li>Extract data from invoices (PDF, email, scan)</li>
+                        <li>Auto-match to purchase orders</li>
+                        <li>Generate payment reminders</li>
+                        <li>Reconcile with accounting software</li>
+                        <li>Flag anomalies and duplicates</li>
+                    </ul>
+                    <a href="#contact" class="btn">Learn More</a>
+                </div>
+                
+                <div class="workflow-card">
+                    <div class="emoji">🏠</div>
+                    <h3>Real Estate</h3>
+                    <p>Streamline listings, valuations, and client communication.</p>
+                    <ul>
+                        <li>Generate listing descriptions from photos</li>
+                        <li>Automated comp analysis</li>
+                        <li>Client follow-up sequences</li>
+                        <li>Document preparation & review</li>
+                        <li>Market report generation</li>
+                    </ul>
+                    <a href="#contact" class="btn">Learn More</a>
+                </div>
+                
+                <div class="workflow-card">
+                    <div class="emoji">📧</div>
+                    <h3>Cold Outreach</h3>
+                    <p>Personalized outreach at scale without sounding like a robot.</p>
+                    <ul>
+                        <li>Research prospects automatically</li>
+                        <li>Generate personalized first lines</li>
+                        <li>Multi-channel sequences (email, LinkedIn)</li>
+                        <li>Response classification & routing</li>
+                        <li>Meeting booking automation</li>
+                    </ul>
+                    <a href="#contact" class="btn">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OPENCLAW SECTION -->
+    <section id="openclaw" class="openclaw-section">
+        <div class="container">
+            <div class="openclaw-content">
+                <div class="openclaw-text">
+                    <span class="section-badge">Powered by OpenClaw</span>
+                    <h2>Your AI Assistant, Running 24/7</h2>
+                    <p>OpenClaw is the operating system for AI agents. We set it up, connect it to your workflows, and maintain it so you don't have to think about it.</p>
+                    
+                    <ul class="openclaw-features">
+                        <li>Connects to email, calendar, CRM, and custom tools</li>
+                        <li>Runs scheduled tasks automatically</li>
+                        <li>Remembers context across conversations</li>
+                        <li>Works with local or cloud models</li>
+                        <li>We handle updates, monitoring, and maintenance</li>
+                    </ul>
+                    
+                    <a href="#contact" class="btn">Get OpenClaw Setup</a>
+                </div>
+                
+                <div class="openclaw-visual">
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <span class="terminal-dot red"></span>
+                            <span class="terminal-dot yellow"></span>
+                            <span class="terminal-dot green"></span>
+                        </div>
+                        <div class="terminal-line"><span class="cmd">$</span> openclaw status</div>
+                        <div class="terminal-line"><span class="output">✓ Agent online (uptime: 14d 6h)</span></div>
+                        <div class="terminal-line"><span class="output">✓ 847 tasks completed this week</span></div>
+                        <div class="terminal-line"><span class="output">✓ Connected: Email, Calendar, CRM</span></div>
+                        <div class="terminal-line"><span class="output">✓ Next scheduled: Invoice batch @ 9am</span></div>
+                        <div class="terminal-line">&nbsp;</div>
+                        <div class="terminal-line"><span class="cmd">$</span> openclaw run "send payment reminders"</div>
+                        <div class="terminal-line"><span class="output">→ Found 12 overdue invoices</span></div>
+                        <div class="terminal-line"><span class="output">→ Sending personalized reminders...</span></div>
+                        <div class="terminal-line"><span class="output">✓ Done. 12 emails sent.</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-badge">Simple Pricing</span>
+                <h2>Transparent. Predictable. No Surprises.</h2>
+                <p>All pricing includes setup, training, and ongoing support.</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <h3>Discovery</h3>
+                    <div class="price">Free</div>
+                    <div class="desc">Strategy call to identify opportunities</div>
+                    <ul>
+                        <li>60-minute workflow audit</li>
+                        <li>Identify automation opportunities</li>
+                        <li>ROI estimate</li>
+                        <li>Custom proposal</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Book Call</a>
+                </div>
+                
+                <div class="pricing-card featured">
+                    <h3>OpenClaw Setup</h3>
+                    <div class="price">$2,500</div>
+                    <div class="desc">One-time setup + first workflow</div>
+                    <ul>
+                        <li>OpenClaw installation & config</li>
+                        <li>Connect email, calendar, tools</li>
+                        <li>Build first automated workflow</li>
+                        <li>Team training session</li>
+                        <li>30 days support included</li>
+                    </ul>
+                    <a href="#contact" class="btn">Get Started</a>
+                </div>
+                
+                <div class="pricing-card">
+                    <h3>Managed Service</h3>
+                    <div class="price">$1,500<span>/mo</span></div>
+                    <div class="desc">We run and maintain everything</div>
+                    <ul>
+                        <li>24/7 agent monitoring</li>
+                        <li>Monthly workflow improvements</li>
+                        <li>New automations as needed</li>
+                        <li>Usage-capped API costs</li>
+                        <li>Direct engineer access</li>
+                    </ul>
+                    <a href="#contact" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="cta">
+        <div class="container">
+            <h2>Ready to Automate?</h2>
+            <p>Tell us what your team spends too much time on. We'll show you how AI can handle it.</p>
+            <a href="mailto:nick@aibridges.org" class="btn">nick@aibridges.org</a>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">Or call: (401) 555-0123 • Based in Cranston, RI</p>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p>© 2026 AIBridges. Based in Cranston, Rhode Island.</p>
+            <p style="margin-top: 0.5rem;"><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a></p>
+        </div>
+    </footer>
+</body>
+</html>

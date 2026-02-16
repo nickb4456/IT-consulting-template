@@ -23,34 +23,34 @@
       background: var(--bg);
       color: var(--text);
       line-height: 1.6;
-      padding: 2rem;
-      max-width: 1000px;
+      padding: 1.5rem;
+      max-width: 900px;
       margin: 0 auto;
     }
-    h1 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+    h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.9rem; }
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
     }
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.25rem;
+      border-radius: 10px;
+      padding: 1rem;
       text-align: center;
     }
-    .stat-value { font-size: 2rem; font-weight: 900; }
+    .stat-value { font-size: 1.75rem; font-weight: 900; }
     .stat-value.green { color: var(--green); }
     .stat-value.amber { color: var(--amber); }
     .stat-value.red { color: var(--red); }
     .stat-value.purple { color: var(--purple); }
-    .stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-    .section { margin-bottom: 2rem; }
+    .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .section { margin-bottom: 1.5rem; }
     .section-title {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 700;
       margin-bottom: 1rem;
       padding-bottom: 0.5rem;
@@ -60,7 +60,7 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
       overflow: hidden;
     }
     .patch-header {
@@ -69,41 +69,47 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 1rem;
+      gap: 0.5rem;
     }
     .patch-header:hover { background: rgba(99, 102, 241, 0.1); }
+    .patch-left { flex: 1; min-width: 0; }
     .patch-title {
       font-weight: 600;
-      font-size: 0.95rem;
-    }
-    .patch-id {
-      font-family: monospace;
-      font-size: 0.7rem;
-      color: var(--purple);
-      background: rgba(139, 92, 246, 0.2);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      word-wrap: break-word;
     }
     .patch-meta {
       display: flex;
-      gap: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .patch-hash {
+      font-family: monospace;
       font-size: 0.75rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
+      color: var(--green);
+      background: rgba(16, 185, 129, 0.15);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
     }
     .patch-file {
-      background: rgba(99, 102, 241, 0.2);
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
       font-family: monospace;
       font-size: 0.7rem;
+      color: var(--muted);
+      background: rgba(99, 102, 241, 0.15);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      word-break: break-all;
     }
     .risk-badge {
-      padding: 0.2rem 0.5rem;
+      padding: 0.25rem 0.5rem;
       border-radius: 4px;
       font-size: 0.7rem;
       font-weight: 600;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .risk-low { background: rgba(16, 185, 129, 0.2); color: var(--green); }
     .risk-medium { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
@@ -117,8 +123,8 @@
     }
     .patch-code.show { display: block; }
     .patch-code pre {
-      font-family: 'Fira Code', monospace;
-      font-size: 0.8rem;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.75rem;
       color: #e2e8f0;
       white-space: pre-wrap;
       word-break: break-word;
@@ -129,11 +135,21 @@
       color: var(--muted);
       text-decoration: none;
       margin-bottom: 1rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
     .back-link:hover { color: var(--text); }
-    .toggle-icon { transition: transform 0.2s; }
+    .toggle-icon { 
+      display: inline-block;
+      width: 1em;
+      transition: transform 0.2s;
+      margin-right: 0.25rem;
+    }
     .toggle-icon.open { transform: rotate(90deg); }
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .patch-header { flex-direction: column; }
+      .risk-badge { align-self: flex-start; margin-top: 0.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -152,7 +168,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-value purple">1</div>
-      <div class="stat-label">Self-Mod Queue</div>
+      <div class="stat-label">Self-Mod</div>
     </div>
     <div class="stat-card">
       <div class="stat-value red">15</div>
@@ -163,10 +179,10 @@
     <div class="section-title">⏳ Pending Approval</div>
     <div class="patch-card pending-card">
       <div class="patch-header" onclick="toggleCode('pending-0')">
-        <div>
+        <div class="patch-left">
           <div class="patch-title"><span class="toggle-icon" id="icon-pending-0">▶</span> 🎛️ Auto-tune: Similarity threshold for connections</div>
           <div class="patch-meta">
-            <span class="patch-id">patch_1771266903987_g5if</span>
+            <span class="patch-hash">#g5if</span>
             <span class="patch-file">config.js</span>
           </div>
         </div>
@@ -178,10 +194,10 @@
     </div>
     <div class="patch-card pending-card">
       <div class="patch-header" onclick="toggleCode('pending-1')">
-        <div>
+        <div class="patch-left">
           <div class="patch-title"><span class="toggle-icon" id="icon-pending-1">▶</span> 💭 [Belief] Implement a GAN-based architecture to learn more robust feature representations </div>
           <div class="patch-meta">
-            <span class="patch-id">patch_1770916425341_tgjb</span>
+            <span class="patch-hash">#tgjb</span>
             <span class="patch-file">src/core/embeddings.js</span>
           </div>
         </div>
@@ -226,10 +242,10 @@ function generateEmbeddings(inputData) {
     </div>
     <div class="patch-card pending-card">
       <div class="patch-header" onclick="toggleCode('pending-2')">
-        <div>
+        <div class="patch-left">
           <div class="patch-title"><span class="toggle-icon" id="icon-pending-2">▶</span> 💭 [Belief] Add mechanisms to integrate global contextual information and maintain persisten</div>
           <div class="patch-meta">
-            <span class="patch-id">patch_1770927428435_8whh</span>
+            <span class="patch-hash">#8whh</span>
             <span class="patch-file">src/ants/implementer-ant.js</span>
           </div>
         </div>
@@ -262,10 +278,10 @@ function implementPatch() {
   <div class="section-title">✅ Applied Patches (46)</div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-0')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-0">▶</span> 🧠 [DEEP] Implement selective decay of pheromones based on novelty, as</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-0">▶</span> 🧠 [DEEP] Implement selective decay of pheromones based on nove</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1771167605126_fkr5</span>
+          <span class="patch-hash">#fkr5</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -281,10 +297,10 @@ function implementPatch() {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-1')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-1">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 2's Mixture of Exp</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-1">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 2's Mixture</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1771124418125_melz</span>
+          <span class="patch-hash">#melz</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -308,10 +324,10 @@ function computeGateScore(novelty) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-2')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-2">▶</span> 💭 [Belief] Integrate Knowledge Graphs into the existing Synthesis Ant co</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-2">▶</span> 💭 [Belief] Integrate Knowledge Graphs into the existing Synthe</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1771124414262_35wl</span>
+          <span class="patch-hash">#35wl</span>
           <span class="patch-file">src/ants/synthesis-ant.js</span>
         </div>
       </div>
@@ -458,10 +474,10 @@ class KnowledgeGraphClient {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-3')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-3">▶</span> 🧠 [DEEP] Implement selective pheromone decay based on Paper 2's Mixtu</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-3">▶</span> 🧠 [DEEP] Implement selective pheromone decay based on Paper 2'</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1771081212250_elok</span>
+          <span class="patch-hash">#elok</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -494,10 +510,10 @@ function computeGatingWeights(token) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-4')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-4">▶</span> 💭 [Belief] Implement the missing part of the `recursiveAnalyze` function</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-4">▶</span> 💭 [Belief] Implement the missing part of the `recursiveAnalyze</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1771038006204_rzb6</span>
+          <span class="patch-hash">#rzb6</span>
           <span class="patch-file">src/ants/deep-reader-ant.js</span>
         </div>
       </div>
@@ -548,10 +564,10 @@ async function recursiveAnalyze(db, finding, depth = 0) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-5')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-5">▶</span> 🧠 [DEEP] Implement the adaptive eviction policy proposed in Paper 4 (</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-5">▶</span> 🧠 [DEEP] Implement the adaptive eviction policy proposed in Pa</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770994850638_1tdf</span>
+          <span class="patch-hash">#1tdf</span>
           <span class="patch-file">core/recursive-pheromones.js</span>
         </div>
       </div>
@@ -587,10 +603,10 @@ function createKVPAgent(keyValuePair) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-6')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-6">▶</span> ⚡ Breakthrough: Increase minimum similarity for connection</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770951608925_rh5b</span>
+          <span class="patch-hash">#rh5b</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -604,10 +620,10 @@ REASON: Higher similarity threshold ensures stronger knowledge graph connections
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-7')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-7">▶</span> 💭 [Belief] Modify the `routeTask` function to implement sparse Mixture o</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-7">▶</span> 💭 [Belief] Modify the `routeTask` function to implement sparse</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770951608065_11cm</span>
+          <span class="patch-hash">#11cm</span>
           <span class="patch-file">src/core/model-router.js</span>
         </div>
       </div>
@@ -676,10 +692,10 @@ function routeTask(taskType, opts = {}) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-8')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-8">▶</span> 🧠 [DEEP] Paper 5's "Salience Network" - add selective pheromone decay</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-8">▶</span> 🧠 [DEEP] Paper 5's "Salience Network" - add selective pheromon</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770927376164_yexq</span>
+          <span class="patch-hash">#yexq</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -696,10 +712,10 @@ function routeTask(taskType, opts = {}) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-9')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-9">▶</span> 💭 [Belief] Modify the `recursiveAnalyze` function to incorporate a new a</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-9">▶</span> 💭 [Belief] Modify the `recursiveAnalyze` function to incorpora</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770927373056_at3u</span>
+          <span class="patch-hash">#at3u</span>
           <span class="patch-file">src/ants/deep-reader-ant.js</span>
         </div>
       </div>
@@ -789,10 +805,10 @@ function sliceContent(content, chunkSize = MAX_CONTENT_CHUNK, maintainIntegrity 
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-10')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-10">▶</span> 💭 [Belief] Modify the `routeTask` function to integrate global contextua</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-10">▶</span> 💭 [Belief] Modify the `routeTask` function to integrate global</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770927303019_0e65</span>
+          <span class="patch-hash">#0e65</span>
           <span class="patch-file">src/core/model-router.js</span>
         </div>
       </div>
@@ -852,10 +868,10 @@ function useModel(model, taskType, opts) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-11')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-11">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights on salience </div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-11">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights on sa</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770927285733_4289</span>
+          <span class="patch-hash">#4289</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -880,10 +896,10 @@ function isSalienceNetwork(pheromoneId) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-12')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-12">▶</span> 💭 [Belief] Modify the `scoreText` function to prioritize the preservatio</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-12">▶</span> 💭 [Belief] Modify the `scoreText` function to prioritize the p</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770927281934_wi3m</span>
+          <span class="patch-hash">#wi3m</span>
           <span class="patch-file">src/ants/filter-ant.js</span>
         </div>
       </div>
@@ -949,10 +965,10 @@ function isOvercompressed(text) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-13')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-13">▶</span> 💭 [Belief] Modify the `depositHierarchical` function to include mechanis</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-13">▶</span> 💭 [Belief] Modify the `depositHierarchical` function to includ</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770917153466_vjq1</span>
+          <span class="patch-hash">#vjq1</span>
           <span class="patch-file">src/core/hierarchical-pheromones.js</span>
         </div>
       </div>
@@ -1046,10 +1062,10 @@ function persistContextMemory(id, contextEmbedding) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-14')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-14">▶</span> 🧠 [DEEP] Paper 5's insight on dissociable salience and control networ</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-14">▶</span> 🧠 [DEEP] Paper 5's insight on dissociable salience and control</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770917099312_rbec</span>
+          <span class="patch-hash">#rbec</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1073,10 +1089,10 @@ function persistContextMemory(id, contextEmbedding) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-15')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-15">▶</span> 💭 [Belief] Modify the existing `routeTask` function to incorporate the b</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-15">▶</span> 💭 [Belief] Modify the existing `routeTask` function to incorpo</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770917095935_a2bi</span>
+          <span class="patch-hash">#a2bi</span>
           <span class="patch-file">src/core/model-router.js</span>
         </div>
       </div>
@@ -1158,10 +1174,10 @@ function routeTask(taskType, opts = {}) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-16')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-16">▶</span> ⚡ Breakthrough: Increase minimum similarity threshold for connecti</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-16">▶</span> ⚡ Breakthrough: Increase minimum similarity threshold for conn</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770916971702_sj45</span>
+          <span class="patch-hash">#sj45</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1175,10 +1191,10 @@ REASON: Higher similarity threshold will create more meaningful connections in t
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-17')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-17">▶</span> 💭 [Belief] Modify the `deposit` function to implement the belief by addi</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-17">▶</span> 💭 [Belief] Modify the `deposit` function to implement the beli</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770916970607_ahtk</span>
+          <span class="patch-hash">#ahtk</span>
           <span class="patch-file">src/core/pheromones-db.js</span>
         </div>
       </div>
@@ -1269,10 +1285,10 @@ async function mirrorDatasetCharacteristics(embedding, type) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-18')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-18">▶</span> 💭 [Belief] Modify the existing `embed` function to implement the specifi</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-18">▶</span> 💭 [Belief] Modify the existing `embed` function to implement t</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770916789525_orok</span>
+          <span class="patch-hash">#orok</span>
           <span class="patch-file">src/core/embeddings.js</span>
         </div>
       </div>
@@ -1369,10 +1385,10 @@ async function getStructuredEmbedding(text, persistentEmbedding) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-19')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-19">▶</span> 🧠 [DEEP] Paper 5 shows that salience detection and executive control </div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-19">▶</span> 🧠 [DEEP] Paper 5 shows that salience detection and executive c</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770916431542_etj1</span>
+          <span class="patch-hash">#etj1</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1418,10 +1434,10 @@ function getExecutivePheromone(position) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-20')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-20">▶</span> ⚡ Breakthrough: Increase decay rate for candidate findings</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770908404411_nj8d</span>
+          <span class="patch-hash">#nj8d</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1435,10 +1451,10 @@ REASON: Faster decay for candidate findings will keep the system focused on the 
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-21')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-21">▶</span> 🧠 [DEEP] Paper 5's insights on salience detection and executive contr</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-21">▶</span> 🧠 [DEEP] Paper 5's insights on salience detection and executiv</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901357852_u6rh</span>
+          <span class="patch-hash">#u6rh</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1454,10 +1470,10 @@ REASON: Faster decay for candidate findings will keep the system focused on the 
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-22')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-22">▶</span> ⚡ Breakthrough: Increase mission alignment threshold</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901355740_5sl0</span>
+          <span class="patch-hash">#5sl0</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1471,10 +1487,10 @@ REASON: Higher threshold helps ensure research aligns with colony's mission</pre
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-23')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-23">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 5's insights on Sa</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-23">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 5's insight</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901152542_dvu0</span>
+          <span class="patch-hash">#dvu0</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1491,10 +1507,10 @@ REASON: Higher threshold helps ensure research aligns with colony's mission</pre
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-24')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-24">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-24">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901144582_l7w3</span>
+          <span class="patch-hash">#l7w3</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1508,10 +1524,10 @@ REASON: Higher decay rate ensures newer breakthroughs are prioritized</pre>
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-25')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-25">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights on Sal</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-25">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901132767_hl27</span>
+          <span class="patch-hash">#hl27</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1542,10 +1558,10 @@ function computeExecutiveControl(x, y) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-26')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-26">▶</span> ⚡ Breakthrough: Increase maximum findings per scout</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901129150_owjo</span>
+          <span class="patch-hash">#owjo</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1559,10 +1575,10 @@ REASON: Increasing the maximum findings will allow the colony to discover more h
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-27')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-27">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights about </div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-27">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770901000102_qla5</span>
+          <span class="patch-hash">#qla5</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1579,10 +1595,10 @@ REASON: Increasing the maximum findings will allow the colony to discover more h
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-28')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-28">▶</span> ⚡ Breakthrough: Increase minimum similarity for connection</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900997622_y9h9</span>
+          <span class="patch-hash">#y9h9</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1596,10 +1612,10 @@ REASON: Higher similarity threshold will create stronger connections in the know
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-29')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-29">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights into salienc</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-29">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights into </div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900849775_rmai</span>
+          <span class="patch-hash">#rmai</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1627,10 +1643,10 @@ function getSalienceAndExecutiveScores(key) {
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-30')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-30">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900843912_xggt</span>
+          <span class="patch-hash">#xggt</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1644,10 +1660,10 @@ REASON: Higher relevance threshold ensures only high-quality breakthroughs are r
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-31')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-31">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights on sal</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-31">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900620744_8b9g</span>
+          <span class="patch-hash">#8b9g</span>
           <span class="patch-file">core/pheromones-db.js</span>
         </div>
       </div>
@@ -1668,10 +1684,10 @@ REASON: Higher relevance threshold ensures only high-quality breakthroughs are r
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-32')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-32">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900618333_v06e</span>
+          <span class="patch-hash">#v06e</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1685,10 +1701,10 @@ REASON: Higher relevance threshold ensures only high-quality breakthroughs are c
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-33')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-33">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900246302_pbtf</span>
+          <span class="patch-hash">#pbtf</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1702,10 +1718,10 @@ REASON: Raising the relevance threshold ensures only the most impactful breakthr
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-34')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-34">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900209859_4x8z</span>
+          <span class="patch-hash">#4x8z</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1719,10 +1735,10 @@ REASON: Raising the relevance threshold ensures only high-impact breakthroughs a
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-35')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-35">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-35">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770900013720_79zm</span>
+          <span class="patch-hash">#79zm</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1736,10 +1752,10 @@ REASON: Faster decay of validated breakthroughs will encourage the system to exp
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-36')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-36">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770865202470_lwyl</span>
+          <span class="patch-hash">#lwyl</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1753,10 +1769,10 @@ REASON: Higher relevance threshold ensures only the most impactful breakthroughs
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-37')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-37">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770851116440_0w3m</span>
+          <span class="patch-hash">#0w3m</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1770,10 +1786,10 @@ REASON: Higher relevance threshold ensures only the most promising findings are 
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-38')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-38">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for breakthro</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-38">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for break</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770851110953_np1b</span>
+          <span class="patch-hash">#np1b</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1787,10 +1803,10 @@ REASON: This will ensure only the most relevant and impactful breakthroughs are 
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-39')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-39">▶</span> ⚡ Breakthrough: Increase threshold for minimum relevance for break</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-39">▶</span> ⚡ Breakthrough: Increase threshold for minimum relevance for b</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770850291325_nfp7</span>
+          <span class="patch-hash">#nfp7</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1804,10 +1820,10 @@ REASON: Higher relevance threshold ensures only the most impactful breakthroughs
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-40')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-40">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for break</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-40">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for b</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770849048418_ugr6</span>
+          <span class="patch-hash">#ugr6</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1821,10 +1837,10 @@ REASON: This will ensure that only the most relevant and high-quality breakthrou
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-41')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-41">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-41">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthrough</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770848990026_2lau</span>
+          <span class="patch-hash">#2lau</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1838,10 +1854,10 @@ REASON: Faster decay of validated breakthroughs encourages the system to continu
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-42')">
-      <div>
+      <div class="patch-left">
         <div class="patch-title"><span class="toggle-icon" id="icon-applied-42">▶</span> ⚡ Breakthrough: Increase maximum findings per scout</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770848970633_62t9</span>
+          <span class="patch-hash">#62t9</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1855,10 +1871,10 @@ REASON: Reduces processing load by limiting the number of findings per scout</pr
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-43')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-43">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for breakthro</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-43">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for break</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770848943951_biye</span>
+          <span class="patch-hash">#biye</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1872,10 +1888,10 @@ REASON: Raising the bar for what constitutes a breakthrough ensures higher quali
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-44')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-44">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for break</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-44">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for b</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770848524246_rfu0</span>
+          <span class="patch-hash">#rfu0</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1889,10 +1905,10 @@ REASON: This will help ensure that only the most relevant and impactful breakthr
   </div>
   <div class="patch-card">
     <div class="patch-header" onclick="toggleCode('applied-45')">
-      <div>
-        <div class="patch-title"><span class="toggle-icon" id="icon-applied-45">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for a bre</div>
+      <div class="patch-left">
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-45">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for a</div>
         <div class="patch-meta">
-          <span class="patch-id">patch_1770848209138_2dn7</span>
+          <span class="patch-hash">#2dn7</span>
           <span class="patch-file">config.js</span>
         </div>
       </div>
@@ -1914,9 +1930,8 @@ REASON: This will ensure that only the most relevant and high-impact findings ar
     }
   </script>
 
-  <div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8rem;">
-    <p>Last updated: 2026-02-16</p>
-    <p>The Implementer ant reads research papers, forms beliefs, and patches the colony's own code.</p>
+  <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.75rem;">
+    <p>Last updated: 2026-02-16 • Hash = last 4 chars of patch ID</p>
   </div>
 </body>
 </html>

@@ -8,7 +8,7 @@
   @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: none; }
+  body { overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; cursor: default; }
   canvas { display: block; }
 
   #blocker {
@@ -25,13 +25,12 @@
     background-size: 300% 300%;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: shimmer 3s ease infinite;
-    text-shadow: 0 0 60px rgba(255,45,85,0.3);
-    margin-bottom: 0.2em;
+    margin-bottom: 0.1em;
   }
   #blocker h2 {
     font-family: 'Share Tech Mono', monospace;
     font-size: 1.1rem; color: #ff6b35; letter-spacing: 0.5em;
-    margin-bottom: 3em; opacity: 0.8;
+    margin-bottom: 1.5em; opacity: 0.8;
   }
 
   @keyframes shimmer {
@@ -39,19 +38,65 @@
     50% { background-position: 100% 50%; }
   }
 
+  /* Car Selection */
+  #car-select {
+    display: flex; gap: 2em; margin-bottom: 2em; justify-content: center;
+  }
+  .car-option {
+    width: 200px; padding: 1.2em; text-align: center;
+    background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 16px; cursor: pointer; transition: all 0.3s ease;
+    position: relative;
+  }
+  .car-option:hover {
+    border-color: rgba(255,107,53,0.5);
+    background: rgba(255,107,53,0.08);
+    transform: translateY(-4px);
+  }
+  .car-option.selected {
+    border-color: #ff6b35;
+    background: rgba(255,107,53,0.15);
+    box-shadow: 0 0 30px rgba(255,107,53,0.2);
+  }
+  .car-option.selected::after {
+    content: '✓'; position: absolute; top: 8px; right: 12px;
+    color: #ff6b35; font-size: 1.2rem; font-weight: 900;
+  }
+  .car-preview {
+    width: 160px; height: 100px; margin: 0 auto 0.8em;
+    background: rgba(255,255,255,0.03); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .car-preview canvas { width: 100%; height: 100%; }
+  .car-name {
+    font-size: 1rem; font-weight: 700; color: #fff;
+    margin-bottom: 0.3em; letter-spacing: 0.1em;
+  }
+  .car-desc {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; color: #888; line-height: 1.4;
+  }
+
+  #loading-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.9rem; color: #ff6b35; margin-bottom: 2em;
+    letter-spacing: 0.2em;
+  }
+
   .controls-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em 3em;
-    margin-bottom: 3em;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1em 3em;
+    margin-bottom: 2em;
   }
   .control-item {
     display: flex; align-items: center; gap: 1em;
-    font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; color: #aaa;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: #aaa;
   }
   .key-badge {
     background: linear-gradient(180deg, #2a2a3a, #1a1a2a);
     border: 1px solid #444; border-radius: 6px;
-    padding: 0.4em 0.8em; color: #ff6b35; font-weight: 700;
-    min-width: 2.5em; text-align: center;
+    padding: 0.3em 0.7em; color: #ff6b35; font-weight: 700;
+    min-width: 2.2em; text-align: center;
     box-shadow: 0 2px 0 #000, inset 0 1px 0 rgba(255,255,255,0.05);
   }
 
@@ -62,11 +107,13 @@
     border-radius: 50px; cursor: pointer; letter-spacing: 0.2em;
     box-shadow: 0 0 40px rgba(255,45,85,0.3), 0 4px 15px rgba(0,0,0,0.5);
     transition: all 0.3s ease;
+    display: none; /* hidden until models load */
   }
   #start-btn:hover {
     transform: scale(1.05);
     box-shadow: 0 0 60px rgba(255,45,85,0.5), 0 6px 20px rgba(0,0,0,0.5);
   }
+  #start-btn.visible { display: inline-block; }
 
   /* HUD */
   #hud {
@@ -162,11 +209,29 @@
 <div id="blocker">
   <h1>APEX DRIFT</h1>
   <h2>3D RACING</h2>
+  <div id="loading-text">LOADING VEHICLES...</div>
+  <div id="car-select" style="display:none">
+    <div class="car-option selected" data-car="0" onclick="selectCar(0)">
+      <div class="car-preview" id="preview-0"></div>
+      <div class="car-name">CONVERTIBLE</div>
+      <div class="car-desc">Open top cruiser<br>Balanced handling</div>
+    </div>
+    <div class="car-option" data-car="1" onclick="selectCar(1)">
+      <div class="car-preview" id="preview-1"></div>
+      <div class="car-name">JEEP</div>
+      <div class="car-desc">Off-road beast<br>Heavy &amp; tough</div>
+    </div>
+    <div class="car-option" data-car="2" onclick="selectCar(2)">
+      <div class="car-preview" id="preview-2"></div>
+      <div class="car-name">RACECAR</div>
+      <div class="car-desc">Pure speed<br>Sharp cornering</div>
+    </div>
+  </div>
   <div class="controls-grid">
-    <div class="control-item"><span class="key-badge">W / &uarr;</span> Accelerate</div>
-    <div class="control-item"><span class="key-badge">S / &darr;</span> Brake / Reverse</div>
-    <div class="control-item"><span class="key-badge">A / &laquo;</span> Steer Left</div>
-    <div class="control-item"><span class="key-badge">D / &raquo;</span> Steer Right</div>
+    <div class="control-item"><span class="key-badge">W / ↑</span> Accelerate</div>
+    <div class="control-item"><span class="key-badge">S / ↓</span> Brake / Reverse</div>
+    <div class="control-item"><span class="key-badge">A / ←</span> Steer Left</div>
+    <div class="control-item"><span class="key-badge">D / →</span> Steer Right</div>
     <div class="control-item"><span class="key-badge">SPACE</span> Handbrake / Drift</div>
     <div class="control-item"><span class="key-badge">R</span> Reset Car</div>
   </div>
@@ -191,9 +256,10 @@
 <div id="lap-flash"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 // ============================================================
-// APEX DRIFT — Full 3D Racing Game
+// APEX DRIFT — Full 3D Racing Game with GLB Models
 // ============================================================
 
 const { Scene, PerspectiveCamera, WebGLRenderer, Vector3, Vector2,
@@ -203,7 +269,16 @@ const { Scene, PerspectiveCamera, WebGLRenderer, Vector3, Vector2,
   FogExp2, Color, Raycaster, BufferGeometry, BufferAttribute, Float32BufferAttribute,
   DoubleSide, FrontSide, BackSide, Shape, ShapeGeometry, ExtrudeGeometry,
   TextureLoader, RepeatWrapping, MathUtils, Clock, LineBasicMaterial, Line,
-  AdditiveBlending, NormalBlending } = THREE;
+  AdditiveBlending, NormalBlending, Box3 } = THREE;
+
+// ---- GLB Car Models ----
+const CAR_DEFS = [
+  { name: 'CONVERTIBLE', file: 'Meshy_AI_make_a_convertible_b_0216034646_texture.glb', color: '#ff6b35' },
+  { name: 'JEEP', file: 'Meshy_AI_Make_a_black_jeep_for_0216034637_texture.glb', color: '#3388FF' },
+  { name: 'RACECAR', file: 'Meshy_AI_Make_a_red_racecar_0216034631_texture.glb', color: '#ff2d55' },
+];
+const loadedModels = [null, null, null]; // Stores the loaded GLTF scenes
+let selectedCarIndex = 0;
 
 // ---- Audio Context ----
 let audioCtx = null;
@@ -212,7 +287,6 @@ let screeching = false, screechNode = null, screechGain = null;
 
 function initAudio() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  // Engine
   engineOsc = audioCtx.createOscillator();
   engineOsc.type = 'sawtooth';
   engineOsc.frequency.value = 80;
@@ -269,6 +343,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.appendChild(renderer.domElement);
 
 // ---- Lighting ----
@@ -316,24 +391,19 @@ const trackCurve = new CatmullRomCurve3(trackPoints, true, 'catmullrom', 0.5);
 const TRACK_WIDTH = 22;
 const CURB_WIDTH = 2;
 const TRACK_SEGMENTS = 600;
+const ROAD_Y = 0.15;
 
 // ---- Build Track Mesh ----
 function buildTrack() {
-  const pts = trackCurve.getPoints(TRACK_SEGMENTS);
-  const ROAD_Y = 0.15; // Raised above ground to prevent z-fighting
-
-  // === MAIN ROAD SURFACE (vertex colored asphalt) ===
   const roadGeo = new BufferGeometry();
   const roadVerts = [], roadColors = [], roadIndices = [];
 
-  // === EDGE LINES (white lane markings) ===
   const edgeLGeo = new BufferGeometry();
   const edgeLVerts = [];
   const edgeRGeo = new BufferGeometry();
   const edgeRVerts = [];
   const EDGE_LINE_W = 0.4;
 
-  // === CURBS ===
   const curbLGeo = new BufferGeometry();
   const curbLVerts = [], curbLColors = [];
   const curbRGeo = new BufferGeometry();
@@ -350,22 +420,19 @@ function buildTrack() {
 
     roadVerts.push(left.x, ROAD_Y, left.z, right.x, ROAD_Y, right.z);
 
-    // Asphalt color with variation — dark grey with subtle randomness per vertex
-    const v = 0.18 + Math.random() * 0.06; // Range 0.18-0.24 (dark asphalt)
-    roadColors.push(v, v, v * 0.95, v, v, v * 0.95); // Slightly warm
+    const v = 0.18 + Math.random() * 0.06;
+    roadColors.push(v, v, v * 0.95, v, v, v * 0.95);
 
     if (i < TRACK_SEGMENTS) {
       const base = i * 2;
       roadIndices.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
     }
 
-    // Edge lines — thin white strips just inside the road edge
     const elInner = left.clone().sub(normal.clone().multiplyScalar(EDGE_LINE_W));
     const erInner = right.clone().add(normal.clone().multiplyScalar(EDGE_LINE_W));
     edgeLVerts.push(left.x, ROAD_Y + 0.01, left.z, elInner.x, ROAD_Y + 0.01, elInner.z);
     edgeRVerts.push(right.x, ROAD_Y + 0.01, right.z, erInner.x, ROAD_Y + 0.01, erInner.z);
 
-    // Curbs — outside the road edge
     const curbOuterL = left.clone().add(normal.clone().multiplyScalar(CURB_WIDTH));
     const curbOuterR = right.clone().add(normal.clone().multiplyScalar(-CURB_WIDTH));
 
@@ -377,20 +444,16 @@ function buildTrack() {
     curbRColors.push(...segColor, ...segColor);
   }
 
-  // Road mesh
   roadGeo.setAttribute('position', new Float32BufferAttribute(roadVerts, 3));
   roadGeo.setAttribute('color', new Float32BufferAttribute(roadColors, 3));
   roadGeo.setIndex(roadIndices);
   roadGeo.computeVertexNormals();
 
-  const roadMat = new MeshStandardMaterial({
-    vertexColors: true, roughness: 0.92, metalness: 0.0,
-  });
+  const roadMat = new MeshStandardMaterial({ vertexColors: true, roughness: 0.92, metalness: 0.0 });
   const roadMesh = new Mesh(roadGeo, roadMat);
   roadMesh.receiveShadow = true;
   scene.add(roadMesh);
 
-  // Edge line meshes (white)
   [{ geo: edgeLGeo, verts: edgeLVerts }, { geo: edgeRGeo, verts: edgeRVerts }].forEach(({ geo, verts }) => {
     geo.setAttribute('position', new Float32BufferAttribute(verts, 3));
     const indices = [];
@@ -401,11 +464,9 @@ function buildTrack() {
     geo.setIndex(indices);
     geo.computeVertexNormals();
     const mat = new MeshStandardMaterial({ color: 0xDDDDDD, roughness: 0.5 });
-    const mesh = new Mesh(geo, mat);
-    scene.add(mesh);
+    scene.add(new Mesh(geo, mat));
   });
 
-  // Curb meshes
   [{ geo: curbLGeo, verts: curbLVerts, colors: curbLColors },
    { geo: curbRGeo, verts: curbRVerts, colors: curbRColors }].forEach(({ geo, verts, colors }) => {
     geo.setAttribute('position', new Float32BufferAttribute(verts, 3));
@@ -424,21 +485,19 @@ function buildTrack() {
   });
 
   // Start/finish line
-  const startT = 0;
-  const startP = trackCurve.getPointAt(startT);
-  const startTan = trackCurve.getTangentAt(startT).normalize();
+  const startP = trackCurve.getPointAt(0);
+  const startTan = trackCurve.getTangentAt(0).normalize();
   const startNorm = new Vector3(-startTan.z, 0, startTan.x);
 
   const sfGeo = new PlaneGeometry(TRACK_WIDTH, 4);
   const sfMat = new MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.5 });
   const sfMesh = new Mesh(sfGeo, sfMat);
   sfMesh.rotation.x = -Math.PI / 2;
-  sfMesh.position.set(startP.x, 0.18, startP.z);
+  sfMesh.position.set(startP.x, ROAD_Y + 0.02, startP.z);
   sfMesh.rotation.z = -Math.atan2(startTan.z, startTan.x);
   sfMesh.receiveShadow = true;
   scene.add(sfMesh);
 
-  // Checkerboard pattern on start line
   for (let cx = -5; cx < 5; cx++) {
     for (let cz = 0; cz < 2; cz++) {
       if ((cx + cz) % 2 === 0) {
@@ -448,7 +507,7 @@ function buildTrack() {
         checkMesh.rotation.x = -Math.PI / 2;
         const offset = startNorm.clone().multiplyScalar((cx + 0.5) * TRACK_WIDTH / 10);
         const fwdOffset = startTan.clone().multiplyScalar((cz - 0.5) * 2);
-        checkMesh.position.set(startP.x + offset.x + fwdOffset.x, 0.19, startP.z + offset.z + fwdOffset.z);
+        checkMesh.position.set(startP.x + offset.x + fwdOffset.x, ROAD_Y + 0.03, startP.z + offset.z + fwdOffset.z);
         checkMesh.rotation.z = -Math.atan2(startTan.z, startTan.x);
         scene.add(checkMesh);
       }
@@ -470,7 +529,7 @@ function buildTrack() {
       const dashMat = new MeshStandardMaterial({ color: 0xCCCCCC, roughness: 0.5 });
       const dashMesh = new Mesh(dashGeo, dashMat);
       dashMesh.rotation.x = -Math.PI / 2;
-      dashMesh.position.set(mid.x, 0.17, mid.z);
+      dashMesh.position.set(mid.x, ROAD_Y + 0.02, mid.z);
       dashMesh.rotation.z = -Math.atan2(dir.z, dir.x) + Math.PI / 2;
       scene.add(dashMesh);
     }
@@ -490,7 +549,6 @@ function buildGround() {
 
 // ---- Trackside Objects ----
 function buildTrackside() {
-  // Trees
   const treeMat = new MeshStandardMaterial({ color: 0x2d5a1e });
   const trunkMat = new MeshStandardMaterial({ color: 0x5a3a1a });
 
@@ -503,7 +561,6 @@ function buildTrackside() {
     const dist = TRACK_WIDTH / 2 + CURB_WIDTH + 8 + Math.random() * 60;
 
     const pos = p.clone().add(normal.clone().multiplyScalar(side * dist));
-
     const tree = new Group();
 
     const trunkH = 3 + Math.random() * 4;
@@ -528,8 +585,6 @@ function buildTrackside() {
   const barrierWhiteMat = new MeshStandardMaterial({ color: 0xEEEEEE });
 
   for (let i = 0; i < TRACK_SEGMENTS; i += 3) {
-    const t = i / TRACK_SEGMENTS;
-    // Check curvature — place barriers on sharp turns
     const t1 = ((i - 2 + TRACK_SEGMENTS) % TRACK_SEGMENTS) / TRACK_SEGMENTS;
     const t2 = ((i + 2) % TRACK_SEGMENTS) / TRACK_SEGMENTS;
     const tan1 = trackCurve.getTangentAt(t1);
@@ -537,6 +592,7 @@ function buildTrackside() {
     const curvature = 1 - tan1.dot(tan2);
 
     if (curvature > 0.015) {
+      const t = i / TRACK_SEGMENTS;
       const p = trackCurve.getPointAt(t);
       const tan = trackCurve.getTangentAt(t).normalize();
       const normal = new Vector3(-tan.z, 0, tan.x);
@@ -556,7 +612,7 @@ function buildTrackside() {
     }
   }
 
-  // Grandstand near start
+  // Grandstand
   const standGeo = new BoxGeometry(40, 8, 6);
   const standMat = new MeshStandardMaterial({ color: 0x888899 });
   const stand = new Mesh(standGeo, standMat);
@@ -564,7 +620,6 @@ function buildTrackside() {
   stand.castShadow = true;
   scene.add(stand);
 
-  // Roof
   const roofGeo = new BoxGeometry(44, 0.5, 8);
   const roofMat = new MeshStandardMaterial({ color: 0xDD3333 });
   const roof = new Mesh(roofGeo, roofMat);
@@ -572,126 +627,61 @@ function buildTrackside() {
   scene.add(roof);
 }
 
-// ---- Build Car ----
-function buildCar() {
-  const car = new Group();
+// ---- Normalize a GLB model to fit a standard car size ----
+function normalizeModel(model, targetSize) {
+  const box = new Box3().setFromObject(model);
+  const size = new Vector3();
+  box.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const scale = targetSize / maxDim;
+  model.scale.set(scale, scale, scale);
 
-  // Body
-  const bodyGeo = new BoxGeometry(2.2, 0.7, 4.5);
-  const bodyMat = new MeshStandardMaterial({ color: 0xff2d55, metalness: 0.7, roughness: 0.2 });
-  const body = new Mesh(bodyGeo, bodyMat);
-  body.position.y = 0.6;
-  body.castShadow = true;
-  car.add(body);
+  // Recalculate after scale
+  const box2 = new Box3().setFromObject(model);
+  const center = new Vector3();
+  box2.getCenter(center);
+  const min = box2.min;
 
-  // Cabin
-  const cabinGeo = new BoxGeometry(1.8, 0.6, 2.0);
-  const cabinMat = new MeshStandardMaterial({ color: 0x222244, metalness: 0.9, roughness: 0.1 });
-  const cabin = new Mesh(cabinGeo, cabinMat);
-  cabin.position.set(0, 1.2, -0.3);
-  cabin.castShadow = true;
-  car.add(cabin);
+  // Center horizontally, sit on ground
+  model.position.x = -center.x;
+  model.position.z = -center.z;
+  model.position.y = -min.y;
 
-  // Hood scoop
-  const scoopGeo = new BoxGeometry(0.6, 0.3, 1.0);
-  const scoopMat = new MeshStandardMaterial({ color: 0x111111 });
-  const scoop = new Mesh(scoopGeo, scoopMat);
-  scoop.position.set(0, 1.1, 1.3);
-  car.add(scoop);
-
-  // Spoiler
-  const spoilerGeo = new BoxGeometry(2.4, 0.1, 0.5);
-  const spoilerMat = new MeshStandardMaterial({ color: 0x111111 });
-  const spoiler = new Mesh(spoilerGeo, spoilerMat);
-  spoiler.position.set(0, 1.4, -2.1);
-  car.add(spoiler);
-
-  // Spoiler supports
-  for (const sx of [-0.8, 0.8]) {
-    const supportGeo = new BoxGeometry(0.1, 0.5, 0.1);
-    const support = new Mesh(supportGeo, spoilerMat);
-    support.position.set(sx, 1.15, -2.1);
-    car.add(support);
-  }
-
-  // Headlights
-  const headlightMat = new MeshStandardMaterial({ color: 0xFFFF88, emissive: 0xFFFF44, emissiveIntensity: 0.5 });
-  for (const hx of [-0.7, 0.7]) {
-    const hl = new Mesh(new CircleGeometry(0.15, 8), headlightMat);
-    hl.position.set(hx, 0.65, 2.26);
-    car.add(hl);
-  }
-
-  // Taillights
-  const taillightMat = new MeshStandardMaterial({ color: 0xFF0000, emissive: 0xFF0000, emissiveIntensity: 0.5 });
-  for (const tx of [-0.7, 0.7]) {
-    const tl = new Mesh(new BoxGeometry(0.4, 0.15, 0.05), taillightMat);
-    tl.position.set(tx, 0.65, -2.26);
-    car.add(tl);
-  }
-
-  // Wheels
-  const wheelGeo = new CylinderGeometry(0.38, 0.38, 0.3, 12);
-  const wheelMat = new MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8 });
-  const hubMat = new MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8 });
-
-  const wheelPositions = [
-    { x: -1.2, y: 0.38, z: 1.4 },
-    { x: 1.2, y: 0.38, z: 1.4 },
-    { x: -1.2, y: 0.38, z: -1.4 },
-    { x: 1.2, y: 0.38, z: -1.4 },
-  ];
-
-  car.wheels = [];
-  wheelPositions.forEach(wp => {
-    const wg = new Group();
-    const wheel = new Mesh(wheelGeo, wheelMat);
-    wheel.rotation.z = Math.PI / 2;
-    wg.add(wheel);
-
-    const hub = new Mesh(new CylinderGeometry(0.15, 0.15, 0.32, 6), hubMat);
-    hub.rotation.z = Math.PI / 2;
-    wg.add(hub);
-
-    wg.position.set(wp.x, wp.y, wp.z);
-    car.add(wg);
-    car.wheels.push(wg);
+  // Enable shadows
+  model.traverse(child => {
+    if (child.isMesh) {
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
   });
 
-  // Exhaust particles placeholder (will be managed in game loop)
-  car.position.y = 0;
-  car.castShadow = true;
-
-  return car;
+  return model;
 }
 
-// ---- AI Cars ----
-function buildAICar(color) {
+// ---- Create a car wrapper group from a loaded model ----
+function createCarFromModel(modelIndex) {
   const car = new Group();
+  const modelClone = loadedModels[modelIndex].clone();
 
-  const bodyGeo = new BoxGeometry(2.0, 0.65, 4.2);
-  const bodyMat = new MeshStandardMaterial({ color, metalness: 0.6, roughness: 0.25 });
-  const body = new Mesh(bodyGeo, bodyMat);
-  body.position.y = 0.6;
-  body.castShadow = true;
-  car.add(body);
-
-  const cabinGeo = new BoxGeometry(1.6, 0.55, 1.8);
-  const cabinMat = new MeshStandardMaterial({ color: 0x222244, metalness: 0.9, roughness: 0.1 });
-  const cabin = new Mesh(cabinGeo, cabinMat);
-  cabin.position.set(0, 1.15, -0.3);
-  car.add(cabin);
-
-  const wheelGeo = new CylinderGeometry(0.35, 0.35, 0.28, 10);
-  const wheelMat = new MeshStandardMaterial({ color: 0x1a1a1a });
-  const wps = [[-1.1, 0.35, 1.3], [1.1, 0.35, 1.3], [-1.1, 0.35, -1.3], [1.1, 0.35, -1.3]];
-  wps.forEach(([x, y, z]) => {
-    const w = new Mesh(wheelGeo, wheelMat);
-    w.rotation.z = Math.PI / 2;
-    w.position.set(x, y, z);
-    car.add(w);
+  // Deep clone materials and brighten car textures
+  modelClone.traverse(child => {
+    if (child.isMesh) {
+      child.material = child.material.clone();
+      child.castShadow = true;
+      // Brighten dark GLB materials — reduce metalness, boost color
+      if (child.material.isMeshStandardMaterial) {
+        child.material.metalness = Math.min(child.material.metalness, 0.4);
+        child.material.roughness = Math.max(child.material.roughness, 0.3);
+        child.material.envMapIntensity = 2.0;
+      }
+    }
   });
 
+  normalizeModel(modelClone, 12); // car size in world units
+  // Rotate GLB model to face forward along +Z
+  modelClone.rotation.y = Math.PI / 2;
+  car.add(modelClone);
+  car.userData.modelIndex = modelIndex;
   return car;
 }
 
@@ -731,12 +721,9 @@ const MAX_SPEED = 120;
 const ACCELERATION = 45;
 const BRAKE_FORCE = 60;
 const FRICTION = 12;
-const STEER_SPEED = 3.8;
-const DRIFT_FACTOR = 0.92;
-const HANDBRAKE_DRIFT = 0.75;
 const TOTAL_LAPS = 3;
 
-let gameState = 'menu'; // menu, countdown, racing, finished
+let gameState = 'menu';
 let speed = 0;
 let steerAngle = 0;
 let carAngle = 0;
@@ -746,43 +733,148 @@ let lapStartTime = 0;
 let bestLapTime = Infinity;
 let raceStartTime = 0;
 let lastCheckpointT = 0;
-let distanceAlongTrack = 0;
 let handbrakeActive = false;
 
 // AI racers
 const aiCars = [];
 const aiStates = [];
-const AI_COLORS = [0x3388FF, 0xFFCC00, 0x33CC55, 0xAA44FF];
-const AI_NAMES = ['NOVA', 'BLITZ', 'VENOM', 'GHOST'];
 
-// ---- Init ----
 let playerCar;
 
-function init() {
+// ---- Car Selection ----
+function selectCar(index) {
+  selectedCarIndex = index;
+  document.querySelectorAll('.car-option').forEach((el, i) => {
+    el.classList.toggle('selected', i === index);
+  });
+}
+
+// ---- Load GLB Models ----
+function loadAllModels() {
+  const loader = new THREE.GLTFLoader();
+  let loaded = 0;
+
+  CAR_DEFS.forEach((def, i) => {
+    loader.load(
+      def.file,
+      (gltf) => {
+        loadedModels[i] = gltf.scene;
+        loaded++;
+        document.getElementById('loading-text').textContent = `LOADED ${loaded}/3 VEHICLES...`;
+
+        if (loaded === 3) {
+          onAllModelsLoaded();
+        }
+      },
+      undefined,
+      (err) => {
+        console.error(`Failed to load ${def.file}:`, err);
+        // Fallback: create a primitive car
+        const fallback = new Group();
+        const body = new Mesh(
+          new BoxGeometry(2, 0.7, 4.5),
+          new MeshStandardMaterial({ color: parseInt(def.color.replace('#', '0x')) })
+        );
+        body.position.y = 0.6;
+        fallback.add(body);
+        const cabin = new Mesh(
+          new BoxGeometry(1.6, 0.5, 1.8),
+          new MeshStandardMaterial({ color: 0x222244 })
+        );
+        cabin.position.set(0, 1.15, -0.3);
+        fallback.add(cabin);
+        loadedModels[i] = fallback;
+        loaded++;
+        if (loaded === 3) onAllModelsLoaded();
+      }
+    );
+  });
+}
+
+function onAllModelsLoaded() {
+  document.getElementById('loading-text').style.display = 'none';
+  document.getElementById('car-select').style.display = 'flex';
+  document.getElementById('start-btn').classList.add('visible');
+
+  // Create preview renders for each car
+  CAR_DEFS.forEach((def, i) => {
+    createPreview(i);
+  });
+}
+
+// ---- Preview renders for selection screen ----
+function createPreview(index) {
+  const container = document.getElementById(`preview-${index}`);
+  const w = 320, h = 200;
+
+  const prevRenderer = new WebGLRenderer({ antialias: true, alpha: true });
+  prevRenderer.setSize(w, h);
+  prevRenderer.setPixelRatio(2);
+  prevRenderer.outputEncoding = THREE.sRGBEncoding;
+  container.appendChild(prevRenderer.domElement);
+
+  const prevScene = new Scene();
+  prevScene.add(new AmbientLight(0xffffff, 1.0));
+  const dLight = new DirectionalLight(0xffffff, 1.2);
+  dLight.position.set(5, 8, 5);
+  prevScene.add(dLight);
+  const dLight2 = new DirectionalLight(0xffffff, 0.6);
+  dLight2.position.set(-5, 4, -3);
+  prevScene.add(dLight2);
+
+  const prevCam = new PerspectiveCamera(40, w / h, 0.1, 100);
+  prevCam.position.set(4, 3, 5);
+  prevCam.lookAt(0, 0.5, 0);
+
+  const model = loadedModels[index].clone();
+  normalizeModel(model, 5);
+  prevScene.add(model);
+
+  // Render once + rotate animation
+  let angle = 0;
+  function animatePreview() {
+    requestAnimationFrame(animatePreview);
+    angle += 0.008;
+    model.rotation.y = angle;
+    prevRenderer.render(prevScene, prevCam);
+  }
+  animatePreview();
+}
+
+// ---- Init Game ----
+function initGame() {
   buildGround();
   buildTrack();
   buildTrackside();
 
-  playerCar = buildCar();
+  // Player gets selected car
+  playerCar = createCarFromModel(selectedCarIndex);
   const startPos = trackCurve.getPointAt(0);
   const startTan = trackCurve.getTangentAt(0);
   playerCar.position.copy(startPos);
+  playerCar.position.y = ROAD_Y;
   carAngle = Math.atan2(startTan.x, startTan.z);
   playerCar.rotation.y = carAngle;
   scene.add(playerCar);
 
-  // AI cars
-  AI_COLORS.forEach((col, i) => {
-    const ai = buildAICar(col);
-    const offset = 0.005 + i * 0.012;
+  // Other cars become AI
+  const aiModelIndices = [];
+  for (let i = 0; i < 3; i++) {
+    if (i !== selectedCarIndex) aiModelIndices.push(i);
+  }
+
+  const AI_NAMES_LIST = ['NOVA', 'BLITZ', 'VENOM'];
+  aiModelIndices.forEach((modelIdx, i) => {
+    const ai = createCarFromModel(modelIdx);
+    const offset = 0.01 + i * 0.015;
     const aiPos = trackCurve.getPointAt(offset);
     ai.position.copy(aiPos);
+    ai.position.y = ROAD_Y;
     const aiTan = trackCurve.getTangentAt(offset);
     ai.rotation.y = Math.atan2(aiTan.x, aiTan.z);
 
-    // Offset laterally
     const norm = new Vector3(-aiTan.z, 0, aiTan.x).normalize();
-    ai.position.add(norm.multiplyScalar((i % 2 === 0 ? -1 : 1) * 4));
+    ai.position.add(norm.multiplyScalar((i % 2 === 0 ? -1 : 1) * 5));
 
     scene.add(ai);
     aiCars.push(ai);
@@ -793,7 +885,8 @@ function init() {
       wobble: Math.random() * 1000,
       lapCount: 0,
       lastT: offset,
-      name: AI_NAMES[i],
+      name: AI_NAMES_LIST[i] || CAR_DEFS[modelIdx].name,
+      color: CAR_DEFS[modelIdx].color,
     });
   });
 
@@ -813,14 +906,12 @@ function drawSpeedometer(speedKmh) {
 
   ctx.clearRect(0, 0, w, h);
 
-  // Background arc
   ctx.beginPath();
   ctx.arc(cx, cy, r, Math.PI * 0.8, Math.PI * 2.2, false);
   ctx.strokeStyle = 'rgba(255,255,255,0.1)';
   ctx.lineWidth = 20;
   ctx.stroke();
 
-  // Speed arc
   const maxAngle = Math.PI * 1.4;
   const speedRatio = Math.min(Math.abs(speedKmh) / 280, 1);
   const sweepAngle = speedRatio * maxAngle;
@@ -837,7 +928,6 @@ function drawSpeedometer(speedKmh) {
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // Tick marks
   for (let i = 0; i <= 280; i += 20) {
     const a = Math.PI * 0.8 + (i / 280) * maxAngle;
     const inner = r - 30;
@@ -857,7 +947,6 @@ function drawSpeedometer(speedKmh) {
     }
   }
 
-  // Needle
   const needleAngle = Math.PI * 0.8 + speedRatio * maxAngle;
   ctx.beginPath();
   ctx.moveTo(cx, cy);
@@ -867,13 +956,11 @@ function drawSpeedometer(speedKmh) {
   ctx.lineCap = 'round';
   ctx.stroke();
 
-  // Center dot
   ctx.beginPath();
   ctx.arc(cx, cy, 8, 0, Math.PI * 2);
   ctx.fillStyle = '#FF2D55';
   ctx.fill();
 
-  // Speed number
   ctx.font = 'bold 48px Orbitron';
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
@@ -891,7 +978,6 @@ let minimapTrackPoints = [];
 
 function initMinimap() {
   const pts = trackCurve.getPoints(200);
-  // Find bounds
   let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
   pts.forEach(p => {
     minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
@@ -905,7 +991,6 @@ function initMinimap() {
   minimapTrackPoints = pts.map(p => ({
     x: 10 + (p.x - minX + padding) * scale,
     y: 10 + (p.z - minZ + padding) * scale,
-    wx: p.x, wz: p.z
   }));
   minimapTrackPoints.scale = scale;
   minimapTrackPoints.minX = minX - padding;
@@ -916,7 +1001,6 @@ function drawMinimap() {
   const ctx = minimapCtx;
   ctx.clearRect(0, 0, 320, 320);
 
-  // Track
   ctx.beginPath();
   minimapTrackPoints.forEach((p, i) => {
     i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
@@ -930,17 +1014,15 @@ function drawMinimap() {
   const oX = minimapTrackPoints.minX;
   const oZ = minimapTrackPoints.minZ;
 
-  // AI dots
   aiCars.forEach((ai, i) => {
     const mx = 10 + (ai.position.x - oX) * s;
     const my = 10 + (ai.position.z - oZ) * s;
     ctx.beginPath();
     ctx.arc(mx, my, 4, 0, Math.PI * 2);
-    ctx.fillStyle = '#' + AI_COLORS[i].toString(16).padStart(6, '0');
+    ctx.fillStyle = aiStates[i].color;
     ctx.fill();
   });
 
-  // Player dot
   const px = 10 + (playerCar.position.x - oX) * s;
   const py = 10 + (playerCar.position.z - oZ) * s;
   ctx.beginPath();
@@ -970,7 +1052,6 @@ function getTrackT(pos) {
     const d = pos.distanceTo(p);
     if (d < bestDist) { bestDist = d; bestT = t; }
   }
-  // Refine
   for (let i = -20; i <= 20; i++) {
     const t = bestT + i / 4000;
     const tt = ((t % 1) + 1) % 1;
@@ -988,14 +1069,14 @@ function getPositions() {
   racers.push({
     name: 'YOU',
     progress: lapCount + playerT,
-    color: '#FF2D55',
+    color: CAR_DEFS[selectedCarIndex].color,
     isPlayer: true
   });
   aiStates.forEach((ai, i) => {
     racers.push({
       name: ai.name,
       progress: ai.lapCount + ai.t,
-      color: '#' + AI_COLORS[i].toString(16).padStart(6, '0'),
+      color: ai.color,
       isPlayer: false
     });
   });
@@ -1025,6 +1106,8 @@ document.addEventListener('keyup', e => { keys[e.code] = false; });
 // ---- Start ----
 document.getElementById('start-btn').addEventListener('click', () => {
   initAudio();
+  initGame();
+  initMinimap();
   document.getElementById('blocker').classList.add('hidden');
   startCountdown();
 });
@@ -1078,7 +1161,6 @@ function gameLoop() {
     updateSmoke(dt);
     updateEngineSound(speed, MAX_SPEED);
 
-    // HUD
     const now = performance.now();
     const elapsed = now - lapStartTime;
     document.getElementById('lap-timer').textContent = formatTime(elapsed);
@@ -1087,24 +1169,17 @@ function gameLoop() {
     const speedKmh = Math.abs(speed) * 2.4;
     drawSpeedometer(speedKmh);
 
-    // Gear
     const gear = speed < 0 ? 'R' : speed < 5 ? '1' : speed < 20 ? '2' : speed < 40 ? '3' : speed < 65 ? '4' : speed < 90 ? '5' : '6';
     document.getElementById('gear-display').textContent = gear;
 
-    // Drift indicator
     const driftEl = document.getElementById('drift-indicator');
-    if (driftAmount > 0.3) {
-      driftEl.classList.add('active');
-    } else {
-      driftEl.classList.remove('active');
-    }
+    driftEl.classList.toggle('active', driftAmount > 0.3);
 
     if (frameCount % 5 === 0) {
       drawMinimap();
       updatePositionBar();
     }
 
-    // Speed lines
     const speedLineEl = document.getElementById('speed-lines');
     if (Math.abs(speed) > 80) {
       speedLineEl.style.opacity = (Math.abs(speed) - 80) / 40 * 0.3;
@@ -1117,7 +1192,7 @@ function gameLoop() {
     if (frameCount % 10 === 0) drawMinimap();
   }
 
-  updateCamera(dt);
+  if (playerCar) updateCamera(dt);
   renderer.render(scene, camera);
 }
 
@@ -1130,12 +1205,12 @@ function updatePlayer(dt) {
   handbrakeActive = keys['Space'];
 
   // Reset
-  if (keys['KeyR']) {
+  if (keys['KeyR'] && gameState === 'racing') {
     const t = getTrackT(playerCar.position);
     const p = trackCurve.getPointAt(t);
     const tan = trackCurve.getTangentAt(t);
     playerCar.position.copy(p);
-    playerCar.position.y = 0.15;
+    playerCar.position.y = ROAD_Y;
     carAngle = Math.atan2(tan.x, tan.z);
     speed = 0;
     steerAngle = 0;
@@ -1152,7 +1227,6 @@ function updatePlayer(dt) {
       speed -= ACCELERATION * 0.5 * dt;
     }
   } else {
-    // Friction
     if (Math.abs(speed) > 0.5) {
       speed -= Math.sign(speed) * FRICTION * dt;
     } else {
@@ -1162,17 +1236,16 @@ function updatePlayer(dt) {
 
   speed = MathUtils.clamp(speed, -30, MAX_SPEED);
 
-  // Steering — smooth buildup, not twitchy
+  // Steering — smooth buildup
   const speedRatio = Math.abs(speed) / MAX_SPEED;
-  const maxSteer = 0.035; // Max steer angle — moderate
-  const steerRate = 1.8 * dt; // How fast steer angle builds up
+  const maxSteer = 0.035;
+  const steerRate = 1.8 * dt;
 
   if (left) steerAngle = Math.min(steerAngle + steerRate, maxSteer);
   else if (right) steerAngle = Math.max(steerAngle - steerRate, -maxSteer);
-  else steerAngle *= 0.88; // Smooth return to center
+  else steerAngle *= 0.88;
 
-  // Turn rate scales with speed — need to be moving to turn
-  const speedFactor = Math.min(Math.abs(speed) / 10, 1); // No turning when stopped
+  const speedFactor = Math.min(Math.abs(speed) / 10, 1);
   const turnMultiplier = handbrakeActive ? 2.0 : (1.5 - speedRatio * 0.5);
   const turnRate = steerAngle * turnMultiplier * speedFactor;
   carAngle += turnRate * Math.sign(speed);
@@ -1180,9 +1253,8 @@ function updatePlayer(dt) {
   // Drift physics
   if (handbrakeActive && Math.abs(speed) > 15) {
     driftAmount = MathUtils.lerp(driftAmount, 1, dt * 5);
-    speed *= (1 - dt * 0.3); // Lose some speed while drifting
+    speed *= (1 - dt * 0.3);
 
-    // Spawn smoke
     if (frameCount % 2 === 0) {
       const backL = new Vector3(-1, 0, -2).applyAxisAngle(new Vector3(0, 1, 0), carAngle).add(playerCar.position);
       const backR = new Vector3(1, 0, -2).applyAxisAngle(new Vector3(0, 1, 0), carAngle).add(playerCar.position);
@@ -1205,12 +1277,12 @@ function updatePlayer(dt) {
   // Move car
   const moveDir = new Vector3(Math.sin(carAngle), 0, Math.cos(carAngle));
   playerCar.position.add(moveDir.multiplyScalar(speed * dt));
-  playerCar.position.y = 0;
+  playerCar.position.y = ROAD_Y;
 
   // Car visual rotation
   playerCar.rotation.y = carAngle;
 
-  // Body lean into turns
+  // Body lean
   const leanTarget = -steerAngle * 4 * speedFactor;
   playerCar.rotation.z = MathUtils.lerp(playerCar.rotation.z, MathUtils.clamp(leanTarget, -0.12, 0.12), dt * 6);
 
@@ -1218,15 +1290,7 @@ function updatePlayer(dt) {
   const driftYaw = driftAmount * steerAngle * -8;
   playerCar.rotation.y = carAngle + MathUtils.clamp(driftYaw, -0.25, 0.25);
 
-  // Spin wheels
-  if (playerCar.wheels) {
-    playerCar.wheels.forEach(w => {
-      w.children[0].rotation.y += speed * dt * 0.5;
-      w.children[1].rotation.y += speed * dt * 0.5;
-    });
-  }
-
-  // Keep on track — soft boundary push
+  // Keep on track
   const trackT = getTrackT(playerCar.position);
   const trackPoint = trackCurve.getPointAt(trackT);
   const distFromCenter = playerCar.position.distanceTo(trackPoint);
@@ -1240,7 +1304,6 @@ function updatePlayer(dt) {
 // ---- AI Update ----
 function updateAI(dt) {
   aiStates.forEach((ai, i) => {
-    // Vary speed based on track curvature at their position
     const lookAhead = (ai.t + 0.02) % 1;
     const tan1 = trackCurve.getTangentAt(ai.t);
     const tan2 = trackCurve.getTangentAt(lookAhead);
@@ -1250,19 +1313,15 @@ function updateAI(dt) {
     if (curvature > 0.01) targetSpeed *= 0.65;
     else if (curvature > 0.005) targetSpeed *= 0.8;
 
-    // Add slight wobble for realism
     targetSpeed += Math.sin(performance.now() * 0.001 + ai.wobble) * 5;
-
     ai.speed = MathUtils.lerp(ai.speed, targetSpeed, dt * 2);
 
-    // Move along track
     const trackLen = trackCurve.getLength();
     const advanceT = (ai.speed * dt) / trackLen;
 
     ai.lastT = ai.t;
     ai.t = (ai.t + advanceT) % 1;
 
-    // Lap detection
     if (ai.lastT > 0.95 && ai.t < 0.05) {
       ai.lapCount++;
     }
@@ -1270,16 +1329,14 @@ function updateAI(dt) {
     const pos = trackCurve.getPointAt(ai.t);
     const tan = trackCurve.getTangentAt(ai.t);
 
-    // Slight lateral offset for variety
     const norm = new Vector3(-tan.z, 0, tan.x).normalize();
     const lateralOffset = Math.sin(ai.t * Math.PI * 8 + ai.wobble) * 3;
     pos.add(norm.multiplyScalar(lateralOffset));
 
     aiCars[i].position.copy(pos);
-    aiCars[i].position.y = 0.15;
+    aiCars[i].position.y = ROAD_Y;
     aiCars[i].rotation.y = Math.atan2(tan.x, tan.z);
 
-    // Lean into turns
     const crossProduct = tan1.x * tan2.z - tan1.z * tan2.x;
     aiCars[i].rotation.z = MathUtils.lerp(aiCars[i].rotation.z, -crossProduct * 3, dt * 5);
   });
@@ -1289,18 +1346,16 @@ function updateAI(dt) {
 function checkLap() {
   const currentT = getTrackT(playerCar.position);
 
-  // Detect crossing start/finish (t wraps from ~1 to ~0)
   if (lastCheckpointT > 0.9 && currentT < 0.1) {
     const now = performance.now();
     const lapTime = now - lapStartTime;
 
-    if (lapTime > 5000) { // Minimum lap time to avoid false triggers
+    if (lapTime > 5000) {
       if (lapTime < bestLapTime) {
         bestLapTime = lapTime;
         document.getElementById('best-time').textContent = formatTime(bestLapTime);
       }
 
-      // Flash
       const flash = document.getElementById('lap-flash');
       flash.style.opacity = '1';
       setTimeout(() => flash.style.opacity = '0', 300);
@@ -1339,32 +1394,27 @@ function showFinish() {
 }
 
 // ---- Camera ----
-const cameraOffset = new Vector3(0, 6, -14);
+const cameraOffset = new Vector3(0, 5, -12);
 const cameraLookOffset = new Vector3(0, 2, 10);
 
 function updateCamera(dt) {
   const carForward = new Vector3(Math.sin(carAngle), 0, Math.cos(carAngle));
   const carRight = new Vector3(Math.cos(carAngle), 0, -Math.sin(carAngle));
 
-  // Chase camera position
   const targetPos = playerCar.position.clone()
     .add(carForward.clone().multiplyScalar(cameraOffset.z))
     .add(new Vector3(0, cameraOffset.y, 0))
     .add(carRight.clone().multiplyScalar(driftAmount * steerAngle * -8));
 
-  camera.position.lerp(targetPos, dt * 5);
+  camera.position.lerp(targetPos, dt * 3.5);
 
-  // Look target
   const lookTarget = playerCar.position.clone()
     .add(carForward.clone().multiplyScalar(cameraLookOffset.z))
     .add(new Vector3(0, cameraLookOffset.y, 0));
 
-  const currentLook = new Vector3();
-  camera.getWorldDirection(currentLook);
   camera.lookAt(lookTarget);
 
-  // FOV boost at speed
-  const targetFOV = 65 + (Math.abs(speed) / MAX_SPEED) * 15;
+  const targetFOV = 60 + (Math.abs(speed) / MAX_SPEED) * 5;
   camera.fov = MathUtils.lerp(camera.fov, targetFOV, dt * 3);
   camera.updateProjectionMatrix();
 }
@@ -1376,10 +1426,9 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// ---- Restart detection ----
+// ---- Restart ----
 document.addEventListener('keydown', e => {
   if (e.code === 'KeyR' && gameState === 'finished') {
-    // Reset everything
     speed = 0; steerAngle = 0; driftAmount = 0;
     lapCount = 0; bestLapTime = Infinity;
     document.getElementById('best-time').textContent = '--:--.---';
@@ -1388,12 +1437,13 @@ document.addEventListener('keydown', e => {
     const startPos = trackCurve.getPointAt(0);
     const startTan = trackCurve.getTangentAt(0);
     playerCar.position.copy(startPos);
+    playerCar.position.y = ROAD_Y;
     carAngle = Math.atan2(startTan.x, startTan.z);
     playerCar.rotation.y = carAngle;
     playerCar.rotation.z = 0;
 
     aiStates.forEach((ai, i) => {
-      ai.t = 0.005 + i * 0.012;
+      ai.t = 0.01 + i * 0.015;
       ai.speed = 0;
       ai.lapCount = 0;
       ai.lastT = ai.t;
@@ -1403,9 +1453,8 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ---- GO ----
-init();
-initMinimap();
+// ---- Load models then start render loop ----
+loadAllModels();
 gameLoop();
 </script>
 </body>

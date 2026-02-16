@@ -98,13 +98,11 @@
             height: 650px;
             --poster-color: transparent;
             animation: float 3s ease-in-out infinite;
-            transform: scale(0.6);
-            transform-origin: center center;
         }
-        
+
         @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
+            0%, 100% { transform: translateY(0) scale(0.6); }
+            50% { transform: translateY(-15px) scale(0.6); }
         }
         
         .badge {
@@ -150,7 +148,7 @@
             font-style: italic;
             color: #ccc;
             vertical-align: baseline;
-            margin-right: 0.4em;
+            margin-right: 0.6em;
         }
         
         .gradient-text {
@@ -613,9 +611,9 @@
                     environment-image="neutral"
                     shadow-intensity="1"
                     exposure="1.2"
-                    camera-orbit="0deg 80deg 100%"
-                    camera-target="0m 0m 0m"
-                    field-of-view="45deg"
+                    camera-orbit="0deg 80deg 180%"
+                    camera-target="0m 0.2m 0m"
+                    field-of-view="35deg"
                     min-camera-orbit="auto auto auto"
                     max-camera-orbit="auto auto auto"
                 ></model-viewer>
@@ -625,7 +623,7 @@
                     function swayRobot() {
                         angle += 0.006;
                         const rotation = Math.sin(angle) * 10;
-                        robot.setAttribute('camera-orbit', `${rotation}deg 80deg 100%`);
+                        robot.setAttribute('camera-orbit', `${rotation}deg 80deg 180%`);
                         requestAnimationFrame(swayRobot);
                     }
                     robot.addEventListener('load', swayRobot);

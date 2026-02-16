@@ -962,68 +962,13 @@
     (function() {
         const viewer = document.getElementById('robot-viewer');
         if (!viewer) return;
-
-        // Once the 3D model loads, find the right arm bone and wave it
-        viewer.addEventListener('load', () => {
-            const scene = viewer.model;
-            if (!scene) return;
-
-            // Search the scene graph for arm-related bones
-            let armBone = null;
-            const names = [];
-            viewer.model[Object.getOwnPropertySymbols(viewer.model).find(
-                s => s.toString().includes('scene')
-            )]?.traverse?.(node => {
-                names.push(node.name);
-                const n = node.name.toLowerCase();
-                if (!armBone && (n.includes('right') && (n.includes('arm') || n.includes('shoulder')) ||
-                    n.includes('r_arm') || n.includes('r_shoulder') || n.includes('rightarm'))) {
-                    armBone = node;
-                }
-            });
-
-            // If no named bone found, try to grab from the internal Three.js scene
-            if (!armBone) {
-                const threeScene = viewer[Object.getOwnPropertySymbols(viewer).find(
-                    s => s.toString().includes('scene')
-                )];
-                if (threeScene) {
-                    threeScene.traverse(node => {
-                        const n = (node.name || '').toLowerCase();
-                        if (!armBone && n && (
-                            (n.includes('right') && (n.includes('arm') || n.includes('shoulder'))) ||
-                            n.includes('r_arm') || n.includes('r_upper')
-                        )) {
-                            armBone = node;
-                        }
-                    });
-                }
-            }
-
-            if (armBone) {
-                const baseRot = armBone.rotation.clone();
-                let t = 0;
-                function wave() {
-                    t += 0.06;
-                    // Wave: raise arm up and oscillate
-                    armBone.rotation.z = baseRot.z + Math.sin(t * 3) * 0.4 - 0.6;
-                    armBone.rotation.x = baseRot.x - 0.3;
-                    viewer.requestUpdate();
-                    requestAnimationFrame(wave);
-                }
-                wave();
-            } else {
-                // Fallback: gentle CSS rock if no bone access
-                viewer.style.animation = 'robotRock 2s ease-in-out infinite';
-            }
-        });
+        viewer.style.animation = 'robotFloat 3s ease-in-out infinite';
     })();
     </script>
     <style>
-    @keyframes robotRock {
-        0%, 100% { transform: rotate(0deg); }
-        25% { transform: rotate(3deg); }
-        75% { transform: rotate(-3deg); }
+    @keyframes robotFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-14px); }
     }
     </style>
 </body>

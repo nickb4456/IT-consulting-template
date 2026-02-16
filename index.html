@@ -1069,6 +1069,49 @@
             50% { opacity: 0; }
         }
 
+        /* Rotating text effect */
+        .rotating-text {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+            opacity: 0;
+            animation: fadeSlideUp 0.8s ease forwards;
+            animation-delay: 1s;
+        }
+        .static-text {
+            color: var(--text-muted);
+        }
+        .rotating-wrapper {
+            overflow: hidden;
+            height: 1.5em;
+            position: relative;
+        }
+        .rotating-words {
+            display: block;
+            position: relative;
+            animation: rotateWords 10s infinite;
+        }
+        .rotating-words span {
+            display: block;
+            height: 1.5em;
+            line-height: 1.5em;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        @keyframes rotateWords {
+            0%, 16% { transform: translateY(0); }
+            20%, 36% { transform: translateY(-1.5em); }
+            40%, 56% { transform: translateY(-3em); }
+            60%, 76% { transform: translateY(-4.5em); }
+            80%, 96% { transform: translateY(-6em); }
+            100% { transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .rotating-text { font-size: 1.1rem; flex-direction: column; gap: 0.2em; text-align: center; justify-content: center; }
+        }
+
         .hero-buttons {
             display: flex;
             gap: 1rem;
@@ -3866,11 +3909,18 @@
                 <span class="gradient-flow">AI Solutions</span>
                 <span class="hero-subtitle-line">for Rhode Island</span>
             </h1>
-            <p class="hero-subtitle">
-                <span class="typewriter" id="typewriter">
-                    <span class="typewriter-text"></span><span class="typewriter-cursor"></span>
+            <div class="rotating-text" style="margin-bottom: 1.5rem;">
+                <span class="static-text">We deliver</span>
+                <span class="rotating-wrapper">
+                    <span class="rotating-words">
+                        <span>AI automation</span>
+                        <span>custom agents</span>
+                        <span>workflow optimization</span>
+                        <span>24/7 monitoring</span>
+                        <span>real results</span>
+                    </span>
                 </span>
-            </p>
+            </div>
             <div class="hero-buttons">
                 <a href="#contact" class="btn btn-primary ripple" role="button">
                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>

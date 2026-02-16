@@ -783,13 +783,9 @@
  <div class="chart-title">Monthly Sales Volume & Average Price (24 Months)</div>
  <div style="position:relative;height:200px"><canvas id="trendChart"></canvas></div>
  </div>
- <div class="chart-card">
- <div class="chart-title">Sales by City (Top 15)</div>
- <div style="position:relative;height:300px"><canvas id="cityChart"></canvas></div>
- </div>
- <div class="chart-card">
- <div class="chart-title">Median Price by City</div>
- <div style="position:relative;height:300px"><canvas id="priceChart"></canvas></div>
+ <div class="chart-card full">
+ <div class="chart-title">Sales by City & Property Type (Top 12)</div>
+ <div style="position:relative;height:350px"><canvas id="cityStackedChart"></canvas></div>
  </div>
  </div>
  
@@ -4280,8 +4276,37 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  // Store for later use
  window.computedCityStats = cityStats;
  
- new Chart(document.getElementById('cityChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => c.count), backgroundColor: cityData.map((_,i) => `hsl(${250+i*7},70%,60%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } } } });
- new Chart(document.getElementById('priceChart'), { type: 'bar', data: { labels: cityData.map(c => c.city), datasets: [{ data: cityData.map(c => Math.round(c.medianPrice/1000)), backgroundColor: cityData.map((_,i) => `hsl(${330+i*5},70%,55%)`), borderRadius: 6 }] }, options: { indexAxis: 'y', ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, ticks: { ...chartOpts.scales.x.ticks, callback: v => '$'+v+'K' } } } } });
+ // Stacked bar chart by property type
+ const propTypes = ['Single Family', 'Condo', 'Multi Family', 'Land', 'Other'];
+ const propColors = { 'Single Family': '#6366f1', 'Condo': '#22d3ee', 'Multi Family': '#f59e0b', 'Land': '#10b981', 'Other': '#94a3b8' };
+ const top12Cities = cityData.slice(0, 12).map(c => c.city);
+ const cityPropCounts = {};
+ top12Cities.forEach(city => { cityPropCounts[city] = {}; propTypes.forEach(t => cityPropCounts[city][t] = 0); });
+ rawData.properties.forEach(p => {
+   if (!cityPropCounts[p.city]) return;
+   const type = p.propertyType?.includes('Single') ? 'Single Family' : 
+                p.propertyType?.includes('Condo') ? 'Condo' :
+                p.propertyType?.includes('Multi') ? 'Multi Family' :
+                p.propertyType?.includes('Land') || p.propertyType?.includes('Lot') ? 'Land' : 'Other';
+   cityPropCounts[p.city][type]++;
+ });
+ new Chart(document.getElementById('cityStackedChart'), {
+   type: 'bar',
+   data: {
+     labels: top12Cities,
+     datasets: propTypes.map(type => ({
+       label: type,
+       data: top12Cities.map(city => cityPropCounts[city][type]),
+       backgroundColor: propColors[type],
+       borderRadius: 4
+     }))
+   },
+   options: {
+     ...chartOpts,
+     plugins: { legend: { display: true, position: 'top', labels: { color: '#94a3b8', usePointStyle: true, padding: 15 } } },
+     scales: { ...chartOpts.scales, x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } }
+   }
+ });
  
  // Price histogram
  const priceRanges = ['<$300K', '$300-400K', '$400-500K', '$500-600K', '$600-750K', '$750K-1M', '$1M+'];

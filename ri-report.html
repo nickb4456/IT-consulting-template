@@ -1214,21 +1214,24 @@ function loadMainData() {
   startLoad();
 }
 
-// Trigger data load after first paint (or on user interaction)
+// Trigger data load after scripts ready + first paint
 let dataLoading = false;
 const triggerLoad = () => {
-  if (dataLoading) return;
+  if (dataLoading || typeof initSqlJs === 'undefined') return;
   dataLoading = true;
   loadMainData();
 };
 
-if ('requestIdleCallback' in window) {
-  requestIdleCallback(triggerLoad, { timeout: 2000 });
-} else {
-  setTimeout(triggerLoad, 300);
-}
-window.addEventListener('scroll', triggerLoad, { once: true, passive: true });
-document.addEventListener('click', triggerLoad, { once: true });
+// Wait for DOMContentLoaded (deferred scripts loaded), then defer further
+document.addEventListener('DOMContentLoaded', () => {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(triggerLoad, { timeout: 1500 });
+  } else {
+    setTimeout(triggerLoad, 200);
+  }
+  window.addEventListener('scroll', triggerLoad, { once: true, passive: true });
+  document.addEventListener('click', triggerLoad, { once: true });
+});
 
 function updateInsights() {
   if (!rawData || !rawData.properties || !window.cityStats) return;

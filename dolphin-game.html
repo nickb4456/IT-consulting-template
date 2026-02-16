@@ -16,6 +16,34 @@
             user-select: none;
         }
         canvas { display: block; }
+        
+        /* Loading overlay */
+        #loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, #0a3d5c 0%, #062840 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+        #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 60px; height: 60px;
+            border: 4px solid rgba(100,220,255,0.2);
+            border-top-color: #7de8ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .loading-text {
+            margin-top: 20px;
+            color: #7de8ff;
+            font-family: 'Lilita One', cursive;
+            font-size: 1.2rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .back-btn {
             position: fixed;
@@ -268,6 +296,10 @@
     </style>
 </head>
 <body>
+    <div id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
     <a href="games.html" class="back-btn">&#x2190; Back</a>
     <div id="combo-display"></div>
     <div id="tap-hint">TAP TO JUMP!</div>
@@ -873,6 +905,10 @@
             dolphinPivot.add(model);
             dolphinModelLoaded = true;
 
+            // Hide loading overlay
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+
             console.log('Dolphin GLB loaded successfully');
         }, function(progress) {
             if (progress.total > 0) {
@@ -881,6 +917,9 @@
             }
         }, function(error) {
             console.warn('Could not load dolphin GLB, keeping placeholder:', error);
+            // Still hide overlay even if GLB fails
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
         });
     }
 

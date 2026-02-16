@@ -16,6 +16,16 @@
             user-select: none;
         }
         canvas { display: block; }
+        #loading-overlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: linear-gradient(180deg, #1a0e00 0%, #0d0700 100%);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.5s ease;
+        }
+        #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner { width: 60px; height: 60px; border: 4px solid rgba(200,150,50,0.2); border-top-color: #c89632; border-radius: 50%; animation: spin 1s linear infinite; }
+        .loading-text { margin-top: 20px; color: #c89632; font-family: 'Lilita One', cursive; font-size: 1.2rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         .back-btn {
             position: fixed;
@@ -243,6 +253,10 @@
     </style>
 </head>
 <body>
+    <div id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
     <a href="games.html" class="back-btn">&larr; Back</a>
 
     <div id="hud">
@@ -1065,6 +1079,13 @@
 
             raptorTemplate.add(model);
             spawnRaptorPacks();
+            // Hide loading overlay
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }, undefined, function(error) {
+            console.warn('Could not load raptor GLB:', error);
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
         });
     }
 

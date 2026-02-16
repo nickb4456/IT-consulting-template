@@ -136,6 +136,64 @@
             margin-bottom: 32px;
         }
         
+        /* Rotating text subtitle */
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #aaa;
+            margin-bottom: 32px;
+            min-height: 2em;
+        }
+        
+        .static-text {
+            font-style: italic;
+            color: #ccc;
+        }
+        
+        .rotating-wrapper {
+            display: inline-block;
+            overflow: hidden;
+            height: 1.4em;
+            vertical-align: bottom;
+            position: relative;
+            min-width: 280px;
+        }
+        
+        .rotating-words {
+            display: block;
+            position: relative;
+            animation: rotateWords 16s infinite;
+        }
+        
+        .rotating-words span {
+            display: block;
+            height: 1.4em;
+            line-height: 1.4em;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--cyan), var(--primary), var(--cyan));
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 3s ease-in-out infinite;
+        }
+        
+        @keyframes rotateWords {
+            0%, 10% { transform: translateY(0); }
+            12.5%, 22.5% { transform: translateY(-1.4em); }
+            25%, 35% { transform: translateY(-2.8em); }
+            37.5%, 47.5% { transform: translateY(-4.2em); }
+            50%, 60% { transform: translateY(-5.6em); }
+            62.5%, 72.5% { transform: translateY(-7em); }
+            75%, 85% { transform: translateY(-8.4em); }
+            87.5%, 97.5% { transform: translateY(-9.8em); }
+            100% { transform: translateY(0); }
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+        
         .cta-group {
             display: flex;
             gap: 16px;
@@ -540,7 +598,21 @@
             <div class="hero-content">
                 <div class="badge">Built for Rhode Island</div>
                 <h1>Your AI Assistant<br>That <span>Actually Knows RI</span></h1>
-                <p>Claude-powered AI trained on 36,000+ Rhode Island properties. Handles texts, schedules showings, answers client questions — 24/7.</p>
+                <p class="hero-subtitle">
+                    <span class="static-text">We deliver</span>
+                    <span class="rotating-wrapper">
+                        <span class="rotating-words">
+                            <span>instant lead responses</span>
+                            <span>showing scheduling</span>
+                            <span>property comps</span>
+                            <span>market analysis</span>
+                            <span>24/7 availability</span>
+                            <span>listing descriptions</span>
+                            <span>client follow-ups</span>
+                            <span>neighborhood insights</span>
+                        </span>
+                    </span>
+                </p>
                 <div class="cta-group">
                     <a href="#pricing" class="btn btn-primary">See Pricing</a>
                     <a href="#demo" class="btn btn-secondary">See the Data</a>

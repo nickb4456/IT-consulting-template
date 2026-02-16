@@ -1319,7 +1319,18 @@ function loadMainData() {
   
   // Initialize everything now that data is loaded
   console.log('Data loaded, initializing...', rawData.properties.length, 'properties');
-  if (typeof initCharts === 'function') initCharts();
+  
+  // Wait for Chart.js to load (it's deferred), then init charts
+  function waitForCharts() {
+    if (typeof Chart !== 'undefined' && typeof initCharts === 'function') {
+      console.log('Chart.js ready, initializing charts...');
+      initCharts();
+    } else {
+      console.log('Waiting for Chart.js...');
+      setTimeout(waitForCharts, 100);
+    }
+  }
+  waitForCharts();
   if (typeof initHouseHunter === 'function') {
     console.log('Calling initHouseHunter...');
     initHouseHunter();
@@ -4157,6 +4168,62 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  function initCharts() {
  try {
  const chartColors = { purple: '#6366f1', pink: '#00E1E6', green: '#10b981', amber: '#f59e0b', cyan: '#06b6d4' };
+ 
+ // 3D effect plugin for bars
+ const bar3DPlugin = {
+   id: 'bar3D',
+   beforeDatasetsDraw(chart) {
+     const ctx = chart.ctx;
+     chart.data.datasets.forEach((dataset, i) => {
+       const meta = chart.getDatasetMeta(i);
+       if (meta.type !== 'bar') return;
+       meta.data.forEach((bar, index) => {
+         const { x, y, width, height, base } = bar.getProps(['x', 'y', 'width', 'height', 'base']);
+         if (height === 0) return;
+         const depth = 8;
+         const isHorizontal = chart.options.indexAxis === 'y';
+         ctx.save();
+         ctx.fillStyle = 'rgba(0,0,0,0.3)';
+         if (isHorizontal) {
+           // Horizontal bar - shadow on top and right
+           ctx.beginPath();
+           ctx.moveTo(x, y);
+           ctx.lineTo(x + depth, y - depth);
+           ctx.lineTo(base + depth, y - depth);
+           ctx.lineTo(base, y);
+           ctx.closePath();
+           ctx.fill();
+           ctx.beginPath();
+           ctx.moveTo(x, y);
+           ctx.lineTo(x + depth, y - depth);
+           ctx.lineTo(x + depth, y + height - depth);
+           ctx.lineTo(x, y + height);
+           ctx.closePath();
+           ctx.fill();
+         } else {
+           // Vertical bar - shadow on top and right
+           ctx.beginPath();
+           ctx.moveTo(x - width/2, y);
+           ctx.lineTo(x - width/2 + depth, y - depth);
+           ctx.lineTo(x + width/2 + depth, y - depth);
+           ctx.lineTo(x + width/2, y);
+           ctx.closePath();
+           ctx.fill();
+           ctx.beginPath();
+           ctx.moveTo(x + width/2, y);
+           ctx.lineTo(x + width/2 + depth, y - depth);
+           ctx.lineTo(x + width/2 + depth, base - depth);
+           ctx.lineTo(x + width/2, base);
+           ctx.closePath();
+           ctx.fill();
+         }
+         ctx.restore();
+       });
+     });
+   }
+ };
+ Chart.register(bar3DPlugin);
+ 
  const chartOpts = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8' } } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } }, y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8' } } } };
  
  // Monthly trend - compute from properties if not in summary

@@ -24,7 +24,7 @@
       color: var(--text);
       line-height: 1.6;
       padding: 2rem;
-      max-width: 900px;
+      max-width: 1000px;
       margin: 0 auto;
     }
     h1 { font-size: 2rem; margin-bottom: 0.5rem; }
@@ -60,25 +60,36 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 1rem;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      overflow: hidden;
     }
     .patch-header {
+      padding: 1rem;
+      cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 1rem;
-      margin-bottom: 0.5rem;
     }
+    .patch-header:hover { background: rgba(99, 102, 241, 0.1); }
     .patch-title {
       font-weight: 600;
       font-size: 0.95rem;
+    }
+    .patch-id {
+      font-family: monospace;
+      font-size: 0.7rem;
+      color: var(--purple);
+      background: rgba(139, 92, 246, 0.2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
     }
     .patch-meta {
       display: flex;
       gap: 0.75rem;
       font-size: 0.75rem;
       color: var(--muted);
+      margin-top: 0.5rem;
     }
     .patch-file {
       background: rgba(99, 102, 241, 0.2);
@@ -87,33 +98,32 @@
       font-family: monospace;
       font-size: 0.7rem;
     }
-    .patch-reason {
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-top: 0.5rem;
-    }
     .risk-badge {
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
       font-size: 0.7rem;
       font-weight: 600;
+      white-space: nowrap;
     }
     .risk-low { background: rgba(16, 185, 129, 0.2); color: var(--green); }
     .risk-medium { background: rgba(245, 158, 11, 0.2); color: var(--amber); }
     .risk-high { background: rgba(239, 68, 68, 0.2); color: var(--red); }
-    .file-group { margin-bottom: 1.5rem; }
-    .file-header {
-      font-family: monospace;
-      font-size: 0.9rem;
-      color: var(--purple);
-      margin-bottom: 0.75rem;
-      padding: 0.5rem;
-      background: rgba(139, 92, 246, 0.1);
-      border-radius: 6px;
+    .patch-code {
+      display: none;
+      padding: 1rem;
+      background: #1e293b;
+      border-top: 1px solid var(--border);
+      overflow-x: auto;
     }
-    .pending-card {
-      border-color: var(--amber);
+    .patch-code.show { display: block; }
+    .patch-code pre {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
+    .pending-card { border-color: var(--amber); }
     .back-link {
       display: inline-block;
       color: var(--muted);
@@ -122,13 +132,14 @@
       font-size: 0.9rem;
     }
     .back-link:hover { color: var(--text); }
-    .timestamp { font-size: 0.7rem; color: var(--muted); }
+    .toggle-icon { transition: transform 0.2s; }
+    .toggle-icon.open { transform: rotate(90deg); }
   </style>
 </head>
 <body>
   <a href="/ouroboros/" class="back-link">← Back to Ouroboros</a>
   <h1>🐍 Evolution Log</h1>
-  <p class="subtitle">Self-modifications by the Ouroboros Colony — the snake eating its own tail</p>
+  <p class="subtitle">Self-modifications by the Ouroboros Colony — click any patch to see the code</p>
   
   <div class="stats-grid">
     <div class="stat-card">
@@ -145,269 +156,1763 @@
     </div>
     <div class="stat-card">
       <div class="stat-value red">15</div>
-      <div class="stat-label">Failed/No Match</div>
+      <div class="stat-label">Failed</div>
     </div>
   </div>
 <div class="section">
     <div class="section-title">⏳ Pending Approval</div>
     <div class="patch-card pending-card">
-      <div class="patch-header">
-        <div class="patch-title">🎛️ Auto-tune: Similarity threshold for connections</div>
+      <div class="patch-header" onclick="toggleCode('pending-0')">
+        <div>
+          <div class="patch-title"><span class="toggle-icon" id="icon-pending-0">▶</span> 🎛️ Auto-tune: Similarity threshold for connections</div>
+          <div class="patch-meta">
+            <span class="patch-id">patch_1771266903987_g5if</span>
+            <span class="patch-file">config.js</span>
+          </div>
+        </div>
         <span class="risk-badge risk-low">low</span>
       </div>
-      <div class="patch-meta">
-        <span class="patch-file">config.js</span>
+      <div class="patch-code" id="pending-0">
+        <pre>Similarity threshold for connections: 0.7</pre>
       </div>
-      <div class="patch-reason">Increasing the similarity threshold will make it harder for ideas to connect, requiring them to be more distinct. This should reduce the formation of overly similar clusters of ideas that lead to the ...</div>
     </div>
     <div class="patch-card pending-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Implement a GAN-based architecture to learn more robust feature representations </div>
+      <div class="patch-header" onclick="toggleCode('pending-1')">
+        <div>
+          <div class="patch-title"><span class="toggle-icon" id="icon-pending-1">▶</span> 💭 [Belief] Implement a GAN-based architecture to learn more robust feature representations </div>
+          <div class="patch-meta">
+            <span class="patch-id">patch_1770916425341_tgjb</span>
+            <span class="patch-file">src/core/embeddings.js</span>
+          </div>
+        </div>
         <span class="risk-badge risk-medium">medium</span>
       </div>
-      <div class="patch-meta">
-        <span class="patch-file">src/core/embeddings.js</span>
+      <div class="patch-code" id="pending-1">
+        <pre>// Import necessary dependencies
+const tf = require('@tensorflow/tfjs');
+const { Generator, Discriminator } = require('./gan');
+
+// Define the GAN architecture
+class EmbeddingGAN {
+  constructor(inputDim, embeddingDim) {
+    this.generator = new Generator(inputDim, embeddingDim);
+    this.discriminator = new Discriminator(embeddingDim);
+    this.optimizer = tf.train.adam(0.0002, 0.5);
+  }
+
+  trainStep(real, fake) {
+    const dloss = this.discriminator.train(real, fake, this.optimizer);
+    const gloss = this.generator.train(fake, this.optimizer);
+    return { dloss, gloss };
+  }
+
+  generateEmbeddings(inputData) {
+    return this.generator.generate(inputData);
+  }
+}
+
+// Replace the existing embedding generation logic with the GAN-based approach
+function generateEmbeddings(inputData) {
+  const embeddingGAN = new EmbeddingGAN(inputDim, embeddingDim);
+  for (let i = 0; i &lt; numIterations; i++) {
+    const real = getRandomRealData(batchSize);
+    const fake = embeddingGAN.generateEmbeddings(inputData.slice(i * batchSize, (i + 1) * batchSize));
+    const { dloss, gloss } = embeddingGAN.trainStep(real, fake);
+    // Log losses and monitor training progress
+  }
+  return embeddingGAN.generateEmbeddings(inputData);
+}</pre>
       </div>
-      <div class="patch-reason">strong_belief implementation (algorithm)...</div>
     </div>
     <div class="patch-card pending-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Add mechanisms to integrate global contextual information and maintain persisten</div>
+      <div class="patch-header" onclick="toggleCode('pending-2')">
+        <div>
+          <div class="patch-title"><span class="toggle-icon" id="icon-pending-2">▶</span> 💭 [Belief] Add mechanisms to integrate global contextual information and maintain persisten</div>
+          <div class="patch-meta">
+            <span class="patch-id">patch_1770927428435_8whh</span>
+            <span class="patch-file">src/ants/implementer-ant.js</span>
+          </div>
+        </div>
         <span class="risk-badge risk-high">high</span>
       </div>
-      <div class="patch-meta">
-        <span class="patch-file">src/ants/implementer-ant.js</span>
+      <div class="patch-code" id="pending-2">
+        <pre>// Add skip connections, topological priors, and high-dimensional latent spaces
+const { SkipConnectionLayer, TopologicalPriorLayer, HighDimensionalLatentLayer } = require('@anthropic-ai/sdk');
+
+function integrateContextualMemory(input) {
+  const skipConnections = SkipConnectionLayer(input);
+  const topologicalPriors = TopologicalPriorLayer(input);
+  const highDimensionalLatent = HighDimensionalLatentLayer(input);
+
+  // Combine the contextual information and persistent memory
+  const contextAwareRepresentation = tf.concat([skipConnections, topologicalPriors, highDimensionalLatent], axis=-1);
+
+  return contextAwareRepresentation;
+}
+
+// Use the integrateContextualMemory function in the main logic
+function implementPatch() {
+  const currentData = loadData();
+  const contextAwareData = integrateContextualMemory(currentData);
+  // Use the contextAwareData for precise, context-aware representation and retrieval
+  updateModel(contextAwareData);
+}</pre>
       </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
     </div></div><div class="section">
-  <div class="section-title">✅ Applied Patches (46)</div><div class="file-group">
-    <div class="file-header">📄 config.js <span style="opacity:0.6">(22 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity for connection</div>
-        <span class="risk-badge risk-low">low</span>
+  <div class="section-title">✅ Applied Patches (46)</div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-0')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-0">▶</span> 🧠 [DEEP] Implement selective decay of pheromones based on novelty, as</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1771167605126_fkr5</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Higher similarity threshold ensures stronger knowledge graph connections...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity threshold for connecti</div>
-        <span class="risk-badge risk-low">low</span>
-      </div>
-      <div class="patch-reason">Higher similarity threshold will create more meaningful connections in the knowledge graph...</div>
+    <div class="patch-code" id="applied-0">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  // Decay pheromone more quickly if it is less novel
+  const decay = novelty &lt; 0.5 ? 0.9 : 0.99;
+  return pheromone * decay;
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase decay rate for candidate findings</div>
-        <span class="risk-badge risk-low">low</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-1')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-1">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 2's Mixture of Exp</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1771124418125_melz</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Faster decay for candidate findings will keep the system focused on the most promising breakthroughs....</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase mission alignment threshold</div>
-        <span class="risk-badge risk-low">low</span>
-      </div>
-      <div class="patch-reason">Higher threshold helps ensure research aligns with colony's mission...</div>
+    <div class="patch-code" id="applied-1">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  // Compute gating score based on pheromone novelty
+  const gateScore = computeGateScore(novelty);
+
+  // Apply selective decay based on gating score
+  return pheromone * (1 - gateScore * decay_rate);
+}
+
+function computeGateScore(novelty) {
+  // Implement a gating network that dynamically selects which pheromones to decay based on novelty
+  // This could use a small neural network or other heuristic approach
+  return Math.min(1, novelty / novelty_threshold);
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
-        <span class="risk-badge risk-low">low</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-2')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-2">▶</span> 💭 [Belief] Integrate Knowledge Graphs into the existing Synthesis Ant co</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1771124414262_35wl</span>
+          <span class="patch-file">src/ants/synthesis-ant.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Higher decay rate ensures newer breakthroughs are prioritized...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase maximum findings per scout</div>
-        <span class="risk-badge risk-low">low</span>
-      </div>
-      <div class="patch-reason">Increasing the maximum findings will allow the colony to discover more high-value breakthroughs....</div>
+    <div class="patch-code" id="applied-2">
+      <pre>#!/usr/bin/env node
+/**
+ * Synthesis Ant 💡
+ * 
+ * Generates high-level insights from findings, with the help of Knowledge Graphs.
+ * Uses Retrieval-Augmented Generation (RAG) to improve domain-specific accuracy.
+ * 
+ * Schedule: Every 4 hours at :30
+ */
+
+const path = require('path');
+const { initDb } = require('../core/database');
+const { deposit, sense } = require('../core/pheromones-db');
+const { fetchFromKnowledgeGraph } = require('./knowledge-graph-client');
+
+// Insight templates
+const TEMPLATES = {
+  trend: (topic, count) =&gt; `Emerging trend: ${topic} with ${count} related findings in the last 24h`,
+  consensus: (topic, sources) =&gt; `Consensus forming around ${topic} from ${sources.length} independent sources`,
+  breakthrough: (title, why) =&gt; `Potential breakthrough: ${title} - ${why}`,
+  gap: (area) =&gt; `Research gap identified: ${area} has low coverage despite relevance`,
+  connection: (a, b) =&gt; `Unexpected connection between ${a} and ${b} research areas`
+};
+
+async function run() {
+  console.log('💡 Synthesis Ant starting...');
+  const db = initDb();
+  
+  // Sense hot topics
+  const hotTopics = sense(db, 'hot_topic', 0.3);
+  console.log(`Sensed ${hotTopics.length} hot topics`);
+  
+  // Get breakthrough candidates
+  const candidates = db.prepare(`
+    SELECT f.id, f.title, f.content, f.score, f.source,
+           p.strength as pheromone_strength
+    FROM findings f
+    JOIN pheromones p ON p.target_node = f.id
+    WHERE p.type = 'candidate'
+      AND p.strength &gt;= 0.6
+      AND f.created_at &gt; datetime('now', '-48 hours')
+    ORDER BY f.score DESC
+    LIMIT 20
+  `).all();
+  
+  console.log(`Found ${candidates.length} breakthrough candidates`);
+  
+  const insights = [];
+  
+  // Generate trend insights
+  for (const topic of hotTopics.slice(0, 5)) {
+    insights.push({
+      type: 'trend',
+      content: TEMPLATES.trend(topic.target_node, Math.round(topic.strength * 10)),
+      strength: topic.strength,
+      source: topic.target_node
+    });
+  }
+  
+  // Generate breakthrough insights
+  for (const candidate of candidates.slice(0, 5)) {
+    // Retrieve relevant knowledge from the Knowledge Graph
+    const knowledgeGraphData = await fetchFromKnowledgeGraph(candidate.title, candidate.content);
+    
+    if (candidate.score &gt;= 80) {
+      insights.push({
+        type: 'breakthrough',
+        content: TEMPLATES.breakthrough(candidate.title, `score ${candidate.score}, reasoning: ${knowledgeGraphData.reasoning}`),
+        strength: candidate.score / 100,
+        findingId: candidate.id
+      });
+      
+      // Deposit breakthrough pheromone
+      await deposit(db, {
+        type: 'breakthrough',
+        target_node: candidate.id,
+        strength: candidate.score / 100,
+        claim: `High-value finding: ${candidate.title}`,
+        deposited_by: 'synthesis-ant'
+      });
+    }
+  }
+  
+  // Look for cross-topic connections
+  const edges = db.prepare(`
+    SELECT source_id, target_id, weight
+    FROM edges
+    WHERE edge_type = 'cross_cluster'
+      AND created_at &gt; datetime('now', '-24 hours')
+    ORDER BY weight DESC
+    LIMIT 10
+  `).all();
+  
+  for (const edge of edges) {
+    const sourceTitle = db.prepare('SELECT title FROM findings WHERE id = ?').get(edge.source_id);
+    const targetTitle = db.prepare('SELECT title FROM findings WHERE id = ?').get(edge.target_id);
+    
+    // Retrieve relevant knowledge from the Knowledge Graph
+    const knowledgeGraphData = await fetchFromKnowledgeGraph(sourceTitle, targetTitle);
+    
+    insights.push({
+      type: 'connection',
+      content: TEMPLATES.connection(sourceTitle, targetTitle),
+      strength: edge.weight,
+      reasoning: knowledgeGraphData.reasoning
+    });
+  }
+  
+  // ...
+}
+
+/**
+ * Fetches relevant information from the Knowledge Graph for a given topic.
+ * @param {string} topic - The topic to search for.
+ * @param {string} [context] - Additional context to improve the search.
+ * @returns {Promise&lt;{ reasoning: string }&gt;} - An object containing the reasoning for the given topic.
+ */
+async function fetchFromKnowledgeGraph(topic, context = '') {
+  const knowledgeGraphClient = new KnowledgeGraphClient();
+  const response = await knowledgeGraphClient.searchAndRetrieve(topic, context);
+  return { reasoning: response.reasoning };
+}
+
+class KnowledgeGraphClient {
+  constructor() {
+    // Initialize the Knowledge Graph client
+  }
+
+  async searchAndRetrieve(topic, context) {
+    // Implement the logic to search the Knowledge Graph and retrieve relevant information
+    // Return an object with the reasoning
+    return {
+      reasoning: `The Knowledge Graph indicates that ${topic} is related to ${context} due to the following factors: ...`
+    };
+  }
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum similarity for connection</div>
-        <span class="risk-badge risk-low">low</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-3')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-3">▶</span> 🧠 [DEEP] Implement selective pheromone decay based on Paper 2's Mixtu</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1771081212250_elok</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Higher similarity threshold will create stronger connections in the knowledge graph...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
-        <span class="risk-badge risk-low">low</span>
-      </div>
-      <div class="patch-reason">Higher relevance threshold ensures only high-quality breakthroughs are recognized...</div>
+    <div class="patch-code" id="applied-3">
+      <pre>function selectiveDecay(pheromone, token) {
+  // Use the gating network from the MoE model to determine which experts (pheromone types) are most relevant for the current token
+  const expertWeights = computeGatingWeights(token);
+
+  // Decay each pheromone type proportionally to its relevance, instead of uniform decay
+  return pheromone.map((p, i) =&gt; p * expertWeights[i]);
+}
+
+function computeGatingWeights(token) {
+  // Implement the gating network logic to compute relevance weights for each pheromone type
+  const expertWeights = new Array(NUM_PHEROMONE_TYPES).fill(0);
+  
+  // Example implementation using simple dot product with token embedding
+  const tokenEmbed = embed(token);
+  for (let i = 0; i &lt; NUM_PHEROMONE_TYPES; i++) {
+    expertWeights[i] = dot(tokenEmbed, expertEmbeddings[i]);
+  }
+
+  // Normalize the weights to sum to 1
+  const sum = expertWeights.reduce((a, b) =&gt; a + b, 0);
+  return expertWeights.map(w =&gt; w / sum);
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
-        <span class="risk-badge risk-low">low</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-4')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-4">▶</span> 💭 [Belief] Implement the missing part of the `recursiveAnalyze` function</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1771038006204_rzb6</span>
+          <span class="patch-file">src/ants/deep-reader-ant.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Higher relevance threshold ensures only high-quality breakthroughs are considered...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
-        <span class="risk-badge risk-low">low</span>
-      </div>
-      <div class="patch-reason">Raising the relevance threshold ensures only the most impactful breakthroughs are considered...</div>
-    </div><div style="color: var(--muted); font-size: 0.85rem; padding: 0.5rem;">+ 12 more patches...</div></div><div class="file-group">
-    <div class="file-header">📄 core/pheromones-db.js <span style="opacity:0.6">(13 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement selective decay of pheromones based on novelty, as</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">The paper discusses how equivariance properties can lead to improved sample efficiency and generalization for interatomic potential models. By impleme...</div>
+    <div class="patch-code" id="applied-4">
+      <pre>/**
+ * Recursively analyze a large document
+ */
+async function recursiveAnalyze(db, finding, depth = 0) {
+  const content = finding.content || '';
+
+  // Base case: content fits in one chunk
+  if (content.length &lt;= MAX_CONTENT_CHUNK || depth &gt;= MAX_RECURSION_DEPTH) {
+    return await analyzeChunk(db, finding, content, depth);
+  }
+
+  console.log(`    📚 Content too large (${content.length} chars), recursing...`);
+
+  // 1. Grep for key patterns to find important sections
+  const keyPatterns = [
+    'abstract', 'conclusion', 'results', 'method',
+    'architecture', 'attention', 'memory', 'context',
+    'performance', 'benchmark', 'state-of-the-art'
+  ];
+  const grepHits = grepContent(content, keyPatterns);
+
+  // 2. Slice into chunks
+  const chunks = sliceContent(content);
+  console.log(`    📄 Split into ${chunks.length} chunks, ${grepHits.length} pattern hits`);
+
+  // 3. Analyze each chunk recursively
+  const subFindings = await Promise.all(chunks.map(async (chunk, idx) =&gt; {
+    const subFinding = {
+      ...finding,
+      content: chunk,
+      lineNum: idx,
+      pattern: grepHits.find(hit =&gt; hit.lineNum === idx)?.pattern
+    };
+    return await recursiveAnalyze(db, subFinding, depth + 1);
+  }));
+
+  // 4. Summarize the recursive findings
+  const summary = summarizeTree(subFindings);
+  return { ...finding, summary };
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement selective gating based on Paper 2's Mixture of Exp</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-5')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-5">▶</span> 🧠 [DEEP] Implement the adaptive eviction policy proposed in Paper 4 (</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770994850638_1tdf</span>
+          <span class="patch-file">core/recursive-pheromones.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Paper 2 describes the Mixture of Experts (MoE) architecture, which uses a gating network to dynamically select a small subset of "expert" models to pr...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement selective pheromone decay based on Paper 2's Mixtu</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">Implementing the selective pheromone decay based on the MoE concept from Paper 2 can improve the efficiency and effectiveness of the pheromone-based m...</div>
+    <div class="patch-code" id="applied-5">
+      <pre>function learnedEvictionPolicy(keyValuePairs, budget) {
+  // Use KV Policy (KVP) framework to train RL agents on pre-computed generation traces
+  // Agents learn specialized eviction policies guided by future utility
+  // Evaluate quality of ranking across all cache budgets
+  const evictionRankings = trainKVPAgents(keyValuePairs);
+
+  // Evict key-value pairs based on the learned eviction policy
+  return evictionRankings.slice(0, budget);
+}
+
+function trainKVPAgents(keyValuePairs) {
+  // Implement KVP framework to train RL agents on key-value pairs
+  // Agents learn to predict future utility of each key-value pair
+  const agents = keyValuePairs.map(createKVPAgent);
+  const evictionRankings = agents.map(agent =&gt; agent.predictUtility(keyValuePairs));
+  return evictionRankings;
+}
+
+function createKVPAgent(keyValuePair) {
+  // Implement RL agent with specialized eviction policy
+  // Agent is trained on pre-computed generation traces using only key and value vectors
+  const agent = new KVPAgent(keyValuePair.key, keyValuePair.value);
+  agent.train(precomputedTraces);
+  return agent;
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Paper 5's "Salience Network" - add selective pheromone decay</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-6')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-6">▶</span> ⚡ Breakthrough: Increase minimum similarity for connection</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770951608925_rh5b</span>
+          <span class="patch-file">config.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Paper 5 shows the brain has a distinct "Salience Network" that filters relevant stimuli before passing it to the "Executive Control Network" for deepe...</div>
+      <span class="risk-badge risk-low">low</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Add selective decay based on Paper 5's insights on salience </div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">Paper 5 shows that the brain has distinct salience detection and executive control networks. Applying selective decay based on this insight can help t...</div>
+    <div class="patch-code" id="applied-6">
+      <pre>min_similarity_for_connection: 0.8
+RISK: low
+REASON: Higher similarity threshold ensures stronger knowledge graph connections</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Paper 5's insight on dissociable salience and control networ</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-7')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-7">▶</span> 💭 [Belief] Modify the `routeTask` function to implement sparse Mixture o</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770951608065_11cm</span>
+          <span class="patch-file">src/core/model-router.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Paper 5 shows that the brain separates salience detection from high-level control, suggesting our pheromone system could benefit from selectively deca...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Paper 5 shows that salience detection and executive control </div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">Paper 5 shows that separating salience detection and executive control into distinct functional networks is an important architectural consideration f...</div>
+    <div class="patch-code" id="applied-7">
+      <pre>/**
+ * Get the best model for a task
+ */
+function routeTask(taskType, opts = {}) {
+  const { forceModel = null, maxCost = null, antName = 'default' } = opts;
+
+  // Check if current ant should use Anthropic
+  const useAnthropic = shouldUseAnthropic(antName);
+
+  // Check if current ant should use Gemini 3 Flash Preview
+  const useGemini3 = shouldUseGemini3(antName);
+
+  // Implement sparse MoE scaling
+  let selectedModel = null;
+  let activeTokens = 0;
+  let totalTokens = 0;
+
+  // Iterate through models and select the most cost-effective one
+  for (const [modelName, model] of Object.entries(MODELS)) {
+    // Skip models that don't match the task type or exceed the cost limit
+    if (
+      !model.capabilities.includes(taskType) ||
+      (maxCost !== null &amp;&amp; model.costPer1kTokens &gt; maxCost)
+    ) {
+      continue;
+    }
+
+    // Update active and total token counts
+    activeTokens += model.maxTokens;
+    totalTokens += model.maxTokens;
+
+    // If this is the first match, or the current model is more cost-effective, select it
+    if (
+      selectedModel === null ||
+      model.costPer1kTokens &lt; MODELS[selectedModel].costPer1kTokens
+    ) {
+      selectedModel = modelName;
+    }
+  }
+
+  // If the total token capacity exceeds 1B, scale down active tokens to maintain 1B limit
+  if (totalTokens &gt; 1e9) {
+    const scaleFactor = 1e9 / totalTokens;
+    activeTokens = Math.floor(activeTokens * scaleFactor);
+  }
+
+  // Use the selected model or the forced model if provided
+  const usedModel = forceModel || selectedModel;
+
+  // Apply Anthropic or Gemini 3 overrides if needed
+  if (useAnthropic) {
+    usedModel = 'claude-haiku';
+  } else if (useGemini3) {
+    usedModel = 'gemini-3-flash';
+  }
+
+  return MODELS[usedModel];
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Paper 5's insights on salience detection and executive contr</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-8')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-8">▶</span> 🧠 [DEEP] Paper 5's "Salience Network" - add selective pheromone decay</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770927376164_yexq</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Paper 5 shows that the brain has distinct networks for detecting salient stimuli and processing that information. Applying a similar selective decay m...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement selective gating based on Paper 5's insights on Sa</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">Paper 5 shows that the brain has distinct networks for detecting salient stimuli (salience network) and processing high-level information (executive c...</div>
+    <div class="patch-code" id="applied-8">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  const baseDecayRate = config.decay_rates.default;
+  const boostFactor = config.decay_rates.saliency_boost;
+  const decayRate = baseDecayRate / (1 + boostFactor * novelty);
+  return pheromone * Math.exp(-decayRate);
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement selective decay based on Paper 5's insights on Sal</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-9')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-9">▶</span> 💭 [Belief] Modify the `recursiveAnalyze` function to incorporate a new a</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770927373056_at3u</span>
+          <span class="patch-file">src/ants/deep-reader-ant.js</span>
+        </div>
       </div>
-      <div class="patch-reason">Paper 5 suggests that selectively gating pheromone signals based on salience and executive control can improve the colony's ability to focus on high-p...</div>
-    </div><div style="color: var(--muted); font-size: 0.85rem; padding: 0.5rem;">+ 3 more patches...</div></div><div class="file-group">
-    <div class="file-header">📄 core/recursive-pheromones.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">🧠 [DEEP] Implement the adaptive eviction policy proposed in Paper 4 (</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">Implementing the KVP framework to learn specialized eviction policies can significantly improve the performance of the colony's key-value cache, as sh...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/ants/deep-reader-ant.js <span style="opacity:0.6">(2 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Implement the missing part of the `recursiveAnalyze` function to analyz</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `recursiveAnalyze` function to incorporate a new approach fo</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/ants/filter-ant.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `scoreText` function to prioritize the preservation of funda</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/ants/synthesis-ant.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Integrate Knowledge Graphs into the existing Synthesis Ant code to impr</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/core/embeddings.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the existing `embed` function to implement the specified belief,</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/core/hierarchical-pheromones.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `depositHierarchical` function to include mechanisms for mai</div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/core/model-router.js <span style="opacity:0.6">(3 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `routeTask` function to implement sparse Mixture of Experts </div>
-        <span class="risk-badge risk-medium">medium</span>
-      </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
+    <div class="patch-code" id="applied-9">
+      <pre>/**
+ * Recursively analyze a large document
+ */
+async function recursiveAnalyze(db, finding, depth = 0) {
+  const content = finding.content || '';
+
+  // Base case: content fits in one chunk
+  if (content.length &lt;= MAX_CONTENT_CHUNK || depth &gt;= MAX_RECURSION_DEPTH) {
+    return await analyzeChunk(db, finding, content, depth);
+  }
+
+  console.log(`    📚 Content too large (${content.length} chars), recursing...`);
+
+  // 1. Grep for key patterns to find important sections
+  const keyPatterns = [
+    'abstract', 'conclusion', 'results', 'method',
+    'architecture', 'attention', 'memory', 'context',
+    'performance', 'benchmark', 'state-of-the-art'
+  ];
+  const grepHits = grepContent(content, keyPatterns);
+
+  // 2. Slice into chunks, but maintain representational integrity
+  const chunks = sliceContent(content, MAX_CONTENT_CHUNK, true); // Pass true to maintain integrity
+  console.log(`    📄 Split into ${chunks.length} chunks, ${grepHits.length} pattern hits`);
+
+  // 3. Analyze each chunk recursively, passing the original context
+  const results = [];
+  for (const chunk of chunks) {
+    const chunkResult = await recursiveAnalyze(db, { content: chunk, context: finding.context }, depth + 1);
+    results.push(chunkResult);
+  }
+
+  // 4. Aggregate the results and maintain the original context
+  const aggregatedResult = {
+    ...finding,
+    results: results.flat()
+  };
+
+  return aggregatedResult;
+}
+
+/**
+ * Slice content into processable chunks, maintaining representational integrity
+ */
+function sliceContent(content, chunkSize = MAX_CONTENT_CHUNK, maintainIntegrity = false) {
+  const chunks = [];
+
+  if (maintainIntegrity) {
+    // Split on sentence boundaries to preserve semantic meaning
+    const sentences = content.split(/[.!?]+ /);
+    let currentChunk = '';
+
+    for (const sentence of sentences) {
+      if (currentChunk.length + sentence.length &gt; chunkSize) {
+        if (currentChunk) chunks.push(currentChunk.trim());
+        currentChunk = sentence;
+      } else {
+        currentChunk += ' ' + sentence;
+      }
+    }
+    if (currentChunk.trim()) chunks.push(currentChunk.trim());
+  } else {
+    // Fall back to the original paragraph-based splitting
+    const paragraphs = content.split(/\n\n+/);
+    let currentChunk = '';
+
+    for (const para of paragraphs) {
+      if (currentChunk.length + para.length &gt; chunkSize) {
+        if (currentChunk) chunks.push(currentChunk.trim());
+        currentChunk = para;
+      } else {
+        currentChunk += '\n\n' + para;
+      }
+    }
+    if (currentChunk.trim()) chunks.push(currentChunk.trim());
+  }
+
+  return chunks;
+}</pre>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `routeTask` function to integrate global contextual informat</div>
-        <span class="risk-badge risk-medium">medium</span>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-10')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-10">▶</span> 💭 [Belief] Modify the `routeTask` function to integrate global contextua</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770927303019_0e65</span>
+          <span class="patch-file">src/core/model-router.js</span>
+        </div>
       </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
+      <span class="risk-badge risk-medium">medium</span>
     </div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the existing `routeTask` function to incorporate the belief abou</div>
-        <span class="risk-badge risk-medium">medium</span>
+    <div class="patch-code" id="applied-10">
+      <pre>/**
+ * Get the best model for a task
+ */
+function routeTask(taskType, opts = {}) {
+  const { forceModel = null, maxCost = null, antName = '' } = opts;
+
+  // Check if current ant should use Anthropic
+  const useAnthropic = shouldUseAnthropic(antName);
+
+  // Check if current ant should use Gemini 3 Flash Preview
+  const useGemini3 = shouldUseGemini3(antName);
+
+  // Maintain persistent memory for context-aware representation
+  let contextMemory = {};
+
+  // Integrate global contextual information
+  function getContextualModel(taskType) {
+    // Analyze task type and global context to determine best model
+    if (taskType === 'code-generation' &amp;&amp; contextMemory.codeComplexity &gt; 0.8) {
+      return 'claude-sonnet';
+    } else if (taskType === 'summarization' &amp;&amp; contextMemory.documentLength &gt; 10000) {
+      return 'gemini-3-flash';
+    } else {
+      return TASK_ROUTES[taskType];
+    }
+  }
+
+  // Update context memory based on task type and results
+  function updateContextMemory(taskType, result) {
+    if (taskType === 'code-generation') {
+      contextMemory.codeComplexity = result.codeComplexity;
+    } else if (taskType === 'summarization') {
+      contextMemory.documentLength = result.documentLength;
+    }
+  }
+
+  // Use contextual model selection and update memory
+  const modelName = getContextualModel(taskType);
+  const model = MODELS[modelName];
+  const result = useModel(model, taskType, opts);
+  updateContextMemory(taskType, result);
+
+  return result;
+}
+
+function useModel(model, taskType, opts) {
+  // Use the selected model to execute the task
+  // ...
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-11')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-11">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights on salience </div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770927285733_4289</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
       </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div><div class="file-group">
-    <div class="file-header">📄 src/core/pheromones-db.js <span style="opacity:0.6">(1 patches)</span></div>
-    <div class="patch-card">
-      <div class="patch-header">
-        <div class="patch-title">💭 [Belief] Modify the `deposit` function to implement the belief by adding support</div>
-        <span class="risk-badge risk-medium">medium</span>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-11">
+      <pre>function selectiveDecay(pheromoneId, currentValue) {
+  // Check if pheromoneId corresponds to a "salience" signal vs "executive control"
+  const isSalienceSignal = isSalienceNetwork(pheromoneId);
+  
+  // Apply slower decay rate for salience signals, faster decay for executive control signals
+  const decayRate = isSalienceSignal ? config.salience_decay_rate : config.control_decay_rate;
+  return currentValue * Math.exp(-decayRate);
+}
+
+function isSalienceNetwork(pheromoneId) {
+  // Heuristic to determine if pheromoneId belongs to salience network or executive control network
+  // e.g., check prefix, lookup in a network mapping, etc.
+  return pheromoneId.startsWith('SN_');
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-12')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-12">▶</span> 💭 [Belief] Modify the `scoreText` function to prioritize the preservatio</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770927281934_wi3m</span>
+          <span class="patch-file">src/ants/filter-ant.js</span>
+        </div>
       </div>
-      <div class="patch-reason">strong_belief implementation (modify)...</div>
-    </div></div></div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-12">
+      <pre>function scoreText(text) {
+  if (!text) return 0;
+  const lower = text.toLowerCase();
+
+  let score = 50; // Base score
+
+  // Core keyword matches (+5 each, max +30)
+  let coreMatches = 0;
+  for (const kw of CORE_KEYWORDS) {
+    if (lower.includes(kw)) {
+      coreMatches++;
+      if (coreMatches &lt;= 6) score += 5;
+    }
+  }
+
+  // Boost keywords (+10 each, no cap)
+  for (const kw of BOOST_KEYWORDS) {
+    if (lower.includes(kw)) {
+      score += 10;
+    }
+  }
+
+  // Noise keywords (-5 each)
+  for (const kw of NOISE_KEYWORDS) {
+    if (lower.includes(kw)) {
+      score -= 5;
+    }
+  }
+
+  // Noise domain auto-reject (-100)
+  if (isNoiseDomain(text)) {
+    score -= 100;
+  }
+
+  // Preserve semantic integrity and expressiveness
+  if (containsDigitFlips(text) || isOvercompressed(text)) {
+    score -= 20; // Penalize transformations that alter fundamental meaning or limit expressiveness
+  }
+
+  return Math.max(0, score);
+}
+
+function containsDigitFlips(text) {
+  // Implement logic to detect digit flips or other semantic-altering transformations
+  // This could involve techniques like character-level analysis, n-gram matching, etc.
+  // Return true if the text appears to have undergone such transformations
+  return false; // Placeholder, implement actual logic
+}
+
+function isOvercompressed(text) {
+  // Implement logic to detect if the text has been overly compressed into a fixed-length vector
+  // This could involve techniques like analyzing the information density, entropy, or other statistical properties of the text
+  // Return true if the text appears to be an overly compressed, fixed-length representation
+  return false; // Placeholder, implement actual logic
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-13')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-13">▶</span> 💭 [Belief] Modify the `depositHierarchical` function to include mechanis</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770917153466_vjq1</span>
+          <span class="patch-file">src/core/hierarchical-pheromones.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-13">
+      <pre>/**
+ * Deposit a hierarchical pheromone with multi-scale context
+ */
+function depositHierarchical(opts) {
+  const db = initHierarchy();
+  const now = Date.now();
+  const id = opts.id || `hp_${now}_${Math.random().toString(36).slice(2, 8)}`;
+
+  // Encode multi-scale context using skip connections and structured latent space
+  const contextEmbedding = encodeMultiScaleContext(opts);
+
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO hierarchical_pheromones 
+    (id, level, type, embedding, context_embedding, strength, metadata, parent_id, child_count, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  stmt.run(
+    id,
+    opts.level || HIERARCHY.FINDING,
+    opts.type || 'signal',
+    opts.embedding || null,
+    contextEmbedding,
+    opts.strength || 1.0,
+    JSON.stringify(opts.metadata || {}),
+    opts.parentId || null,
+    opts.childCount || 0,
+    opts.createdAt || now,
+    now
+  );
+
+  // Update parent's child count if exists
+  if (opts.parentId) {
+    db.prepare(`
+      UPDATE hierarchical_pheromones 
+      SET child_count = child_count + 1, updated_at = ?
+      WHERE id = ?
+    `).run(now, opts.parentId);
+  }
+
+  // Persist memory of multi-scale context
+  persistContextMemory(id, contextEmbedding);
+
+  return id;
+}
+
+/**
+ * Encode multi-scale context using skip connections and structured latent space
+ */
+function encodeMultiScaleContext(opts) {
+  const { embedding, parentId, metadata } = opts;
+  const parentContext = getParentContextEmbedding(parentId);
+  const structuredContext = structureContextLatentSpace(embedding, metadata);
+  return JSON.stringify([parentContext, structuredContext]);
+}
+
+/**
+ * Retrieve parent's context embedding from persistent memory
+ */
+function getParentContextEmbedding(parentId) {
+  if (!parentId) return null;
+  const db = initHierarchy();
+  const row = db.prepare('SELECT context_embedding FROM hierarchical_pheromones WHERE id = ?').get(parentId);
+  return row ? JSON.parse(row.context_embedding)[0] : null;
+}
+
+/**
+ * Structure the context latent space based on metadata
+ */
+function structureContextLatentSpace(embedding, metadata) {
+  // Leverage techniques like VAE or other structured latent space models
+  // to encode the context based on the metadata
+  return encodeStructuredLatentSpace(embedding, metadata);
+}
+
+/**
+ * Persist the multi-scale context memory
+ */
+function persistContextMemory(id, contextEmbedding) {
+  // Store the context embedding in a persistent store (e.g., DynamoDB, S3)
+  // to enable efficient retrieval and integration across processing stages
+  persistToStore(id, contextEmbedding);
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-14')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-14">▶</span> 🧠 [DEEP] Paper 5's insight on dissociable salience and control networ</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770917099312_rbec</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-14">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  const decayRate = config.decay_rates.default;
+  const highNoveltyDecay = config.decay_rates.highNovelty;
+  const lowNoveltyDecay = config.decay_rates.lowNovelty;
+
+  if (novelty &gt; config.noveltyThreshold.high) {
+    return pheromone * Math.exp(-highNoveltyDecay);
+  } else if (novelty &lt; config.noveltyThreshold.low) {
+    return pheromone * Math.exp(-lowNoveltyDecay);
+  } else {
+    return pheromone * Math.exp(-decayRate);
+  }
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-15')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-15">▶</span> 💭 [Belief] Modify the existing `routeTask` function to incorporate the b</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770917095935_a2bi</span>
+          <span class="patch-file">src/core/model-router.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-15">
+      <pre>/**
+ * Get the best model for a task
+ */
+function routeTask(taskType, opts = {}) {
+  const { forceModel = null, maxCost = null, antName = 'default' } = opts;
+
+  // Check if the current ant should use Anthropic
+  const useAnthropicModels = shouldUseAnthropic(antName);
+
+  // Check if the current ant should use Gemini 3 Flash Preview
+  const useGemini3Models = shouldUseGemini3(antName);
+
+  // Define a function to select the most appropriate model based on the task and other factors
+  function selectModel() {
+    // First, check if a specific model has been forced
+    if (forceModel &amp;&amp; MODELS[forceModel]) {
+      return MODELS[forceModel];
+    }
+
+    // Define a function to score models based on the belief about effective AI architectures
+    function modelScore(model) {
+      let score = 0;
+
+      // Award points for mechanisms that maintain and integrate multi-scale contextual information
+      if (model.capabilities.includes('skip-connections')) {
+        score += 2;
+      }
+      if (model.capabilities.includes('persistent-memory')) {
+        score += 2;
+      }
+      if (model.capabilities.includes('structured-latent-space')) {
+        score += 2;
+      }
+
+      // Award points for the ability to bridge global semantics and fine-grained details
+      if (model.capabilities.includes('precise-retrieval')) {
+        score += 2;
+      }
+
+      // Adjust score based on cost and other factors
+      score -= model.costPer1kTokens * 10;
+      if (model.maxTokens &lt; opts.maxTokens) {
+        score -= 1;
+      }
+
+      return score;
+    }
+
+    // Evaluate all available models and select the one with the highest score
+    let bestModel = null;
+    let bestScore = -Infinity;
+    for (const modelName in MODELS) {
+      const model = MODELS[modelName];
+      const score = modelScore(model);
+      if (score &gt; bestScore) {
+        bestModel = model;
+        bestScore = score;
+      }
+    }
+
+    return bestModel;
+  }
+
+  // Select the best model and return it
+  const selectedModel = selectModel();
+  if (selectedModel) {
+    return selectedModel;
+  } else {
+    throw new Error(`No suitable model found for task type: ${taskType}`);
+  }
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-16')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-16">▶</span> ⚡ Breakthrough: Increase minimum similarity threshold for connecti</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770916971702_sj45</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-16">
+      <pre>min_similarity_for_connection: 0.8
+RISK: low
+REASON: Higher similarity threshold will create more meaningful connections in the knowledge graph</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-17')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-17">▶</span> 💭 [Belief] Modify the `deposit` function to implement the belief by addi</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770916970607_ahtk</span>
+          <span class="patch-file">src/core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-17">
+      <pre>/**
+ * Deposit a pheromone signal
+ * @param {Database} db - SQLite database instance
+ * @param {Object} opts - Pheromone options
+ * @param {string} opts.type - Pheromone type (breakthrough, candidate, etc.)
+ * @param {string} opts.target_node - What this pheromone refers to
+ * @param {number} [opts.strength=1.0] - Signal strength (0-1)
+ * @param {string} [opts.claim] - Human-readable reason/claim
+ * @param {string} [opts.deposited_by] - Which ant deposited this
+ * @param {Object} [opts.payload] - Additional data
+ * @param {string} [opts.lineage] - Parent pheromone ID
+ */
+async function deposit(db, opts) {
+  const {
+    type,
+    target_node,
+    strength = 1.0,
+    claim = '',
+    deposited_by = 'unknown',
+    payload = null,
+    lineage = null
+  } = opts;
+
+  if (!type || !target_node) {
+    throw new Error('deposit requires type and target_node');
+  }
+
+  const now = new Date().toISOString();
+  const id = generateId();
+
+  // Generate embedding as BLOB (50% smaller than hex string)
+  // embedToBlob is async, so we need to await it
+  const embedding = await embedToBlob(target_node);
+
+  // Apply label-dependent transformations
+  let transformedEmbedding = embedding;
+  if (type === 'candidate') {
+    transformedEmbedding = await applyTransformation(embedding, 'candidate');
+  } else if (type === 'breakthrough') {
+    transformedEmbedding = await applyTransformation(embedding, 'breakthrough');
+  }
+
+  // Control overfitting
+  if (type === 'validated' || type === 'validated_breakthrough') {
+    transformedEmbedding = await controlOverfitting(transformedEmbedding);
+  }
+
+  // Mirror domain-specific dataset characteristics
+  transformedEmbedding = await mirrorDatasetCharacteristics(transformedEmbedding, type);
+
+  await db.run(`
+    INSERT INTO pheromones (
+      id, type, target_node, strength, claim, deposited_by, payload, lineage, created_at, embedding
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `, [
+    id, type, target_node, strength, claim, deposited_by, payload, lineage, now, transformedEmbedding
+  ]);
+
+  return id;
+}
+
+async function applyTransformation(embedding, label) {
+  // Implement label-dependent transformations here
+  // This could involve techniques like data augmentation, style transfer, etc.
+  // Return the transformed embedding
+  return transformedEmbedding;
+}
+
+async function controlOverfitting(embedding) {
+  // Implement techniques to control overfitting, such as regularization, dropout, etc.
+  // Return the modified embedding
+  return controlledEmbedding;
+}
+
+async function mirrorDatasetCharacteristics(embedding, type) {
+  // Implement logic to mirror the characteristics of the domain-specific dataset
+  // This could involve techniques like style transfer, domain adaptation, etc.
+  // Return the modified embedding
+  return mirroredEmbedding;
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-18')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-18">▶</span> 💭 [Belief] Modify the existing `embed` function to implement the specifi</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770916789525_orok</span>
+          <span class="patch-file">src/core/embeddings.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-18">
+      <pre>/**
+ * Embed text using BGE-small via HTTP service with multi-scale contextual integration
+ * @returns {string} 96-char hex string (48 bytes = 384 bits)
+ */
+async function embed(text) {
+  if (!text || typeof text !== 'string') {
+    return '0'.repeat(96);
+  }
+
+  // Truncate very long texts
+  const truncated = text.slice(0, 8000);
+
+  // Check cache
+  const cacheKey = crypto.createHash('md5').update(truncated).digest('hex');
+  if (cache.has(cacheKey)) {
+    return cache.get(cacheKey);
+  }
+
+  try {
+    // Obtain the base embedding from the BGE service
+    const floatEmbedding = await callBGE(truncated);
+
+    // Apply skip connections to integrate multi-scale contextual information
+    const skipEmbedding = await getSkipEmbedding(truncated, floatEmbedding);
+
+    // Utilize persistent memory modeled through topological priors
+    const persistentEmbedding = await getPersistentEmbedding(truncated, skipEmbedding);
+
+    // Construct a structured latent space representation
+    const structuredEmbedding = await getStructuredEmbedding(truncated, persistentEmbedding);
+
+    // Convert the final embedding to binary
+    const hex = floatToBinary(structuredEmbedding);
+
+    // Cache result
+    if (cache.size &gt;= MAX_CACHE) {
+      const firstKey = cache.keys().next().value;
+      cache.delete(firstKey);
+    }
+    cache.set(cacheKey, hex);
+
+    return hex;
+  } catch (e) {
+    console.error('BGE embed error:', e.message);
+    return '0'.repeat(96);
+  }
+}
+
+/**
+ * Obtain a skip-connected embedding by integrating multi-scale contextual information
+ * @param {string} text - The input text
+ * @param {number[]} baseEmbedding - The base float embedding from the BGE service
+ * @returns {number[]} The skip-connected embedding
+ */
+async function getSkipEmbedding(text, baseEmbedding) {
+  // Implement skip connection logic here, e.g., using transformer layers
+  // to capture global semantics and fine-grained details
+  // ...
+  return baseEmbedding;
+}
+
+/**
+ * Obtain a persistent embedding by modeling topological priors
+ * @param {string} text - The input text
+ * @param {number[]} skipEmbedding - The skip-connected embedding
+ * @returns {number[]} The persistent embedding
+ */
+async function getPersistentEmbedding(text, skipEmbedding) {
+  // Implement persistent memory logic here, e.g., using a memory module
+  // to maintain and integrate contextual information over time
+  // ...
+  return skipEmbedding;
+}
+
+/**
+ * Construct a structured latent space representation
+ * @param {string} text - The input text
+ * @param {number[]} persistentEmbedding - The persistent embedding
+ * @returns {number[]} The structured embedding
+ */
+async function getStructuredEmbedding(text, persistentEmbedding) {
+  // Implement structured latent space logic here, e.g., using a generative model
+  // to decompose the embedding into interpretable factors
+  // ...
+  return persistentEmbedding;
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-19')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-19">▶</span> 🧠 [DEEP] Paper 5 shows that salience detection and executive control </div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770916431542_etj1</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-19">
+      <pre>// Modify deposit() to handle salience and executive control pheromones separately
+function deposit(type, position, value) {
+  if (type === 'salience') {
+    depositSaliencePheromone(position, value);
+  } else if (type === 'executive') {
+    depositExecutivePheromone(position, value);
+  }
+}
+
+function depositSaliencePheromone(position, value) {
+  // Deposit salience pheromone, with faster decay rate
+  pheromoneDB.salience[position] = value;
+  pheromoneDB.salienceDecay[position] = config.salienceDecayRate;
+}
+
+function depositExecutivePheromone(position, value) {
+  // Deposit executive pheromone, with slower decay rate  
+  pheromoneDB.executive[position] = value;
+  pheromoneDB.executiveDecay[position] = config.executiveDecayRate;
+}
+
+// Modify sense() to check both salience and executive pheromones
+function sense(position) {
+  const salience = getSaliencePheromone(position);
+  const executive = getExecutivePheromone(position);
+  return { salience, executive };
+}
+
+function getSaliencePheromone(position) {
+  return pheromoneDB.salience[position] || 0;
+}
+
+function getExecutivePheromone(position) {
+  return pheromoneDB.executive[position] || 0;
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-20')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-20">▶</span> ⚡ Breakthrough: Increase decay rate for candidate findings</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770908404411_nj8d</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-20">
+      <pre>decay_rates.candidate: 0.15
+RISK: low
+REASON: Faster decay for candidate findings will keep the system focused on the most promising breakthroughs.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-21')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-21">▶</span> 🧠 [DEEP] Paper 5's insights on salience detection and executive contr</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901357852_u6rh</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-21">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  // Decay pheromone more quickly if it is less novel/salient
+  const decayRate = config.decay_rates.base * (1 - novelty);
+  return pheromone * Math.exp(-decayRate);
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-22')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-22">▶</span> ⚡ Breakthrough: Increase mission alignment threshold</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901355740_5sl0</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-22">
+      <pre>mission_alignment_threshold: 0.8
+RISK: low
+REASON: Higher threshold helps ensure research aligns with colony's mission</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-23')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-23">▶</span> 🧠 [DEEP] Implement selective gating based on Paper 5's insights on Sa</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901152542_dvu0</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-23">
+      <pre>function selectiveDecay(pheromoneValue, novelty) {
+  // Decay pheromones more rapidly for low-novelty signals (salience network)
+  // Maintain pheromones longer for high-novelty signals (executive control network)
+  const decayRate = novelty &gt; 0.5 ? config.decay_rates.executive : config.decay_rates.salience;
+  return pheromoneValue * decayRate;
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-24')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-24">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901144582_l7w3</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-24">
+      <pre>decay_rates.validated_breakthrough: 0.98
+RISK: low
+REASON: Higher decay rate ensures newer breakthroughs are prioritized</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-25')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-25">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights on Sal</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901132767_hl27</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-25">
+      <pre>function selectiveDecay(x, y, timestamp) {
+  const salience = computeSalience(x, y);
+  const executiveControl = computeExecutiveControl(x, y);
+
+  // Decay more rapidly for non-salient, non-executive-relevant signals
+  const decayRate = 0.9 * (1 - salience) + 0.1 * (1 - executiveControl);
+  return Math.exp(-decayRate * (Date.now() - timestamp));
+}
+
+function computeSalience(x, y) {
+  // Implement salience detection logic based on paper's insights
+  // E.g., check if (x, y) is in anterior insula or anterior cingulate cortex
+  return 0.8; // Example salience score
+}
+
+function computeExecutiveControl(x, y) {
+  // Implement executive control logic based on paper
+  // E.g., check if (x, y) is in dorsolateral prefrontal or parietal cortex 
+  return 0.6; // Example executive control score
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-26')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-26">▶</span> ⚡ Breakthrough: Increase maximum findings per scout</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901129150_owjo</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-26">
+      <pre>max_findings_per_scout: 10
+RISK: low
+REASON: Increasing the maximum findings will allow the colony to discover more high-value breakthroughs.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-27')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-27">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights about </div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770901000102_qla5</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-27">
+      <pre>function selectiveDecay(pheromone, salience) {
+  // Decay pheromones faster if they are low-salience
+  // Preserve high-salience pheromones for longer
+  const decayRate = salience &gt; 0.5 ? config.decay_rates.highSalience : config.decay_rates.lowSalience;
+  return pheromone * Math.exp(-decayRate);
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-28')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-28">▶</span> ⚡ Breakthrough: Increase minimum similarity for connection</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900997622_y9h9</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-28">
+      <pre>min_similarity_for_connection: 0.8
+RISK: low
+REASON: Higher similarity threshold will create stronger connections in the knowledge graph</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-29')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-29">▶</span> 🧠 [DEEP] Add selective decay based on Paper 5's insights into salienc</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900849775_rmai</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-29">
+      <pre>function selectiveDecay(key, value) {
+  // Retrieve the salience and executive control scores for this pheromone key
+  const { salienceScore, executiveScore } = getSalienceAndExecutiveScores(key);
+
+  // Apply differential decay rates based on the scores
+  const decayRate = config.decay_rates.base * (1 - salienceScore * config.decay_rates.salience_multiplier) * (1 - executiveScore * config.decay_rates.executive_multiplier);
+  return value * Math.exp(-decayRate);
+}
+
+function getSalienceAndExecutiveScores(key) {
+  // Lookup the salience and executive control scores for this pheromone key
+  // This could involve querying a pre-computed database or applying a machine learning model
+  return {
+    salienceScore: 0.7,
+    executiveScore: 0.3
+  };
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-30')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-30">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900843912_xggt</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-30">
+      <pre>thresholds.min_relevance_for_breakthrough: 85
+RISK: low
+REASON: Higher relevance threshold ensures only high-quality breakthroughs are recognized</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-31')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-31">▶</span> 🧠 [DEEP] Implement selective decay based on Paper 5's insights on sal</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900620744_8b9g</span>
+          <span class="patch-file">core/pheromones-db.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-medium">medium</span>
+    </div>
+    <div class="patch-code" id="applied-31">
+      <pre>function selectiveDecay(pheromone, novelty) {
+  const salienceDecay = 0.9; // Higher decay for less salient pheromones
+  const executiveDecay = 0.99; // Lower decay for more salient pheromones
+  
+  if (novelty &gt; 0.5) { // Salient pheromone
+    return pheromone * executiveDecay;
+  } else { // Less salient pheromone
+    return pheromone * salienceDecay;
+  }
+}</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-32')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-32">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900618333_v06e</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-32">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.85
+RISK: low
+REASON: Higher relevance threshold ensures only high-quality breakthroughs are considered</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-33')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-33">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900246302_pbtf</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-33">
+      <pre>thresholds.min_relevance_for_breakthrough: 85
+RISK: low
+REASON: Raising the relevance threshold ensures only the most impactful breakthroughs are considered</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-34')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-34">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900209859_4x8z</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-34">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.85
+RISK: low
+REASON: Raising the relevance threshold ensures only high-impact breakthroughs are identified</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-35')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-35">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770900013720_79zm</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-35">
+      <pre>decay_rates.validated_breakthrough: 0.1
+RISK: low
+REASON: Faster decay of validated breakthroughs will encourage the system to explore new ideas more frequently.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-36')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-36">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770865202470_lwyl</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-36">
+      <pre>thresholds.min_relevance_for_breakthrough: 85
+RISK: low
+REASON: Higher relevance threshold ensures only the most impactful breakthroughs are identified</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-37')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-37">▶</span> ⚡ Breakthrough: Increase minimum relevance for breakthrough</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770851116440_0w3m</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-37">
+      <pre>min_relevance_for_breakthrough: 0.85
+RISK: low
+REASON: Higher relevance threshold ensures only the most promising findings are considered breakthroughs</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-38')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-38">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for breakthro</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770851110953_np1b</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-38">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.8
+RISK: low
+REASON: This will ensure only the most relevant and impactful breakthroughs are considered, reducing noise and improving the colony's focus.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-39')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-39">▶</span> ⚡ Breakthrough: Increase threshold for minimum relevance for break</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770850291325_nfp7</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-39">
+      <pre>thresholds.min_relevance_for_breakthrough: 80
+RISK: low
+REASON: Higher relevance threshold ensures only the most impactful breakthroughs are identified.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-40')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-40">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for break</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770849048418_ugr6</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-40">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.8
+RISK: low
+REASON: This will ensure that only the most relevant and high-quality breakthroughs are considered, reducing the risk of incorporating lower-quality findings.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-41')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-41">▶</span> ⚡ Breakthrough: Increase decay rate for validated breakthroughs</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770848990026_2lau</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-41">
+      <pre>decay_rates.validated_breakthrough: 0.2
+RISK: low
+REASON: Faster decay of validated breakthroughs encourages the system to continually seek new discoveries</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-42')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-42">▶</span> ⚡ Breakthrough: Increase maximum findings per scout</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770848970633_62t9</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-42">
+      <pre>limits.max_findings_per_scout: 20
+RISK: low
+REASON: Reduces processing load by limiting the number of findings per scout</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-43')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-43">▶</span> ⚡ Breakthrough: Increase minimum relevance threshold for breakthro</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770848943951_biye</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-43">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.85
+RISK: low
+REASON: Raising the bar for what constitutes a breakthrough ensures higher quality findings</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-44')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-44">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for break</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770848524246_rfu0</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-44">
+      <pre>thresholds.min_relevance_for_breakthrough: 0.9
+RISK: low
+REASON: This will help ensure that only the most relevant and impactful breakthroughs are promoted, reducing the chances of false positives or less valuable findings.</pre>
+    </div>
+  </div>
+  <div class="patch-card">
+    <div class="patch-header" onclick="toggleCode('applied-45')">
+      <div>
+        <div class="patch-title"><span class="toggle-icon" id="icon-applied-45">▶</span> ⚡ Breakthrough: Increase the minimum relevance threshold for a bre</div>
+        <div class="patch-meta">
+          <span class="patch-id">patch_1770848209138_2dn7</span>
+          <span class="patch-file">config.js</span>
+        </div>
+      </div>
+      <span class="risk-badge risk-low">low</span>
+    </div>
+    <div class="patch-code" id="applied-45">
+      <pre>thresholds.min_relevance_for_breakthrough: 90
+RISK: low
+REASON: This will ensure that only the most relevant and high-impact findings are considered as breakthroughs, reducing the risk of false positives or low-value discoveries.</pre>
+    </div>
+  </div></div>
+
+  <script>
+    function toggleCode(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById('icon-' + id);
+      el.classList.toggle('show');
+      icon.classList.toggle('open');
+    }
+  </script>
 
   <div style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.8rem;">
     <p>Last updated: 2026-02-16</p>

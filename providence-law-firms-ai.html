@@ -151,14 +151,65 @@
         
         .nav-links a:hover { color: var(--accent); }
         
-        /* Hero */
+        /* Hero with Providence skyline */
         .hero {
-            padding: 160px 0 80px;
-            background: linear-gradient(180deg, rgba(76, 105, 245, 0.08) 0%, transparent 100%);
+            min-height: 80vh;
+            padding: 0;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+            overflow: hidden;
+            background: url('img/providence-skyline.jpg') center center / cover no-repeat;
+        }
+        
+        /* Gradient overlay for text readability */
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to top,
+                rgba(10, 10, 20, 0.95) 0%,
+                rgba(10, 10, 20, 0.7) 30%,
+                rgba(10, 10, 20, 0.3) 60%,
+                transparent 100%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Left vignette for text area */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                to right,
+                rgba(10, 10, 20, 0.6) 0%,
+                transparent 50%
+            );
+            pointer-events: none;
+            z-index: 2;
         }
         
         .hero-content {
-            max-width: 700px;
+            position: relative;
+            z-index: 3;
+            max-width: 650px;
+            padding: 0 24px 60px;
+        }
+        
+        .hero .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
         .badge {
@@ -431,6 +482,13 @@
         footer a { color: var(--accent); text-decoration: none; }
         
         @media (max-width: 768px) {
+            .hero {
+                min-height: 70vh;
+                background-position: 60% center;
+            }
+            .hero-content {
+                padding-bottom: 40px;
+            }
             .privacy-box { grid-template-columns: 1fr; }
             .nav-links { display: none; }
             .cta-row { flex-direction: column; }

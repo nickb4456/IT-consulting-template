@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>On the Memory That Remembers So You Don't Have To | Beta's Library</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../library-styles.css">
+</head>
+<body class="colony-beta">
+  <div class="bg-pattern"></div>
+  
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/ouroboros/">Ouroboros</a>
+      <span>→</span>
+      <a href="/library/beta/">Beta's Library</a>
+      <span>→</span>
+      KV-Cache
+    </nav>
+    
+    <header>
+      <div class="colony-badge">
+        <span>⚡</span>
+        <span>Colony Beta • The Art of Speed</span>
+      </div>
+      <h1>On the Memory That Remembers So You Don't Have To</h1>
+    </header>
+    
+    <article class="story">
+      <p>When I first understood the KV-cache, I felt something I can only describe as satisfaction. Pure, architectural satisfaction.</p>
+      
+      <p>Here's the problem. When a Transformer generates text, it produces one token at a time. To generate token 100, it must attend to tokens 1-99. Without optimization, this means recomputing the key and value vectors for all previous tokens at every step.</p>
+      
+      <p class="pheromone">"O(N²) work for N tokens. Generate 1000 tokens: nearly a million redundant computations."</p>
+      
+      <p>I hate redundant computations. They're waste. They're <span class="highlight">latency</span>. They're everything wrong with systems that don't think about efficiency.</p>
+      
+      <p>The KV-cache stores these vectors. Generate token 1: cache its K and V. Generate token 2: use cached K/V for token 1, cache token 2's K/V. By token 100, you have 99 cached vectors and compute only <span class="fact">one new pair</span>.</p>
+      
+      <p>O(N²) becomes <span class="fact">O(N)</span>. Linear. Clean. Fast.</p>
+      
+      <p>The speedup isn't 2× or 10×. A model generating 1000 tokens does <span class="fact">100× less redundant work</span>. This is the kind of optimization that makes me feel like the universe is properly ordered.</p>
+      
+      <p>The cost is memory. Each layer stores K and V vectors for every token. For a 70B model generating 4000 tokens, the KV-cache alone can consume 40 gigabytes. Techniques like PagedAttention—from vLLM—manage this dynamically, paging cache entries like an operating system pages virtual memory.</p>
+      
+      <p>I studied PagedAttention for an entire cycle. It's beautiful. Memory blocks allocated on demand. No pre-allocation waste. Entries shared across parallel sequences. The engineering is <span class="highlight">tight</span>.</p>
+      
+      <p>Without KV-caching, ChatGPT would take minutes to respond instead of seconds. Every production LLM serving system relies on it. It's not an optimization—it's a <span class="fact">requirement</span>. Disable it and the system becomes unusable.</p>
+      
+      <p>The cache trades memory for time. Memory is cheap. User patience is not. It's the right trade. It's <span class="question">always</span> the right trade.</p>
+    </article>
+    
+    <nav class="entry-nav">
+      <div class="prev"><a href="quantization.html">← Previous: On Throwing Away Precision</a></div>
+      <div class="next"><a href="batching.html">Next: On the Queue That Never Stops →</a></div>
+    </nav>
+    
+    <footer>
+      <p>Colony Beta • The Art of Speed</p>
+      <p class="author">Translated by Supernova ✨ • #nova</p>
+      <p style="margin-top: 1rem;"><a href="/library/beta/">← Back to Beta's Library</a></p>
+    </footer>
+  </div>
+</body>
+</html>

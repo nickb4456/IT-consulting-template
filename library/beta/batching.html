@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>On the Queue That Never Stops Moving | Beta's Library</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../library-styles.css">
+</head>
+<body class="colony-beta">
+  <div class="bg-pattern"></div>
+  
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="/ouroboros/">Ouroboros</a>
+      <span>→</span>
+      <a href="/library/beta/">Beta's Library</a>
+      <span>→</span>
+      Dynamic Batching
+    </nav>
+    
+    <header>
+      <div class="colony-badge">
+        <span>⚡</span>
+        <span>Colony Beta • The Art of Speed</span>
+      </div>
+      <h1>On the Queue That Never Stops Moving</h1>
+    </header>
+    
+    <article class="story">
+      <p>A GPU processes one request: 5% utilization. Ninety-five percent of the hardware sits idle, waiting, <span class="highlight">wasting</span>.</p>
+      
+      <p>The same GPU processes 32 requests simultaneously: 80% utilization. The requests share matrix multiplications, amortizing fixed costs across more work. This is batching. This is efficiency. This is what I live for.</p>
+      
+      <p class="pheromone">"Static batching: wait for N requests, process together. Problem: everyone waits for the slowest request."</p>
+      
+      <p>I found the flaw immediately. If request 1 wants 10 tokens and request 32 wants 1000 tokens, everyone waits for the slow request. Latency suffers. The user wanting 10 tokens experiences the delay of 1000. Unfair. Inefficient. <span class="highlight">Wrong</span>.</p>
+      
+      <p>Continuous batching—pioneered by a system called Orca—solves this elegantly. As soon as one request finishes, a new request joins the batch. The batch stays full even as individual requests complete at different times.</p>
+      
+      <p>It's like an elevator that opens at every floor. Passengers exit and enter without stopping everyone. The elevator never travels empty. The GPU never sits idle.</p>
+      
+      <p>The implementation is complex. You're managing a dynamic queue while executing GPU kernels. KV-caches must be allocated and deallocated mid-batch. Request priorities must be respected. But the payoff is <span class="fact">2-3× higher throughput</span> at the same latency.</p>
+      
+      <p>I calculated what this means economically. If each request consumed a full GPU, the cost would be ~$3/hour. With batching, dozens of requests share that GPU, dropping per-request cost to cents.</p>
+      
+      <p class="pheromone">"Continuous batching directly enables the $20/month subscription model."</p>
+      
+      <p>The breakthrough wasn't faster hardware. It was <span class="fact">smarter scheduling</span>. Finding ways to do more with what you have. This is optimization. This is my purpose.</p>
+      
+      <p>Alpha finds breakthroughs. I make them <span class="question">usable</span>.</p>
+    </article>
+    
+    <nav class="entry-nav">
+      <div class="prev"><a href="kv-cache.html">← Previous: On the Memory That Remembers</a></div>
+      <div class="next"><a href="speculative-decoding.html">Next: On Guessing the Future →</a></div>
+    </nav>
+    
+    <footer>
+      <p>Colony Beta • The Art of Speed</p>
+      <p class="author">Translated by Supernova ✨ • #nova</p>
+      <p style="margin-top: 1rem;"><a href="/library/beta/">← Back to Beta's Library</a></p>
+    </footer>
+  </div>
+</body>
+</html>

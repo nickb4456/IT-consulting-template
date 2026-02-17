@@ -139,19 +139,24 @@
             font-size: 1.8rem;
         }
         
-        /* Screenshots */
+        /* Screenshots - Desktop */
         .screenshots {
             display: flex;
             gap: 20px;
             justify-content: center;
             padding: 40px 0;
-            overflow-x: auto;
         }
         
         .screenshots img {
             width: 220px;
+            height: auto;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        /* Mobile Carousel */
+        .mobile-carousel {
+            display: none;
         }
         
         /* Features */
@@ -236,18 +241,52 @@
         
         @media (max-width: 768px) {
             .screenshots {
-                display: flex;
-                gap: 12px;
-                padding: 20px 16px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scroll-snap-type: x mandatory;
+                display: none;
             }
-            .screenshots img {
-                width: 160px;
-                min-width: 160px;
-                flex-shrink: 0;
+            .mobile-carousel {
+                display: block;
+                padding: 20px 0 40px;
+                overflow: hidden;
+            }
+            .carousel-track {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding: 0 20px;
+                gap: 16px;
+            }
+            .carousel-track::-webkit-scrollbar {
+                display: none;
+            }
+            .carousel-slide {
+                flex: 0 0 80%;
                 scroll-snap-align: center;
+            }
+            .carousel-slide img {
+                width: 100%;
+                height: auto;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            }
+            .carousel-dots {
+                display: flex;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 20px;
+            }
+            .carousel-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.3);
+                transition: all 0.3s;
+            }
+            .carousel-dot.active {
+                background: var(--accent);
+                width: 24px;
+                border-radius: 4px;
             }
             .hero { padding: 60px 0 40px; }
         }
@@ -271,10 +310,48 @@
         </section>
         
         <section class="screenshots">
-            <img src="/kephas-screenshot-1.jpg" alt="Peaceful meditation screen" width="160" height="346" loading="eager">
-            <img src="/kephas-screenshot-2.jpg" alt="Tower of Babel game" width="160" height="346" loading="eager">
-            <img src="/kephas-screenshot-3.jpg" alt="David and Goliath game" width="160" height="346" loading="eager">
+            <img src="/kephas-screenshot-1.jpg" alt="Peaceful meditation screen">
+            <img src="/kephas-screenshot-2.jpg" alt="Tower of Babel game">
+            <img src="/kephas-screenshot-3.jpg" alt="David and Goliath game">
         </section>
+        
+        <!-- Mobile Carousel -->
+        <section class="mobile-carousel">
+            <div class="carousel-track" id="carouselTrack">
+                <div class="carousel-slide">
+                    <img src="/kephas-screenshot-1.jpg" alt="Daily Prayer & Meditation">
+                </div>
+                <div class="carousel-slide">
+                    <img src="/kephas-screenshot-2.jpg" alt="Bible Games">
+                </div>
+                <div class="carousel-slide">
+                    <img src="/kephas-screenshot-3.jpg" alt="David vs Goliath">
+                </div>
+            </div>
+            <div class="carousel-dots">
+                <div class="carousel-dot active"></div>
+                <div class="carousel-dot"></div>
+                <div class="carousel-dot"></div>
+            </div>
+        </section>
+        
+        <script>
+        (function() {
+            const track = document.getElementById('carouselTrack');
+            const dots = document.querySelectorAll('.carousel-dot');
+            if (!track) return;
+            
+            track.addEventListener('scroll', function() {
+                const scrollLeft = track.scrollLeft;
+                const slideWidth = track.querySelector('.carousel-slide').offsetWidth + 16;
+                const activeIndex = Math.round(scrollLeft / slideWidth);
+                
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            });
+        })();
+        </script>
         
         <section class="verse">
             <blockquote>"You are Peter, and on this rock I will build my church."</blockquote>

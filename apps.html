@@ -2,125 +2,367 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Apps | AIBridges — iOS Apps from Rhode Island</title>
+    <meta name="description" content="Mobile apps built by AIBridges. Kephas - Catholic app for kids with prayer, Bible games, and saints. Quality iOS apps from Rhode Island.">
+    <link rel="canonical" href="https://aibridges.org/apps">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apps We Made | AIBridges - Mobile & Web Applications</title>
-    <meta name="description" content="Apps built by AIBridges: Petros Catholic kids app, SwiftShot screenshot tool, and more. Quality software from Rhode Island.">
-    <link rel="canonical" href="https://aibridges.org/apps">
-    <link rel="stylesheet" href="css/style.css">
+    
+    <meta property="og:title" content="Mobile Apps | AIBridges">
+    <meta property="og:description" content="iOS apps built in Rhode Island. Kephas - Catholic learning for kids.">
+    <meta property="og:url" content="https://aibridges.org/apps">
+    <meta property="og:image" content="https://aibridges.org/kephas-og.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        .apps-hero {
-            padding: 140px 20px 60px;
-            text-align: center;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #4C69F5;
+            --accent: #00E1E6;
+            --bg-dark: #0a0a0f;
+            --bg-card: rgba(20, 20, 35, 0.9);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
         }
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2rem;
-            padding: 40px 0 80px;
-        }
-        .app-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-        .app-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-        }
-        .app-header {
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .app-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, #1a237e, #0d1442);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-        }
-        .app-info h3 {
-            font-size: 1.5rem;
-            color: #fff;
-            margin: 0 0 0.25rem;
-        }
-        .app-info p {
-            color: #888;
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        .app-body {
-            padding: 0 2rem 2rem;
-        }
-        .app-body p {
-            color: #aaa;
+        
+        html { scroll-behavior: smooth; }
+        
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
             line-height: 1.7;
-            margin-bottom: 1.5rem;
+            min-height: 100vh;
         }
-        .app-badges {
+        
+        /* Nav */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
             gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text);
         }
-        .app-badge {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            color: #888;
-        }
-        .app-badge.featured {
-            background: rgba(0, 212, 255, 0.1);
+        
+        .logo-icon {
             color: var(--accent);
         }
-        .app-links {
+        
+        .nav-links {
             display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
+            gap: 2rem;
+            align-items: center;
         }
-        .app-links a {
+        
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--text);
+        }
+        
+        .nav-cta {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.6rem 1.25rem;
+            border-radius: 8px;
+        }
+        
+        .nav-cta:hover {
+            background: #5a75f7;
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 160px 2rem 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(76, 105, 245, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        
+        .hero-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 10px 20px;
-            border-radius: 8px;
+            background: rgba(76, 105, 245, 0.1);
+            border: 1px solid rgba(76, 105, 245, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Apps Grid */
+        .apps-section {
+            padding: 40px 0 100px;
+        }
+        
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.3s;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        
+        .app-card:hover {
+            border-color: rgba(76, 105, 245, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(76, 105, 245, 0.1);
+        }
+        
+        .app-visual {
+            background: linear-gradient(135deg, #0f1729, #1a1a2e);
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+        
+        .app-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .app-store-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
             text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.2s;
         }
-        .btn-primary-app {
-            background: var(--accent);
-            color: #000;
+        
+        .app-store-btn:hover {
+            background: #1a1a1a;
+            transform: scale(1.02);
         }
-        .btn-primary-app:hover {
-            background: #fff;
+        
+        .app-store-btn svg {
+            width: 24px;
+            height: 24px;
         }
-        .btn-secondary-app {
+        
+        .app-content {
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .app-badge {
+            display: inline-block;
+            background: rgba(76, 105, 245, 0.1);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            width: fit-content;
+        }
+        
+        .app-content h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .app-tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .app-description {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+        
+        .app-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .feature-tag {
             background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
-        .btn-secondary-app:hover {
-            border-color: var(--accent);
+        
+        .app-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .app-link:hover {
+            color: var(--accent);
+        }
+        
+        /* Coming Soon */
+        .coming-soon {
+            text-align: center;
+            padding: 60px 2rem;
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+        }
+        
+        .coming-soon h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .coming-soon p {
+            color: #64748b;
+        }
+        
+        /* Footer */
+        .footer {
+            padding: 2rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .footer a {
+            color: var(--text-muted);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: var(--text);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .app-visual {
+                padding: 2rem;
+            }
+            
+            .app-content {
+                padding: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <nav class="nav" id="nav">
+    <nav class="nav">
         <div class="nav-container">
-            <a href="/" class="logo"><span class="logo-icon">△</span><span class="logo-text">AIBridges</span></a>
+            <a href="/" class="logo">
+                <span class="logo-icon">△</span>
+                <span>AIBridges</span>
+            </a>
             <div class="nav-links">
                 <a href="/#services">Services</a>
                 <a href="/#products">Products</a>
@@ -129,127 +371,54 @@
         </div>
     </nav>
 
-    <main id="main">
-        <section class="hero apps-hero">
-            <div class="hero-bg"><div class="gradient-orb orb-1"></div><div class="gradient-orb orb-2"></div></div>
-            <div class="hero-content">
-                <div class="hero-badge"><span class="pulse"></span><span>Our Portfolio</span></div>
-                <h1 class="hero-title">Apps We <span class="gradient-text">Made</span></h1>
-                <p class="hero-subtitle">Quality software built in Rhode Island. From mobile apps to browser extensions.</p>
-            </div>
+    <main>
+        <section class="hero">
+            <div class="hero-badge">📱 Our Apps</div>
+            <h1>Mobile <span class="gradient-text">Apps</span></h1>
+            <p class="hero-subtitle">Quality iOS apps built in Rhode Island</p>
         </section>
 
-        <section class="container">
-            <div class="apps-grid">
-                <!-- Petros -->
-                <article class="app-card">
-                    <div class="app-header">
-                        <div class="app-icon">✝️</div>
-                        <div class="app-info">
-                            <h3>Petros</h3>
-                            <p>Catholic Apps for Kids</p>
-                        </div>
-                    </div>
-                    <div class="app-body">
-                        <p>Daily prayer and meditation app designed for Catholic kids. Features Bible stories, saints, faith games, and bedtime prayers — all in a safe, ad-free environment.</p>
-                        <div class="app-badges">
-                            <span class="app-badge featured">iOS</span>
-                            <span class="app-badge">Kids</span>
-                            <span class="app-badge">Catholic</span>
-                            <span class="app-badge">Ad-Free</span>
-                        </div>
-                        <div class="app-links">
-                            <a href="/petros" class="btn-primary-app">Learn More</a>
-                            <a href="https://apps.apple.com/app/petros" class="btn-secondary-app">App Store →</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- SwiftShot -->
-                <article class="app-card">
-                    <div class="app-header">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #4C69F5, #654CF4);">⚡</div>
-                        <div class="app-info">
-                            <h3>SwiftShot</h3>
-                            <p>Screenshot & Annotate Tool</p>
-                        </div>
-                    </div>
-                    <div class="app-body">
-                        <p>Capture, annotate, and share screenshots instantly. Perfect for bug reports, documentation, and quick visual communication. Available as a browser extension.</p>
-                        <div class="app-badges">
-                            <span class="app-badge featured">Chrome</span>
-                            <span class="app-badge featured">Firefox</span>
-                            <span class="app-badge">Productivity</span>
-                            <span class="app-badge">Free</span>
-                        </div>
-                        <div class="app-links">
-                            <a href="/swiftshot" class="btn-primary-app">Learn More</a>
-                            <a href="#" class="btn-secondary-app">Chrome Store →</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- CaseVault -->
-                <article class="app-card">
-                    <div class="app-header">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a);">⚖️</div>
-                        <div class="app-info">
-                            <h3>CaseVault</h3>
-                            <p>Legal Settlement Calculator</p>
-                        </div>
-                    </div>
-                    <div class="app-body">
-                        <p>Data-driven settlement valuations for personal injury attorneys. Analyze case factors, compare to similar verdicts, and generate professional reports.</p>
-                        <div class="app-badges">
-                            <span class="app-badge featured">Web App</span>
-                            <span class="app-badge">Legal Tech</span>
-                            <span class="app-badge">B2B</span>
-                        </div>
-                        <div class="app-links">
-                            <a href="/casevault" class="btn-primary-app">Learn More</a>
-                            <a href="/casevault-calculator" class="btn-secondary-app">Try Calculator →</a>
-                        </div>
-                    </div>
-                </article>
-
-                <!-- RI Real Estate -->
-                <article class="app-card">
-                    <div class="app-header">
-                        <div class="app-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">🏠</div>
-                        <div class="app-info">
-                            <h3>RI Real Estate Report</h3>
-                            <p>Rhode Island Property Analysis</p>
-                        </div>
-                    </div>
-                    <div class="app-body">
-                        <p>Interactive dashboard for Rhode Island real estate data. 36,000+ properties with AI-powered analysis, comps finder, and market insights.</p>
-                        <div class="app-badges">
-                            <span class="app-badge featured">Web App</span>
-                            <span class="app-badge">Real Estate</span>
-                            <span class="app-badge">Rhode Island</span>
-                            <span class="app-badge">Free</span>
-                        </div>
-                        <div class="app-links">
-                            <a href="/ri-report" class="btn-primary-app">Open Dashboard</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <section style="padding: 60px 0 80px; text-align: center;">
+        <section class="apps-section">
             <div class="container">
-                <h2 class="section-title">Have an App Idea?</h2>
-                <p style="color: #888; max-width: 500px; margin: 1rem auto 2rem;">We build custom mobile apps, web applications, and browser extensions. Let's talk about your project.</p>
-                <a href="/#contact" class="btn btn-primary">Get in Touch</a>
+                <!-- Kephas -->
+                <article class="app-card">
+                    <div class="app-visual">
+                        <div class="app-icon">
+                            <img src="/kephas-logo.png" alt="Kephas app icon">
+                        </div>
+                        <a href="https://apps.apple.com/app/kephas" class="app-store-btn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                            <span>App Store</span>
+                        </a>
+                    </div>
+                    <div class="app-content">
+                        <span class="app-badge">iOS • Free</span>
+                        <h2>Kephas</h2>
+                        <p class="app-tagline">Catholic faith for kids — built on the Rock</p>
+                        <p class="app-description">
+                            Daily prayers, interactive Bible games, saint stories, and guided meditations designed for children. 
+                            Safe, ad-free, and perfect for Catholic families.
+                        </p>
+                        <div class="app-features">
+                            <span class="feature-tag">🙏 Daily Prayer</span>
+                            <span class="feature-tag">🎮 Bible Games</span>
+                            <span class="feature-tag">😇 Saints</span>
+                            <span class="feature-tag">🌙 Meditations</span>
+                        </div>
+                        <a href="/kephas" class="app-link">Learn more →</a>
+                    </div>
+                </article>
+
+                <div class="coming-soon">
+                    <h3>More apps coming soon</h3>
+                    <p>We're working on new mobile experiences. Stay tuned!</p>
+                </div>
             </div>
         </section>
     </main>
 
     <footer class="footer">
-        <div class="container">
-            <div class="footer-bottom"><p>&copy; 2026 AIBridges. Building great software in Rhode Island.</p></div>
-        </div>
+        <p>© 2026 <a href="/">AIBridges</a> · Built in Rhode Island</p>
     </footer>
 </body>
 </html>

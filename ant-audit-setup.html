@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ant Audit S3 Setup Guide</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: rgba(30, 41, 59, 0.9);
+      --border: rgba(99, 102, 241, 0.3);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --green: #10b981;
+      --cyan: #00E1E6;
+      --purple: #8b5cf6;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 { 
+      font-size: 2rem; 
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle { color: var(--muted); margin-bottom: 2rem; }
+    h2 { 
+      font-size: 1.3rem; 
+      margin: 2rem 0 1rem; 
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .step-num {
+      background: var(--purple);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin: 1rem 0;
+    }
+    pre {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.85rem;
+      margin: 1rem 0;
+    }
+    code {
+      color: var(--cyan);
+      font-family: 'Fira Code', 'Consolas', monospace;
+    }
+    .warning {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .warning::before { content: "⚠️ "; }
+    .success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+    .success::before { content: "✅ "; }
+    ol, ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin: 0.5rem 0; }
+    a { color: var(--cyan); }
+    .time { color: var(--green); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Ant Audit S3 Setup</h1>
+  <p class="subtitle">Cryptographically verifiable proof that Nova can't fake autonomous ant runs</p>
+
+  <div class="card">
+    <strong>Goal:</strong> Create an S3 bucket + IAM user that only the <code>antrunner</code> system user can write to. 
+    Nova doesn't have these credentials, so any logs in S3 are provably from autonomous cron runs.
+    <br><br>
+    <strong>Cost:</strong> ~$0.01/month
+    <br>
+    <strong>Time:</strong> <span class="time">~10 minutes</span>
+  </div>
+
+  <h2><span class="step-num">1</span> Create S3 Bucket</h2>
+  
+  <ol>
+    <li>Go to <a href="https://s3.console.aws.amazon.com/s3/buckets" target="_blank">S3 Console</a></li>
+    <li>Click <strong>Create bucket</strong></li>
+    <li>Name: <code>ouroboros-audit-log</code> (or any unique name)</li>
+    <li>Region: <code>us-east-1</code> (or your preferred)</li>
+    <li>Enable <strong>Bucket Versioning</strong> (prevents deletion/overwrite)</li>
+    <li>Click <strong>Create bucket</strong></li>
+  </ol>
+
+  <h2><span class="step-num">2</span> Create IAM Policy</h2>
+  
+  <ol>
+    <li>Go to <a href="https://console.aws.amazon.com/iam/home#/policies" target="_blank">IAM Policies</a></li>
+    <li>Click <strong>Create policy</strong></li>
+    <li>Switch to <strong>JSON</strong> tab and paste:</li>
+  </ol>
+
+  <pre>{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "arn:aws:s3:::ouroboros-audit-log/*"
+        }
+    ]
+}</pre>
+
+  <div class="warning">
+    Replace <code>ouroboros-audit-log</code> with your actual bucket name if different.
+  </div>
+
+  <ol start="4">
+    <li>Click <strong>Next</strong></li>
+    <li>Name: <code>AntrunnerAuditWriteOnly</code></li>
+    <li>Click <strong>Create policy</strong></li>
+  </ol>
+
+  <h2><span class="step-num">3</span> Create IAM User</h2>
+  
+  <ol>
+    <li>Go to <a href="https://console.aws.amazon.com/iam/home#/users" target="_blank">IAM Users</a></li>
+    <li>Click <strong>Create user</strong></li>
+    <li>Name: <code>antrunner-audit</code></li>
+    <li>Click <strong>Next</strong></li>
+    <li>Select <strong>Attach policies directly</strong></li>
+    <li>Search for and check <code>AntrunnerAuditWriteOnly</code></li>
+    <li>Click <strong>Next</strong> → <strong>Create user</strong></li>
+  </ol>
+
+  <h2><span class="step-num">4</span> Create Access Key</h2>
+  
+  <ol>
+    <li>Click on the new <code>antrunner-audit</code> user</li>
+    <li>Go to <strong>Security credentials</strong> tab</li>
+    <li>Click <strong>Create access key</strong></li>
+    <li>Select <strong>Application running outside AWS</strong></li>
+    <li>Click <strong>Create access key</strong></li>
+    <li><strong>COPY BOTH VALUES</strong> (you won't see the secret again)</li>
+  </ol>
+
+  <div class="warning">
+    Do NOT share these credentials with Nova. Enter them directly on the server yourself.
+  </div>
+
+  <h2><span class="step-num">5</span> Configure on Server (SSH in yourself)</h2>
+  
+  <p>SSH into the server and run these commands yourself:</p>
+
+  <pre># Create AWS config directory for antrunner
+sudo mkdir -p /home/antrunner/.aws
+sudo chown antrunner:antrunner /home/antrunner/.aws
+sudo chmod 700 /home/antrunner/.aws
+
+# Create credentials file (paste your keys)
+sudo nano /home/antrunner/.aws/credentials</pre>
+
+  <p>Paste this (with your actual keys):</p>
+
+  <pre>[default]
+aws_access_key_id = AKIA...YOUR_KEY_HERE
+aws_secret_access_key = ...YOUR_SECRET_HERE
+region = us-east-1</pre>
+
+  <p>Save and set permissions:</p>
+
+  <pre>sudo chown antrunner:antrunner /home/antrunner/.aws/credentials
+sudo chmod 600 /home/antrunner/.aws/credentials</pre>
+
+  <h2><span class="step-num">6</span> Tell Nova the Bucket Name</h2>
+  
+  <p>Once done, just tell Nova:</p>
+  
+  <div class="card">
+    "The audit bucket is <code>ouroboros-audit-log</code> and antrunner credentials are set up."
+  </div>
+
+  <p>Nova will update the ant scripts to upload attestations. She won't ask for the credentials — she can't use them anyway.</p>
+
+  <h2><span class="step-num">7</span> Verify It Works</h2>
+  
+  <p>After the next cron run (03:00 or 15:00 UTC), check your S3 bucket. You should see:</p>
+
+  <pre>s3://ouroboros-audit-log/
+  └── 2026-02-17/
+      └── 03-00-05_alpha_implementer-ant.json</pre>
+
+  <div class="success">
+    Each file contains a GPG-signed attestation with timestamp, colony, ant name, and run metadata.
+    S3 timestamps are Amazon's — Nova cannot fake them.
+  </div>
+
+  <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+  <h2>🔍 How to Verify Authenticity</h2>
+  
+  <p>To prove a run was autonomous:</p>
+  
+  <ol>
+    <li><strong>S3 object timestamp</strong> — Set by Amazon, not the server</li>
+    <li><strong>GPG signature</strong> — Signed by key <code>490EC8CB21F31659</code> that Nova can't access</li>
+    <li><strong>No conversation at that time</strong> — Check Discord/chat history</li>
+  </ol>
+
+  <p>All three together = cryptographic + circumstantial proof of autonomous execution.</p>
+
+</body>
+</html>

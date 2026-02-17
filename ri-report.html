@@ -3354,11 +3354,23 @@ ${compResults.map(p => `<tr><td><a href="${p.url}" target="_blank">${p.address}<
  }
  if (comps.length < 3) return null;
 
- // STEP 1: Remove outliers - exclude comps way outside subject's price range
- // If subject < $500K, exclude comps > $1M (million dollar homes skew averages)
- // Otherwise exclude comps > 2x subject price
- const outlierCap = h.price < 500000 ? 1000000 : h.price * 2;
- const outlierFloor = h.price * 0.3; // Also exclude if way cheaper (teardowns)
+ // STEP 1: Remove outliers using IQR method (Tukey fence)
+ // This naturally handles "$1M comps skewing $500K median" problem
+ const compPrices = comps.map(c => c.price).sort((a, b) => a - b);
+ const q1Idx = Math.floor(compPrices.length * 0.25);
+ const q3Idx = Math.floor(compPrices.length * 0.75);
+ const q1 = compPrices[q1Idx];
+ const q3 = compPrices[q3Idx];
+ const iqr = q3 - q1;
+ // Tukey fences: exclude anything outside Q1-1.5*IQR to Q3+1.5*IQR
+ const iqrFloor = q1 - 1.5 * iqr;
+ const iqrCap = q3 + 1.5 * iqr;
+ // Also apply subject-relative bounds as secondary filter
+ const subjectFloor = h.price * 0.3;
+ const subjectCap = h.price < 500000 ? 1000000 : h.price * 2;
+ // Use the tighter of IQR vs subject bounds
+ const outlierFloor = Math.max(iqrFloor, subjectFloor, 50000);
+ const outlierCap = Math.min(iqrCap, subjectCap);
  const noOutliers = comps.filter(c => c.price >= outlierFloor && c.price <= outlierCap);
 
  // Filter comps to similar size (+/- 25% tighter than before)

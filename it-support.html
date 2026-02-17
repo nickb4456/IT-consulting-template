@@ -10,7 +10,7 @@
     <link rel="shortcut icon" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IT Support Services Rhode Island | AIBridges - Same Day On-Site</title>
-    <meta name="description" content="Responsive IT support for Rhode Island businesses. Same-day on-site visits, $75/hr or $500/mo managed. Call (401) 327-2971.">
+    <meta name="description" content="Responsive IT support for Rhode Island businesses. Same-day on-site visits, $75/hr or $500/mo managed. Local techs based in Cranston. Call (401) 327-2971.">
     <link rel="canonical" href="https://aibridges.org/it-support">
     <link rel="stylesheet" href="css/style.css">
     
@@ -21,9 +21,155 @@
         "serviceType": "IT Support",
         "provider": {"@type": "LocalBusiness", "name": "AIBridges", "telephone": "+1-401-327-2971"},
         "areaServed": "Rhode Island",
-        "offers": {"@type": "Offer", "price": "75.00", "priceCurrency": "USD"}
+        "offers": [
+            {"@type": "Offer", "name": "Hourly IT Support", "price": "75.00", "priceCurrency": "USD"},
+            {"@type": "Offer", "name": "Managed IT", "price": "500.00", "priceCurrency": "USD"}
+        ]
     }
     </script>
+
+    <style>
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .pricing-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+        .pricing-card.featured {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+        }
+        .pricing-badge {
+            display: inline-block;
+            background: var(--accent);
+            color: #000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        .pricing-price {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #fff;
+            margin: 1rem 0;
+        }
+        .pricing-price span {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 400;
+        }
+        .pricing-features {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        .pricing-features li {
+            padding: 0.5rem 0;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .pricing-features li::before {
+            content: "✓";
+            color: var(--accent);
+            font-weight: bold;
+        }
+        .faq-section {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .faq-item {
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: 1.5rem 0;
+        }
+        .faq-question {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .faq-question::after {
+            content: "+";
+            font-size: 1.5rem;
+            color: var(--accent);
+            transition: transform 0.3s;
+        }
+        .faq-item.open .faq-question::after {
+            transform: rotate(45deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            color: #aaa;
+            line-height: 1.6;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 500px;
+            padding-top: 1rem;
+        }
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            padding: 2rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+        }
+        .service-areas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        .service-areas a {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .service-areas a:hover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+        }
+    </style>
 </head>
 <body>
     <nav class="nav" id="nav">
@@ -31,54 +177,238 @@
             <a href="/" class="logo"><span class="logo-icon">△</span><span class="logo-text">AIBridges</span></a>
             <div class="nav-links">
                 <a href="/#services">Services</a>
+                <a href="/#products">Products</a>
+                <a href="/blog">Blog</a>
                 <a href="/#contact" class="nav-cta">Get Started</a>
             </div>
         </div>
     </nav>
 
     <main id="main">
-        <section class="hero" style="min-height: 60vh; padding-top: 140px;">
+        <!-- Hero Section -->
+        <section class="hero" style="min-height: 70vh; padding-top: 140px;">
             <div class="hero-bg"><div class="gradient-orb orb-1"></div><div class="gradient-orb orb-2"></div></div>
             <div class="hero-content">
                 <div class="hero-badge"><span class="pulse"></span><span>Same-Day On-Site Support</span></div>
                 <h1 class="hero-title">IT Support That<br><span class="gradient-text">Actually Shows Up</span></h1>
-                <p class="hero-subtitle">Based in Cranston, we can be at your Rhode Island business the same day. No ticket queues, no offshore call centers—just real help from local techs.</p>
+                <p class="hero-subtitle">Based in Cranston, we can be at your Rhode Island business the same day. No ticket queues, no offshore call centers — just real help from local techs who speak your language.</p>
                 <div class="hero-cta">
                     <a href="tel:+14013272971" class="btn btn-primary">📞 (401) 327-2971</a>
-                    <a href="/#contact" class="btn btn-secondary">Get Quote</a>
-                </div>
-                <div class="hero-proof" style="margin-top: 2rem;">
-                    <div class="proof-item"><span class="proof-number">$75</span><span class="proof-label">Per Hour</span></div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item"><span class="proof-number">$500</span><span class="proof-label">Monthly Managed</span></div>
-                    <div class="proof-divider"></div>
-                    <div class="proof-item"><span class="proof-number">24hr</span><span class="proof-label">Response Time</span></div>
+                    <a href="/#contact" class="btn btn-secondary">Get a Quote</a>
                 </div>
             </div>
         </section>
 
-        <section class="services" style="padding: 80px 0;">
+        <!-- Stats Bar -->
+        <section style="padding: 40px 20px;">
+            <div class="container">
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <div class="stat-number">24hr</div>
+                        <div class="stat-label">Response Time</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15+</div>
+                        <div class="stat-label">Years Experience</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Local Technicians</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">4.9★</div>
+                        <div class="stat-label">Client Rating</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing Section -->
+        <section style="padding: 80px 0;">
             <div class="container">
                 <div class="section-header">
-                    <span class="section-tag">SERVICES</span>
-                    <h2 class="section-title">IT Support Services</h2>
+                    <span class="section-tag">PRICING</span>
+                    <h2 class="section-title">Simple, Transparent Pricing</h2>
+                    <p style="color: #888; max-width: 600px; margin: 0 auto;">No hidden fees. No long-term contracts. Just straightforward IT support when you need it.</p>
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <h3 style="color: #fff; margin-bottom: 0.5rem;">On-Demand</h3>
+                        <p style="color: #888; font-size: 0.9rem;">Pay only when you need help</p>
+                        <div class="pricing-price">$75<span>/hour</span></div>
+                        <ul class="pricing-features">
+                            <li>Same-day on-site visits</li>
+                            <li>Remote support available</li>
+                            <li>No minimum hours</li>
+                            <li>Emergency support available</li>
+                            <li>Hardware & software troubleshooting</li>
+                        </ul>
+                        <a href="tel:+14013272971" class="btn btn-secondary" style="width: 100%;">Call Now</a>
+                    </div>
+                    <div class="pricing-card featured">
+                        <span class="pricing-badge">MOST POPULAR</span>
+                        <h3 style="color: #fff; margin-bottom: 0.5rem;">Managed IT</h3>
+                        <p style="color: #888; font-size: 0.9rem;">Proactive monitoring & support</p>
+                        <div class="pricing-price">$500<span>/month</span></div>
+                        <ul class="pricing-features">
+                            <li>Everything in On-Demand</li>
+                            <li>24/7 monitoring & alerts</li>
+                            <li>Monthly security updates</li>
+                            <li>Backup verification</li>
+                            <li>Quarterly review meetings</li>
+                            <li>Priority response (4hr SLA)</li>
+                        </ul>
+                        <a href="/#contact" class="btn btn-primary" style="width: 100%;">Get Started</a>
+                    </div>
+                    <div class="pricing-card">
+                        <h3 style="color: #fff; margin-bottom: 0.5rem;">Project-Based</h3>
+                        <p style="color: #888; font-size: 0.9rem;">One-time setup & migrations</p>
+                        <div class="pricing-price">Custom</div>
+                        <ul class="pricing-features">
+                            <li>Office 365 migrations</li>
+                            <li>Network infrastructure setup</li>
+                            <li>Server deployments</li>
+                            <li>Security audits</li>
+                            <li>New office buildouts</li>
+                        </ul>
+                        <a href="/#contact" class="btn btn-secondary" style="width: 100%;">Request Quote</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services" style="padding: 80px 0; background: rgba(255,255,255,0.02);">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">WHAT WE DO</span>
+                    <h2 class="section-title">IT Services for Rhode Island Businesses</h2>
                 </div>
                 <div class="services-grid">
                     <article class="service-card glass-card">
                         <div class="service-icon">🖥️</div>
                         <h3>Helpdesk & Troubleshooting</h3>
-                        <p>Computer issues, network problems, software glitches—we diagnose and fix it fast.</p>
+                        <p>Computer won't start? Network down? Software acting weird? We diagnose and fix it fast — on-site or remote.</p>
                     </article>
                     <article class="service-card glass-card">
                         <div class="service-icon">🔒</div>
-                        <h3>Security & Backup</h3>
-                        <p>Protect your business with proper security, regular backups, and disaster recovery planning.</p>
+                        <h3>Security & Compliance</h3>
+                        <p>Endpoint protection, email security, firewall configuration. We keep your business safe from threats and compliant with industry standards.</p>
                     </article>
                     <article class="service-card glass-card">
                         <div class="service-icon">☁️</div>
-                        <h3>Cloud & Infrastructure</h3>
-                        <p>Office 365 setup, cloud migration, server maintenance—we modernize your tech stack.</p>
+                        <h3>Cloud & Microsoft 365</h3>
+                        <p>Office 365 setup, SharePoint configuration, Teams deployment, cloud migrations. We modernize your tech stack without the headaches.</p>
                     </article>
+                    <article class="service-card glass-card">
+                        <div class="service-icon">💾</div>
+                        <h3>Backup & Disaster Recovery</h3>
+                        <p>Automated backups, tested restores, business continuity planning. Sleep better knowing your data is protected.</p>
+                    </article>
+                    <article class="service-card glass-card">
+                        <div class="service-icon">🌐</div>
+                        <h3>Networking & WiFi</h3>
+                        <p>Slow internet? Dead zones? We design and deploy networks that actually work — wired and wireless.</p>
+                    </article>
+                    <article class="service-card glass-card">
+                        <div class="service-icon">🖨️</div>
+                        <h3>Hardware & Procurement</h3>
+                        <p>Need new computers? Printers? Servers? We source, configure, and deploy hardware at competitive prices.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Us Section -->
+        <section style="padding: 80px 0;">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">WHY AIBRIDGES</span>
+                    <h2 class="section-title">IT Support That's Actually Different</h2>
+                </div>
+                <div class="services-grid">
+                    <article class="service-card glass-card">
+                        <div class="service-icon">📍</div>
+                        <h3>Local & Accountable</h3>
+                        <p>We're based in Cranston, not overseas. When you call, you talk to the same person who works on your systems. No ticket queues, no runaround.</p>
+                    </article>
+                    <article class="service-card glass-card">
+                        <div class="service-icon">⚡</div>
+                        <h3>Actually Fast</h3>
+                        <p>Same-day on-site visits for emergencies. 4-hour SLA for managed clients. We know downtime costs you money.</p>
+                    </article>
+                    <article class="service-card glass-card">
+                        <div class="service-icon">🧠</div>
+                        <h3>AI-Enhanced</h3>
+                        <p>We use AI tools to monitor your systems, predict issues before they happen, and automate routine maintenance. Modern IT for modern businesses.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section style="padding: 80px 0; background: rgba(255,255,255,0.02);">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">FAQ</span>
+                    <h2 class="section-title">Common Questions</h2>
+                </div>
+                <div class="faq-section">
+                    <div class="faq-item">
+                        <div class="faq-question">How quickly can you get to my business?</div>
+                        <div class="faq-answer">For emergencies, we offer same-day on-site visits throughout Rhode Island. Most requests in the Providence metro area can be handled within 2-4 hours. Managed clients get priority 4-hour SLA response.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">Do you require long-term contracts?</div>
+                        <div class="faq-answer">No. Our managed IT service is month-to-month — you can cancel anytime. We earn your business every month, not through contract lock-in.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">What size businesses do you work with?</div>
+                        <div class="faq-answer">We work with businesses from 1 to 50 employees. Solo practitioners, small offices, retail shops, restaurants, medical practices, law firms — if you need IT help in Rhode Island, we can help.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">Can you help with specific software we use?</div>
+                        <div class="faq-answer">Most likely, yes. We have experience with practice management software, POS systems, accounting software, CRM tools, and industry-specific applications. If we haven't seen it before, we'll learn it fast.</div>
+                    </div>
+                    <div class="faq-item">
+                        <div class="faq-question">What's included in the $500/month managed plan?</div>
+                        <div class="faq-answer">24/7 monitoring, monthly security updates, backup verification, unlimited remote support, priority on-site visits (4-hour SLA), quarterly review meetings, and vendor coordination. Basically, we become your IT department.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Areas -->
+        <section style="padding: 80px 0;">
+            <div class="container" style="text-align: center;">
+                <div class="section-header">
+                    <span class="section-tag">SERVICE AREAS</span>
+                    <h2 class="section-title">IT Support Across Rhode Island</h2>
+                    <p style="color: #888;">On-site and remote support for businesses throughout the state</p>
+                </div>
+                <div class="service-areas">
+                    <a href="/providence-ri">Providence</a>
+                    <a href="/cranston-ri">Cranston</a>
+                    <a href="/warwick-ri">Warwick</a>
+                    <a href="/pawtucket-ri">Pawtucket</a>
+                    <a href="/east-providence-ri">East Providence</a>
+                    <a href="/woonsocket-ri">Woonsocket</a>
+                    <a href="/coventry-ri">Coventry</a>
+                    <a href="/north-providence-ri">North Providence</a>
+                    <a href="/johnston-ri">Johnston</a>
+                    <a href="/lincoln-ri">Lincoln</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section style="padding: 80px 0; background: linear-gradient(135deg, rgba(0,212,255,0.1) 0%, rgba(0,0,0,0) 100%);">
+            <div class="container" style="text-align: center;">
+                <h2 class="section-title">Ready to Fix Your IT Headaches?</h2>
+                <p style="color: #888; max-width: 600px; margin: 1rem auto 2rem;">Tell us what's broken. We'll give you a straight answer and a fair price.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="tel:+14013272971" class="btn btn-primary">📞 (401) 327-2971</a>
+                    <a href="/#contact" class="btn btn-secondary">Send a Message</a>
                 </div>
             </div>
         </section>
@@ -86,8 +416,17 @@
 
     <footer class="footer">
         <div class="container">
-            <div class="footer-bottom"><p>&copy; 2025 AIBridges. IT Support Services in Rhode Island.</p></div>
+            <div class="footer-bottom"><p>&copy; 2026 AIBridges. IT Support Services in Rhode Island.</p></div>
         </div>
     </footer>
+
+    <script>
+        // FAQ Accordion
+        document.querySelectorAll('.faq-question').forEach(q => {
+            q.addEventListener('click', () => {
+                q.parentElement.classList.toggle('open');
+            });
+        });
+    </script>
 </body>
 </html>

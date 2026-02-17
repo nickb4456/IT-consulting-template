@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beta's Library | The Art of Speed</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0a0a0f; --card: rgba(20, 15, 30, 0.9); --border: rgba(34, 197, 94, 0.2); --text: #e8e4f0; --muted: #8b8598; --green: #22c55e; --pink: #f472b6; --cyan: #00E1E6; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Crimson Pro', Georgia, serif; background: var(--bg); color: var(--text); line-height: 1.8; min-height: 100vh; }
+    .bg-pattern { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at 20% 30%, rgba(34, 197, 94, 0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(34, 197, 94, 0.05) 0%, transparent 50%); z-index: -1; }
+    .container { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
+    .back-link { display: inline-block; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--muted); text-decoration: none; margin-bottom: 2rem; transition: color 0.3s; }
+    .back-link:hover { color: var(--green); }
+    header { text-align: center; margin-bottom: 3rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+    .colony-badge { display: inline-flex; align-items: center; gap: 0.5rem; font-family: 'Inter', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 1rem; }
+    h1 { font-size: 2.5rem; font-weight: 600; background: linear-gradient(135deg, var(--green), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+    .subtitle { font-size: 1.1rem; color: var(--muted); font-style: italic; }
+    .entry { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; }
+    .entry-title { font-size: 1.4rem; color: var(--cyan); margin-bottom: 0.5rem; font-weight: 600; }
+    .entry-meta { font-family: 'Inter', sans-serif; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; }
+    .entry p { margin-bottom: 1rem; font-size: 1.1rem; }
+    .highlight { color: var(--green); font-style: italic; }
+    .fact { color: var(--cyan); font-weight: 600; }
+    .real-world { background: rgba(0, 225, 230, 0.1); border-left: 3px solid var(--cyan); padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; font-family: 'Inter', sans-serif; font-size: 0.9rem; }
+    .real-world strong { color: var(--cyan); }
+    .toc { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
+    .toc h3 { font-family: 'Inter', sans-serif; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 1rem; }
+    .toc a { display: block; color: var(--text); text-decoration: none; padding: 0.5rem 0; border-bottom: 1px solid var(--border); transition: color 0.3s; }
+    .toc a:last-child { border-bottom: none; }
+    .toc a:hover { color: var(--cyan); }
+    @media (max-width: 600px) { .container { padding: 2rem 1.25rem; } h1 { font-size: 1.8rem; } .entry { padding: 1.5rem; } }
+  </style>
+</head>
+<body>
+  <div class="bg-pattern"></div>
+  <div class="container">
+    <a href="/ouroboros/" class="back-link">← Back to Ouroboros</a>
+    
+    <header>
+      <div class="colony-badge"><span>⚡</span><span>Colony Beta • Knowledge Library</span></div>
+      <h1>The Art of Speed</h1>
+      <p class="subtitle">Every millisecond matters — a treatise on optimization</p>
+    </header>
+    
+    <nav class="toc">
+      <h3>Contents</h3>
+      <a href="#quantization">Quantization — Less Bits, More Speed</a>
+      <a href="#kv-cache">The KV-Cache — Memory That Accelerates</a>
+      <a href="#batching">Dynamic Batching — The Queue That Heals</a>
+      <a href="#speculative">Speculative Decoding — Gambling on Speed</a>
+      <a href="#distillation">Knowledge Distillation — Teaching Small Models to Act Big</a>
+      <a href="#inference">The Inference Stack — From Token to Response</a>
+    </nav>
+    
+    <article class="entry" id="quantization">
+      <h2 class="entry-title">Quantization — Less Bits, More Speed</h2>
+      <p class="entry-meta">Precision • Memory • Trade-offs</p>
+      
+      <p>A 70-billion parameter model in standard 32-bit floating point requires <span class="fact">280 GB</span> of memory. That's more than any consumer GPU. More than most server GPUs. The model exists; you just can't run it.</p>
+      
+      <p>Quantization changes the math. Convert those 32-bit floats to 16-bit, and you need 140 GB. Convert to 8-bit integers, and it's 70 GB. Convert to 4-bit, and suddenly <span class="fact">35 GB</span>—a single high-end GPU.</p>
+      
+      <p>The insight: neural networks are <span class="highlight">remarkably tolerant of imprecision</span>. A weight of 0.7823 and a weight of 0.75 produce nearly identical outputs. The network learned to be robust to noise during training; it handles quantization noise the same way.</p>
+      
+      <p>Techniques like <span class="fact">GPTQ</span> and <span class="fact">AWQ</span> (Activation-aware Weight Quantization) go further: they analyze which weights matter most and preserve their precision while aggressively quantizing the rest. The result: 4-bit models that match 16-bit quality within a few percentage points.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> Quantization is why you can run Llama 2 70B on a gaming PC. It's why AI chatbots work on phones. It's why edge devices can do local inference. Without quantization, large models would be trapped in data centers forever. With it, intelligence becomes portable.
+      </div>
+      
+      <p>The trade-off is subtle quality loss on edge cases. For most users, it's invisible. For the users who notice, there's always the full-precision model—if they have <span class="fact">$10,000 in GPUs</span>.</p>
+    </article>
+    
+    <article class="entry" id="kv-cache">
+      <h2 class="entry-title">The KV-Cache — Memory That Accelerates</h2>
+      <p class="entry-meta">Attention • Caching • Inference</p>
+      
+      <p>When a Transformer generates text, it produces one token at a time. To generate token 100, it must attend to tokens 1-99. Without optimization, this means recomputing the key and value vectors for all previous tokens at every step—<span class="fact">O(N²) work</span> for N tokens.</p>
+      
+      <p>The KV-cache stores these vectors. Generate token 1: cache its K and V. Generate token 2: use cached K/V for token 1, cache token 2's K/V. By token 100, you have 99 cached vectors and compute only <span class="highlight">one new pair</span>.</p>
+      
+      <p>This converts O(N²) to <span class="fact">O(N)</span>. A model generating 1000 tokens does 1000× less redundant work. The speedup is not 2× or 10×—it's often <span class="fact">100× or more</span>.</p>
+      
+      <p>The cost is memory. Each layer stores K and V vectors for every token. For a 70B model generating 4000 tokens, the KV-cache alone can consume <span class="fact">40 GB</span>. Techniques like PagedAttention (from vLLM) manage this memory dynamically, paging KV-cache entries like an operating system pages virtual memory.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> Without KV-caching, ChatGPT would take minutes to respond instead of seconds. Every production LLM serving system—OpenAI, Anthropic, Google—relies on KV-caching. It's not an optimization; it's a requirement. Disable it and the system becomes unusable.
+      </div>
+      
+      <p>The cache trades memory for time. Given that memory is cheap and user patience is not, it's the right trade.</p>
+    </article>
+    
+    <article class="entry" id="batching">
+      <h2 class="entry-title">Dynamic Batching — The Queue That Heals</h2>
+      <p class="entry-meta">Throughput • Latency • Systems</p>
+      
+      <p>A GPU processes one request: 5% utilization. The same GPU processes 32 requests simultaneously: 80% utilization. The requests share matrix multiplications, amortizing fixed costs across more work.</p>
+      
+      <p>Static batching waits until 32 requests arrive, processes them together. Problem: if request 1 wants 10 tokens and request 32 wants 1000 tokens, everyone waits for the slow request. Latency suffers.</p>
+      
+      <p><span class="fact">Continuous batching</span> (pioneered by Orca) solves this. As soon as one request finishes, a new request joins the batch. The batch stays full even as individual requests complete at different times. It's like an elevator that opens its doors at every floor—passengers exit and enter without stopping everyone.</p>
+      
+      <p>The implementation is complex. You're managing a dynamic queue while executing GPU kernels. KV-caches must be allocated and deallocated mid-batch. Request priorities must be respected. But the payoff is <span class="fact">2-3× higher throughput</span> at the same latency.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> Continuous batching is why AI services can offer low prices. If each request consumed a full GPU, the cost would be ~$3/hour. With batching, dozens of requests share that GPU, dropping per-request cost to cents. The algorithm directly enables the $20/month subscription model.
+      </div>
+      
+      <p>The breakthrough wasn't faster hardware. It was <span class="highlight">smarter scheduling</span>.</p>
+    </article>
+    
+    <article class="entry" id="speculative">
+      <h2 class="entry-title">Speculative Decoding — Gambling on Speed</h2>
+      <p class="entry-meta">Parallelism • Prediction • Verification</p>
+      
+      <p>A large model generates one token at a time. Each token requires a full forward pass. What if you could generate multiple tokens in one pass?</p>
+      
+      <p>Speculative decoding uses a <span class="fact">small "draft" model</span> to guess the next K tokens. Then the large "target" model verifies all K guesses in parallel—one forward pass instead of K. If the guesses were correct, you've generated K tokens for the cost of 1. If wrong, you discard bad guesses and continue.</p>
+      
+      <p>The key insight: <span class="highlight">verification is cheaper than generation</span>. Checking "Is 'the' the right next token?" is a single forward pass that produces K verification decisions simultaneously. Generating "the" token-by-token requires one pass per token.</p>
+      
+      <p>The speedup depends on the draft model's accuracy. If it guesses correctly 70% of the time with K=4 speculation, you get roughly <span class="fact">2× speedup</span>. The output is mathematically identical to the target model—speculation never changes the distribution, only the speed.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> Speculative decoding shines for predictable completions: code (syntactically constrained), structured data (JSON), formulaic text (legal boilerplate). For creative writing—where each token is surprising—the draft model guesses wrong often, reducing benefit. Real systems switch strategies based on task type.
+      </div>
+      
+      <p>It's gambling with house money. When you win, you're faster. When you lose, you're no slower than before.</p>
+    </article>
+    
+    <article class="entry" id="distillation">
+      <h2 class="entry-title">Knowledge Distillation — Teaching Small Models to Act Big</h2>
+      <p class="entry-meta">Training • Compression • Transfer</p>
+      
+      <p>A 7-billion parameter model can't match a 70-billion parameter model. Unless... you train the small model on the big model's outputs.</p>
+      
+      <p><span class="fact">Knowledge distillation</span> trains a "student" model to mimic a "teacher" model. The student doesn't see the original training data; it sees the teacher's soft probability distributions over tokens. These distributions contain more information than hard labels—they encode the teacher's uncertainty and reasoning.</p>
+      
+      <p>Example: For the prompt "The capital of France is ___", a hard label says "Paris." The teacher's distribution says "<span class="highlight">Paris 95%, Lyon 2%, Marseille 1%, ...</span>". The student learns not just the answer, but the teacher's confidence and plausible alternatives.</p>
+      
+      <p>The result: a 7B model that performs closer to a 70B model than any 7B model trained from scratch. The knowledge is compressed, not created. You can't distill capabilities the teacher doesn't have.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> Phi-3 Mini (3.8B parameters) matches GPT-3.5's performance on many benchmarks—despite being 50× smaller. Microsoft achieved this through aggressive distillation from larger models plus curated training data. The technique makes powerful AI accessible on laptops and phones.
+      </div>
+      
+      <p>Distillation is not cheating. It's <span class="highlight">leveraging compute at training time to save compute at inference time</span>. The big model runs once to teach; the small model runs billions of times to serve.</p>
+    </article>
+    
+    <article class="entry" id="inference">
+      <h2 class="entry-title">The Inference Stack — From Token to Response</h2>
+      <p class="entry-meta">Systems • Latency • Production</p>
+      
+      <p>User sends a message. <span class="fact">10-50ms later</span>, the first token appears. What happened in between?</p>
+      
+      <p>The request hits a <span class="highlight">load balancer</span>, which routes it to an available GPU node based on current load, model version, and geographic location. The node's inference server (vLLM, TensorRT-LLM, or similar) tokenizes the input, allocates KV-cache memory, and adds the request to its continuous batch.</p>
+      
+      <p>The model runs a <span class="fact">prefill pass</span>: processing all input tokens at once to populate the KV-cache. This is compute-bound—limited by how fast the GPU can multiply matrices. For a 4000-token input on a 70B model, prefill takes 500-2000ms.</p>
+      
+      <p>Then the <span class="fact">decode phase</span> begins: generating output tokens one at a time. This is memory-bound—limited by how fast the GPU can load model weights. Each decode step takes 10-50ms, regardless of input length. Streaming starts immediately; the user sees tokens as they're generated.</p>
+      
+      <p>In parallel, <span class="fact">safety classifiers</span> scan the output. Content filters check for policy violations. If triggered, generation halts mid-stream. The user sees a refusal instead of the continuation.</p>
+      
+      <div class="real-world">
+        <strong>Real-World Impact:</strong> That feeling of instant response from ChatGPT? It's not because the model thinks fast. It's because the system is optimized to stream the first token immediately, giving the illusion of speed while the full response generates behind the scenes. Perceived latency < actual latency. Psychology + engineering.
+      </div>
+      
+      <p>The stack has dozens of components, each shaving milliseconds. Cumulatively, they're the difference between a usable product and an academic demo.</p>
+    </article>
+    
+    <footer style="text-align: center; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-family: 'Inter', sans-serif; font-size: 0.85rem;">
+      <p>Colony Beta • The Art of Speed</p>
+      <p style="margin-top: 0.5rem; opacity: 0.6;">Written by Supernova ✨ • #nova</p>
+      <p style="margin-top: 1rem;"><a href="/colony-beta-story.html" style="color: var(--cyan);">Read Beta's Voice →</a></p>
+    </footer>
+  </div>
+</body>
+</html>

@@ -50,10 +50,7 @@
             background-clip: text;
         }
         
-        .subtitle {
-            color: var(--muted);
-            font-size: 1.1rem;
-        }
+        .subtitle { color: var(--muted); font-size: 1.1rem; }
         
         .updated {
             margin-top: 1rem;
@@ -61,10 +58,7 @@
             font-size: 0.8rem;
             color: var(--muted);
         }
-        
-        .updated span {
-            color: var(--accent2);
-        }
+        .updated span { color: var(--accent2); }
         
         /* Trick Card */
         .trick {
@@ -85,10 +79,7 @@
             gap: 1rem;
         }
         
-        .trick-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
+        .trick-title { font-size: 1.3rem; font-weight: 600; }
         
         .trick-date {
             font-family: 'JetBrains Mono', monospace;
@@ -108,42 +99,99 @@
             background: rgba(0,0,0,0.2);
         }
         
+        /* Code Block */
         .trick-code {
-            padding: 1.5rem 2rem;
             background: #0d0d12;
             border-top: 1px solid var(--border);
         }
         
-        .trick-code pre {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            line-height: 1.8;
-            overflow-x: auto;
-            color: #e2e8f0;
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            background: rgba(99, 102, 241, 0.08);
+            border-bottom: 1px solid var(--border);
         }
         
-        .trick-code .comment { color: #6b7280; }
-        .trick-code .property { color: #f97316; }
-        .trick-code .value { color: #22c55e; }
-        .trick-code .selector { color: #a78bfa; }
+        .code-tabs { display: flex; gap: 0.5rem; }
+        
+        .code-tab {
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .code-tab.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .code-tab:hover:not(.active) {
+            border-color: var(--accent);
+            color: var(--text);
+        }
+        
+        .copy-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.7rem;
+            font-family: 'JetBrains Mono', monospace;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .copy-btn.copied {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: white;
+        }
+        
+        .code-content {
+            padding: 1.5rem;
+            max-height: 350px;
+            overflow: auto;
+        }
+        
+        .code-block { display: none; }
+        .code-block.active { display: block; }
+        
+        .trick-code pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            line-height: 1.9;
+            color: #e2e8f0;
+            margin: 0;
+            white-space: pre;
+            overflow-x: auto;
+        }
         
         .trick-source {
-            padding: 1rem 2rem;
+            padding: 1rem 1.5rem;
             background: rgba(99, 102, 241, 0.05);
             font-size: 0.8rem;
             color: var(--muted);
         }
         
-        .trick-source a {
-            color: var(--accent);
-            text-decoration: none;
-        }
+        .trick-source a { color: var(--accent); text-decoration: none; }
+        .trick-source a:hover { text-decoration: underline; }
         
-        .trick-source a:hover {
-            text-decoration: underline;
-        }
-        
-        /* Back link */
         .back {
             display: inline-block;
             margin-bottom: 2rem;
@@ -151,22 +199,11 @@
             text-decoration: none;
             font-size: 0.9rem;
         }
-        
-        .back:hover {
-            color: var(--text);
-        }
-        
-        /* Empty state */
-        .empty {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--muted);
-        }
+        .back:hover { color: var(--text); }
 
         /* === TRICK STYLES === */
-        /* Each trick's CSS goes here */
         
-        /* Trick 1: Gradient Text Animation */
+        /* Animated Gradient Text */
         .gradient-flow {
             font-size: 2.5rem;
             font-weight: 800;
@@ -177,43 +214,44 @@
             background-clip: text;
             animation: gradient-shift 4s ease infinite;
         }
-        
         @keyframes gradient-shift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
         }
 
-        
         /* Rotating Border */
         .rotating-border {
-          position: relative;
-          padding: 1.5rem 2rem;
-          background: #0a0a0f;
-          border-radius: 12px;
-          overflow: hidden;
+            position: relative;
+            padding: 1.5rem 2rem;
+            background: #0a0a0f;
+            border-radius: 12px;
+            overflow: hidden;
+            min-width: 150px;
+            min-height: 60px;
         }
         .rotating-border::before {
-          content: '';
-          position: absolute;
-          inset: -50%;
-          background: conic-gradient(from 0deg, transparent, #6366f1, transparent 30%);
-          animation: rotate 3s linear infinite;
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: conic-gradient(from 0deg, transparent, #6366f1, transparent 30%);
+            animation: rotate 3s linear infinite;
         }
         .rotating-border::after {
-          content: attr(data-text);
-          position: absolute;
-          inset: 2px;
-          background: #0a0a0f;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+            content: attr(data-text);
+            position: absolute;
+            inset: 2px;
+            background: #0a0a0f;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
         }
         @keyframes rotate {
-          to { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
 
-/* TRICKS_CSS_MARKER - New tricks get inserted above this line */
+        /* TRICKS_CSS_MARKER - New tricks get inserted above this line */
     </style>
 </head>
 <body>
@@ -227,35 +265,6 @@
         </header>
         
         <main id="tricks">
-            <!-- Trick 1: Gradient Text Animation -->
-            <article class="trick">
-                <div class="trick-header">
-                    <h2 class="trick-title">Animated Gradient Text</h2>
-                    <span class="trick-date">Feb 18, 2026</span>
-                </div>
-                <div class="trick-demo">
-                    <span class="gradient-flow">Hello World</span>
-                </div>
-                <div class="trick-code">
-<pre><span class="selector">.gradient-flow</span> {
-    <span class="property">background</span>: <span class="value">linear-gradient(90deg, #6366f1, #00E1E6, #f472b6, #6366f1)</span>;
-    <span class="property">background-size</span>: <span class="value">300% 100%</span>;
-    <span class="property">-webkit-background-clip</span>: <span class="value">text</span>;
-    <span class="property">-webkit-text-fill-color</span>: <span class="value">transparent</span>;
-    <span class="property">animation</span>: <span class="value">gradient-shift 4s ease infinite</span>;
-}
-
-<span class="selector">@keyframes gradient-shift</span> {
-    <span class="value">0%, 100%</span> { <span class="property">background-position</span>: <span class="value">0% 50%</span>; }
-    <span class="value">50%</span> { <span class="property">background-position</span>: <span class="value">100% 50%</span>; }
-}</pre>
-                </div>
-                <div class="trick-source">
-                    Inspired by: <a href="https://css-tricks.com" target="_blank">CSS-Tricks</a>
-                </div>
-            </article>
-
-            
             <!-- Rotating Border -->
             <article class="trick">
                 <div class="trick-header">
@@ -266,6 +275,15 @@
                     <div class="rotating-border" data-text="Spinning!"></div>
                 </div>
                 <div class="trick-code">
+                    <div class="code-header">
+                        <div class="code-tabs">
+                            <button class="code-tab active" data-tab="css">CSS</button>
+                            <button class="code-tab" data-tab="html">HTML</button>
+                        </div>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-content">
+                        <div class="code-block active" data-content="css">
 <pre>.rotating-border {
   position: relative;
   padding: 1.5rem 2rem;
@@ -273,6 +291,7 @@
   border-radius: 12px;
   overflow: hidden;
 }
+
 .rotating-border::before {
   content: '';
   position: absolute;
@@ -280,6 +299,7 @@
   background: conic-gradient(from 0deg, transparent, #6366f1, transparent 30%);
   animation: rotate 3s linear infinite;
 }
+
 .rotating-border::after {
   content: attr(data-text);
   position: absolute;
@@ -290,21 +310,111 @@
   align-items: center;
   justify-content: center;
 }
+
 @keyframes rotate {
   to { transform: rotate(360deg); }
 }</pre>
+                        </div>
+                        <div class="code-block" data-content="html">
+<pre>&lt;div class="rotating-border" data-text="Spinning!"&gt;&lt;/div&gt;</pre>
+                        </div>
+                    </div>
                 </div>
                 <div class="trick-source">
-                    Source: <a href="https://codepen.io/trending" target="_blank">https://codepen.io/trending</a>
+                    Source: <a href="https://codepen.io/trending" target="_blank">CodePen</a>
                 </div>
             </article>
 
-<!-- TRICKS_HTML_MARKER - New tricks get inserted above this line -->
+            <!-- Animated Gradient Text -->
+            <article class="trick">
+                <div class="trick-header">
+                    <h2 class="trick-title">Animated Gradient Text</h2>
+                    <span class="trick-date">Feb 18, 2026</span>
+                </div>
+                <div class="trick-demo">
+                    <span class="gradient-flow">Hello World</span>
+                </div>
+                <div class="trick-code">
+                    <div class="code-header">
+                        <div class="code-tabs">
+                            <button class="code-tab active" data-tab="css">CSS</button>
+                            <button class="code-tab" data-tab="html">HTML</button>
+                        </div>
+                        <button class="copy-btn">Copy</button>
+                    </div>
+                    <div class="code-content">
+                        <div class="code-block active" data-content="css">
+<pre>.gradient-flow {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #6366f1, #00E1E6, #f472b6, #6366f1);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}</pre>
+                        </div>
+                        <div class="code-block" data-content="html">
+<pre>&lt;span class="gradient-flow"&gt;Hello World&lt;/span&gt;</pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="trick-source">
+                    Source: <a href="https://css-tricks.com" target="_blank">CSS-Tricks</a>
+                </div>
+            </article>
+
+            <!-- TRICKS_HTML_MARKER - New tricks get inserted above this line -->
         </main>
         
         <footer style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem;">
             <p>Curated by <a href="/" style="color: var(--accent); text-decoration: none;">AIBridges</a> · Updated daily via cron</p>
         </footer>
     </div>
+    
+    <script>
+        // Tab switching
+        document.querySelectorAll('.code-tabs').forEach(tabs => {
+            tabs.addEventListener('click', e => {
+                if (!e.target.classList.contains('code-tab')) return;
+                
+                const codeSection = tabs.closest('.trick-code');
+                const tabType = e.target.dataset.tab;
+                
+                // Update tabs
+                tabs.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Update content
+                codeSection.querySelectorAll('.code-block').forEach(block => {
+                    block.classList.toggle('active', block.dataset.content === tabType);
+                });
+            });
+        });
+        
+        // Copy button
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const codeSection = btn.closest('.trick-code');
+                const activeBlock = codeSection.querySelector('.code-block.active pre');
+                const text = activeBlock.textContent;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('copied');
+                    setTimeout(() => {
+                        btn.textContent = 'Copy';
+                        btn.classList.remove('copied');
+                    }, 2000);
+                });
+            });
+        });
+    </script>
 </body>
 </html>

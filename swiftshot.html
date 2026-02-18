@@ -18,8 +18,6 @@
     <meta property="og:description" content="Tamper-proof web evidence with WORM storage, SHA-256 verification, chain of custody, and AES-256 encryption. The evidence tool built for litigation.">
     <meta name="twitter:card" content="summary_large_image">
 
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect x='4' y='4' width='120' height='120' rx='24' fill='%232563eb'/%3E%3Cpath d='M24 48 L24 28 Q24 24 28 24 L48 24' stroke='white' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M80 24 L100 24 Q104 24 104 28 L104 48' stroke='white' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M24 80 L24 100 Q24 104 28 104 L48 104' stroke='white' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M80 104 L100 104 Q104 104 104 100 L104 80' stroke='white' stroke-width='6' fill='none' stroke-linecap='round'/%3E%3Cpath d='M72 34 L52 66 L64 66 L56 94 L76 62 L64 62 Z' fill='%23FBBF24' stroke='white' stroke-width='1.5'/%3E%3C/svg%3E">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -27,19 +25,21 @@
 
     <style>
         :root {
-            --bg: #09090b;
-            --bg-card: #18181b;
-            --bg-input: #27272a;
-            --border: #3f3f46;
-            --text: #fafafa;
-            --text-muted: #a1a1aa;
-            --primary: #2E1A47;
-            --primary-hover: #1d4ed8;
-            --accent: #FBBF24;
-            --accent-glow: rgba(251, 191, 36, 0.3);
+            --bg: #0a0f0a;
+            --bg-card: #111a11;
+            --bg-input: #1a261a;
+            --border: #2d3d2d;
+            --text: #f0f5f0;
+            --text-muted: #8fa38f;
+            --primary: #047857;
+            --primary-light: #059669;
+            --primary-glow: rgba(4, 120, 87, 0.3);
+            --accent: #d97706;
+            --accent-light: #f59e0b;
+            --accent-glow: rgba(217, 119, 6, 0.3);
             --success: #10b981;
             --warning: #f59e0b;
-            --vault: #00E1E6;
+            --danger: #dc2626;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,9 +53,8 @@
         }
 
         .navbar {
-            background: rgba(9, 9, 11, 0.9);
+            background: rgba(10, 15, 10, 0.95);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             padding: 1rem 0;
             position: sticky;
@@ -83,7 +82,7 @@
         .brand-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary), #3B82F6);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -110,25 +109,111 @@
 
         .navbar-links a:hover { color: var(--text); }
 
-        .btn-back {
+        .btn-nav {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             padding: 10px 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text);
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
             text-decoration: none;
             font-size: 0.875rem;
-            font-weight: 500;
+            font-weight: 600;
             transition: all 0.2s;
         }
 
-        .btn-back:hover { background: var(--bg-input); border-color: var(--primary); }
+        .btn-nav:hover { background: var(--primary-light); }
 
-        .hero {
+        /* Story Section */
+        .story-hook {
             padding: 80px 40px 60px;
+            background: linear-gradient(180deg, var(--bg) 0%, #0d120d 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .story-hook .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .story-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+
+        .story-scenario {
+            background: #0d0d0d;
+            border-left: 4px solid var(--danger);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .story-scenario .timestamp {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 0.75rem;
+        }
+
+        .story-scenario .quote {
+            font-size: 1.4rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .story-scenario .speaker {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .story-text {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.85;
+            margin-bottom: 1.5rem;
+        }
+
+        .story-text strong {
+            color: var(--text);
+        }
+
+        .story-highlight {
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+
+        .story-result {
+            background: linear-gradient(135deg, rgba(4, 120, 87, 0.1), rgba(217, 119, 6, 0.05));
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .story-result h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--primary-light);
+        }
+
+        .story-result p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 60px 40px 80px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -137,12 +222,12 @@
         .hero::before {
             content: '';
             position: absolute;
-            top: -100px;
+            top: -200px;
             left: 50%;
             transform: translateX(-50%);
-            width: 900px;
-            height: 900px;
-            background: radial-gradient(circle, rgba(37, 99, 235, 0.12) 0%, transparent 60%);
+            width: 1000px;
+            height: 1000px;
+            background: radial-gradient(circle, rgba(4, 120, 87, 0.08) 0%, transparent 50%);
             pointer-events: none;
         }
 
@@ -152,29 +237,15 @@
             position: relative;
         }
 
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(37, 99, 235, 0.15);
-            border: 1px solid rgba(37, 99, 235, 0.3);
-            padding: 8px 16px;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--accent);
-            margin-bottom: 24px;
-        }
-
         .logo-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, var(--primary), #3B82F6);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 22px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 60px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 60px var(--primary-glow);
             margin-bottom: 24px;
         }
 
@@ -189,7 +260,7 @@
         h1 span { color: var(--accent); }
 
         .hero-sub {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             color: var(--text-muted);
             max-width: 640px;
             margin: 0 auto 32px;
@@ -208,21 +279,21 @@
             align-items: center;
             gap: 10px;
             padding: 14px 32px;
-            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             color: white;
             font-size: 1rem;
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 20px var(--primary-glow);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(37, 99, 235, 0.5);
+            box-shadow: 0 6px 30px var(--primary-glow);
         }
 
         .btn-secondary {
@@ -232,7 +303,7 @@
             padding: 14px 32px;
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-radius: 10px;
             color: var(--text);
             font-size: 1rem;
             font-weight: 600;
@@ -243,63 +314,29 @@
 
         .btn-secondary:hover { border-color: var(--primary); background: var(--bg-input); }
 
-        .social-proof {
+        .trust-bar {
             display: flex;
             justify-content: center;
-            gap: 40px;
+            gap: 48px;
             margin-top: 48px;
             padding-top: 32px;
             border-top: 1px solid var(--border);
         }
 
-        .proof-item { text-align: center; }
-        .proof-number { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
-        .proof-label { font-size: 0.8rem; color: var(--text-muted); }
+        .trust-item { text-align: center; }
+        .trust-value { font-size: 1.25rem; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+        .trust-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
 
-        /* Evidence section */
+        /* Evidence Flow */
         .evidence {
             padding: 80px 40px;
-            background: linear-gradient(180deg, transparent, rgba(37, 99, 235, 0.03), transparent);
+            background: var(--bg-card);
         }
 
         .evidence .container {
             max-width: 1000px;
             margin: 0 auto;
         }
-
-        .evidence-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-top: 48px;
-        }
-
-        .evidence-step {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            text-align: center;
-            position: relative;
-        }
-
-        .evidence-step .step-num {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            font-weight: 700;
-            font-size: 0.875rem;
-            margin-bottom: 16px;
-        }
-
-        .evidence-step h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-        .evidence-step p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
-        .evidence-step .step-icon { font-size: 28px; margin-bottom: 12px; }
 
         .section-title {
             text-align: center;
@@ -316,58 +353,120 @@
             margin-bottom: 48px;
         }
 
-        /* Features Grid */
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .evidence-step {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .evidence-step:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .evidence-step .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .evidence-step h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 12px; }
+        .evidence-step p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+
+        /* Features */
         .features { padding: 80px 40px; }
         .features .container { max-width: 1100px; margin: 0 auto; }
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 24px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
         }
 
         .feature-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 28px;
             transition: all 0.3s;
         }
 
         .feature-card:hover {
             border-color: var(--primary);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 30px rgba(37, 99, 235, 0.15);
+            transform: translateY(-2px);
         }
 
         .feature-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             margin-bottom: 16px;
+            background: rgba(4, 120, 87, 0.15);
+            color: var(--primary-light);
         }
 
-        .feature-card h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 8px; }
+        .feature-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; }
         .feature-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
 
-        .feature-card .badge {
+        .feature-card .tier {
             display: inline-block;
             margin-top: 12px;
             padding: 4px 10px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            border-radius: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .badge-free { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-        .badge-pro { background: rgba(37, 99, 235, 0.15); color: #60A5FA; }
-        .badge-firm { background: rgba(14, 165, 233, 0.15); color: #38BDF8; }
+        .tier-free { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .tier-pro { background: rgba(217, 119, 6, 0.15); color: var(--accent-light); }
+        .tier-firm { background: rgba(4, 120, 87, 0.15); color: var(--primary-light); }
+
+        /* Use Cases */
+        .use-cases { padding: 80px 40px; background: var(--bg-card); }
+        .use-cases .container { max-width: 1000px; margin: 0 auto; }
+
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .use-case {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: all 0.3s;
+        }
+
+        .use-case:hover { border-color: var(--primary); }
+
+        .use-case h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; color: var(--accent); }
+        .use-case p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
 
         /* Pricing */
         .pricing { padding: 80px 40px; }
@@ -376,56 +475,56 @@
         .pricing-cards {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 16px;
             margin-top: 48px;
         }
 
         .pricing-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 32px 24px;
+            border-radius: 16px;
+            padding: 28px 20px;
             position: relative;
         }
 
         .pricing-card.featured {
             border-color: var(--primary);
-            box-shadow: 0 0 40px rgba(37, 99, 235, 0.2);
+            box-shadow: 0 0 40px var(--primary-glow);
         }
 
         .pricing-card.featured::before {
-            content: 'BEST FOR FIRMS';
+            content: 'RECOMMENDED';
             position: absolute;
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
-            padding: 4px 16px;
+            padding: 4px 14px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: 700;
             letter-spacing: 1px;
             white-space: nowrap;
         }
 
-        .pricing-card h3 { font-size: 1.125rem; font-weight: 700; margin-bottom: 8px; }
+        .pricing-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
         .pricing-card .price { font-size: 2rem; font-weight: 800; margin-bottom: 4px; }
         .pricing-card .price span { font-size: 0.875rem; font-weight: 400; color: var(--text-muted); }
         .pricing-card .price-note { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 20px; }
 
         .pricing-card ul { list-style: none; margin-bottom: 24px; }
-        .pricing-card li { padding: 6px 0; font-size: 0.8125rem; display: flex; align-items: center; gap: 8px; color: var(--text-muted); }
-        .pricing-card li i { color: var(--success); font-size: 0.7rem; }
+        .pricing-card li { padding: 5px 0; font-size: 0.8rem; display: flex; align-items: flex-start; gap: 8px; color: var(--text-muted); }
+        .pricing-card li i { color: var(--success); font-size: 0.65rem; margin-top: 5px; flex-shrink: 0; }
         .pricing-card li.disabled { opacity: 0.4; }
-        .pricing-card li.disabled i { color: #52525b; }
+        .pricing-card li.disabled i { color: #444; }
 
         .btn-pricing {
             display: block;
             width: 100%;
             padding: 12px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
@@ -435,15 +534,11 @@
         }
 
         .btn-pricing.primary {
-            background: linear-gradient(135deg, var(--primary), #1d4ed8);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
         }
 
-        .btn-pricing.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 30px rgba(37, 99, 235, 0.4);
-        }
+        .btn-pricing.primary:hover { transform: translateY(-2px); }
 
         .btn-pricing.outline {
             background: transparent;
@@ -453,65 +548,48 @@
 
         .btn-pricing.outline:hover { border-color: var(--primary); }
 
-        /* Use Cases */
-        .use-cases { padding: 80px 40px; }
-        .use-cases .container { max-width: 1000px; margin: 0 auto; }
-
-        .use-case-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
-        }
-
-        .use-case {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-        }
-
-        .use-case h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
-        .use-case p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
-
         /* CTA */
         .cta { padding: 80px 40px; text-align: center; }
 
         .cta .container {
             max-width: 700px;
             margin: 0 auto;
-            background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(251, 191, 36, 0.05));
-            border: 1px solid rgba(37, 99, 235, 0.2);
-            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(4, 120, 87, 0.1), rgba(217, 119, 6, 0.05));
+            border: 1px solid var(--primary);
+            border-radius: 20px;
             padding: 56px 40px;
         }
 
-        .cta h2 { font-size: 2rem; font-weight: 800; margin-bottom: 12px; }
-        .cta p { font-size: 1rem; color: var(--text-muted); margin-bottom: 28px; }
+        .cta h2 { font-size: 1.75rem; font-weight: 800; margin-bottom: 12px; }
+        .cta p { font-size: 1rem; color: var(--text-muted); margin-bottom: 28px; line-height: 1.7; }
 
+        /* Footer */
         .footer {
             padding: 40px;
             border-top: 1px solid var(--border);
             text-align: center;
         }
 
-        .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; }
+        .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 16px; flex-wrap: wrap; }
         .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.875rem; transition: color 0.2s; }
         .footer-links a:hover { color: var(--text); }
-        .footer-copy { font-size: 0.8rem; color: #52525b; }
+        .footer-copy { font-size: 0.8rem; color: #555; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .pricing-cards { grid-template-columns: repeat(2, 1fr); }
-            .evidence-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 768px) {
             h1 { font-size: 2.25rem; }
-            .hero { padding: 48px 20px 40px; }
+            .hero, .story-hook { padding: 48px 20px; }
             .hero-sub { font-size: 1rem; }
+            .evidence-grid { grid-template-columns: 1fr; }
+            .use-case-grid { grid-template-columns: 1fr; }
             .pricing-cards { grid-template-columns: 1fr; }
-            .social-proof { flex-wrap: wrap; gap: 24px; }
+            .trust-bar { flex-wrap: wrap; gap: 24px; }
             .navbar .container { padding: 0 20px; }
             .features, .evidence, .pricing, .use-cases, .cta { padding: 48px 20px; }
+            .story-scenario .quote { font-size: 1.15rem; }
         }
 
         @media (max-width: 480px) {
@@ -549,55 +627,87 @@
                 <a href="/#services">Services</a>
                 <a href="/#software">Software</a>
                 <a href="/contact">Contact</a>
-                <a href="#pricing" class="btn-back" style="border-color: var(--primary); color: var(--accent);">View Plans</a>
+                <a href="#pricing" class="btn-nav">View Plans</a>
             </div>
         </div>
     </nav>
 
+    <!-- The Hook - Story that pulls readers in -->
+    <section class="story-hook">
+        <div class="container">
+            <div class="story-label">Case File: Evidence Dismissed</div>
+            
+            <div class="story-scenario">
+                <div class="timestamp">Federal Court, Boston. 9:47 AM.</div>
+                <p class="quote">"Counsel, can you prove this screenshot hasn't been altered since it was taken?"</p>
+                <p class="speaker">— Opposing counsel, during cross-examination</p>
+            </div>
+            
+            <p class="story-text">
+                The paralegal had taken the screenshot three months earlier. A social media post. Clear evidence of defamation. <strong>But she couldn't prove it was authentic.</strong>
+            </p>
+            
+            <p class="story-text">
+                No hash verification. No timestamp from a trusted source. No chain of custody. Just a PNG file that could have been edited in Photoshop five minutes before the hearing.
+            </p>
+            
+            <p class="story-text">
+                The judge excluded it. Three months of discovery work, <span class="story-highlight">thrown out in 30 seconds</span>.
+            </p>
+            
+            <p class="story-text">
+                The partner called a meeting that afternoon. "This can never happen again."
+            </p>
+            
+            <div class="story-result">
+                <h3>That's why we built SwiftShot.</h3>
+                <p>Every capture is SHA-256 hashed at the moment it's taken. One click uploads to tamper-proof WORM storage. A complete chain of custody log tracks every action. When opposing counsel asks if you can prove authenticity — you can.</p>
+            </div>
+        </div>
+    </section>
+
     <section class="hero">
         <div class="container">
-            <div class="hero-badge"><i class="fas fa-shield-halved"></i> Tamper-Proof Evidence Preservation</div>
-
             <div class="logo-icon">
                 <svg width="40" height="40" viewBox="0 0 128 128" fill="none">
                     <path d="M24 48 L24 28 Q24 24 28 24 L48 24" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M80 24 L100 24 Q104 24 104 28 L104 48" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M24 80 L24 100 Q24 104 28 104 L48 104" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                     <path d="M80 104 L100 104 Q104 104 104 100 L104 80" stroke="white" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M72 34 L52 66 L64 66 L56 94 L76 62 L64 62 Z" fill="#FBBF24" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M72 34 L52 66 L64 66 L56 94 L76 62 L64 62 Z" fill="#d97706" stroke="white" stroke-width="2" stroke-linejoin="round"/>
                 </svg>
             </div>
 
             <h1>Swift<span>Shot</span></h1>
             <p class="hero-sub">
-                Capture, annotate, and preserve web evidence with tamper-proof WORM storage, SHA-256 hash verification, and full chain of custody. Built for litigation.
+                Web evidence capture with cryptographic proof of authenticity. SHA-256 hash verification, WORM storage, and full chain of custody. Built for litigation.
             </p>
 
             <div class="hero-actions">
                 <a href="#pricing" class="btn-primary">
-                    <i class="fas fa-bolt"></i> View Plans
+                    <i class="fas fa-shield-halved"></i> View Plans
                 </a>
                 <a href="#" class="btn-secondary" id="installBtn">
                     <i class="fab fa-chrome"></i> Install Free
                 </a>
             </div>
 
-            <div class="social-proof">
-                <div class="proof-item">
-                    <div class="proof-number">SHA-256</div>
-                    <div class="proof-label">Hash Verification</div>
+            <div class="trust-bar">
+                <div class="trust-item">
+                    <div class="trust-value">SHA-256</div>
+                    <div class="trust-label">Hash Verification</div>
                 </div>
-                <div class="proof-item">
-                    <div class="proof-number">WORM</div>
-                    <div class="proof-label">Tamper-Proof Storage</div>
+                <div class="trust-item">
+                    <div class="trust-value">WORM</div>
+                    <div class="trust-label">Immutable Storage</div>
                 </div>
-                <div class="proof-item">
-                    <div class="proof-number">AES-256</div>
-                    <div class="proof-label">Encrypted Export</div>
+                <div class="trust-item">
+                    <div class="trust-value">AES-256</div>
+                    <div class="trust-label">Encrypted Export</div>
                 </div>
-                <div class="proof-item">
-                    <div class="proof-number">100%</div>
-                    <div class="proof-label">Local Processing</div>
+                <div class="trust-item">
+                    <div class="trust-value">100%</div>
+                    <div class="trust-label">Local Processing</div>
                 </div>
             </div>
         </div>
@@ -606,25 +716,22 @@
     <!-- Evidence Preservation Flow -->
     <section class="evidence">
         <div class="container">
-            <h2 class="section-title">Evidence That Holds Up in Court</h2>
-            <p class="section-sub">Three steps from capture to court-defensible evidence</p>
+            <h2 class="section-title">From Capture to Court</h2>
+            <p class="section-sub">Three steps to evidence that holds up under scrutiny</p>
 
             <div class="evidence-grid">
                 <div class="evidence-step">
                     <div class="step-num">1</div>
-                    <div class="step-icon"><i class="fas fa-camera" style="color: var(--primary);"></i></div>
-                    <h3>Capture & Hash</h3>
+                    <h3>Capture and Hash</h3>
                     <p>Every screenshot is immediately SHA-256 hashed at the moment of capture. The hash proves the image hasn't been altered since it was taken.</p>
                 </div>
                 <div class="evidence-step">
                     <div class="step-num">2</div>
-                    <div class="step-icon"><i class="fas fa-cloud-arrow-up" style="color: var(--vault);"></i></div>
                     <h3>Preserve to WORM</h3>
-                    <p>One click uploads to AWS S3 Object Lock storage. Governance mode prevents deletion or modification during your retention period &mdash; even by admins.</p>
+                    <p>One click uploads to AWS S3 Object Lock storage. Governance mode prevents deletion or modification during your retention period — even by admins.</p>
                 </div>
                 <div class="evidence-step">
                     <div class="step-num">3</div>
-                    <div class="step-icon"><i class="fas fa-link" style="color: var(--success);"></i></div>
                     <h3>Chain of Custody</h3>
                     <p>Every action is logged: who captured it, when, from which URL, the hash, and when it was preserved. A complete audit trail for opposing counsel.</p>
                 </div>
@@ -635,71 +742,71 @@
     <!-- Features -->
     <section class="features" id="features">
         <div class="container">
-            <h2 class="section-title">Capture & Annotate in Seconds</h2>
-            <p class="section-sub">Free tools for daily work, Pro for the full legal toolkit, Cloud Vault for litigation</p>
+            <h2 class="section-title">Capture. Annotate. Preserve.</h2>
+            <p class="section-sub">Professional tools for legal workflows</p>
 
             <div class="feature-grid">
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(37, 99, 235, 0.1);"><i class="fas fa-camera" style="color: #60A5FA;"></i></div>
-                    <h3>Lightning-Fast Capture</h3>
+                    <div class="feature-icon"><i class="fas fa-camera"></i></div>
+                    <h3>Multi-Mode Capture</h3>
                     <p>Visible area, region select, or full-page scroll capture with automatic sticky header/footer handling. One click or keyboard shortcut.</p>
-                    <span class="badge badge-free">Free</span>
+                    <span class="tier tier-free">Free</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(239, 68, 68, 0.1);"><i class="fas fa-pen-fancy" style="color: #f87171;"></i></div>
+                    <div class="feature-icon"><i class="fas fa-pen"></i></div>
                     <h3>Annotation Tools</h3>
                     <p>Arrows (7 styles), rectangles, ellipses, lines, text boxes, sticky notes, highlighting. Full color and stroke control.</p>
-                    <span class="badge badge-free">Free</span>
+                    <span class="tier tier-free">Free</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(37, 99, 235, 0.1);"><i class="fas fa-eye-slash" style="color: #60A5FA;"></i></div>
-                    <h3>Redaction</h3>
-                    <p>Black box, Gaussian blur, or pixelation. Permanently destroys pixel data &mdash; not a visual overlay. Forensically verified.</p>
-                    <span class="badge badge-pro">Pro</span>
+                    <div class="feature-icon"><i class="fas fa-eye-slash"></i></div>
+                    <h3>Forensic Redaction</h3>
+                    <p>Black box, Gaussian blur, or pixelation. Permanently destroys pixel data — not a visual overlay. Verified irreversible.</p>
+                    <span class="tier tier-pro">Pro</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(245, 158, 11, 0.1);"><i class="fas fa-stamp" style="color: var(--warning);"></i></div>
-                    <h3>Legal Stamps &amp; Bates</h3>
+                    <div class="feature-icon"><i class="fas fa-stamp"></i></div>
+                    <h3>Legal Stamps and Bates</h3>
                     <p>Exhibit labels, CONFIDENTIAL, PRIVILEGED, DRAFT stamps. Auto-incrementing Bates numbers. Signature lines and watermarks.</p>
-                    <span class="badge badge-pro">Pro</span>
+                    <span class="tier tier-pro">Pro</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1);"><i class="fas fa-microphone" style="color: var(--success);"></i></div>
+                    <div class="feature-icon"><i class="fas fa-microphone"></i></div>
                     <h3>Voice Commands</h3>
-                    <p>"Highlight the date", "Arrow to the signature", "Redact the SSN". Natural language annotation without switching tabs.</p>
-                    <span class="badge badge-pro">Pro</span>
+                    <p>"Highlight the date." "Arrow to the signature." "Redact the SSN." Natural language annotation without switching tabs.</p>
+                    <span class="tier tier-pro">Pro</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(0, 81, 230, 0.1);"><i class="fas fa-font" style="color: #6C5CE7;"></i></div>
-                    <h3>OCR &amp; Word Export</h3>
-                    <p>On-device text recognition. Extract text from screenshots and export directly to Word (.docx) documents with metadata.</p>
-                    <span class="badge badge-pro">Pro</span>
+                    <div class="feature-icon"><i class="fas fa-file-word"></i></div>
+                    <h3>OCR and Word Export</h3>
+                    <p>On-device text recognition. Extract text from screenshots and export directly to Word documents with metadata intact.</p>
+                    <span class="tier tier-pro">Pro</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(14, 165, 233, 0.1);"><i class="fas fa-fingerprint" style="color: var(--vault);"></i></div>
-                    <h3>SHA-256 Hash Verification</h3>
-                    <p>Every capture is hashed at the moment it's taken. The hash is displayed in the editor and embedded in exports. Proves the image is unaltered.</p>
-                    <span class="badge badge-free">Free</span>
+                    <div class="feature-icon"><i class="fas fa-fingerprint"></i></div>
+                    <h3>SHA-256 Verification</h3>
+                    <p>Every capture is hashed at the moment it's taken. The hash is displayed in the editor and embedded in exports. Proves authenticity.</p>
+                    <span class="tier tier-free">Free</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(14, 165, 233, 0.1);"><i class="fas fa-vault" style="color: var(--vault);"></i></div>
+                    <div class="feature-icon"><i class="fas fa-vault"></i></div>
                     <h3>Cloud Vault (WORM)</h3>
-                    <p>One-click upload to tamper-proof AWS storage with Governance retention. Chain of custody log, per-case retention, admin release when the case closes.</p>
-                    <span class="badge badge-firm">Firm</span>
+                    <p>One-click upload to tamper-proof AWS storage. Governance retention, chain of custody log, per-case retention periods, admin lock release.</p>
+                    <span class="tier tier-firm">Firm</span>
                 </div>
 
                 <div class="feature-card">
-                    <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1);"><i class="fas fa-shield-halved" style="color: var(--success);"></i></div>
+                    <div class="feature-icon"><i class="fas fa-lock"></i></div>
                     <h3>100% Local Processing</h3>
-                    <p>Capture, annotate, OCR, and encrypt &mdash; all in your browser. Cloud Vault is opt-in. Your data never touches our servers unless you choose to preserve it.</p>
-                    <span class="badge badge-free">Free</span>
+                    <p>Capture, annotate, OCR, and encrypt — all in your browser. Cloud Vault is opt-in. Your data never touches our servers unless you choose.</p>
+                    <span class="tier tier-free">Free</span>
                 </div>
             </div>
         </div>
@@ -713,19 +820,19 @@
 
             <div class="use-case-grid">
                 <div class="use-case">
-                    <h3><i class="fas fa-gavel" style="color: var(--primary);"></i> Litigation Teams</h3>
-                    <p>Preserve web evidence with WORM storage, chain of custody, and SHA-256 verification. Exhibit stamps, Bates numbers, and encrypted exports in one click.</p>
+                    <h3>Litigation Teams</h3>
+                    <p>Preserve web evidence with WORM storage, chain of custody, and SHA-256 verification. Exhibit stamps, Bates numbers, and encrypted exports in one workflow.</p>
                 </div>
                 <div class="use-case">
-                    <h3><i class="fas fa-clipboard-check" style="color: var(--success);"></i> Compliance &amp; eDiscovery</h3>
+                    <h3>Compliance and eDiscovery</h3>
                     <p>Capture regulatory pages with timestamps, redact PII, and store with governance retention policies. Full audit trail for examinations.</p>
                 </div>
                 <div class="use-case">
-                    <h3><i class="fas fa-building-columns" style="color: var(--vault);"></i> Insurance &amp; Claims</h3>
+                    <h3>Insurance and Claims</h3>
                     <p>Document web-based claims evidence with tamper-proof preservation. Prove what a page looked like on a specific date, verified by hash.</p>
                 </div>
                 <div class="use-case">
-                    <h3><i class="fas fa-scale-balanced" style="color: var(--accent);"></i> IP &amp; Trade Secret</h3>
+                    <h3>IP and Trade Secret</h3>
                     <p>Capture infringing content before it's taken down. WORM storage ensures the evidence exists even if the original page disappears.</p>
                 </div>
             </div>
@@ -745,12 +852,12 @@
                     <div class="price">$0</div>
                     <div class="price-note">Forever</div>
                     <ul>
-                        <li><i class="fas fa-check"></i> 3 captures / day</li>
+                        <li><i class="fas fa-check"></i> 3 captures per day</li>
                         <li><i class="fas fa-check"></i> Full-page, region, visible</li>
                         <li><i class="fas fa-check"></i> Arrows, shapes, text</li>
                         <li><i class="fas fa-check"></i> SHA-256 hash on every capture</li>
                         <li><i class="fas fa-check"></i> PNG export</li>
-                        <li class="disabled"><i class="fas fa-times"></i> Redaction / stamps</li>
+                        <li class="disabled"><i class="fas fa-times"></i> Redaction and stamps</li>
                         <li class="disabled"><i class="fas fa-times"></i> Cloud preservation</li>
                     </ul>
                     <a href="#" class="btn-pricing outline" id="freeInstallBtn">Install Free</a>
@@ -760,14 +867,14 @@
                 <div class="pricing-card">
                     <h3>Pro</h3>
                     <div class="price">$9 <span>/mo</span></div>
-                    <div class="price-note">For solo attorneys &amp; paralegals</div>
+                    <div class="price-note">Solo attorneys and paralegals</div>
                     <ul>
                         <li><i class="fas fa-check"></i> Unlimited captures</li>
                         <li><i class="fas fa-check"></i> Everything in Free</li>
                         <li><i class="fas fa-check"></i> Redaction (black, blur, pixel)</li>
-                        <li><i class="fas fa-check"></i> Legal stamps &amp; Bates</li>
+                        <li><i class="fas fa-check"></i> Legal stamps and Bates</li>
                         <li><i class="fas fa-check"></i> Voice commands</li>
-                        <li><i class="fas fa-check"></i> OCR + Word export</li>
+                        <li><i class="fas fa-check"></i> OCR and Word export</li>
                         <li><i class="fas fa-check"></i> AES-256 encryption</li>
                         <li class="disabled"><i class="fas fa-times"></i> Cloud preservation</li>
                     </ul>
@@ -778,7 +885,7 @@
                 <div class="pricing-card featured">
                     <h3>Firm</h3>
                     <div class="price">$29 <span>/seat/mo</span></div>
-                    <div class="price-note">WORM storage &amp; chain of custody</div>
+                    <div class="price-note">WORM storage and chain of custody</div>
                     <ul>
                         <li><i class="fas fa-check"></i> Everything in Pro</li>
                         <li><i class="fas fa-check"></i> <strong>Cloud Vault (WORM)</strong></li>
@@ -796,7 +903,7 @@
                 <div class="pricing-card">
                     <h3>Enterprise</h3>
                     <div class="price">$99 <span>/seat/mo</span></div>
-                    <div class="price-note">For AmLaw 200 &amp; large practices</div>
+                    <div class="price-note">AmLaw 200 and large practices</div>
                     <ul>
                         <li><i class="fas fa-check"></i> Everything in Firm</li>
                         <li><i class="fas fa-check"></i> 500 GB per organization</li>
@@ -812,7 +919,7 @@
             </div>
 
             <p style="text-align: center; margin-top: 24px; font-size: 0.8rem; color: var(--text-muted);">
-                All plans include 100% local processing &middot; No data leaves your browser unless you opt into Cloud Vault &middot; <a href="contact.html" style="color: var(--accent);">Volume discounts for 20+ seats</a>
+                All plans include 100% local processing. No data leaves your browser unless you opt into Cloud Vault. <a href="contact.html" style="color: var(--accent);">Volume discounts for 20+ seats</a>
             </p>
         </div>
     </section>
@@ -822,7 +929,7 @@
             <h2>Screenshots are easy. Evidence is hard.</h2>
             <p>SwiftShot turns web captures into court-defensible evidence with hash verification, WORM storage, and full chain of custody. Install free in 10 seconds.</p>
             <div class="hero-actions">
-                <a href="#" class="btn-primary" id="ctaInstallBtn"><i class="fab fa-chrome"></i> Add to Chrome &mdash; Free</a>
+                <a href="#" class="btn-primary" id="ctaInstallBtn"><i class="fab fa-chrome"></i> Add to Chrome — Free</a>
                 <a href="contact.html" class="btn-secondary"><i class="fas fa-calendar"></i> Book a Demo</a>
             </div>
         </div>
@@ -836,7 +943,7 @@
             <a href="/contact">Contact</a>
             <a href="/contact">Support</a>
         </div>
-        <p class="footer-copy">&copy; 2026 AIBridges &middot; SwiftShot &middot; Cranston, RI &middot; (401) 327-2971</p>
+        <p class="footer-copy">2026 AIBridges. SwiftShot. Cranston, RI. (401) 327-2971</p>
     </footer>
 
 </body>

@@ -363,9 +363,9 @@
                 display: none;
             }
         }
-        /* Home button */
+        /* Home button - static at top */
         .home-btn {
-            position: fixed;
+            position: absolute;
             top: 20px;
             left: 20px;
             display: flex;
@@ -396,8 +396,45 @@
             fill: currentColor;
         }
         
+        /* Back to top button - mobile only */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: #000;
+            color: #fff;
+            border: 2px solid #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Courier Prime', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            text-decoration: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        
+        .back-to-top:hover {
+            background: #fff;
+            color: #000;
+        }
+        
+        @media (max-width: 768px) {
+            .back-to-top {
+                display: flex;
+            }
+        }
+        
         @media print {
-            .home-btn { display: none; }
+            .home-btn, .back-to-top { display: none; }
         }
     </style>
 </head>
@@ -598,5 +635,18 @@
             
         </div>
     </div>
+    
+    <a href="#" class="back-to-top" id="backToTop" aria-label="Back to top">^</a>
+    
+    <script>
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+    </script>
 </body>
 </html>

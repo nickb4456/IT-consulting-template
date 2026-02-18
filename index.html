@@ -3989,6 +3989,41 @@
 
     <!-- REDESIGNED SECTIONS - Anti-homogenization approach -->
     <style>
+        /* Feathered/masked tile effect */
+        .feathered-tile {
+            position: relative;
+        }
+        .feathered-tile::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(0, 225, 230, 0.3));
+            filter: blur(20px);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+            border-radius: inherit;
+        }
+        .feathered-tile:hover::before {
+            opacity: 1;
+        }
+        
+        /* Soft glow tiles - always visible subtle glow */
+        .glow-tile {
+            position: relative;
+            overflow: visible;
+        }
+        .glow-tile::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            filter: blur(30px);
+            opacity: 0.3;
+            z-index: -1;
+            border-radius: inherit;
+        }
+        
         /* Rotating border effect */
         .rotating-border-container {
             position: relative;
@@ -4182,7 +4217,7 @@
             <!-- Three distinct blocks, not identical cards -->
             <div class="why-grid-mixed" style="display: grid; gap: 2rem;">
                 <!-- Block 1: Large quote style -->
-                <div style="background: linear-gradient(135deg, rgba(76,105,245,0.1) 0%, rgba(0,225,230,0.05) 100%); border-left: 4px solid var(--primary); padding: 3rem; border-radius: 0 16px 16px 0;">
+                <div class="feathered-tile" style="background: linear-gradient(135deg, rgba(76,105,245,0.1) 0%, rgba(0,225,230,0.05) 100%); border-left: 4px solid var(--primary); padding: 3rem; border-radius: 0 16px 16px 0;">
                     <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
                     <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">It Actually Works</h3>
                     <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; max-width: 600px;">We don't deploy and disappear. Every AI has guardrails — automatic limits, error handling, human escalation. If something breaks at 2am, it fixes itself or alerts us. <em>Not you.</em></p>
@@ -4190,13 +4225,13 @@
                 
                 <!-- Block 2 & 3: Side by side, different styles -->
                 <div class="why-subgrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px;">
+                    <div class="feathered-tile" style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px;">
                         <div style="font-size: 2.5rem; margin-bottom: 1rem;">💰</div>
                         <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;">No Surprise Bills</h3>
                         <p style="color: var(--text-muted); line-height: 1.7;">AI gets expensive fast if nobody's watching. We cap costs upfront, batch requests smartly, and show you exactly what you're paying. No mysteries.</p>
                     </div>
                     
-                    <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px; position: relative; overflow: hidden;">
+                    <div class="feathered-tile" style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px; position: relative; overflow: visible;">
                         <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, rgba(0,225,230,0.2), transparent); pointer-events: none;"></div>
                         <div style="font-size: 2.5rem; margin-bottom: 1rem;">📍</div>
                         <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;">One Person. One Number.</h3>
@@ -4251,7 +4286,7 @@
                 </div>
                 
                 <!-- Visual: Code snippet look -->
-                <div style="background: #0d0d12; border: 1px solid #1a1a24; border-radius: 12px; padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
+                <div class="feathered-tile" style="background: #0d0d12; border: 1px solid #1a1a24; border-radius: 12px; padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
                     <div style="color: #6b7280; margin-bottom: 1rem;"># Your data stays here</div>
                     <div><span style="color: #f97316;">location:</span> <span style="color: #22c55e;">on-premise</span></div>
                     <div><span style="color: #f97316;">cloud_apis:</span> <span style="color: #ef4444;">none</span></div>

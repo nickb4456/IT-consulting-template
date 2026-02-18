@@ -122,21 +122,77 @@
             --poster-color: transparent;
         }
         
-        /* Comparison */
+        /* Comparison with rotating glow */
         .comparison {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: #1a1a1a;
+            gap: 2rem;
             margin: 2rem 0;
         }
         
         .compare-col {
-            background: #0a0a0f;
+            position: relative;
             padding: 1.5rem;
+            background: #0a0a0f;
+            overflow: hidden;
+        }
+        
+        /* Rotating light effect */
+        .compare-col::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            animation: rotateGlow 4s linear infinite;
+            z-index: 0;
+        }
+        
+        .compare-col.bad::before {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(239, 68, 68, 0.4) 30deg,
+                rgba(239, 68, 68, 0.6) 60deg,
+                rgba(239, 68, 68, 0.4) 90deg,
+                transparent 120deg,
+                transparent 360deg
+            );
+        }
+        
+        .compare-col.good::before {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(34, 197, 94, 0.4) 30deg,
+                rgba(34, 197, 94, 0.6) 60deg,
+                rgba(34, 197, 94, 0.4) 90deg,
+                transparent 120deg,
+                transparent 360deg
+            );
+        }
+        
+        /* Inner background to cover the rotating effect except at edges */
+        .compare-col::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: #0a0a0f;
+            z-index: 1;
+        }
+        
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .compare-col h4 {
+            position: relative;
+            z-index: 2;
             font-size: 0.85rem;
             margin-bottom: 1rem;
             color: #666;
@@ -148,6 +204,8 @@
         .compare-col.good h4 { color: #22c55e; }
         
         .compare-item {
+            position: relative;
+            z-index: 2;
             padding: 0.75rem 0;
             border-bottom: 1px solid #151515;
             font-size: 0.9rem;

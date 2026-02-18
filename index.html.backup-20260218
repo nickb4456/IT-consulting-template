@@ -3652,220 +3652,6 @@
             pointer-events: none;
             opacity: 0.8;
         }
-
-        /* ============================================
-           SCROLL TIMELINE - Red Connecting Line
-           ============================================ */
-        .scroll-timeline {
-            --timeline-color: #dc2626;
-            --timeline-glow: rgba(220, 38, 38, 0.4);
-            position: relative;
-            padding: 8rem 2rem;
-            background: #050508;
-            overflow: hidden;
-        }
-
-        .scroll-timeline::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 150px;
-            background: linear-gradient(to bottom, var(--bg-dark), transparent);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .scroll-timeline-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        /* The vertical line track (background) */
-        .timeline-track {
-            position: absolute;
-            left: 60px;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 2px;
-        }
-
-        /* The fill line that grows on scroll */
-        .timeline-fill {
-            position: absolute;
-            left: 60px;
-            top: 0;
-            width: 4px;
-            height: 0%;
-            background: var(--timeline-color);
-            border-radius: 2px;
-            transition: height 0.1s linear;
-            box-shadow: 0 0 20px var(--timeline-glow),
-                        0 0 40px var(--timeline-glow);
-        }
-
-        /* Pulsing glow at the tip */
-        .timeline-fill::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            height: 16px;
-            background: var(--timeline-color);
-            border-radius: 50%;
-            box-shadow: 0 0 20px var(--timeline-color),
-                        0 0 40px var(--timeline-color),
-                        0 0 60px var(--timeline-glow);
-            animation: timelinePulse 2s ease-in-out infinite;
-        }
-
-        @keyframes timelinePulse {
-            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
-            50% { transform: translateX(-50%) scale(1.3); opacity: 0.7; }
-        }
-
-        /* Timeline steps */
-        .timeline-step {
-            display: grid;
-            grid-template-columns: 120px 1fr;
-            gap: 3rem;
-            padding: 4rem 0;
-            position: relative;
-            opacity: 0.3;
-            transform: translateY(30px);
-            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .timeline-step.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Step number on left */
-        .step-number {
-            font-size: 5rem;
-            font-weight: 900;
-            color: var(--timeline-color);
-            line-height: 1;
-            position: relative;
-            text-shadow: 0 0 30px var(--timeline-glow);
-            transition: all 0.4s ease;
-        }
-
-        .timeline-step.active .step-number {
-            text-shadow: 0 0 40px var(--timeline-color),
-                         0 0 80px var(--timeline-glow);
-        }
-
-        /* Step label (Step 1:) */
-        .step-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--timeline-color);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-        /* Step title */
-        .step-title {
-            font-size: 2.2rem;
-            font-weight: 800;
-            line-height: 1.2;
-            margin-bottom: 1rem;
-            color: var(--text);
-        }
-
-        /* Step description */
-        .step-description {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            line-height: 1.8;
-            max-width: 500px;
-        }
-
-        /* Connecting node on the line */
-        .step-node {
-            position: absolute;
-            left: 54px;
-            top: 5rem;
-            width: 16px;
-            height: 16px;
-            background: #050508;
-            border: 3px solid rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transition: all 0.4s ease;
-            z-index: 2;
-        }
-
-        .timeline-step.active .step-node {
-            border-color: var(--timeline-color);
-            background: var(--timeline-color);
-            box-shadow: 0 0 20px var(--timeline-color);
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 768px) {
-            .scroll-timeline {
-                padding: 4rem 1.5rem;
-            }
-
-            .timeline-track,
-            .timeline-fill {
-                left: 30px;
-            }
-
-            .timeline-step {
-                grid-template-columns: 70px 1fr;
-                gap: 1.5rem;
-                padding: 3rem 0;
-            }
-
-            .step-number {
-                font-size: 3rem;
-            }
-
-            .step-node {
-                left: 24px;
-                top: 4rem;
-            }
-
-            .step-title {
-                font-size: 1.5rem;
-            }
-
-            .step-description {
-                font-size: 1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .timeline-track,
-            .timeline-fill {
-                left: 20px;
-            }
-
-            .timeline-step {
-                grid-template-columns: 50px 1fr;
-                gap: 1rem;
-            }
-
-            .step-number {
-                font-size: 2.5rem;
-            }
-
-            .step-node {
-                left: 14px;
-                width: 14px;
-                height: 14px;
-            }
-        }
     </style>
 
     <!-- LocalBusiness Schema for SEO -->
@@ -4065,7 +3851,8 @@
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Navigation menu" aria-hidden="true">
         <a href="#services" data-mobile-link>Services</a>
-        <a href="/providence-law-firms-ai" data-mobile-link>⚖️ Providence Lawyers</a>
+        <a href="/law-firms" data-mobile-link>⚖️ Law Firms</a>
+        <a href="/providence-law-firms-ai" data-mobile-link>📍 Providence Lawyers</a>
         <a href="products.html" data-mobile-link>Products</a>
         <a href="ri-report" data-mobile-link>RI Real Estate</a>
         <a href="realtors-ai" data-mobile-link>Realtors AI</a>
@@ -4082,7 +3869,8 @@
                 <li class="nav-dropdown">
                     <a href="#services" data-nav>Services</a>
                     <div class="dropdown-menu">
-                        <a href="/providence-law-firms-ai">⚖️ Providence Lawyers</a>
+                        <a href="/law-firms">⚖️ Law Firms</a>
+                        <a href="/providence-law-firms-ai">📍 Providence Lawyers</a>
                         <a href="/realtors-ai">🏠 Realtors AI</a>
                         <a href="/ai-consulting">🤖 AI Consulting</a>
                         <a href="/it-support">💻 IT Support</a>
@@ -4106,7 +3894,6 @@
                         <a href="/realtors-ai">🤖 Realtors AI</a>
                         <a href="/youtube-trends">📊 YouTube Trends</a>
                         <a href="/kb.html">📚 Knowledge Base</a>
-                        <a href="/css-tricks.html">🎨 CSS Tricks</a>
                     </div>
                 </li>
                 <li class="nav-dropdown">
@@ -4201,337 +3988,516 @@
         </div>
     </section>
 
-            <!-- ============================================
-         STORY SECTIONS - Clean with green timeline
-         ============================================ -->
-    <style>
-        /* Base */
-        .story {
-            padding: 5rem 2rem;
-            background: #050508;
-        }
-        
-        .story-inner {
-            max-width: 680px;
-            margin: 0 auto;
-        }
-        
-        /* Typography */
-        .story-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            color: #555;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            margin-bottom: 1.5rem;
-        }
-        
-        .story-title {
-            font-size: clamp(1.6rem, 4vw, 2.2rem);
-            font-weight: 700;
-            line-height: 1.3;
-            margin-bottom: 1.5rem;
-            color: #fff;
-        }
-        
-        .story-text {
-            font-size: 1.05rem;
-            color: #888;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-        }
-        
-        .story-em {
-            color: #fff;
-        }
-        
-        /* Green Timeline Section */
-        .timeline-section {
-            padding: 6rem 2rem;
-            background: #050508;
-            position: relative;
-        }
-        
-        .timeline-wrap {
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-        }
-        
-        /* The vertical track */
-        .timeline-track {
-            position: absolute;
-            left: 50px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #1a1a1a;
-        }
-        
-        /* The animated fill */
-        .timeline-fill {
-            position: absolute;
-            left: 50px;
-            top: 0;
-            width: 2px;
-            height: 0%;
-            background: #22c55e;
-            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-            transition: height 0.1s linear;
-        }
-        
-        /* Glow dot at the tip */
-        .timeline-fill::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: -4px;
-            width: 10px;
-            height: 10px;
-            background: #22c55e;
-            border-radius: 50%;
-            box-shadow: 0 0 15px #22c55e, 0 0 30px rgba(34, 197, 94, 0.5);
-        }
-        
-        /* Timeline items */
-        .timeline-item {
-            position: relative;
-            padding: 2.5rem 0 2.5rem 100px;
-            opacity: 0.3;
-            transform: translateY(20px);
-            transition: all 0.5s ease;
-        }
-        
-        .timeline-item.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Node on the line */
-        .timeline-node {
-            position: absolute;
-            left: 43px;
-            top: 3rem;
-            width: 16px;
-            height: 16px;
-            background: #050508;
-            border: 2px solid #333;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-            z-index: 2;
-        }
-        
-        .timeline-item.active .timeline-node {
-            border-color: #22c55e;
-            background: #22c55e;
-            box-shadow: 0 0 10px #22c55e;
-        }
-        
-        .timeline-item h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: #fff;
-        }
-        
-        .timeline-item p {
-            color: #777;
-            line-height: 1.7;
-        }
-        
-        /* Form */
-        .story-form {
-            max-width: 400px;
-            margin: 2rem auto 0;
-        }
-        
-        .story-form input,
-        .story-form textarea {
-            width: 100%;
-            padding: 1rem;
-            background: #0a0a0a;
-            border: 1px solid #222;
-            color: #fff;
-            font-family: inherit;
-            font-size: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .story-form input:focus,
-        .story-form textarea:focus {
-            outline: none;
-            border-color: #22c55e;
-        }
-        
-        .story-form textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-        
-        .story-form button {
-            width: 100%;
-            padding: 1rem;
-            background: #fff;
-            color: #000;
-            border: none;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        
-        .story-form button:hover {
-            background: #22c55e;
-            color: #000;
-        }
-        
-        /* Mobile */
-        @media (max-width: 600px) {
-            .story { padding: 3rem 1.5rem; }
-            .timeline-section { padding: 4rem 1.5rem; }
-            
-            .timeline-track,
-            .timeline-fill {
-                left: 25px;
-            }
-            
-            .timeline-item {
-                padding-left: 60px;
-            }
-            
-            .timeline-node {
-                left: 18px;
-            }
-        }
-    </style>
+    <!-- Neuron Showcase -->
+    <!-- Products Section -->
+    <!-- Services Section -->
+    <section id="services">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <span class="section-badge">Services</span>
+                <h2 class="section-title">AI Services — From Strategy to Deployment</h2>
+                <p class="section-subtitle">AI integrations, cloud infrastructure, custom development, and ongoing support — your complete technology partner.</p>
+            </div>
 
-    <!-- INTRO -->
-    <section class="story">
-        <div class="story-inner">
-            <p class="story-text" style="font-size: 1.15rem;">
-                You started this business to do work you care about. Not to copy-paste data between spreadsheets at 11pm. Not to chase the same invoices every month. Not to answer the same questions over and over.
-            </p>
-            <p class="story-text">
-                But here you are. Buried. Wishing for more hours in the day.
-            </p>
-            <p class="story-text">
-                <span class="story-em">It doesn't have to be this way.</span>
-            </p>
-        </div>
-    </section>
+            <div class="more-services-grid">
+                <a href="service-agent-discovery.html" class="mini-service popular reveal" style="text-decoration: none; color: inherit;">
+                    <h4>🎯 Agent Discovery & Strategy</h4>
+                    <p>We audit your workflows and identify exactly where AI can save you time. You'll get a concrete plan with ROI estimates — no jargon, no fluff.</p>
+                    <ul style="color: var(--text-muted); font-size: 0.85rem; margin: 1rem 0; padding-left: 1.2rem; line-height: 1.8;">
+                        <li>Workflow audit & bottleneck analysis</li>
+                        <li>AI opportunity mapping</li>
+                        <li>Cost/benefit breakdown</li>
+                    </ul>
+                    <span class="price">Free Discovery Call</span>
+                </a>
 
-    <!-- TIMELINE -->
-    <section class="timeline-section">
-        <div class="timeline-wrap">
-            <div class="timeline-track"></div>
-            <div class="timeline-fill" id="timelineFill"></div>
-            
-            <div class="timeline-item" data-step="1">
-                <div class="timeline-node"></div>
-                <h3>You tell us what's eating your time.</h3>
-                <p>A 30-minute call. No pitch. Just us listening to understand your workflows, your bottlenecks, what "done" looks like for you.</p>
+                <a href="service-agent-build.html" class="mini-service popular reveal" style="text-decoration: none; color: inherit;">
+                    <h4>🔧 Agent Build & Deploy</h4>
+                    <p>We build custom AI agents that handle your specific tasks — email triage, document processing, data entry, appointment scheduling, and more.</p>
+                    <ul style="color: var(--text-muted); font-size: 0.85rem; margin: 1rem 0; padding-left: 1.2rem; line-height: 1.8;">
+                        <li>Custom agent development</li>
+                        <li>Integration with your existing tools</li>
+                        <li>Testing & deployment</li>
+                    </ul>
+                    <span class="price">From $400</span>
+                </a>
+
+                <a href="service-agentic-office.html" class="mini-service popular reveal" style="text-decoration: none; color: inherit;">
+                    <h4>🏢 Agentic Office Retainer</h4>
+                    <p>Your AI agents run 24/7 with us monitoring performance, fixing issues, and improving them monthly. Predictable costs with usage caps.</p>
+                    <ul style="color: var(--text-muted); font-size: 0.85rem; margin: 1rem 0; padding-left: 1.2rem; line-height: 1.8;">
+                        <li>24/7 monitoring & maintenance</li>
+                        <li>Monthly optimization reports</li>
+                        <li>Priority support & updates</li>
+                    </ul>
+                    <span class="price">From $500/mo</span>
+                </a>
             </div>
-            
-            <div class="timeline-item" data-step="2">
-                <div class="timeline-node"></div>
-                <h3>We build an AI that works your way.</h3>
-                <p>Custom rules, your existing tools, your voice. You approve everything before it goes live. Nothing changes without your say.</p>
-            </div>
-            
-            <div class="timeline-item" data-step="3">
-                <div class="timeline-node"></div>
-                <h3>Your AI starts handling the repetitive stuff.</h3>
-                <p>Email triage. Document processing. Data entry. Scheduling. It works 24/7, doesn't forget steps, and costs a fraction of an employee.</p>
-            </div>
-            
-            <div class="timeline-item" data-step="4">
-                <div class="timeline-node"></div>
-                <h3>You get your hours back.</h3>
-                <p>The stuff that used to eat your evenings? Handled. The tasks you kept putting off? Done. You focus on the work that actually matters.</p>
+
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="services.html" style="color: var(--text-muted); text-decoration: none; font-size: 0.95rem; padding: 0.75rem 1.5rem; border: 1px solid var(--border); border-radius: 8px; display: inline-block; transition: all 0.3s ease;" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--primary)';this.style.background='rgba(76,105,245,0.1)'" onmouseout="this.style.color='var(--text-muted)';this.style.borderColor='var(--border)';this.style.background='transparent'">
+                    Also: AWS Hosting, IT Support, App Development & more →
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- WHY US -->
-    <section class="story">
-        <div class="story-inner">
-            <p class="story-label">Why Us</p>
-            <h2 class="story-title">We've been where you are.</h2>
-            <p class="story-text">
-                Buried in busywork. Wishing for more hours. We built AI to fix it for ourselves — and now we build it for businesses like yours.
-            </p>
-            <p class="story-text">
-                <span class="story-em">It actually works.</span> Every AI has guardrails — automatic limits, error handling, human escalation when needed. If something breaks at 2am, it fixes itself or alerts us. Not you.
-            </p>
-            <p class="story-text">
-                <span class="story-em">No surprise bills.</span> We cap costs upfront. You'll know exactly what you're paying before anything goes live.
-            </p>
-            <p class="story-text">
-                <span class="story-em">One person. One number.</span> Talk to the same engineer who builds your system — not a support queue. Based in Cranston, RI. Call or text anytime.
-            </p>
+    <!-- AI Demo Section -->
+    <section id="ai-demo" class="ai-demo">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <span class="section-badge">See It In Action</span>
+                <h2 class="section-title">How AI Automates Invoice Processing</h2>
+                <p class="section-subtitle">Watch how AI processes invoices, extracts data, and updates your systems automatically.</p>
+            </div>
+
+            <div class="demo-container">
+                <div class="terminal reveal" id="terminal" role="region" aria-label="AI automation demo terminal">
+                    <div class="terminal-header">
+                        <span class="terminal-dot red" aria-hidden="true"></span>
+                        <span class="terminal-dot yellow" aria-hidden="true"></span>
+                        <span class="terminal-dot green" aria-hidden="true"></span>
+                        <span class="terminal-title">ai-agent — invoice-processor</span>
+                        <div class="terminal-controls">
+                            <button class="terminal-btn ripple" id="soundToggle" aria-label="Toggle typing sounds" aria-pressed="false">🔇 Sound</button>
+                            <button class="terminal-btn ripple" id="replayBtn" aria-label="Replay demo">↻ Replay</button>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="terminal-body" aria-live="polite" aria-atomic="false">
+                        <!-- Lines will be added by JS -->
+                    </div>
+                </div>
+
+                <div class="stats-grid" role="list" aria-label="AI automation statistics">
+                    <div class="stat-card reveal" role="listitem">
+                        <div class="stat-number" data-target="73" aria-label="73 percent">0</div>
+                        <div class="stat-label">Task Automation</div>
+                    </div>
+                    <div class="stat-card reveal" role="listitem">
+                        <div class="stat-number" data-target="89" aria-label="89 percent">0</div>
+                        <div class="stat-label">Accuracy Rate</div>
+                    </div>
+                    <div class="stat-card reveal" role="listitem">
+                        <div class="stat-number" data-target="50" aria-label="50 percent">0</div>
+                        <div class="stat-label">Cost Reduction</div>
+                    </div>
+                    <div class="stat-card reveal" role="listitem">
+                        <div class="stat-number" aria-label="24 hours, 7 days a week">24/7</div>
+                        <div class="stat-label">Availability</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- CTA -->
-    <section class="story" id="contact" style="border-top: 1px solid #1a1a1a;">
-        <div class="story-inner" style="text-align: center;">
-            <h2 class="story-title">Ready to get your hours back?</h2>
-            <p class="story-text" style="max-width: 400px; margin: 0 auto;">
-                Tell us what your team spends too much time on. We'll tell you if AI can help.
-            </p>
-            <form action="https://formspree.io/f/mvzrqler" method="POST" class="story-form">
-                <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
-                <input type="text" name="name" placeholder="Name" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <textarea name="message" placeholder="What tasks eat up your time?" required></textarea>
-                <button type="submit">Get a Free Strategy Call</button>
-            </form>
+    <!-- Why Choose Us -->
+    <section id="why">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <span class="section-badge">Why AIBridges</span>
+                <h2 class="section-title">Why Work With Us</h2>
+                <p class="section-subtitle">We've been where you are — buried in repetitive tasks, wishing for more hours in the day. We built AI to fix that.</p>
+            </div>
+
+            <div class="why-grid" role="list" aria-label="Why choose AIBridges">
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">🛡️</div>
+                    <h3>It Actually Works</h3>
+                    <p>We don't deploy and disappear. Every AI we build has guardrails — automatic limits, error handling, human escalation paths. If something breaks at 2am, it fixes itself or alerts us. Not you.</p>
+                </div>
+
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">💰</div>
+                    <h3>No Surprise Bills</h3>
+                    <p>AI can get expensive fast if nobody's watching. We cap your costs upfront, batch requests smartly, and show you exactly what you're paying for each month. No mysteries.</p>
+                </div>
+
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">📍</div>
+                    <h3>One Person. One Number.</h3>
+                    <p>You'll talk to the same engineer who builds your system — not a support queue, not an account manager reading a script. Based in Cranston. Call or text anytime.</p>
+                </div>
+            </div>
+
+            <div class="industries" role="list" aria-label="Industries we serve">
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">🛒</span> Retail</span>
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">🍽️</span> Restaurants</span>
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">🔧</span> Trades</span>
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">🏥</span> Healthcare</span>
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">⚖️</span> Law Firms</span>
+                <span class="industry-tag" role="listitem"><span aria-hidden="true">💼</span> Professional Services</span>
+            </div>
         </div>
     </section>
 
-    <!-- Timeline scroll animation -->
-    <script>
-    (function() {
-        const section = document.querySelector('.timeline-section');
-        const fill = document.getElementById('timelineFill');
-        const items = document.querySelectorAll('.timeline-item');
-        
-        if (!section || !fill) return;
-        
-        function update() {
-            const rect = section.getBoundingClientRect();
-            const vh = window.innerHeight;
-            
-            // Calculate progress through section
-            const start = -rect.top + vh * 0.3;
-            const end = rect.height - vh * 0.3;
-            let progress = start / end;
-            progress = Math.max(0, Math.min(1, progress));
-            
-            fill.style.height = (progress * 100) + '%';
-            
-            // Activate items as we scroll past
-            items.forEach((item, i) => {
-                const itemRect = item.getBoundingClientRect();
-                if (itemRect.top < vh * 0.65) {
-                    item.classList.add('active');
-                } else {
-                    item.classList.remove('active');
-                }
-            });
-        }
-        
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                requestAnimationFrame(() => { update(); ticking = false; });
-                ticking = true;
+    <!-- Private AI / Local Models Section -->
+    <section id="private-ai" style="padding: 6rem 0; position: relative;">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <span class="section-badge">Private AI</span>
+                <h2 class="section-title">Private AI Deployment — 100% On-Premise</h2>
+                <p class="section-subtitle">For companies with sensitive data — legal, medical, financial — we deploy AI models that run entirely on your hardware. No cloud. No third-party APIs. Complete privacy.</p>
+            </div>
+
+            <div class="why-grid" role="list" aria-label="Private AI benefits">
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">🔒</div>
+                    <h3>Zero Data Exposure</h3>
+                    <p>Models run on your own servers or workstations. Client files, patient records, financial data — nothing ever touches an external API or cloud service.</p>
+                </div>
+
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">🏢</div>
+                    <h3>Built for Sensitive Industries</h3>
+                    <p>Legal, medical, financial — industries where data can't leave the building. We configure air-gapped deployments so your client files stay on your hardware.</p>
+                </div>
+
+                <div class="why-card reveal" role="listitem">
+                    <div class="why-icon" aria-hidden="true">⚡</div>
+                    <h3>Fast & Unlimited</h3>
+                    <p>No per-token fees. No rate limits. No waiting on API queues. Your local models respond instantly and run as many queries as you need — included in setup.</p>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 3rem;">
+                <div class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem;">
+                    <h4 style="color: var(--accent); font-size: 1rem; margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;">What We Deploy</h4>
+                    <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem; line-height: 2;">
+                        <li>&#10003; Llama 3, Mistral, DeepSeek, Phi-4 models</li>
+                        <li>&#10003; Ollama / vLLM runtime setup</li>
+                        <li>&#10003; Document Q&A with local RAG</li>
+                        <li>&#10003; Fine-tuning on your domain data</li>
+                        <li>&#10003; GPU provisioning &amp; optimization</li>
+                    </ul>
+                </div>
+
+                <div class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem;">
+                    <h4 style="color: var(--accent); font-size: 1rem; margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;">Who It's For</h4>
+                    <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem; line-height: 2;">
+                        <li>&#10003; Law firms with privileged documents</li>
+                        <li>&#10003; Medical &amp; dental practices</li>
+                        <li>&#10003; Financial advisors &amp; CPAs</li>
+                        <li>&#10003; Government contractors</li>
+                        <li>&#10003; Any org that can't risk data leaks</li>
+                    </ul>
+                </div>
+
+                <div class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem;">
+                    <h4 style="color: var(--accent); font-size: 1rem; margin-bottom: 1rem; font-family: 'JetBrains Mono', monospace;">How It Works</h4>
+                    <ul style="list-style: none; color: var(--text-muted); font-size: 0.95rem; line-height: 2;">
+                        <li><span style="color:#3fb950;">1.</span> We audit your hardware &amp; needs</li>
+                        <li><span style="color:#3fb950;">2.</span> Select &amp; optimize the right model</li>
+                        <li><span style="color:#3fb950;">3.</span> Deploy on your network (or ours)</li>
+                        <li><span style="color:#3fb950;">4.</span> Train your team to use it</li>
+                        <li><span style="color:#3fb950;">5.</span> Ongoing support &amp; model updates</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="#contact" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; text-decoration: none; font-weight: 600; font-size: 1rem; padding: 14px 32px; border-radius: 12px; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(99,102,241,0.3);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 30px rgba(99,102,241,0.4)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 4px 20px rgba(99,102,241,0.3)'">Get a Free Privacy Consultation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Tools Carousel -->
+    <!-- Testimonials -->
+    <!-- FAQ Section -->
+    <section id="faq" style="padding: 5rem 0; background: var(--bg-dark);">
+        <div class="section-container">
+            <div class="section-header reveal">
+                <span class="section-badge">FAQ</span>
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <p class="section-subtitle">Common questions about our AI solutions and services.</p>
+            </div>
+            <div style="max-width: 800px; margin: 3rem auto 0; display: flex; flex-direction: column; gap: 1rem;">
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">What is an AI agent and how can it help my business? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">An AI agent is software that handles repetitive tasks autonomously — email triage, document processing, data entry, scheduling. It works 24/7, follows your rules, and frees your team to focus on higher-value work. We customize agents to fit your existing workflows.</p>
+                </details>
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">How much does AI integration cost for a small business? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">Our discovery call is free. AI agents start at $400. Managed service starts at $99/month with usage caps so costs stay predictable.</p>
+                </details>
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">Is my data safe with local AI models? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">Yes. We deploy models that run entirely on your own hardware — no cloud APIs, no third-party data sharing. For law firms, medical practices, and financial advisors, this means privileged data never leaves your building.</p>
+                </details>
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">Do you work with law firms? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">Absolutely. Legal tech is one of our core specialties. We've built SwiftShot for evidence capture, CaseVault for settlement data, document processing tools, and private AI deployments specifically for law firms handling sensitive client files.</p>
+                </details>
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">What's included in the Agentic Office retainer? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">The retainer includes 24/7 agent monitoring, monthly performance reports, usage-capped API costs, prompt and workflow improvements, new agent builds as needs arise, and direct access to the engineer managing your system.</p>
+                </details>
+                <details class="reveal" style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; cursor: pointer;">
+                    <summary style="font-weight: 600; font-size: 1.05rem; color: var(--text); list-style: none; display: flex; justify-content: space-between; align-items: center;">Do you serve businesses outside Rhode Island? <span style="color: var(--accent); font-size: 1.2rem;">+</span></summary>
+                    <p style="color: var(--text-muted); margin-top: 1rem; line-height: 1.7;">Yes. While we're based in Cranston, RI and most of our clients are in Rhode Island and New England, we work with businesses across the US remotely. On-site deployment is available in the greater Providence and Boston areas.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <section id="featured-blog" style="padding: 4rem 0; background: linear-gradient(180deg, rgba(20, 20, 35, 1) 0%, var(--bg-dark) 100%); overflow: hidden;">
+        <style>
+            .article-scroll {
+                display: flex;
+                gap: 1.5rem;
+                overflow-x: auto;
+                padding: 2rem 0 3rem;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: thin;
+                scrollbar-color: var(--primary) transparent;
             }
-        });
-        
-        update();
-    })();
-    </script>
+            .article-scroll::-webkit-scrollbar {
+                height: 6px;
+            }
+            .article-scroll::-webkit-scrollbar-track {
+                background: rgba(255,255,255,0.05);
+                border-radius: 3px;
+            }
+            .article-scroll::-webkit-scrollbar-thumb {
+                background: var(--primary);
+                border-radius: 3px;
+            }
+            .scroll-card {
+                flex: 0 0 280px;
+                min-height: 320px;
+                background: rgba(46, 26, 71, 0.95);
+                border-radius: 16px;
+                padding: 1.75rem;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                            box-shadow 0.3s ease,
+                            z-index 0s 0.4s;
+                scroll-snap-align: start;
+                text-decoration: none;
+                display: flex;
+                flex-direction: column;
+                transform-style: preserve-3d;
+                perspective: 1000px;
+            }
+            .scroll-card::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 4px;
+                background: linear-gradient(180deg, #2E1A47, #00E1E6);
+                border-radius: 16px 0 0 16px;
+                transition: width 0.3s ease;
+            }
+            .scroll-card:hover {
+                transform: translateY(-20px) scale(1.05) rotate3d(0, 1, 0, -5deg);
+                box-shadow: 0 25px 50px rgba(0, 81, 230, 0.3), 
+                            10px 10px 30px rgba(0, 225, 230, 0.15);
+                z-index: 10;
+                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                            box-shadow 0.3s ease,
+                            z-index 0s 0s;
+            }
+            .scroll-card:hover::before {
+                width: 6px;
+            }
+            .scroll-card .card-type {
+                font-size: 0.8rem;
+                color: var(--text-muted);
+                margin-bottom: 0.75rem;
+            }
+            .scroll-card .card-type span {
+                color: var(--text);
+                font-weight: 500;
+            }
+            .scroll-card h3 {
+                font-size: 1.15rem;
+                font-weight: 700;
+                color: var(--text);
+                line-height: 1.4;
+                margin-bottom: 1rem;
+                flex: 1;
+            }
+            .scroll-card .card-tag {
+                font-size: 0.75rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--accent);
+                margin-top: auto;
+            }
+            .scroll-header {
+                flex: 0 0 260px;
+                min-height: 320px;
+                background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+                border-radius: 16px;
+                padding: 2rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                scroll-snap-align: start;
+                position: relative;
+                overflow: hidden;
+            }
+            .scroll-header::before {
+                content: '';
+                position: absolute;
+                inset: 3px;
+                background: var(--bg-dark);
+                border-radius: 14px;
+            }
+            .scroll-header > * {
+                position: relative;
+                z-index: 1;
+            }
+            .scroll-header h2 {
+                font-size: 2rem;
+                font-weight: 900;
+                line-height: 1.2;
+                margin-bottom: 1.5rem;
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+            }
+            .scroll-header p {
+                color: var(--text-muted);
+                font-size: 0.9rem;
+            }
+            .scroll-header a {
+                color: var(--accent);
+                text-decoration: none;
+                font-weight: 600;
+            }
+        </style>
+        <div class="section-container">
+            <div class="article-scroll">
+                <!-- Header Card -->
+                <div class="scroll-header">
+                    <h2>Latest Articles</h2>
+                    <p>Powered by</p>
+                    <a href="blog.html">AIBridges Research →</a>
+                </div>
 
+                <!-- Card 0 - RI AI Task Force -->
+                <a href="blog-ri-ai-task-force" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Feb 16, 2026</div>
+                    <h3>RI AI Task Force: What Small Businesses Need to Know</h3>
+                    <div class="card-tag">Policy</div>
+                </a>
+
+                <!-- Card 1 - MA Settlements -->
+                <a href="blog-ma-car-accident-settlements-2026" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
+                    <h3>Average Car Accident Settlement in Massachusetts 2026</h3>
+                    <div class="card-tag">Legal Data</div>
+                </a>
+
+                <!-- Card 2 - CT Settlements -->
+                <a href="blog-ct-car-accident-settlements-2026" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
+                    <h3>Average Car Accident Settlement in Connecticut 2026</h3>
+                    <div class="card-tag">Legal Data</div>
+                </a>
+
+                <!-- Card 3 - AI Consciousness -->
+                <a href="blog-ai-agents-consciousness-moltbook" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Feb 2, 2026</div>
+                    <h3>AI Agents & Consciousness: What the Moltbook Reveals</h3>
+                    <div class="card-tag">AI Research</div>
+                </a>
+
+                <!-- Card 4 - Word Add-ins -->
+                <a href="blog-word-addins-lawyers" class="scroll-card">
+                    <div class="card-type"><span>Guide</span> on Jan 28, 2026</div>
+                    <h3>Word Add-ins for Lawyers: The Complete 2026 Guide</h3>
+                    <div class="card-tag">Legal Tech</div>
+                </a>
+
+                <!-- Card 5 - Document Automation -->
+                <a href="blog-legal-document-automation-2025" class="scroll-card">
+                    <div class="card-type"><span>Guide</span> on Jan 15, 2026</div>
+                    <h3>Legal Document Automation: 2025 Best Practices</h3>
+                    <div class="card-tag">Automation</div>
+                </a>
+
+                <!-- Card 6 - Small Business AI -->
+                <a href="blog-small-business-ai-guide" class="scroll-card">
+                    <div class="card-type"><span>Guide</span> on Jan 10, 2026</div>
+                    <h3>AI for Small Business: A Practical Implementation Guide</h3>
+                    <div class="card-tag">AI Strategy</div>
+                </a>
+
+                <!-- Card 7 - OneDrive Troubleshooting -->
+                <a href="blog-disk-space-onedrive-troubleshooting" class="scroll-card">
+                    <div class="card-type"><span>Tutorial</span> on Jan 5, 2026</div>
+                    <h3>OneDrive Disk Space Issues: The Complete Fix</h3>
+                    <div class="card-tag">IT Support</div>
+                </a>
+
+                <!-- Card 8 - IT Support RI -->
+                <a href="blog-it-support-rhode-island" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Dec 20, 2025</div>
+                    <h3>IT Support in Rhode Island: What Businesses Need in 2026</h3>
+                    <div class="card-tag">Local</div>
+                </a>
+
+                <!-- Card 9 - StaffSync -->
+                <a href="blog-staffsync-free-restaurant-scheduler" class="scroll-card">
+                    <div class="card-type"><span>Product</span> on Dec 15, 2025</div>
+                    <h3>StaffSync: Free Restaurant Staff Scheduling</h3>
+                    <div class="card-tag">Tools</div>
+                </a>
+
+                <!-- Card 10 - Shift Trading -->
+                <a href="blog-shift-trading-restaurant-staff" class="scroll-card">
+                    <div class="card-type"><span>Article</span> on Dec 10, 2025</div>
+                    <h3>Shift Trading for Restaurant Staff: Best Practices</h3>
+                    <div class="card-tag">Operations</div>
+                </a>
+
+                <!-- Card 11 - Sanctus Partnership -->
+                <a href="blog-sanctus-partnership-catholic-couples-app" class="scroll-card">
+                    <div class="card-type"><span>News</span> on Dec 1, 2025</div>
+                    <h3>Sanctus Partnership: Building the Catholic Couples App</h3>
+                    <div class="card-tag">Partnership</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="contact" class="cta-section">
+        <div class="section-container">
+            <div class="cta-content reveal">
+                <h2>Get a Free AI Strategy Consultation</h2>
+                <p>Tell us what your team spends too much time on. We'll show you how AI can streamline it — and what it'll cost. No pressure, no jargon.</p>
+
+                <!-- Contact Form -->
+                <form action="https://formspree.io/f/mvzrqler" method="POST" class="contact-form" style="max-width: 500px; margin: 2rem auto 0; text-align: left;">
+                    <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <input type="text" name="name" placeholder="Your Name" required style="padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; transition: all 0.3s;">
+                        <input type="email" name="email" placeholder="Your Email" required style="padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; transition: all 0.3s;">
+                    </div>
+                    <textarea name="message" placeholder="How can we help?" required style="width: 100%; padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; min-height: 120px; resize: vertical; margin-bottom: 1rem; transition: all 0.3s;"></textarea>
+                    <button type="submit" class="btn btn-primary ripple" style="width: 100%; justify-content: center;">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        Send Message
+                    </button>
+                </form>
+
+                <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
+                    <a href="contact.html" class="btn btn-secondary ripple" role="button" aria-label="Contact AIBridges">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
 
     </main>
 
@@ -8421,64 +8387,6 @@
             card.appendChild(badge);
         }
     });
-
-    // ============================================
-    // SCROLL TIMELINE - Red Line Animation
-    // ============================================
-    (function() {
-        const timelineSection = document.querySelector('.scroll-timeline');
-        const timelineFill = document.getElementById('timelineFill');
-        const timelineSteps = document.querySelectorAll('.timeline-step');
-        
-        if (!timelineSection || !timelineFill || timelineSteps.length === 0) return;
-
-        function updateTimeline() {
-            const sectionRect = timelineSection.getBoundingClientRect();
-            const sectionTop = sectionRect.top;
-            const sectionHeight = sectionRect.height;
-            const windowHeight = window.innerHeight;
-            
-            // Calculate scroll progress through the section
-            // Start filling when section enters viewport, finish when it exits
-            const startOffset = windowHeight * 0.3; // Start when 30% in view
-            const scrollStart = -sectionTop + startOffset;
-            const scrollEnd = sectionHeight - windowHeight * 0.3;
-            
-            let progress = scrollStart / scrollEnd;
-            progress = Math.max(0, Math.min(1, progress));
-            
-            // Update the fill line height
-            timelineFill.style.height = (progress * 100) + '%';
-            
-            // Update step active states based on scroll position
-            timelineSteps.forEach((step, index) => {
-                const stepRect = step.getBoundingClientRect();
-                const stepCenter = stepRect.top + stepRect.height / 2;
-                const threshold = windowHeight * 0.6; // Activate when step is 60% up the viewport
-                
-                if (stepCenter < threshold) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
-        }
-
-        // Throttled scroll listener
-        let ticking = false;
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                requestAnimationFrame(function() {
-                    updateTimeline();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        });
-
-        // Initial check
-        updateTimeline();
-    })();
 
     </script>
 </body>

@@ -11,7 +11,6 @@
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
         body {
             font-family: 'Lato', sans-serif;
             background: #050508;
@@ -19,7 +18,6 @@
             line-height: 1.6;
         }
         
-        /* Nav */
         nav {
             padding: 20px 24px;
             border-bottom: 1px solid #1a1a1a;
@@ -29,96 +27,206 @@
             max-width: 900px;
             margin: 0 auto;
         }
-        
         .logo {
             font-size: 1.3rem;
             font-weight: 700;
             color: #fff;
             text-decoration: none;
         }
-        
         nav a:not(.logo) {
             color: #666;
             text-decoration: none;
             font-size: 0.9rem;
             margin-left: 24px;
         }
-        
         nav a:not(.logo):hover { color: #fff; }
         
-        /* Sections */
         .s {
             padding: 4rem 24px;
             max-width: 700px;
             margin: 0 auto;
         }
         
-        .s-wide {
-            max-width: 900px;
-        }
-        
         .label {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
-            color: #555;
+            color: #444;
             letter-spacing: 3px;
             text-transform: uppercase;
             margin-bottom: 1rem;
         }
         
-        h1 {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
-            font-weight: 700;
-            line-height: 1.2;
-            margin-bottom: 1.5rem;
-        }
-        
-        h2 {
-            font-size: clamp(1.4rem, 3vw, 1.8rem);
+        h1, h2 {
+            font-size: clamp(1.4rem, 3.5vw, 1.9rem);
             font-weight: 700;
             line-height: 1.3;
-            margin-bottom: 1rem;
-        }
-        
-        .lead {
-            font-size: 1.15rem;
-            color: #999;
-            line-height: 1.7;
-            margin-bottom: 1.5rem;
-        }
-        
-        .text {
-            color: #888;
-            line-height: 1.8;
             margin-bottom: 1.25rem;
         }
         
+        .text {
+            color: #777;
+            line-height: 1.85;
+            margin-bottom: 1.25rem;
+            font-size: 1.02rem;
+        }
+        
         .em { color: #fff; }
-        
         .red { color: #ef4444; }
-        
         .green { color: #22c55e; }
         
-        /* Hero grid */
+        /* Scenario box */
+        .scenario {
+            background: #0a0a0f;
+            border-left: 3px solid #22c55e;
+            padding: 1.75rem;
+            margin: 2rem 0;
+        }
+        
+        .scenario-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #22c55e;
+            margin-bottom: 0.75rem;
+        }
+        
+        .scenario-msg {
+            color: #999;
+            font-style: italic;
+            line-height: 1.7;
+        }
+        
+        .scenario-msg strong {
+            color: #fff;
+            font-style: normal;
+        }
+        
+        /* Hero with robot */
         .hero-grid {
             display: grid;
-            grid-template-columns: 1fr 240px;
+            grid-template-columns: 1fr 220px;
             gap: 2rem;
-            align-items: center;
+            align-items: start;
             max-width: 900px;
             margin: 0 auto;
-            padding: 4rem 24px;
+            padding: 4rem 24px 2rem;
         }
         
         .robot {
-            width: 240px;
-            height: 300px;
+            width: 220px;
+            height: 280px;
         }
         
         model-viewer {
             width: 100%;
             height: 100%;
             --poster-color: transparent;
+        }
+        
+        /* Comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: #1a1a1a;
+            margin: 2rem 0;
+        }
+        
+        .compare-col {
+            background: #0a0a0f;
+            padding: 1.5rem;
+        }
+        
+        .compare-col h4 {
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .compare-col.bad h4 { color: #ef4444; }
+        .compare-col.good h4 { color: #22c55e; }
+        
+        .compare-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #151515;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .compare-item:last-child { border-bottom: none; }
+        
+        .compare-item .time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+        
+        .compare-col.bad .time { color: #ef4444; }
+        .compare-col.good .time { color: #22c55e; }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 70px;
+            margin: 2rem 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #22c55e 80%, #1a1a1a);
+        }
+        
+        .step {
+            position: relative;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #111;
+        }
+        
+        .step:last-child { border-bottom: none; }
+        
+        .step-num {
+            position: absolute;
+            left: -70px;
+            top: 1.25rem;
+            width: 32px;
+            height: 32px;
+            background: #050508;
+            border: 2px solid #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #22c55e;
+        }
+        
+        .step h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        
+        .step p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .step .metric {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 2px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
         }
         
         /* Stats */
@@ -128,11 +236,12 @@
             padding: 1.5rem 0;
             border-top: 1px solid #1a1a1a;
             border-bottom: 1px solid #1a1a1a;
-            margin: 1.5rem 0;
+            margin: 2rem 0;
+            flex-wrap: wrap;
         }
         
         .stat-n {
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             font-weight: 700;
         }
         
@@ -143,81 +252,16 @@
             letter-spacing: 1px;
         }
         
-        /* Timeline */
-        .timeline {
-            position: relative;
-            padding-left: 80px;
-            margin: 2rem 0;
-        }
-        
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 30px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: linear-gradient(180deg, #22c55e, #22c55e 80%, #1a1a1a);
-        }
-        
-        .step {
-            position: relative;
-            padding: 1.5rem 0;
-            border-bottom: 1px solid #111;
-        }
-        
-        .step:last-child { border-bottom: none; }
-        
-        .step-num {
-            position: absolute;
-            left: -80px;
-            top: 1.5rem;
-            width: 36px;
-            height: 36px;
-            background: #050508;
-            border: 2px solid #22c55e;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #22c55e;
-        }
-        
-        .step h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .step p {
-            color: #777;
-            line-height: 1.6;
-        }
-        
-        .step .metric {
-            display: inline-block;
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-        
         /* Pricing */
         .price-box {
-            border: 1px solid #222;
+            border: 1px solid #1a1a1a;
             padding: 2rem;
             margin: 2rem 0;
             text-align: center;
         }
         
         .price-main {
-            font-size: 2.5rem;
+            font-size: 2.25rem;
             font-weight: 700;
         }
         
@@ -234,13 +278,13 @@
         
         .price-list li {
             padding: 0.5rem 0;
-            color: #777;
+            color: #666;
             border-bottom: 1px solid #111;
+            font-size: 0.9rem;
         }
         
         .price-list li:last-child { border-bottom: none; }
         
-        /* Button */
         .btn {
             display: inline-block;
             padding: 1rem 2rem;
@@ -266,7 +310,7 @@
             width: 100%;
             padding: 1rem;
             background: #0a0a0a;
-            border: 1px solid #222;
+            border: 1px solid #1a1a1a;
             color: #fff;
             font-family: inherit;
             font-size: 1rem;
@@ -296,13 +340,6 @@
         
         .form button:hover { background: #22c55e; }
         
-        /* Divider */
-        .divider {
-            border-top: 1px solid #1a1a1a;
-            margin: 3rem 0;
-        }
-        
-        /* Footer */
         footer {
             padding: 2rem;
             text-align: center;
@@ -313,35 +350,25 @@
         
         footer a { color: #666; }
         
-        /* Mobile */
         @media (max-width: 700px) {
             .hero-grid {
                 grid-template-columns: 1fr;
                 text-align: center;
             }
             .robot {
-                width: 180px;
-                height: 220px;
+                width: 160px;
+                height: 200px;
                 margin: 0 auto;
                 order: -1;
             }
-            .stats {
-                flex-wrap: wrap;
-                justify-content: center;
+            .comparison {
+                grid-template-columns: 1fr;
             }
-            .timeline {
-                padding-left: 60px;
-            }
-            .timeline::before {
-                left: 20px;
-            }
-            .step-num {
-                left: -60px;
-                width: 30px;
-                height: 30px;
-                font-size: 0.7rem;
-            }
+            .timeline { padding-left: 55px; }
+            .timeline::before { left: 20px; }
+            .step-num { left: -55px; width: 28px; height: 28px; font-size: 0.7rem; }
             nav a:not(.logo) { display: none; }
+            .stats { justify-content: center; }
         }
     </style>
 </head>
@@ -359,23 +386,13 @@
     <div class="hero-grid">
         <div>
             <p class="label">For Rhode Island Realtors</p>
-            <h1>It's 11:47 PM. A lead just texted about 47 Maple Street.</h1>
-            <p class="lead">
-                You're exhausted. You have three showings tomorrow. But if you don't respond in the next <span class="red">5 minutes</span>, that lead goes to someone who will.
+            <h1>Sarah needs comp data before she decides on an offer. It's 10:47 PM.</h1>
+            <p class="text">
+                She's been thinking about 47 Maple Street all day. Her husband just agreed to stretch the budget. But she's nervous — what did similar homes actually sell for? She needs to know tonight, before someone else makes a move.
             </p>
             <p class="text">
-                This is your life. Racing to respond. Juggling calendars. Answering the same questions about school districts and flood zones. You became a realtor to close deals — not to be a 24/7 answering service.
+                She texts you.
             </p>
-            <div class="stats">
-                <div>
-                    <div class="stat-n red">78%</div>
-                    <div class="stat-l">of leads go to first responder</div>
-                </div>
-                <div>
-                    <div class="stat-n red">5 min</div>
-                    <div class="stat-l">response window</div>
-                </div>
-            </div>
         </div>
         <div class="robot">
             <model-viewer
@@ -401,148 +418,166 @@
         </div>
     </div>
 
-    <!-- THE COST -->
+    <!-- THE SCENARIO -->
     <section class="s">
-        <p class="label">The Math</p>
-        <h2>Every missed text is money walking out the door.</h2>
+        <div class="scenario">
+            <div class="scenario-time">10:47 PM</div>
+            <div class="scenario-msg">
+                "Hey, quick question — what did comparable homes near 47 Maple sell for recently? We're thinking of putting in an offer tomorrow but want to make sure we're not overpaying. Also, any flood zone issues I should know about?"
+            </div>
+        </div>
+        
         <p class="text">
-            Average RI home sale: <span class="em">$425,000</span>. Your commission at 2.5%: <span class="em">$10,625</span>.
+            You're exhausted. You had three showings today. The kids are finally asleep. Your phone is charging in the kitchen because you promised yourself you'd stop checking it after 9.
         </p>
         <p class="text">
-            Miss <span class="red">one lead per month</span> because you were asleep, in a showing, or just couldn't respond fast enough? That's <span class="red">$127,500/year</span> you're leaving on the table.
-        </p>
-        <p class="text">
-            And your competitors? They're responding instantly. Because they have help.
+            But Sarah doesn't know that. She just knows she needs an answer.
         </p>
     </section>
 
-    <!-- THE SOLUTION -->
-    <section class="s" id="solution">
-        <p class="label green">The Solution</p>
-        <h2>An AI that responds in 3 seconds. Every time.</h2>
-        <p class="text">
-            Your AI assistant knows every property in Rhode Island. Trained on <span class="em">36,000+ listings</span>. Speaks in your voice. Books showings directly into your calendar. Works while you sleep.
+    <!-- TWO PATHS -->
+    <section class="s" style="border-top: 1px solid #111;">
+        <p class="label">Two Paths</p>
+        <h2>What happens next decides whether you get that commission.</h2>
+        
+        <div class="comparison">
+            <div class="compare-col bad">
+                <h4>Without AI</h4>
+                <div class="compare-item">You see the text at 7:15 AM</div>
+                <div class="compare-item">Pull comps from MLS <span class="time">+12 min</span></div>
+                <div class="compare-item">Check flood maps <span class="time">+6 min</span></div>
+                <div class="compare-item">Type out response <span class="time">+8 min</span></div>
+                <div class="compare-item">Send at 7:45 AM</div>
+                <div class="compare-item" style="color: #ef4444;">Sarah already called another agent at 7:20</div>
+            </div>
+            <div class="compare-col good">
+                <h4>With AI</h4>
+                <div class="compare-item">AI sees text instantly</div>
+                <div class="compare-item">Pulls 5 comparable sales <span class="time">0.8 sec</span></div>
+                <div class="compare-item">Checks flood zone <span class="time">0.2 sec</span></div>
+                <div class="compare-item">Sends personalized response <span class="time">1.5 sec</span></div>
+                <div class="compare-item">Sarah gets answer at 10:47 PM</div>
+                <div class="compare-item" style="color: #22c55e;">You wake up to a confirmed showing</div>
+            </div>
+        </div>
+        
+        <p class="text" style="margin-top: 2rem;">
+            <span class="em">Total time saved: 26 minutes.</span> But that's not the point. The point is Sarah got her answer when she needed it — and she's still your client.
         </p>
+    </section>
+
+    <!-- THE RESPONSE -->
+    <section class="s" style="border-top: 1px solid #111;" id="solution">
+        <p class="label green">What Sarah received at 10:47 PM</p>
+        
+        <div class="scenario" style="border-color: #22c55e;">
+            <div class="scenario-time">10:47 PM — AI Response</div>
+            <div class="scenario-msg">
+                "Great question, Sarah! Here are the 5 most recent comparable sales within 0.5 miles of 47 Maple:
+                <br><br>
+                <strong>• 52 Oak St</strong> — $412K (3bd/2ba, sold 3 weeks ago)<br>
+                <strong>• 31 Maple St</strong> — $398K (3bd/1.5ba, sold 6 weeks ago)<br>
+                <strong>• 19 Birch Ave</strong> — $425K (4bd/2ba, sold 2 months ago)<br>
+                <strong>• 88 Cedar Ln</strong> — $389K (3bd/2ba, sold 2 months ago)<br>
+                <strong>• 7 Maple St</strong> — $415K (3bd/2ba, sold 3 months ago)
+                <br><br>
+                Average: <strong>$408K</strong>. 47 Maple is listed at $399K, which looks competitive.
+                <br><br>
+                Re: flood zone — the property is in <strong>Zone X</strong> (minimal risk). No flood insurance required by lenders.
+                <br><br>
+                Want me to schedule a showing tomorrow so you can see it before deciding? I have 10 AM and 2 PM open."
+            </div>
+        </div>
+        
+        <p class="text">
+            That response would have taken you 26 minutes to research and write. Your AI did it in under 3 seconds — and it sounds exactly like you.
+        </p>
+    </section>
+
+    <!-- TIME SAVINGS -->
+    <section class="s" style="border-top: 1px solid #111;">
+        <p class="label">The Math</p>
+        <h2>26 minutes saved. Per inquiry.</h2>
         
         <div class="timeline">
             <div class="step">
                 <div class="step-num">1</div>
-                <h3>Lead texts at 11:47 PM</h3>
-                <p>"What's the tax rate on 47 Maple St? Any flood risk?"</p>
-                <span class="metric">Response time: 3 seconds</span>
+                <h3>Comp research</h3>
+                <p>Pulling recent sales, filtering by beds/baths/distance, formatting for client</p>
+                <span class="metric">Manual: 12 min → AI: 0.8 sec</span>
             </div>
             <div class="step">
                 <div class="step-num">2</div>
-                <h3>AI responds with real data</h3>
-                <p>"47 Maple is in Zone X (minimal flood risk). Property tax is $6,847/year. The East Greenwich schools are top-rated. Would you like to schedule a showing?"</p>
-                <span class="metric">Accuracy: 98%</span>
+                <h3>Flood/zoning check</h3>
+                <p>Looking up FEMA maps, verifying zone, explaining implications</p>
+                <span class="metric">Manual: 6 min → AI: 0.2 sec</span>
             </div>
             <div class="step">
                 <div class="step-num">3</div>
-                <h3>Showing booked automatically</h3>
-                <p>AI checks your calendar, finds an open slot, sends confirmation to the lead and you.</p>
-                <span class="metric">Time saved: 12 min/lead</span>
-            </div>
-            <div class="step">
-                <div class="step-num">4</div>
-                <h3>You wake up to a qualified showing</h3>
-                <p>Lead is warm. Questions are answered. All you do is show up and close.</p>
-                <span class="metric">Close rate: +34%</span>
+                <h3>Writing response</h3>
+                <p>Composing a helpful, personalized message that doesn't sound robotic</p>
+                <span class="metric">Manual: 8 min → AI: 1.5 sec</span>
             </div>
         </div>
-    </section>
-
-    <!-- PROOF -->
-    <section class="s">
-        <p class="label">The Data</p>
-        <h2>Trained on Rhode Island. Not generic.</h2>
-        <div class="stats" style="justify-content: flex-start;">
+        
+        <p class="text">
+            If you get <span class="em">10 inquiries like this per week</span>, that's <span class="green">4+ hours saved</span>. Per week. Every week.
+        </p>
+        
+        <div class="stats">
+            <div>
+                <div class="stat-n green">4.3 hrs</div>
+                <div class="stat-l">saved weekly</div>
+            </div>
+            <div>
+                <div class="stat-n green">$8,600</div>
+                <div class="stat-l">value at $50/hr</div>
+            </div>
             <div>
                 <div class="stat-n">36K+</div>
                 <div class="stat-l">RI properties</div>
             </div>
-            <div>
-                <div class="stat-n">77</div>
-                <div class="stat-l">towns covered</div>
-            </div>
-            <div>
-                <div class="stat-n">24/7</div>
-                <div class="stat-l">response</div>
-            </div>
         </div>
-        <p class="text">
-            School ratings. Flood zones. Tax records. Recent comps. Your AI knows Rhode Island cold — because we built it on real local data, not generic training sets.
-        </p>
     </section>
 
     <!-- PRICING -->
-    <section class="s" id="pricing">
+    <section class="s" style="border-top: 1px solid #111;" id="pricing">
         <p class="label">Pricing</p>
-        <h2>Costs less than one missed lead.</h2>
+        <h2>Less than one hour of your time. Per month.</h2>
+        
         <div class="price-box">
             <div class="price-main">$400</div>
             <div class="price-sub">one-time setup + $99/mo</div>
             <ul class="price-list">
-                <li>Custom AI trained on your voice and listings</li>
-                <li>36K+ RI property knowledge base</li>
+                <li>AI trained on your voice and style</li>
+                <li>36,000+ RI property knowledge base</li>
                 <li>Instant text and chat response</li>
+                <li>Comp reports, flood zones, school data</li>
                 <li>Calendar integration + auto-scheduling</li>
                 <li>Website chat widget</li>
-                <li>CRM sync</li>
                 <li>Monthly optimization</li>
             </ul>
-            <p class="text" style="margin-bottom: 1rem; font-size: 0.9rem;">
-                ROI: One extra closing pays for <span class="green">8+ years</span> of service.
+            <p class="text" style="font-size: 0.9rem; margin-bottom: 1rem;">
+                ROI: Saves 4+ hours/week. Pays for itself in <span class="green">2 hours</span>.
             </p>
             <a href="#contact" class="btn">Get Started</a>
         </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section class="s">
-        <p class="label">Setup</p>
-        <h2>Live in 48 hours. Not 48 days.</h2>
-        <div class="timeline">
-            <div class="step">
-                <div class="step-num">1</div>
-                <h3>30-minute call</h3>
-                <p>We learn your style, your listings, how you talk to clients.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">2</div>
-                <h3>We build your AI</h3>
-                <p>Train it on your voice. Connect your calendar. Set up workflows.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">3</div>
-                <h3>You test and approve</h3>
-                <p>Try it out. We fine-tune until it sounds exactly like you.</p>
-            </div>
-            <div class="step">
-                <div class="step-num">4</div>
-                <h3>Go live</h3>
-                <p>Connect your number. Never miss a lead again.</p>
-            </div>
-        </div>
-    </section>
-
     <!-- CTA -->
-    <section class="s" id="contact" style="text-align: center; border-top: 1px solid #1a1a1a; padding-top: 4rem;">
-        <h2>Stop losing leads to slower agents.</h2>
+    <section class="s" id="contact" style="text-align: center; border-top: 1px solid #111;">
+        <h2>Stop losing clients to slower agents.</h2>
         <p class="text" style="max-width: 400px; margin: 0 auto;">
-            Every day without instant response is money walking to your competition. Let's fix that.
+            Every late-night text you miss is a commission walking to someone who was faster. Let's fix that.
         </p>
         <form action="https://formspree.io/f/mvzrqler" method="POST" class="form">
             <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
-            <input type="hidden" name="_subject" value="Realtor AI - Urgent">
+            <input type="hidden" name="_subject" value="Realtor AI Inquiry">
             <input type="text" name="name" placeholder="Name" required>
             <input type="email" name="email" placeholder="Email" required>
-            <input type="text" name="phone" placeholder="Phone (for fastest response)">
+            <input type="text" name="phone" placeholder="Phone">
             <button type="submit">Get My AI Assistant</button>
         </form>
-        <p style="margin-top: 1rem; color: #555; font-size: 0.85rem;">
-            Or call: (401) 555-0123
-        </p>
     </section>
 
     <footer>

@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architect | AIBridges</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #050508;
+            color: #fff;
+            overflow: hidden;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            background: #0a0a0f;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .header-stats {
+            display: flex;
+            gap: 24px;
+            font-size: 0.85rem;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .stat-value {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        
+        .stat-label {
+            color: #666;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #222;
+        }
+        
+        .btn-primary {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background: #16a34a;
+        }
+        
+        /* Main Layout */
+        .main {
+            display: flex;
+            height: calc(100vh - 57px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 200px;
+            background: #0a0a0f;
+            border-right: 1px solid #1a1a1a;
+            padding: 16px;
+            overflow-y: auto;
+        }
+        
+        .sidebar h3 {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+        
+        .component-group {
+            margin-bottom: 20px;
+        }
+        
+        .component-group-title {
+            font-size: 0.7rem;
+            color: #444;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .component {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: #111;
+            border: 1px solid #1a1a1a;
+            margin-bottom: 6px;
+            cursor: grab;
+            transition: all 0.2s;
+        }
+        
+        .component:hover {
+            background: #1a1a1a;
+            border-color: #333;
+        }
+        
+        .component:active {
+            cursor: grabbing;
+        }
+        
+        .component-icon {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: #1a1a1a;
+            border-radius: 4px;
+        }
+        
+        .component-name {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
+        /* Canvas */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(30,30,35,0.5) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30,30,35,0.5) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* Placed Components */
+        .placed-component {
+            position: absolute;
+            padding: 12px 16px;
+            background: #111;
+            border: 2px solid #333;
+            cursor: move;
+            min-width: 100px;
+            text-align: center;
+            user-select: none;
+        }
+        
+        .placed-component.selected {
+            border-color: #22c55e;
+        }
+        
+        .placed-component.active {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+        
+        .placed-component .icon {
+            font-size: 24px;
+            margin-bottom: 6px;
+        }
+        
+        .placed-component .name {
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        .placed-component .traffic-indicator {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+        
+        /* Connections */
+        .connection {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .connection-line {
+            stroke: #333;
+            stroke-width: 2;
+            fill: none;
+        }
+        
+        .connection-line.active {
+            stroke: #22c55e;
+        }
+        
+        .traffic-dot {
+            fill: #22c55e;
+            r: 4;
+        }
+        
+        /* Control Bar */
+        .control-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 12px 24px;
+            background: rgba(10, 10, 15, 0.95);
+            border: 1px solid #1a1a1a;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .control-value {
+            font-size: 0.85rem;
+            color: #22c55e;
+            min-width: 50px;
+        }
+        
+        input[type="range"] {
+            width: 100px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #333;
+            border-radius: 2px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #22c55e;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .control-btn {
+            padding: 8px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .control-btn:hover {
+            background: #222;
+        }
+        
+        .control-btn.active {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #000;
+        }
+        
+        .control-btn.danger {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+        
+        .control-btn.danger:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+        
+        /* Right Panel */
+        .right-panel {
+            width: 250px;
+            background: #0a0a0f;
+            border-left: 1px solid #1a1a1a;
+            padding: 16px;
+        }
+        
+        .panel-section {
+            margin-bottom: 20px;
+        }
+        
+        .panel-title {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #111;
+        }
+        
+        .metric-name {
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .metric-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .metric-value.good { color: #22c55e; }
+        .metric-value.warn { color: #eab308; }
+        .metric-value.bad { color: #ef4444; }
+        
+        .log-entry {
+            font-size: 0.75rem;
+            padding: 6px 0;
+            border-bottom: 1px solid #111;
+            color: #666;
+        }
+        
+        .log-entry.error {
+            color: #ef4444;
+        }
+        
+        .log-entry .time {
+            color: #444;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">System Architect</div>
+        <div class="header-stats">
+            <div class="stat">
+                <span class="stat-value" id="rps">0</span>
+                <span class="stat-label">RPS</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="uptime">99.9%</span>
+                <span class="stat-label">Uptime</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value" id="cost">$0.00</span>
+                <span class="stat-label">/hr</span>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button class="btn" onclick="exportDesign()">Export JSON</button>
+            <button class="btn" onclick="clearCanvas()">Clear</button>
+            <button class="btn btn-primary" onclick="toggleSimulation()">Start Simulation</button>
+        </div>
+    </div>
+    
+    <div class="main">
+        <div class="sidebar">
+            <h3>Components</h3>
+            
+            <div class="component-group">
+                <div class="component-group-title">Traffic & Edge</div>
+                <div class="component" draggable="true" data-type="dns" data-cost="0.50">
+                    <div class="component-icon">D</div>
+                    <div class="component-name">DNS</div>
+                </div>
+                <div class="component" draggable="true" data-type="cdn" data-cost="5.00">
+                    <div class="component-icon">C</div>
+                    <div class="component-name">CDN</div>
+                </div>
+                <div class="component" draggable="true" data-type="waf" data-cost="3.00">
+                    <div class="component-icon">W</div>
+                    <div class="component-name">WAF</div>
+                </div>
+                <div class="component" draggable="true" data-type="lb" data-cost="2.50">
+                    <div class="component-icon">L</div>
+                    <div class="component-name">Load Balancer</div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-group-title">Compute</div>
+                <div class="component" draggable="true" data-type="api" data-cost="4.00">
+                    <div class="component-icon">A</div>
+                    <div class="component-name">API Gateway</div>
+                </div>
+                <div class="component" draggable="true" data-type="server" data-cost="8.00">
+                    <div class="component-icon">S</div>
+                    <div class="component-name">App Server</div>
+                </div>
+                <div class="component" draggable="true" data-type="worker" data-cost="6.00">
+                    <div class="component-icon">W</div>
+                    <div class="component-name">Worker</div>
+                </div>
+                <div class="component" draggable="true" data-type="lambda" data-cost="1.00">
+                    <div class="component-icon">λ</div>
+                    <div class="component-name">Lambda</div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-group-title">Storage</div>
+                <div class="component" draggable="true" data-type="db" data-cost="12.00">
+                    <div class="component-icon">D</div>
+                    <div class="component-name">Database</div>
+                </div>
+                <div class="component" draggable="true" data-type="cache" data-cost="4.00">
+                    <div class="component-icon">R</div>
+                    <div class="component-name">Redis Cache</div>
+                </div>
+                <div class="component" draggable="true" data-type="s3" data-cost="2.00">
+                    <div class="component-icon">S</div>
+                    <div class="component-name">Object Storage</div>
+                </div>
+            </div>
+            
+            <div class="component-group">
+                <div class="component-group-title">Messaging</div>
+                <div class="component" draggable="true" data-type="queue" data-cost="1.50">
+                    <div class="component-icon">Q</div>
+                    <div class="component-name">Queue</div>
+                </div>
+                <div class="component" draggable="true" data-type="pubsub" data-cost="2.00">
+                    <div class="component-icon">P</div>
+                    <div class="component-name">Pub/Sub</div>
+                </div>
+                <div class="component" draggable="true" data-type="kafka" data-cost="8.00">
+                    <div class="component-icon">K</div>
+                    <div class="component-name">Kafka</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <svg id="connections" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;"></svg>
+            <div id="canvas"></div>
+            
+            <div class="control-bar">
+                <div class="control-group">
+                    <span class="control-label">Speed</span>
+                    <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1">
+                    <span class="control-value" id="speedValue">1.0x</span>
+                </div>
+                <div class="control-group">
+                    <span class="control-label">Traffic</span>
+                    <input type="range" id="traffic" min="0" max="100" value="50">
+                    <span class="control-value" id="trafficValue">50</span>
+                </div>
+                <button class="control-btn" id="chaosBtn" onclick="toggleChaos()">Chaos</button>
+                <button class="control-btn danger" onclick="injectFailure()">Inject Failure</button>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title">Metrics</div>
+                <div class="metric">
+                    <span class="metric-name">Latency (p50)</span>
+                    <span class="metric-value good" id="p50">12ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">Latency (p99)</span>
+                    <span class="metric-value good" id="p99">45ms</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">Error Rate</span>
+                    <span class="metric-value good" id="errorRate">0.1%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-name">Throughput</span>
+                    <span class="metric-value" id="throughput">1.2K/s</span>
+                </div>
+            </div>
+            
+            <div class="panel-section">
+                <div class="panel-title">Event Log</div>
+                <div id="eventLog">
+                    <div class="log-entry"><span class="time">10:23:01</span> System ready</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let components = [];
+        let connections = [];
+        let selectedComponent = null;
+        let connectingFrom = null;
+        let isSimulating = false;
+        let chaosMode = false;
+        let componentId = 0;
+        
+        const canvas = document.getElementById('canvas');
+        const connectionsSvg = document.getElementById('connections');
+        
+        // Drag and drop from sidebar
+        document.querySelectorAll('.component').forEach(comp => {
+            comp.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('type', comp.dataset.type);
+                e.dataTransfer.setData('cost', comp.dataset.cost);
+                e.dataTransfer.setData('name', comp.querySelector('.component-name').textContent);
+            });
+        });
+        
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const type = e.dataTransfer.getData('type');
+            const cost = parseFloat(e.dataTransfer.getData('cost'));
+            const name = e.dataTransfer.getData('name');
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left - 50;
+            const y = e.clientY - rect.top - 30;
+            
+            addComponent(type, name, x, y, cost);
+        });
+        
+        function addComponent(type, name, x, y, cost) {
+            const id = 'comp-' + (++componentId);
+            const comp = {
+                id,
+                type,
+                name,
+                x,
+                y,
+                cost,
+                health: 100,
+                traffic: 0
+            };
+            components.push(comp);
+            
+            const el = document.createElement('div');
+            el.className = 'placed-component';
+            el.id = id;
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            el.innerHTML = `
+                <div class="icon">${type.charAt(0).toUpperCase()}</div>
+                <div class="name">${name}</div>
+            `;
+            
+            // Make draggable
+            el.addEventListener('mousedown', startDrag);
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectComponent(id);
+            });
+            el.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                startConnection(id);
+            });
+            
+            canvas.appendChild(el);
+            updateCost();
+            log(`Added ${name}`);
+        }
+        
+        let dragOffset = { x: 0, y: 0 };
+        let dragging = null;
+        
+        function startDrag(e) {
+            if (e.target.closest('.placed-component')) {
+                dragging = e.target.closest('.placed-component');
+                const rect = dragging.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+                dragOffset.x = e.clientX - rect.left;
+                dragOffset.y = e.clientY - rect.top;
+                
+                document.addEventListener('mousemove', onDrag);
+                document.addEventListener('mouseup', stopDrag);
+            }
+        }
+        
+        function onDrag(e) {
+            if (!dragging) return;
+            const canvasRect = canvas.getBoundingClientRect();
+            const x = e.clientX - canvasRect.left - dragOffset.x;
+            const y = e.clientY - canvasRect.top - dragOffset.y;
+            
+            dragging.style.left = x + 'px';
+            dragging.style.top = y + 'px';
+            
+            // Update component position
+            const comp = components.find(c => c.id === dragging.id);
+            if (comp) {
+                comp.x = x;
+                comp.y = y;
+            }
+            
+            renderConnections();
+        }
+        
+        function stopDrag() {
+            dragging = null;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+        
+        function selectComponent(id) {
+            document.querySelectorAll('.placed-component').forEach(el => {
+                el.classList.remove('selected');
+            });
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('selected');
+                selectedComponent = id;
+            }
+        }
+        
+        function startConnection(fromId) {
+            if (connectingFrom === null) {
+                connectingFrom = fromId;
+                log(`Connecting from ${fromId}... double-click target`);
+            } else if (connectingFrom !== fromId) {
+                // Create connection
+                connections.push({
+                    from: connectingFrom,
+                    to: fromId,
+                    traffic: 0
+                });
+                log(`Connected ${connectingFrom} → ${fromId}`);
+                connectingFrom = null;
+                renderConnections();
+            } else {
+                connectingFrom = null;
+            }
+        }
+        
+        function renderConnections() {
+            connectionsSvg.innerHTML = '';
+            
+            connections.forEach((conn, i) => {
+                const fromEl = document.getElementById(conn.from);
+                const toEl = document.getElementById(conn.to);
+                if (!fromEl || !toEl) return;
+                
+                const fromRect = fromEl.getBoundingClientRect();
+                const toRect = toEl.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+                
+                const x1 = fromRect.left + fromRect.width / 2 - canvasRect.left;
+                const y1 = fromRect.top + fromRect.height / 2 - canvasRect.top;
+                const x2 = toRect.left + toRect.width / 2 - canvasRect.left;
+                const y2 = toRect.top + toRect.height / 2 - canvasRect.top;
+                
+                // Draw line
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1);
+                line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2);
+                line.setAttribute('y2', y2);
+                line.setAttribute('class', 'connection-line' + (conn.traffic > 0 ? ' active' : ''));
+                connectionsSvg.appendChild(line);
+                
+                // Traffic animation dot
+                if (isSimulating && conn.traffic > 0) {
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('class', 'traffic-dot');
+                    circle.setAttribute('r', '4');
+                    
+                    const animate = document.createElementNS('http://www.w3.org/2000/svg', 'animateMotion');
+                    animate.setAttribute('dur', (2 / parseFloat(document.getElementById('speed').value)) + 's');
+                    animate.setAttribute('repeatCount', 'indefinite');
+                    animate.setAttribute('path', `M${x1},${y1} L${x2},${y2}`);
+                    
+                    circle.appendChild(animate);
+                    connectionsSvg.appendChild(circle);
+                }
+            });
+        }
+        
+        function toggleSimulation() {
+            isSimulating = !isSimulating;
+            const btn = document.querySelector('.btn-primary');
+            btn.textContent = isSimulating ? 'Stop Simulation' : 'Start Simulation';
+            
+            if (isSimulating) {
+                log('Simulation started');
+                simulationLoop();
+            } else {
+                log('Simulation stopped');
+            }
+        }
+        
+        function simulationLoop() {
+            if (!isSimulating) return;
+            
+            const traffic = parseInt(document.getElementById('traffic').value);
+            const speed = parseFloat(document.getElementById('speed').value);
+            
+            // Update RPS
+            const rps = Math.floor(traffic * 20 * speed);
+            document.getElementById('rps').textContent = rps.toLocaleString();
+            
+            // Update connections traffic
+            connections.forEach(conn => {
+                conn.traffic = traffic > 0 ? Math.random() * traffic : 0;
+            });
+            
+            // Update metrics
+            const baseLatency = 10 + (100 - traffic) * 0.1;
+            const p50 = Math.floor(baseLatency + Math.random() * 5);
+            const p99 = Math.floor(baseLatency * 3 + Math.random() * 20);
+            
+            document.getElementById('p50').textContent = p50 + 'ms';
+            document.getElementById('p99').textContent = p99 + 'ms';
+            document.getElementById('p50').className = 'metric-value ' + (p50 < 50 ? 'good' : p50 < 100 ? 'warn' : 'bad');
+            document.getElementById('p99').className = 'metric-value ' + (p99 < 100 ? 'good' : p99 < 200 ? 'warn' : 'bad');
+            
+            // Error rate (higher with chaos)
+            let errorRate = chaosMode ? (Math.random() * 5).toFixed(1) : (Math.random() * 0.5).toFixed(2);
+            document.getElementById('errorRate').textContent = errorRate + '%';
+            document.getElementById('errorRate').className = 'metric-value ' + (errorRate < 1 ? 'good' : errorRate < 3 ? 'warn' : 'bad');
+            
+            // Throughput
+            document.getElementById('throughput').textContent = (rps / 1000).toFixed(1) + 'K/s';
+            
+            // Activate components with traffic
+            document.querySelectorAll('.placed-component').forEach(el => {
+                if (traffic > 30) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+            
+            renderConnections();
+            
+            setTimeout(simulationLoop, 500);
+        }
+        
+        function toggleChaos() {
+            chaosMode = !chaosMode;
+            document.getElementById('chaosBtn').classList.toggle('active', chaosMode);
+            log(chaosMode ? 'Chaos mode enabled' : 'Chaos mode disabled');
+        }
+        
+        function injectFailure() {
+            if (components.length === 0) return;
+            
+            const comp = components[Math.floor(Math.random() * components.length)];
+            const el = document.getElementById(comp.id);
+            if (el) {
+                el.style.borderColor = '#ef4444';
+                el.style.boxShadow = '0 0 20px rgba(239, 68, 68, 0.5)';
+                log(`FAILURE: ${comp.name} is down!`, true);
+                
+                // Update uptime
+                const uptime = (99.9 - Math.random() * 0.5).toFixed(2);
+                document.getElementById('uptime').textContent = uptime + '%';
+                
+                setTimeout(() => {
+                    el.style.borderColor = '';
+                    el.style.boxShadow = '';
+                    log(`${comp.name} recovered`);
+                    document.getElementById('uptime').textContent = '99.9%';
+                }, 3000);
+            }
+        }
+        
+        function updateCost() {
+            const total = components.reduce((sum, c) => sum + c.cost, 0);
+            document.getElementById('cost').textContent = '$' + total.toFixed(2);
+        }
+        
+        function log(msg, isError = false) {
+            const logEl = document.getElementById('eventLog');
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry' + (isError ? ' error' : '');
+            entry.innerHTML = `<span class="time">${time}</span> ${msg}`;
+            logEl.insertBefore(entry, logEl.firstChild);
+            
+            // Keep only last 20 entries
+            while (logEl.children.length > 20) {
+                logEl.removeChild(logEl.lastChild);
+            }
+        }
+        
+        function exportDesign() {
+            const design = { components, connections };
+            const json = JSON.stringify(design, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'system-design.json';
+            a.click();
+            log('Design exported');
+        }
+        
+        function clearCanvas() {
+            components = [];
+            connections = [];
+            canvas.querySelectorAll('.placed-component').forEach(el => el.remove());
+            connectionsSvg.innerHTML = '';
+            updateCost();
+            log('Canvas cleared');
+        }
+        
+        // Update control values
+        document.getElementById('speed').addEventListener('input', (e) => {
+            document.getElementById('speedValue').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+        });
+        
+        document.getElementById('traffic').addEventListener('input', (e) => {
+            document.getElementById('trafficValue').textContent = e.target.value;
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' && selectedComponent) {
+                const idx = components.findIndex(c => c.id === selectedComponent);
+                if (idx > -1) {
+                    components.splice(idx, 1);
+                    document.getElementById(selectedComponent).remove();
+                    connections = connections.filter(c => c.from !== selectedComponent && c.to !== selectedComponent);
+                    renderConnections();
+                    updateCost();
+                    log('Component deleted');
+                    selectedComponent = null;
+                }
+            }
+        });
+        
+        // Click canvas to deselect
+        canvas.addEventListener('click', () => {
+            document.querySelectorAll('.placed-component').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedComponent = null;
+        });
+    </script>
+</body>
+</html>

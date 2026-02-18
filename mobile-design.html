@@ -781,6 +781,110 @@
       transform: translateX(0);
     }
     
+    /* 16. Bouncing Ball Chart */
+    .bounce-chart-demo {
+      width: 260px;
+      height: 140px;
+      position: relative;
+    }
+    .bounce-chart {
+      position: absolute;
+      bottom: 20px;
+      left: 30px;
+      right: 20px;
+      height: 100px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .bounce-chart::before {
+      content: '';
+      position: absolute;
+      left: -20px;
+      bottom: 0;
+      top: -10px;
+      width: 2px;
+      background: var(--ios-gray-3);
+    }
+    .bounce-chart::after {
+      content: '';
+      position: absolute;
+      left: -20px;
+      bottom: 0;
+      right: -10px;
+      height: 2px;
+      background: var(--ios-gray-3);
+    }
+    .chart-bar {
+      flex: 1;
+      background: var(--ios-gray-4);
+      border-radius: 6px 6px 0 0;
+      position: relative;
+    }
+    .chart-bar:nth-child(1) { height: 30%; }
+    .chart-bar:nth-child(2) { height: 50%; }
+    .chart-bar:nth-child(3) { height: 85%; }
+    .chart-bar:nth-child(4) { height: 40%; }
+    .chart-bar:nth-child(5) { height: 25%; }
+    .bounce-ball {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #00D4FF;
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+      animation: ballBounce 4s ease-in-out infinite;
+      left: calc(12px + 50% * 2 + 12px * 2 - 9px);
+      bottom: 85%;
+    }
+    @keyframes ballBounce {
+      0%, 100% { 
+        left: calc(12px * 0 + (100% / 5) * 0.5 - 9px);
+        bottom: calc(30% + 4px);
+        animation-timing-function: ease-out;
+      }
+      10% {
+        bottom: calc(30% + 40px);
+        animation-timing-function: ease-in;
+      }
+      20% {
+        left: calc(12px * 1 + (100% / 5) * 1.5 - 9px);
+        bottom: calc(50% + 4px);
+        animation-timing-function: ease-out;
+      }
+      30% {
+        bottom: calc(50% + 35px);
+        animation-timing-function: ease-in;
+      }
+      40% {
+        left: calc(12px * 2 + (100% / 5) * 2.5 - 9px);
+        bottom: calc(85% + 4px);
+        animation-timing-function: ease-out;
+      }
+      50% {
+        bottom: calc(85% + 25px);
+        animation-timing-function: ease-in;
+      }
+      60% {
+        left: calc(12px * 3 + (100% / 5) * 3.5 - 9px);
+        bottom: calc(40% + 4px);
+        animation-timing-function: ease-out;
+      }
+      70% {
+        bottom: calc(40% + 38px);
+        animation-timing-function: ease-in;
+      }
+      80% {
+        left: calc(12px * 4 + (100% / 5) * 4.5 - 9px);
+        bottom: calc(25% + 4px);
+        animation-timing-function: ease-out;
+      }
+      90% {
+        bottom: calc(25% + 42px);
+        animation-timing-function: ease-in;
+      }
+    }
+    
     /* Footer */
     footer {
       padding: 3rem 2rem;
@@ -799,7 +903,7 @@
 <body>
   <section class="hero">
     <h1>iOS Design Patterns<br>That Go Viral</h1>
-    <p>15 patterns with live demos. Click any to see the code — CSS + SwiftUI.</p>
+    <p>16 patterns with live demos. Click any to see the code — CSS + SwiftUI.</p>
   </section>
   
   <section class="section">
@@ -1075,6 +1179,26 @@
         <div class="pattern-info">
           <div class="pattern-name">Morphing Search</div>
           <div class="pattern-desc">Icon expands into full search. Spring animation.</div>
+        </div>
+      </div>
+      
+      <!-- 16. Bouncing Ball Chart -->
+      <div class="pattern-card" data-pattern="bouncechart">
+        <div class="pattern-preview">
+          <div class="bounce-chart-demo">
+            <div class="bounce-chart">
+              <div class="chart-bar"></div>
+              <div class="chart-bar"></div>
+              <div class="chart-bar"></div>
+              <div class="chart-bar"></div>
+              <div class="chart-bar"></div>
+              <div class="bounce-ball"></div>
+            </div>
+          </div>
+        </div>
+        <div class="pattern-info">
+          <div class="pattern-name">Bouncing Ball Chart <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Data visualization with physics. Mesmerizing loop.</div>
         </div>
       </div>
     </div>
@@ -2419,6 +2543,194 @@ struct MorphingSearch: View {
     Text("All").tag(SearchScope.all)
     Text("Recent").tag(SearchScope.recent)
 }`
+      },
+      
+      bouncechart: {
+        name: 'Bouncing Ball Chart',
+        css: `/* Bouncing ball on bar chart */
+.chart-container {
+  position: relative;
+  width: 300px;
+  height: 200px;
+  padding: 20px 20px 30px 40px;
+}
+
+/* Axes */
+.chart-container::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  bottom: 20px;
+  top: 10px;
+  width: 2px;
+  background: #48484A;
+}
+
+.chart-container::after {
+  content: '';
+  position: absolute;
+  left: 30px;
+  bottom: 20px;
+  right: 10px;
+  height: 2px;
+  background: #48484A;
+}
+
+/* Bars */
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  gap: 16px;
+  position: relative;
+}
+
+.bar {
+  flex: 1;
+  background: #3A3A3C;
+  border-radius: 6px 6px 0 0;
+}
+
+/* Different heights */
+.bar:nth-child(1) { height: 30%; }
+.bar:nth-child(2) { height: 50%; }
+.bar:nth-child(3) { height: 90%; }
+.bar:nth-child(4) { height: 45%; }
+.bar:nth-child(5) { height: 25%; }
+
+/* Bouncing ball */
+.ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #00D4FF;
+  border-radius: 50%;
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+  animation: bounce 4s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    left: 10%;
+    bottom: 30%;
+    animation-timing-function: ease-out;
+  }
+  10% {
+    bottom: 60%;
+    animation-timing-function: ease-in;
+  }
+  20% {
+    left: 30%;
+    bottom: 50%;
+  }
+  30% {
+    bottom: 75%;
+    animation-timing-function: ease-in;
+  }
+  40% {
+    left: 50%;
+    bottom: 90%;
+  }
+  50% {
+    bottom: 100%;
+    animation-timing-function: ease-in;
+  }
+  60% {
+    left: 70%;
+    bottom: 45%;
+  }
+  70% {
+    bottom: 70%;
+    animation-timing-function: ease-in;
+  }
+  80% {
+    left: 90%;
+    bottom: 25%;
+  }
+  90% {
+    bottom: 55%;
+  }
+}
+
+/* Squash effect on landing */
+.ball.squash {
+  transform: scaleX(1.2) scaleY(0.8);
+}`,
+        swift: `import SwiftUI
+
+struct BouncingChartView: View {
+    @State private var ballPosition = 0
+    @State private var ballOffset: CGFloat = 0
+    
+    let barHeights: [CGFloat] = [0.3, 0.5, 0.9, 0.45, 0.25]
+    
+    var body: some View {
+        GeometryReader { geo in
+            let barWidth = (geo.size.width - 80) / 5
+            
+            ZStack(alignment: .bottomLeading) {
+                // Axes
+                Path { path in
+                    // Y axis
+                    path.move(to: CGPoint(x: 30, y: 10))
+                    path.addLine(to: CGPoint(x: 30, y: geo.size.height - 20))
+                    // X axis
+                    path.addLine(to: CGPoint(x: geo.size.width - 10, y: geo.size.height - 20))
+                }
+                .stroke(Color.gray, lineWidth: 2)
+                
+                // Bars
+                HStack(alignment: .bottom, spacing: 12) {
+                    ForEach(0..<5) { i in
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color.gray.opacity(0.4))
+                            .frame(
+                                width: barWidth,
+                                height: barHeights[i] * (geo.size.height - 40)
+                            )
+                    }
+                }
+                .padding(.leading, 40)
+                .padding(.bottom, 20)
+                
+                // Bouncing ball
+                Circle()
+                    .fill(Color.cyan)
+                    .frame(width: 20, height: 20)
+                    .shadow(color: .cyan.opacity(0.6), radius: 10)
+                    .offset(
+                        x: 40 + CGFloat(ballPosition) * (barWidth + 12) + barWidth/2 - 10,
+                        y: -20 - barHeights[ballPosition] * (geo.size.height - 40) - 10 - ballOffset
+                    )
+                    .animation(
+                        .spring(response: 0.4, dampingFraction: 0.6),
+                        value: ballPosition
+                    )
+            }
+        }
+        .onAppear {
+            animateBall()
+        }
+    }
+    
+    func animateBall() {
+        Timer.scheduledTimer(withTimeInterval: 0.8, repeats: true) { _ in
+            withAnimation {
+                ballOffset = 30
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                withAnimation {
+                    ballPosition = (ballPosition + 1) % 5
+                    ballOffset = 0
+                }
+            }
+        }
+    }
+}
+
+// With haptic on each bounce
+UIImpactFeedbackGenerator(style: .soft).impactOccurred()`
       }
     };
     

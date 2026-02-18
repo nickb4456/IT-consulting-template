@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Tricks & Techniques | AIBridges Lab</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --card: rgba(20, 20, 35, 0.9);
+            --border: rgba(99, 102, 241, 0.2);
+            --text: #f0f0f5;
+            --muted: #8b8598;
+            --accent: #6366f1;
+            --accent2: #00E1E6;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+        }
+        
+        .updated {
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        
+        .updated span {
+            color: var(--accent2);
+        }
+        
+        /* Trick Card */
+        .trick {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .trick-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .trick-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .trick-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+        }
+        
+        .trick-demo {
+            padding: 3rem 2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+            background: rgba(0,0,0,0.2);
+        }
+        
+        .trick-code {
+            padding: 1.5rem 2rem;
+            background: #0d0d12;
+            border-top: 1px solid var(--border);
+        }
+        
+        .trick-code pre {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            overflow-x: auto;
+            color: #e2e8f0;
+        }
+        
+        .trick-code .comment { color: #6b7280; }
+        .trick-code .property { color: #f97316; }
+        .trick-code .value { color: #22c55e; }
+        .trick-code .selector { color: #a78bfa; }
+        
+        .trick-source {
+            padding: 1rem 2rem;
+            background: rgba(99, 102, 241, 0.05);
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        
+        .trick-source a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        
+        .trick-source a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Back link */
+        .back {
+            display: inline-block;
+            margin-bottom: 2rem;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .back:hover {
+            color: var(--text);
+        }
+        
+        /* Empty state */
+        .empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        /* === TRICK STYLES === */
+        /* Each trick's CSS goes here */
+        
+        /* Trick 1: Gradient Text Animation */
+        .gradient-flow {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #6366f1, #00E1E6, #f472b6, #6366f1);
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 4s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        
+        /* Rotating Border */
+        .rotating-border {
+          position: relative;
+          padding: 1.5rem 2rem;
+          background: #0a0a0f;
+          border-radius: 12px;
+          overflow: hidden;
+        }
+        .rotating-border::before {
+          content: '';
+          position: absolute;
+          inset: -50%;
+          background: conic-gradient(from 0deg, transparent, #6366f1, transparent 30%);
+          animation: rotate 3s linear infinite;
+        }
+        .rotating-border::after {
+          content: attr(data-text);
+          position: absolute;
+          inset: 2px;
+          background: #0a0a0f;
+          border-radius: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        @keyframes rotate {
+          to { transform: rotate(360deg); }
+        }
+
+/* TRICKS_CSS_MARKER - New tricks get inserted above this line */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back">← Back to AIBridges</a>
+        
+        <header>
+            <h1>CSS Tricks & Techniques</h1>
+            <p class="subtitle">A daily collection of creative CSS patterns and effects</p>
+            <p class="updated">Auto-updated daily · Last: <span id="lastUpdate">Feb 18, 2026</span></p>
+        </header>
+        
+        <main id="tricks">
+            <!-- Trick 1: Gradient Text Animation -->
+            <article class="trick">
+                <div class="trick-header">
+                    <h2 class="trick-title">Animated Gradient Text</h2>
+                    <span class="trick-date">Feb 18, 2026</span>
+                </div>
+                <div class="trick-demo">
+                    <span class="gradient-flow">Hello World</span>
+                </div>
+                <div class="trick-code">
+<pre><span class="selector">.gradient-flow</span> {
+    <span class="property">background</span>: <span class="value">linear-gradient(90deg, #6366f1, #00E1E6, #f472b6, #6366f1)</span>;
+    <span class="property">background-size</span>: <span class="value">300% 100%</span>;
+    <span class="property">-webkit-background-clip</span>: <span class="value">text</span>;
+    <span class="property">-webkit-text-fill-color</span>: <span class="value">transparent</span>;
+    <span class="property">animation</span>: <span class="value">gradient-shift 4s ease infinite</span>;
+}
+
+<span class="selector">@keyframes gradient-shift</span> {
+    <span class="value">0%, 100%</span> { <span class="property">background-position</span>: <span class="value">0% 50%</span>; }
+    <span class="value">50%</span> { <span class="property">background-position</span>: <span class="value">100% 50%</span>; }
+}</pre>
+                </div>
+                <div class="trick-source">
+                    Inspired by: <a href="https://css-tricks.com" target="_blank">CSS-Tricks</a>
+                </div>
+            </article>
+
+            
+            <!-- Rotating Border -->
+            <article class="trick">
+                <div class="trick-header">
+                    <h2 class="trick-title">Rotating Border</h2>
+                    <span class="trick-date">Feb 18, 2026</span>
+                </div>
+                <div class="trick-demo">
+                    <div class="rotating-border" data-text="Spinning!"></div>
+                </div>
+                <div class="trick-code">
+<pre>.rotating-border {
+  position: relative;
+  padding: 1.5rem 2rem;
+  background: #0a0a0f;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.rotating-border::before {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg, transparent, #6366f1, transparent 30%);
+  animation: rotate 3s linear infinite;
+}
+.rotating-border::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 2px;
+  background: #0a0a0f;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@keyframes rotate {
+  to { transform: rotate(360deg); }
+}</pre>
+                </div>
+                <div class="trick-source">
+                    Source: <a href="https://codepen.io/trending" target="_blank">https://codepen.io/trending</a>
+                </div>
+            </article>
+
+<!-- TRICKS_HTML_MARKER - New tricks get inserted above this line -->
+        </main>
+        
+        <footer style="text-align: center; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem;">
+            <p>Curated by <a href="/" style="color: var(--accent); text-decoration: none;">AIBridges</a> · Updated daily via cron</p>
+        </footer>
+    </div>
+</body>
+</html>

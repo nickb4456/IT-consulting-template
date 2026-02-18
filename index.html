@@ -4391,45 +4391,94 @@
             right: 0;
         }
         
-        /* Service cards grid */
+        /* Service cards grid - Feathered edges */
         .services-grid-new {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 2rem;
             margin: 2.5rem 0;
         }
         
         .service-card-new {
-            background: #0a0a0f;
-            border: 1px solid #1a1a1a;
-            border-radius: 16px;
-            padding: 2rem;
-            transition: all 0.3s ease;
+            background: linear-gradient(180deg, rgba(20, 25, 20, 0.9) 0%, rgba(10, 15, 10, 0.6) 100%);
+            padding: 2.5rem 2rem;
+            transition: all 0.4s ease;
             text-align: center;
+            position: relative;
+            border: none;
+            border-radius: 0;
+        }
+        
+        /* Feathered edge effect using mask */
+        .service-card-new::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, transparent 50%, rgba(34, 197, 94, 0.05) 100%);
+            mask-image: 
+                linear-gradient(to right, transparent, black 15%, black 85%, transparent),
+                linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            mask-composite: intersect;
+            -webkit-mask-image: 
+                linear-gradient(to right, transparent, black 15%, black 85%, transparent),
+                linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            -webkit-mask-composite: source-in;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .service-card-new:hover::before {
+            opacity: 1;
+        }
+        
+        /* Soft glow line at top */
+        .service-card-new::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), transparent);
+            transition: all 0.4s ease;
+        }
+        
+        .service-card-new:hover::after {
+            left: 10%;
+            right: 10%;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.6), transparent);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
         }
         
         .service-card-new:hover {
-            border-color: #22c55e;
             transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(34, 197, 94, 0.1);
+            background: linear-gradient(180deg, rgba(25, 35, 25, 0.95) 0%, rgba(15, 20, 15, 0.7) 100%);
         }
         
         .service-card-new .icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
+            font-size: 2rem;
+            margin-bottom: 1.25rem;
             display: block;
+            color: #22c55e;
+            transition: transform 0.3s ease;
+        }
+        
+        .service-card-new:hover .icon {
+            transform: scale(1.1);
         }
         
         .service-card-new h3 {
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             margin-bottom: 0.75rem;
             color: #fff;
+            font-weight: 700;
         }
         
         .service-card-new p {
-            color: #666;
+            color: #777;
             font-size: 0.9rem;
-            line-height: 1.6;
+            line-height: 1.7;
         }
         
         @media (max-width: 768px) {
@@ -4758,62 +4807,64 @@
         }
     </style>
 
-    <!-- STATS BAR -->
-    <section class="story" style="padding-top: 4rem; padding-bottom: 0;">
+    <!-- THE HOOK - Expanded Story -->
+    <section class="story" style="padding-top: 5rem;">
         <div class="story-inner">
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-number">15+</div>
-                    <div class="stat-label">Years Experience</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">500+</div>
-                    <div class="stat-label">Problems Solved</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">&lt;1 min</div>
-                    <div class="stat-label">Avg Response</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">100%</div>
-                    <div class="stat-label">Rhode Island</div>
-                </div>
-            </div>
+            <p class="story-label">A True Story</p>
             
-            <div class="trust-badges">
-                <div class="trust-badge"><i class="fas fa-shield-alt"></i> Insured & Bonded</div>
-                <div class="trust-badge"><i class="fas fa-map-marker-alt"></i> Based in Cranston</div>
-                <div class="trust-badge"><i class="fas fa-clock"></i> Same-Day Service</div>
-                <div class="trust-badge"><i class="fas fa-phone"></i> Direct Line — No Hold</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- THE HOOK -->
-    <section class="story">
-        <div class="story-inner">
             <div class="scenario-card">
-                <div class="scenario-icon"><i class="fas fa-phone-slash" style="color: #ef4444;"></i></div>
-                <div class="scenario-time">Monday, 8:47 AM</div>
-                <p style="color: #999; line-height: 1.8; margin-top: 1rem;">
-                    Your internet is down. Email won't sync. Three employees are standing around waiting. You call your "IT support" — the one you found online with the great reviews.
+                <div class="scenario-time">Monday, 8:47 AM — Providence, RI</div>
+                <p style="color: #999; line-height: 1.9; margin-top: 1rem; font-size: 1.05rem;">
+                    The internet went down at 8:30. By 8:47, Sarah had three employees standing around her desk asking when it would be fixed. The quarterly report was due at noon. Two clients were waiting for callbacks. The office printer had picked this exact moment to start blinking red.
                 </p>
-                <p style="margin-top: 1.25rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444;">
-                    <strong style="color: #ef4444;">Press 1 for billing. Press 2 for technical support. Press 3 to leave a callback number.</strong><br>
-                    <span style="color: #888;">Current wait time: <strong style="color: #fff;">47 minutes.</strong></span>
+                <p style="color: #999; line-height: 1.9; margin-top: 1rem; font-size: 1.05rem;">
+                    She called their IT company — the one with the 4.8-star rating and the "24/7 emergency support" promise on their website.
+                </p>
+                <p style="margin-top: 1.5rem; padding: 1.25rem; background: rgba(239, 68, 68, 0.08); border-left: 3px solid #ef4444;">
+                    <span style="color: #ef4444; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem;">AUTOMATED VOICE:</span><br>
+                    <span style="color: #888; font-style: italic;">"Press 1 for billing. Press 2 for technical support. Press 3 to leave a callback number. Current wait time is... forty-seven minutes."</span>
                 </p>
             </div>
             
-            <p class="story-text">
-                You've been here before. The hold music. The ticket numbers. The technician who's never heard of your business and asks you to "start from the beginning" every single time.
+            <p class="story-text" style="margin-top: 2.5rem;">
+                Forty-seven minutes. With three employees doing nothing. With clients waiting. With a deadline in three hours.
             </p>
             
-            <div class="big-quote">
-                I finally fixed the IT nightmares that were ruining my Monday mornings.
+            <p class="story-text">
+                She pressed 2. The hold music started — that same loop she'd heard a dozen times before. When someone finally answered, it was a technician she'd never spoken to. He asked her to explain the problem from the beginning. He asked what router model they had. He asked if she'd tried restarting it.
+            </p>
+            
+            <p class="story-text">
+                <strong style="color: #fff;">"We restarted it three times,"</strong> she said. <strong style="color: #fff;">"It's not the router."</strong>
+            </p>
+            
+            <p class="story-text">
+                He put her on hold again. Fifteen more minutes. When he came back, he said someone could come out — <span style="color: #ef4444;">Thursday</span>. Maybe Wednesday if they had a cancellation.
+            </p>
+            
+            <p class="story-text">
+                The quarterly report was due in two hours.
+            </p>
+            
+            <div style="margin: 3rem 0; padding: 2rem; background: linear-gradient(135deg, rgba(34, 197, 94, 0.08), rgba(34, 197, 94, 0.02)); border-left: 3px solid #22c55e;">
+                <p style="color: #22c55e; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 0.75rem;">THE NEXT WEEK</p>
+                <p style="color: #ccc; line-height: 1.8; font-size: 1.05rem;">
+                    Sarah found my number through a referral. When her internet went down again the following Monday — different problem this time, same panic — she texted me at 8:52 AM.
+                </p>
+                <p style="color: #ccc; line-height: 1.8; font-size: 1.05rem; margin-top: 1rem;">
+                    I called back in under a minute. Diagnosed the issue remotely in ten minutes. It was a configuration problem with their ISP — something the call center tech would have figured out eventually, maybe, if he'd known their setup. I knew their setup. I'd seen it before.
+                </p>
+                <p style="color: #fff; line-height: 1.8; font-size: 1.1rem; margin-top: 1.25rem; font-weight: 600;">
+                    Her team was back online by 9:15.
+                </p>
             </div>
             
-            <p class="story-text" style="text-align: center;">
-                There's a reason local IT support still exists. <span class="story-em">Some problems need a person who shows up.</span>
+            <div class="big-quote">
+                "I finally fixed the IT nightmares that were ruining my Monday mornings."
+            </div>
+            
+            <p class="story-text" style="text-align: center; font-size: 1.1rem;">
+                There's a reason local IT support still exists. <span class="story-em">Some problems need a person who knows your business.</span>
             </p>
         </div>
     </section>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAG-2026-0218-001 | Air-Gapped Local AI Deployment Guide</title>
+    <meta name="description" content="Technical guide for deploying Ollama in an air-gapped configuration for law firms requiring complete data isolation. No internet access after setup.">
+    <meta name="keywords" content="Ollama air-gapped, local AI law firm, private LLM deployment, offline AI, attorney-client privilege AI, secure AI deployment">
+    <link rel="canonical" href="https://aibridges.org/ollama-airgap-guide">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+            background: #fff;
+            color: #000;
+            line-height: 1.6;
+            font-size: 12px;
+        }
+        
+        .page {
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 1in;
+            background: #fff;
+        }
+        
+        @media print {
+            .page { padding: 0.5in; }
+        }
+        
+        @media (max-width: 768px) {
+            .page { padding: 1rem; }
+            .meta-grid { grid-template-columns: 1fr; }
+        }
+        
+        .header-block {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px double #000;
+        }
+        
+        .classification {
+            font-size: 11px;
+            letter-spacing: 0.4em;
+            border: 2px solid #000;
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+        
+        .agency-name {
+            font-size: 10px;
+            letter-spacing: 0.3em;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        
+        .title {
+            font-family: 'Special Elite', monospace;
+            font-size: 16px;
+            margin: 0.5rem 0;
+            text-transform: uppercase;
+        }
+        
+        .doc-id {
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            margin-top: 0.5rem;
+        }
+        
+        .divider {
+            border: none;
+            border-top: 1px dashed #000;
+            margin: 1.5rem 0;
+        }
+        
+        .divider-thick {
+            border: none;
+            border-top: 2px solid #000;
+            margin: 2rem 0;
+        }
+        
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 11px;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            border: 1px solid #000;
+        }
+        
+        .meta-label {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .section-header {
+            font-family: 'Special Elite', monospace;
+            font-size: 13px;
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid #000;
+            text-transform: uppercase;
+        }
+        
+        .section-number {
+            font-weight: bold;
+        }
+        
+        .finding-box {
+            border: 1px solid #000;
+            padding: 1rem;
+            margin: 1rem 0;
+            background: #fff;
+        }
+        
+        .finding-box.highlight {
+            border-width: 2px;
+            border-style: double;
+        }
+        
+        .finding-box.warning {
+            border-left: 4px solid #000;
+        }
+        
+        .finding-header {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            border: 1px solid #000;
+            padding: 0.5rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        
+        th {
+            background: #000;
+            color: #fff;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .code-block {
+            background: #fff;
+            border: 1px solid #000;
+            font-family: 'Courier Prime', monospace;
+            font-size: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            white-space: pre;
+        }
+        
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        li {
+            margin-bottom: 0.25rem;
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            padding-top: 1rem;
+            border-top: 3px double #000;
+            font-size: 10px;
+            text-align: center;
+        }
+        
+        .stamp {
+            border: 3px solid #000;
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            margin-top: 1rem;
+            transform: rotate(-2deg);
+            font-family: 'Special Elite', monospace;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+        }
+        
+        p { margin: 0.5rem 0; }
+        
+        strong { text-transform: uppercase; letter-spacing: 0.02em; }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: #000;
+            text-decoration: none;
+            font-size: 11px;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <a href="/law-firms" class="back-link">← Back to Law Firms</a>
+        
+        <div class="header-block">
+            <div class="classification">TECHNICAL GUIDANCE</div>
+            <div class="agency-name">AIBridges Security Division</div>
+            <div class="title">Air-Gapped Local AI Deployment</div>
+            <div class="title">Ollama Configuration Guide</div>
+            <div class="doc-id">DOCUMENT NO: OAG-2026-0218-001</div>
+        </div>
+        
+        <div class="meta-grid">
+            <div><span class="meta-label">Date:</span> 2026-02-18</div>
+            <div><span class="meta-label">Classification:</span> UNCLASSIFIED</div>
+            <div><span class="meta-label">Platforms:</span> Linux, Windows, macOS</div>
+            <div><span class="meta-label">Compliance:</span> Attorney-Client Privilege</div>
+            <div><span class="meta-label">Author:</span> AIBridges Technical Team</div>
+            <div><span class="meta-label">Version:</span> 1.0</div>
+        </div>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">1.</span> Executive Summary</div>
+        
+        <p>This document provides technical guidance for deploying Ollama, an open-source local AI inference engine, in an air-gapped configuration. Air-gapping ensures that after initial setup, the AI system has <strong>zero internet connectivity</strong>, guaranteeing that sensitive client data never leaves the local machine.</p>
+        
+        <div class="finding-box highlight">
+            <div class="finding-header">Key Benefits for Legal Practice</div>
+            <ul>
+                <li><strong>Attorney-Client Privilege:</strong> Data processed locally, never transmitted</li>
+                <li><strong>Compliance:</strong> Meets data residency and confidentiality requirements</li>
+                <li><strong>Verification:</strong> Provable isolation via firewall rules</li>
+                <li><strong>Cost:</strong> No per-token API fees after initial setup</li>
+            </ul>
+        </div>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">2.</span> System Requirements</div>
+        
+        <table>
+            <tr>
+                <th>Component</th>
+                <th>Minimum</th>
+                <th>Recommended</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td>RAM</td>
+                <td>8 GB</td>
+                <td>16-32 GB</td>
+                <td>More RAM = larger models</td>
+            </tr>
+            <tr>
+                <td>Storage</td>
+                <td>20 GB free</td>
+                <td>50+ GB free</td>
+                <td>Models range 2-40GB each</td>
+            </tr>
+            <tr>
+                <td>CPU</td>
+                <td>4 cores</td>
+                <td>8+ cores</td>
+                <td>Apple Silicon preferred</td>
+            </tr>
+            <tr>
+                <td>GPU</td>
+                <td>Optional</td>
+                <td>NVIDIA 8GB+</td>
+                <td>10-50x faster inference</td>
+            </tr>
+            <tr>
+                <td>OS</td>
+                <td colspan="3">Windows 10/11, macOS 12+, Ubuntu 20.04+</td>
+            </tr>
+        </table>
+        
+        <div class="finding-box">
+            <div class="finding-header">Recommended Hardware for Law Firms</div>
+            <p><strong>Mac Mini M4 Pro (24GB):</strong> $1,399 — Runs 7-13B models smoothly. Silent, low power, fits in server closet. Recommended for small-to-medium firms.</p>
+            <p><strong>Mac Mini M4 Pro (64GB):</strong> $2,199 — Runs 70B models. For larger firms or complex document analysis.</p>
+        </div>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">3.</span> Installation — Linux (Ubuntu/Debian)</div>
+        
+        <p><strong>Step 3.1:</strong> Install Ollama</p>
+        <div class="code-block">curl -fsSL https://ollama.com/install.sh | sh</div>
+        
+        <p><strong>Step 3.2:</strong> Download Models (While Online)</p>
+        <div class="code-block"># Recommended for legal document analysis
+ollama pull llama3.2        # 8B general purpose
+ollama pull llama3.2:3b     # 3B lighter model
+
+# For code/contract analysis
+ollama pull codellama:7b</div>
+        
+        <p><strong>Step 3.3:</strong> Verify Installation</p>
+        <div class="code-block">echo "Summarize attorney-client privilege" | ollama run llama3.2:3b</div>
+        
+        <p><strong>Step 3.4:</strong> Enable Air-Gap (Block Internet)</p>
+        <div class="code-block"># Get ollama user ID
+OLLAMA_UID=$(id -u ollama)
+
+# Allow localhost only, block all external
+sudo iptables -I OUTPUT 1 -m owner --uid-owner $OLLAMA_UID -d 127.0.0.0/8 -j ACCEPT
+sudo iptables -I OUTPUT 2 -m owner --uid-owner $OLLAMA_UID -j DROP</div>
+        
+        <p><strong>Step 3.5:</strong> Persist Firewall Rules</p>
+        <div class="code-block">cat &lt;&lt; 'EOF' | sudo tee /etc/network/if-pre-up.d/ollama-firewall
+#!/bin/bash
+OLLAMA_UID=$(id -u ollama 2>/dev/null || echo 997)
+iptables -I OUTPUT 1 -m owner --uid-owner $OLLAMA_UID -d 127.0.0.0/8 -j ACCEPT
+iptables -I OUTPUT 2 -m owner --uid-owner $OLLAMA_UID -j DROP
+EOF
+sudo chmod +x /etc/network/if-pre-up.d/ollama-firewall</div>
+        
+        <p><strong>Step 3.6:</strong> Verify Air-Gap</p>
+        <div class="code-block"># Should FAIL (blocked)
+sudo -u ollama curl -s --connect-timeout 5 https://ollama.com || echo "BLOCKED ✓"
+
+# Should WORK (local)
+curl http://localhost:11434/api/tags</div>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">4.</span> Installation — Windows</div>
+        
+        <p><strong>Step 4.1:</strong> Download Installer</p>
+        <div class="code-block">https://ollama.com/download/windows</div>
+        <p>Run the .exe installer. Ollama will install to <code>C:\Users\[USERNAME]\AppData\Local\Ollama</code></p>
+        
+        <p><strong>Step 4.2:</strong> Download Models (PowerShell)</p>
+        <div class="code-block">ollama pull llama3.2
+ollama pull llama3.2:3b</div>
+        
+        <p><strong>Step 4.3:</strong> Enable Air-Gap via Windows Firewall</p>
+        <div class="code-block"># PowerShell (Run as Administrator)
+
+# Block Ollama outbound
+New-NetFirewallRule -DisplayName "Block Ollama Outbound" `
+    -Direction Outbound `
+    -Program "C:\Users\$env:USERNAME\AppData\Local\Ollama\ollama.exe" `
+    -Action Block
+
+# Allow localhost only
+New-NetFirewallRule -DisplayName "Allow Ollama Localhost" `
+    -Direction Outbound `
+    -Program "C:\Users\$env:USERNAME\AppData\Local\Ollama\ollama.exe" `
+    -RemoteAddress 127.0.0.1 `
+    -Action Allow</div>
+        
+        <p><strong>Step 4.4:</strong> Alternative — Windows Firewall GUI</p>
+        <ol>
+            <li>Open Windows Defender Firewall with Advanced Security</li>
+            <li>Click "Outbound Rules" → "New Rule"</li>
+            <li>Select "Program" → Browse to ollama.exe</li>
+            <li>Select "Block the connection"</li>
+            <li>Apply to all profiles</li>
+            <li>Create second rule allowing localhost (127.0.0.1) only</li>
+        </ol>
+        
+        <div class="finding-box warning">
+            <div class="finding-header">⚠ Windows Air-Gap Verification</div>
+            <p>Windows firewall rules are application-based, not user-based. Verify by checking Event Viewer → Windows Logs → Security for blocked connection attempts from ollama.exe.</p>
+        </div>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">5.</span> Installation — macOS</div>
+        
+        <p><strong>Step 5.1:</strong> Download from official site</p>
+        <div class="code-block">https://ollama.com/download/mac</div>
+        <p>Or via Homebrew:</p>
+        <div class="code-block">brew install ollama</div>
+        
+        <p><strong>Step 5.2:</strong> Download Models</p>
+        <div class="code-block">ollama pull llama3.2
+ollama pull llama3.2:3b</div>
+        
+        <p><strong>Step 5.3:</strong> Enable Air-Gap via PF Firewall</p>
+        <div class="code-block"># Edit /etc/pf.conf (requires sudo)
+sudo nano /etc/pf.conf
+
+# Add these lines:
+block out quick proto tcp from any to any user _ollama
+block out quick proto udp from any to any user _ollama
+pass out quick proto tcp from any to 127.0.0.1 user _ollama
+
+# Reload firewall
+sudo pfctl -f /etc/pf.conf
+sudo pfctl -e</div>
+        
+        <p><strong>Alternative for macOS:</strong> Physical air-gap — simply disconnect from network after model download. Mac Mini can run headless with no network cable.</p>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">6.</span> Integration with DraftBridge</div>
+        
+        <p>Ollama can serve as the local AI backend for DraftBridge document processing:</p>
+        
+        <div class="code-block"># DraftBridge configuration (config.json)
+{
+  "ai_provider": "ollama",
+  "ollama_url": "http://localhost:11434",
+  "model": "llama3.2",
+  "fallback_model": "llama3.2:3b"
+}</div>
+        
+        <p>This configuration ensures all document analysis occurs locally with no external API calls.</p>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">7.</span> Verification Checklist</div>
+        
+        <table>
+            <tr>
+                <th>Check</th>
+                <th>Command</th>
+                <th>Expected Result</th>
+            </tr>
+            <tr>
+                <td>Ollama running</td>
+                <td><code>curl http://localhost:11434</code></td>
+                <td>"Ollama is running"</td>
+            </tr>
+            <tr>
+                <td>Models available</td>
+                <td><code>ollama list</code></td>
+                <td>Lists downloaded models</td>
+            </tr>
+            <tr>
+                <td>Inference works</td>
+                <td><code>ollama run llama3.2:3b "Hello"</code></td>
+                <td>Returns response</td>
+            </tr>
+            <tr>
+                <td>Internet blocked</td>
+                <td>Attempt external connection</td>
+                <td>Connection refused/timeout</td>
+            </tr>
+            <tr>
+                <td>Firewall rules active</td>
+                <td><code>iptables -L OUTPUT</code> (Linux)</td>
+                <td>Shows ACCEPT/DROP rules</td>
+            </tr>
+        </table>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">8.</span> Security Considerations</div>
+        
+        <div class="finding-box highlight">
+            <div class="finding-header">Data Flow Diagram</div>
+            <div class="code-block">┌─────────────────────────────────────────────────────────┐
+│                    LOCAL MACHINE                         │
+│                                                          │
+│  ┌──────────┐      ┌──────────┐      ┌──────────┐      │
+│  │  User    │ ───▶ │  Ollama  │ ───▶ │  Model   │      │
+│  │  Input   │      │  Server  │      │  (Local) │      │
+│  └──────────┘      └──────────┘      └──────────┘      │
+│       │                 │                  │            │
+│       │                 │                  │            │
+│       ▼                 ▼                  ▼            │
+│  ┌──────────────────────────────────────────────┐      │
+│  │              STAYS ON MACHINE                 │      │
+│  └──────────────────────────────────────────────┘      │
+│                                                          │
+├──────────────────────────────────────────────────────────┤
+│  FIREWALL: BLOCK ALL OUTBOUND FROM OLLAMA               │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│                    ✗ INTERNET ✗                         │
+│                    (No connection)                       │
+│                                                          │
+└─────────────────────────────────────────────────────────┘</div>
+        </div>
+        
+        <p><strong>What is blocked:</strong></p>
+        <ul>
+            <li>Telemetry / analytics</li>
+            <li>Model update checks</li>
+            <li>Any outbound data transmission</li>
+            <li>DNS lookups from Ollama process</li>
+        </ul>
+        
+        <p><strong>What still works:</strong></p>
+        <ul>
+            <li>Local API (http://localhost:11434)</li>
+            <li>Local applications connecting to Ollama</li>
+            <li>DraftBridge integration</li>
+            <li>Command-line interface</li>
+        </ul>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">9.</span> Troubleshooting</div>
+        
+        <table>
+            <tr>
+                <th>Issue</th>
+                <th>Cause</th>
+                <th>Solution</th>
+            </tr>
+            <tr>
+                <td>"Model not found"</td>
+                <td>Model not downloaded before air-gap</td>
+                <td>Temporarily disable firewall, download model, re-enable</td>
+            </tr>
+            <tr>
+                <td>Slow inference</td>
+                <td>CPU-only mode, no GPU</td>
+                <td>Normal for CPU. Consider smaller model or GPU upgrade.</td>
+            </tr>
+            <tr>
+                <td>"Connection refused"</td>
+                <td>Ollama service not running</td>
+                <td><code>sudo systemctl start ollama</code> (Linux)</td>
+            </tr>
+            <tr>
+                <td>Out of memory</td>
+                <td>Model too large for RAM</td>
+                <td>Use smaller model (3b instead of 7b)</td>
+            </tr>
+        </table>
+        
+        <hr class="divider-thick">
+        
+        <div class="section-header"><span class="section-number">10.</span> Summary</div>
+        
+        <table>
+            <tr>
+                <th>Capability</th>
+                <th>Status</th>
+            </tr>
+            <tr>
+                <td>Local model inference</td>
+                <td>✓ ENABLED</td>
+            </tr>
+            <tr>
+                <td>API access (localhost)</td>
+                <td>✓ ENABLED</td>
+            </tr>
+            <tr>
+                <td>DraftBridge integration</td>
+                <td>✓ ENABLED</td>
+            </tr>
+            <tr>
+                <td>Internet connectivity</td>
+                <td>✗ BLOCKED</td>
+            </tr>
+            <tr>
+                <td>Telemetry</td>
+                <td>✗ BLOCKED</td>
+            </tr>
+            <tr>
+                <td>Remote model downloads</td>
+                <td>✗ BLOCKED</td>
+            </tr>
+            <tr>
+                <td>Data exfiltration</td>
+                <td>✗ IMPOSSIBLE</td>
+            </tr>
+        </table>
+        
+        <div class="finding-box highlight">
+            <div class="finding-header">Certification Statement</div>
+            <p>When properly configured per this guide, Ollama operates in complete isolation from external networks. All data processing occurs locally. No client data is transmitted, stored externally, or accessible to third parties.</p>
+        </div>
+        
+        <div class="footer">
+            <p>— END OF DOCUMENT —</p>
+            <p>OAG-2026-0218-001</p>
+            <p>AIBridges Security Division</p>
+            <p>For technical support: <a href="tel:4013272971">(401) 327-2971</a></p>
+            <div class="stamp">VERIFIED</div>
+        </div>
+    </div>
+</body>
+</html>

@@ -3652,6 +3652,220 @@
             pointer-events: none;
             opacity: 0.8;
         }
+
+        /* ============================================
+           SCROLL TIMELINE - Red Connecting Line
+           ============================================ */
+        .scroll-timeline {
+            --timeline-color: #dc2626;
+            --timeline-glow: rgba(220, 38, 38, 0.4);
+            position: relative;
+            padding: 8rem 2rem;
+            background: #050508;
+            overflow: hidden;
+        }
+
+        .scroll-timeline::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 150px;
+            background: linear-gradient(to bottom, var(--bg-dark), transparent);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scroll-timeline-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* The vertical line track (background) */
+        .timeline-track {
+            position: absolute;
+            left: 60px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 2px;
+        }
+
+        /* The fill line that grows on scroll */
+        .timeline-fill {
+            position: absolute;
+            left: 60px;
+            top: 0;
+            width: 4px;
+            height: 0%;
+            background: var(--timeline-color);
+            border-radius: 2px;
+            transition: height 0.1s linear;
+            box-shadow: 0 0 20px var(--timeline-glow),
+                        0 0 40px var(--timeline-glow);
+        }
+
+        /* Pulsing glow at the tip */
+        .timeline-fill::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 16px;
+            background: var(--timeline-color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--timeline-color),
+                        0 0 40px var(--timeline-color),
+                        0 0 60px var(--timeline-glow);
+            animation: timelinePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes timelinePulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+            50% { transform: translateX(-50%) scale(1.3); opacity: 0.7; }
+        }
+
+        /* Timeline steps */
+        .timeline-step {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 3rem;
+            padding: 4rem 0;
+            position: relative;
+            opacity: 0.3;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .timeline-step.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Step number on left */
+        .step-number {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--timeline-color);
+            line-height: 1;
+            position: relative;
+            text-shadow: 0 0 30px var(--timeline-glow);
+            transition: all 0.4s ease;
+        }
+
+        .timeline-step.active .step-number {
+            text-shadow: 0 0 40px var(--timeline-color),
+                         0 0 80px var(--timeline-glow);
+        }
+
+        /* Step label (Step 1:) */
+        .step-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--timeline-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Step title */
+        .step-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        /* Step description */
+        .step-description {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            max-width: 500px;
+        }
+
+        /* Connecting node on the line */
+        .step-node {
+            position: absolute;
+            left: 54px;
+            top: 5rem;
+            width: 16px;
+            height: 16px;
+            background: #050508;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+            z-index: 2;
+        }
+
+        .timeline-step.active .step-node {
+            border-color: var(--timeline-color);
+            background: var(--timeline-color);
+            box-shadow: 0 0 20px var(--timeline-color);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .scroll-timeline {
+                padding: 4rem 1.5rem;
+            }
+
+            .timeline-track,
+            .timeline-fill {
+                left: 30px;
+            }
+
+            .timeline-step {
+                grid-template-columns: 70px 1fr;
+                gap: 1.5rem;
+                padding: 3rem 0;
+            }
+
+            .step-number {
+                font-size: 3rem;
+            }
+
+            .step-node {
+                left: 24px;
+                top: 4rem;
+            }
+
+            .step-title {
+                font-size: 1.5rem;
+            }
+
+            .step-description {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timeline-track,
+            .timeline-fill {
+                left: 20px;
+            }
+
+            .timeline-step {
+                grid-template-columns: 50px 1fr;
+                gap: 1rem;
+            }
+
+            .step-number {
+                font-size: 2.5rem;
+            }
+
+            .step-node {
+                left: 14px;
+                width: 14px;
+                height: 14px;
+            }
+        }
     </style>
 
     <!-- LocalBusiness Schema for SEO -->
@@ -4155,6 +4369,60 @@
                         <span>Also: AWS Hosting, IT Support, App Development</span>
                         <span style="color: var(--accent);">→</span>
                     </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scroll Timeline: How We Work -->
+    <section id="process" class="scroll-timeline">
+        <div class="scroll-timeline-container">
+            <!-- The track (background line) -->
+            <div class="timeline-track"></div>
+            <!-- The fill (animated line) -->
+            <div class="timeline-fill" id="timelineFill"></div>
+
+            <!-- Step 1 -->
+            <div class="timeline-step" data-step="1">
+                <div class="step-node"></div>
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <span class="step-label">Step 1:</span>
+                    <h3 class="step-title">Discovery Call</h3>
+                    <p class="step-description">We listen first. A 30-minute call to understand your workflows, pain points, and what "success" looks like for your business. No sales pitch — just questions.</p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="timeline-step" data-step="2">
+                <div class="step-node"></div>
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <span class="step-label">Step 2:</span>
+                    <h3 class="step-title">Build & Test</h3>
+                    <p class="step-description">We create content in your authentic voice that your ideal clients actually enjoy reading and never sounding like a corporate robot. Our content builds both authority and genuine relationships.</p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="timeline-step" data-step="3">
+                <div class="step-node"></div>
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <span class="step-label">Step 3:</span>
+                    <h3 class="step-title">Deploy & Monitor</h3>
+                    <p class="step-description">Your AI goes live with guardrails, cost caps, and real-time monitoring. We watch for errors, optimize performance, and iterate weekly. You focus on your business.</p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="timeline-step" data-step="4">
+                <div class="step-node"></div>
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <span class="step-label">Step 4:</span>
+                    <h3 class="step-title">Scale & Improve</h3>
+                    <p class="step-description">Once the first agent proves its value, we expand. New workflows, new automations, compounding savings. Most clients see 3x ROI within 90 days.</p>
                 </div>
             </div>
         </div>
@@ -8509,6 +8777,64 @@
             card.appendChild(badge);
         }
     });
+
+    // ============================================
+    // SCROLL TIMELINE - Red Line Animation
+    // ============================================
+    (function() {
+        const timelineSection = document.querySelector('.scroll-timeline');
+        const timelineFill = document.getElementById('timelineFill');
+        const timelineSteps = document.querySelectorAll('.timeline-step');
+        
+        if (!timelineSection || !timelineFill || timelineSteps.length === 0) return;
+
+        function updateTimeline() {
+            const sectionRect = timelineSection.getBoundingClientRect();
+            const sectionTop = sectionRect.top;
+            const sectionHeight = sectionRect.height;
+            const windowHeight = window.innerHeight;
+            
+            // Calculate scroll progress through the section
+            // Start filling when section enters viewport, finish when it exits
+            const startOffset = windowHeight * 0.3; // Start when 30% in view
+            const scrollStart = -sectionTop + startOffset;
+            const scrollEnd = sectionHeight - windowHeight * 0.3;
+            
+            let progress = scrollStart / scrollEnd;
+            progress = Math.max(0, Math.min(1, progress));
+            
+            // Update the fill line height
+            timelineFill.style.height = (progress * 100) + '%';
+            
+            // Update step active states based on scroll position
+            timelineSteps.forEach((step, index) => {
+                const stepRect = step.getBoundingClientRect();
+                const stepCenter = stepRect.top + stepRect.height / 2;
+                const threshold = windowHeight * 0.6; // Activate when step is 60% up the viewport
+                
+                if (stepCenter < threshold) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+
+        // Throttled scroll listener
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(function() {
+                    updateTimeline();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Initial check
+        updateTimeline();
+    })();
 
     </script>
 </body>

@@ -4201,182 +4201,417 @@
         </div>
     </section>
 
-    <!-- REDESIGNED SECTIONS - Anti-homogenization approach -->
+    <!-- ============================================
+         STORY-DRIVEN SECTIONS - Full Rebuild
+         Fresh CSS, no tiles, narrative flow
+         ============================================ -->
     <style>
-        /* Feathered/masked tile effect */
-        .feathered-tile {
+        /* Story Section Base */
+        .story-section {
+            padding: 6rem 2rem;
             position: relative;
         }
-        .feathered-tile::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(0, 225, 230, 0.3));
-            filter: blur(20px);
+        
+        .story-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .story-wide {
+            max-width: 1100px;
+        }
+        
+        /* Big Text - Editorial Style */
+        .story-headline {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .story-subhead {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        
+        /* Emphasis */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .text-red {
+            color: #dc2626;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        /* Scroll-triggered fade-in */
+        .story-fade {
             opacity: 0;
-            transition: opacity 0.4s ease;
-            z-index: -1;
-            border-radius: inherit;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        .feathered-tile:hover::before {
+        
+        .story-fade.visible {
             opacity: 1;
+            transform: translateY(0);
         }
         
-        /* Soft glow tiles - always visible subtle glow */
-        .glow-tile {
+        /* Pull Quote */
+        .pull-quote {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            line-height: 1.4;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 3rem 0;
             position: relative;
-            overflow: visible;
         }
-        .glow-tile::after {
-            content: '';
+        
+        .pull-quote::before {
+            content: '"';
             position: absolute;
-            inset: 0;
-            background: inherit;
-            filter: blur(30px);
+            top: 1.5rem;
+            left: -0.5rem;
+            font-size: 4rem;
+            color: var(--primary);
             opacity: 0.3;
-            z-index: -1;
-            border-radius: inherit;
+            font-family: Georgia, serif;
+            line-height: 1;
         }
         
-        /* Rotating border effect */
-        .rotating-border-container {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
+        /* Stats Row - Not tiles */
+        .stats-row {
+            display: flex;
+            gap: 4rem;
+            justify-content: center;
+            padding: 3rem 0;
+            flex-wrap: wrap;
         }
-        .rotating-border-container::before {
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Divider Line */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 3rem auto;
+            border-radius: 2px;
+        }
+        
+        /* CTA Button - Clean */
+        .story-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            background: var(--text);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .story-cta:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 225, 230, 0.3);
+        }
+        
+        .story-cta-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        
+        .story-cta-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: transparent;
+        }
+        
+        /* Process Steps - Vertical flow */
+        .process-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding-left: 80px;
+        }
+        
+        .process-flow::before {
             content: '';
             position: absolute;
-            inset: -150%;
-            background: conic-gradient(from 0deg, transparent 0%, rgba(99, 102, 241, 0.8) 10%, transparent 20%);
-            animation: borderRotate 4s linear infinite;
-            z-index: 0;
-        }
-        .rotating-border-container > * {
-            position: relative;
-            z-index: 1;
-        }
-        @keyframes borderRotate {
-            to { transform: rotate(360deg); }
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
         }
         
-        /* Mobile responsive overrides for redesigned sections */
+        .process-step {
+            position: relative;
+            padding: 2.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .process-step:last-child {
+            border-bottom: none;
+        }
+        
+        .process-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -80px;
+            top: 2.5rem;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .process-step h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        
+        .process-step p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        /* Proof Section */
+        .proof-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .proof-item {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .proof-item .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .proof-item h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .proof-item p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* Final CTA - Full width dramatic */
+        .final-cta {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #050508 100%);
+            text-align: center;
+            padding: 8rem 2rem;
+            position: relative;
+        }
+        
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 100px;
+            background: linear-gradient(180deg, var(--accent), transparent);
+        }
+        
+        /* Contact Form - Clean */
+        .contact-form-clean {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        
+        .contact-form-clean input,
+        .contact-form-clean textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-form-clean input:focus,
+        .contact-form-clean textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(76, 105, 245, 0.05);
+        }
+        
+        .contact-form-clean textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Mobile Responsive */
         @media (max-width: 768px) {
-            .services-grid-desktop { 
-                display: block !important; 
+            .story-section {
+                padding: 4rem 1.5rem;
             }
-            .services-grid-desktop > div:first-child {
-                position: static !important;
-                margin-bottom: 2rem;
+            
+            .stats-row {
+                gap: 2rem;
             }
-            .services-grid-desktop h2 {
-                font-size: 1.8rem !important;
+            
+            .stat-item {
+                flex: 1 1 40%;
             }
-            .service-row {
-                display: block !important;
-                padding: 1.5rem !important;
+            
+            .process-flow {
+                padding-left: 60px;
             }
-            .service-row > div:first-child {
-                margin-bottom: 1rem;
+            
+            .process-flow::before {
+                left: 20px;
             }
-            .service-row > div:last-child {
-                text-align: left !important;
-                margin-top: 1rem;
-                padding-top: 1rem;
-                border-top: 1px solid var(--border);
+            
+            .process-step::before {
+                left: -60px;
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
             }
-            .why-grid-mixed {
-                display: block !important;
+            
+            .proof-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
-            .why-grid-mixed > div {
-                margin-bottom: 1.5rem;
-            }
-            .why-subgrid {
-                display: block !important;
-            }
-            .why-subgrid > div {
-                margin-bottom: 1.5rem;
-            }
-            .private-ai-grid {
-                display: block !important;
-            }
-            .private-ai-grid > div:last-child {
-                margin-top: 2rem;
-            }
-            .stats-inline {
-                gap: 1.5rem !important;
-            }
-            .stats-inline > div {
-                flex: 1 1 40% !important;
+            
+            .pull-quote {
+                font-size: 1.3rem;
+                padding: 2rem 0;
             }
         }
     </style>
-    
-    <!-- Services: Asymmetric editorial layout -->
-    <section id="services" style="padding: 6rem 0; background: var(--bg-dark);">
-        <div class="section-container">
-            <div class="services-grid-desktop" style="display: grid; grid-template-columns: 1fr 2fr; gap: 4rem; align-items: start;">
-                <!-- Left: Sticky headline -->
-                <div style="position: sticky; top: 100px;">
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 1rem;">WHAT WE DO</p>
-                    <h2 style="font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem;">We build AI that <em style="font-style: normal; color: var(--primary);">actually works</em>.</h2>
-                    <p style="color: var(--text-muted); line-height: 1.8; font-size: 1.05rem;">Not demos. Not MVPs that break when you look at them wrong. Systems with error handling, guardrails, and someone who picks up the phone when things go sideways.</p>
-                    <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
-                        <a href="#contact" style="display: inline-flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-weight: 600;">
-                            Talk to us <span style="color: var(--accent);">→</span>
-                        </a>
-                    </div>
+
+    <!-- CHAPTER 1: The Problem -->
+    <section class="story-section" style="background: var(--bg-dark);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 2rem;">THE PROBLEM</p>
+            
+            <h2 class="story-headline">
+                You didn't start a business to <span class="text-red">copy-paste data at 11pm.</span>
+            </h2>
+            
+            <p class="story-subhead">
+                But here you are. Buried in emails. Reformatting spreadsheets. Chasing invoices. Doing the same tasks over and over while the work you actually care about waits.
+            </p>
+            
+            <div class="pull-quote">
+                Every hour spent on repetitive tasks is an hour stolen from growth, from clients, from your life.
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number text-red">40%</div>
+                    <div class="stat-label">of work is repetitive</div>
                 </div>
-                
-                <!-- Right: Stacked services (not a grid) -->
-                <div class="rotating-border-container" style="display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 16px;">
-                    <a href="service-agent-discovery.html" class="service-row" style="background: var(--bg-card); padding: 2.5rem; text-decoration: none; color: inherit; display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: center; transition: background 0.3s;" onmouseover="this.style.background='rgba(76,105,245,0.08)'" onmouseout="this.style.background='var(--bg-card)'">
-                        <div style="font-size: 2rem;">🎯</div>
-                        <div>
-                            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Discovery & Strategy</h3>
-                            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">We audit your workflows, find the bottlenecks, and map out exactly where AI saves you time. Concrete plan, ROI estimates, no jargon.</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="color: var(--success); font-weight: 600; font-size: 0.9rem;">Free</span>
-                        </div>
-                    </a>
-                    
-                    <a href="service-agent-build.html" class="service-row" style="background: var(--bg-card); padding: 2.5rem; text-decoration: none; color: inherit; display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: center; transition: background 0.3s;" onmouseover="this.style.background='rgba(76,105,245,0.08)'" onmouseout="this.style.background='var(--bg-card)'">
-                        <div style="font-size: 2rem;">🔧</div>
-                        <div>
-                            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Agent Build & Deploy</h3>
-                            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Custom AI agents for your specific tasks — email triage, document processing, data entry. Built to integrate with your existing tools.</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">from</span><br>
-                            <span style="color: var(--text); font-weight: 700; font-size: 1.1rem;">$400</span>
-                        </div>
-                    </a>
-                    
-                    <a href="service-agentic-office.html" class="service-row" style="background: var(--bg-card); padding: 2.5rem; text-decoration: none; color: inherit; display: grid; grid-template-columns: auto 1fr auto; gap: 2rem; align-items: center; transition: background 0.3s;" onmouseover="this.style.background='rgba(76,105,245,0.08)'" onmouseout="this.style.background='var(--bg-card)'">
-                        <div style="font-size: 2rem;">🏢</div>
-                        <div>
-                            <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">Agentic Office Retainer</h3>
-                            <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Your AI runs 24/7. We monitor performance, fix issues, improve it monthly. Predictable costs, no surprise bills.</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="color: var(--text-muted); font-size: 0.85rem;">from</span><br>
-                            <span style="color: var(--text); font-weight: 700; font-size: 1.1rem;">$500<span style="font-weight: 400; font-size: 0.85rem;">/mo</span></span>
-                        </div>
-                    </a>
-                    
-                    <a href="services.html" style="background: rgba(76,105,245,0.05); padding: 1.5rem 2.5rem; text-decoration: none; color: var(--text-muted); font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;" onmouseover="this.style.background='rgba(76,105,245,0.1)';this.style.color='var(--text)'" onmouseout="this.style.background='rgba(76,105,245,0.05)';this.style.color='var(--text-muted)'">
-                        <span>Also: AWS Hosting, IT Support, App Development</span>
-                        <span style="color: var(--accent);">→</span>
-                    </a>
+                <div class="stat-item">
+                    <div class="stat-number text-red">2.5hrs</div>
+                    <div class="stat-label">wasted daily on email</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-red">$50K+</div>
+                    <div class="stat-label">lost per employee/year</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Scroll Timeline: How We Work -->
+    <!-- CHAPTER 2: The Hope -->
+    <section class="story-section" style="background: linear-gradient(180deg, var(--bg-dark) 0%, #0d0d14 100%);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 2rem;">THE SOLUTION</p>
+            
+            <h2 class="story-headline">
+                What if AI handled <span class="text-gradient">the boring stuff?</span>
+            </h2>
+            
+            <p class="story-subhead">
+                Not someday. Not "when the tech matures." Right now — with systems we've already built and deployed for businesses like yours.
+            </p>
+            
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 2rem;">
+                AI agents work 24/7. They don't forget steps. They don't need coffee breaks. They handle the repetitive work <em>exactly</em> the way you want it done — email triage, document processing, data entry, scheduling — so your team can focus on what actually matters.
+            </p>
+            
+            <div class="divider"></div>
+            
+            <div style="text-align: center;">
+                <a href="#contact" class="story-cta">
+                    See If AI Can Help Your Business
+                    <span>→</span>
+                </a>
+                <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">Free 30-minute strategy call. No sales pitch.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 3: How It Works (Red Timeline) -->
     <section id="process" class="scroll-timeline">
         <div class="scroll-timeline-container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 1rem;">HOW IT WORKS</p>
+                <h2 class="story-headline" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">From stuck to automated in 4 steps.</h2>
+            </div>
+            
             <!-- The track (background line) -->
             <div class="timeline-track"></div>
             <!-- The fill (animated line) -->
@@ -4389,7 +4624,7 @@
                 <div class="step-content">
                     <span class="step-label">Step 1:</span>
                     <h3 class="step-title">Discovery Call</h3>
-                    <p class="step-description">We listen first. A 30-minute call to understand your workflows, pain points, and what "success" looks like for your business. No sales pitch — just questions.</p>
+                    <p class="step-description">30 minutes. You tell us what eats your time. We listen, ask questions, and identify exactly where AI can help. No pitch — just clarity.</p>
                 </div>
             </div>
 
@@ -4399,8 +4634,8 @@
                 <div class="step-number">02</div>
                 <div class="step-content">
                     <span class="step-label">Step 2:</span>
-                    <h3 class="step-title">Build & Test</h3>
-                    <p class="step-description">We create content in your authentic voice that your ideal clients actually enjoy reading and never sounding like a corporate robot. Our content builds both authority and genuine relationships.</p>
+                    <h3 class="step-title">Build Your Agent</h3>
+                    <p class="step-description">We design an AI agent for your specific workflow. Custom rules, your tools, your voice. You approve before anything goes live.</p>
                 </div>
             </div>
 
@@ -4411,7 +4646,7 @@
                 <div class="step-content">
                     <span class="step-label">Step 3:</span>
                     <h3 class="step-title">Deploy & Monitor</h3>
-                    <p class="step-description">Your AI goes live with guardrails, cost caps, and real-time monitoring. We watch for errors, optimize performance, and iterate weekly. You focus on your business.</p>
+                    <p class="step-description">Your agent goes live with guardrails, cost caps, and real-time monitoring. We watch for errors and optimize weekly. You focus on your business.</p>
                 </div>
             </div>
 
@@ -4422,472 +4657,126 @@
                 <div class="step-content">
                     <span class="step-label">Step 4:</span>
                     <h3 class="step-title">Scale & Improve</h3>
-                    <p class="step-description">Once the first agent proves its value, we expand. New workflows, new automations, compounding savings. Most clients see 3x ROI within 90 days.</p>
+                    <p class="step-description">Once the first agent proves value, we expand. New workflows, compounding savings. Most clients see 3x ROI within 90 days.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Terminal Demo: Full-width immersive -->
-    <section id="ai-demo" style="padding: 0; background: #0a0a0f; position: relative; overflow: hidden;">
-        <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(76,105,245,0.15) 0%, transparent 60%); pointer-events: none;"></div>
-        <div class="section-container" style="padding: 5rem 2rem;">
-            <div style="max-width: 900px; margin: 0 auto;">
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--success); letter-spacing: 1px; margin-bottom: 0.5rem;">● LIVE DEMO</p>
-                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 2rem;">Watch an AI agent process invoices</h2>
-                
-                <div class="terminal reveal" id="terminal" role="region" aria-label="AI automation demo terminal" style="border-radius: 12px; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.5);">
-                    <div class="terminal-header">
-                        <span class="terminal-dot red" aria-hidden="true"></span>
-                        <span class="terminal-dot yellow" aria-hidden="true"></span>
-                        <span class="terminal-dot green" aria-hidden="true"></span>
-                        <span class="terminal-title">ai-agent — invoice-processor</span>
-                        <div class="terminal-controls">
-                            <button class="terminal-btn ripple" id="soundToggle" aria-label="Toggle typing sounds" aria-pressed="false">🔇 Sound</button>
-                            <button class="terminal-btn ripple" id="replayBtn" aria-label="Replay demo">↻ Replay</button>
-                        </div>
-                    </div>
-                    <div class="terminal-body" id="terminal-body" aria-live="polite" aria-atomic="false">
+    <!-- CHAPTER 4: Why Us -->
+    <section class="story-section" style="background: linear-gradient(180deg, #050508 0%, var(--bg-dark) 100%);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 2rem;">WHY US</p>
+            
+            <h2 class="story-headline" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">
+                We've been where you are.
+            </h2>
+            
+            <p class="story-subhead">
+                Buried in repetitive tasks. Wishing for more hours. We built AI to fix that — and now we build it for you.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 2rem; margin-top: 3rem;">
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">🛡️</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">It Actually Works</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">Every AI has guardrails — automatic limits, error handling, human escalation. If something breaks at 2am, it fixes itself or alerts us. <em>Not you.</em></p>
                     </div>
                 </div>
                 
-                <!-- Stats as inline text, not cards -->
-                <div class="stats-inline" style="display: flex; gap: 3rem; justify-content: center; margin-top: 3rem; flex-wrap: wrap;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text);" data-target="73">73%</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Automation</div>
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">💰</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">No Surprise Bills</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">AI gets expensive fast if nobody's watching. We cap costs upfront, batch requests smartly, and show you exactly what you're paying.</p>
                     </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text);" data-target="89">89%</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Accuracy</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text);" data-target="50">50%</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Cost Cut</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text);">24/7</div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Uptime</div>
+                </div>
+                
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">📍</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">One Person. One Number.</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">Talk to the same engineer who builds your system — not a support queue. Based in Cranston, RI. Call or text anytime.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Why Us: Magazine-style pull quotes -->
-    <section id="why" style="padding: 6rem 0; background: linear-gradient(180deg, #0a0a0f 0%, var(--bg-dark) 100%);">
-        <div class="section-container">
-            <div style="max-width: 800px; margin: 0 auto 4rem; text-align: center;">
-                <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">We've been where you are.</h2>
-                <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.8;">Buried in repetitive tasks. Wishing for more hours. We built AI to fix that — and now we build it for you.</p>
+    <!-- CHAPTER 5: Social Proof (Brief) -->
+    <section class="story-section" style="background: var(--bg-dark); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="story-container story-wide story-fade" style="text-align: center;">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 3rem;">TRUSTED BY</p>
+            
+            <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; opacity: 0.6;">
+                <span style="font-size: 1.1rem; font-weight: 600;">Law Firms</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Medical Practices</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Restaurants</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Real Estate</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Professional Services</span>
             </div>
             
-            <!-- Three distinct blocks, not identical cards -->
-            <div class="why-grid-mixed" style="display: grid; gap: 2rem;">
-                <!-- Block 1: Large quote style -->
-                <div class="feathered-tile" style="background: linear-gradient(135deg, rgba(76,105,245,0.1) 0%, rgba(0,225,230,0.05) 100%); border-left: 4px solid var(--primary); padding: 3rem; border-radius: 0 16px 16px 0;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
-                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">It Actually Works</h3>
-                    <p style="color: var(--text-muted); font-size: 1.1rem; line-height: 1.8; max-width: 600px;">We don't deploy and disappear. Every AI has guardrails — automatic limits, error handling, human escalation. If something breaks at 2am, it fixes itself or alerts us. <em>Not you.</em></p>
-                </div>
-                
-                <!-- Block 2 & 3: Side by side, different styles -->
-                <div class="why-subgrid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                    <div class="feathered-tile" style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px;">
-                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">💰</div>
-                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;">No Surprise Bills</h3>
-                        <p style="color: var(--text-muted); line-height: 1.7;">AI gets expensive fast if nobody's watching. We cap costs upfront, batch requests smartly, and show you exactly what you're paying. No mysteries.</p>
-                    </div>
-                    
-                    <div class="feathered-tile" style="background: var(--bg-card); border: 1px solid var(--border); padding: 2.5rem; border-radius: 16px; position: relative; overflow: visible;">
-                        <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: radial-gradient(circle at top right, rgba(0,225,230,0.2), transparent); pointer-events: none;"></div>
-                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">📍</div>
-                        <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;">One Person. One Number.</h3>
-                        <p style="color: var(--text-muted); line-height: 1.7;">Talk to the same engineer who builds your system — not a support queue. Based in Cranston. Call or text anytime.</p>
-                    </div>
-                </div>
-            </div>
+            <div class="divider"></div>
             
-            <!-- Industries: Horizontal flow, not tags -->
-            <div style="margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--border); text-align: center;">
-                <p style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1.5rem;">Industries We Work With</p>
-                <p style="font-size: 1.1rem; color: var(--text);">
-                    <span style="margin: 0 0.5rem;">Retail</span> · 
-                    <span style="margin: 0 0.5rem;">Restaurants</span> · 
-                    <span style="margin: 0 0.5rem;">Trades</span> · 
-                    <span style="margin: 0 0.5rem;">Healthcare</span> · 
-                    <span style="margin: 0 0.5rem; color: var(--accent);">Law Firms</span> · 
-                    <span style="margin: 0 0.5rem;">Professional Services</span>
-                </p>
-            </div>
+            <p style="font-size: 1.3rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                "Finally — AI that doesn't require a PhD to use. We saved 15 hours a week on invoice processing alone."
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">— Operations Manager, Providence</p>
         </div>
     </section>
 
-    <!-- Private AI: Dark dramatic section -->
-    <section id="private-ai" style="padding: 6rem 0; background: #050508; position: relative;">
-        <div style="position: absolute; inset: 0; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22none%22 stroke=%22%23ffffff05%22 stroke-width=%221%22 width=%22100%22 height=%22100%22/></svg>'); opacity: 0.5;"></div>
-        <div class="section-container" style="position: relative;">
-            <div class="private-ai-grid" style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 4rem; align-items: center;">
-                <div>
-                    <div style="display: inline-block; background: rgba(239,68,68,0.15); color: #ef4444; padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-bottom: 1.5rem;">🔒 PRIVATE DEPLOYMENT</div>
-                    <h2 style="font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 1.5rem;">AI that never leaves your building.</h2>
-                    <p style="color: var(--text-muted); line-height: 1.8; font-size: 1.05rem; margin-bottom: 2rem;">For law firms, medical practices, and anyone who can't risk data leaks. We deploy models that run entirely on your hardware. No cloud. No APIs. Complete privacy.</p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span style="color: var(--success);">✓</span>
-                            <span>Zero data exposure — models run on your servers</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span style="color: var(--success);">✓</span>
-                            <span>No per-token fees — unlimited queries</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span style="color: var(--success);">✓</span>
-                            <span>Llama 3, Mistral, DeepSeek, Phi-4</span>
-                        </div>
-                    </div>
-                    
-                    <a href="#contact" style="display: inline-flex; align-items: center; gap: 8px; margin-top: 2rem; background: var(--text); color: var(--bg-dark); padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s;" onmouseover="this.style.background='var(--accent)'" onmouseout="this.style.background='var(--text)'">
-                        Get a Privacy Consultation
-                    </a>
+    <!-- FINAL CTA -->
+    <section id="contact" class="final-cta">
+        <div class="story-container story-fade">
+            <h2 class="story-headline" style="margin-bottom: 1.5rem;">
+                Ready to get your <span class="text-gradient">hours back?</span>
+            </h2>
+            
+            <p class="story-subhead" style="max-width: 500px; margin: 0 auto 3rem;">
+                Tell us what your team spends too much time on. We'll show you how AI can fix it — and what it'll cost. Free call. No pressure.
+            </p>
+            
+            <form action="https://formspree.io/f/mvzrqler" method="POST" class="contact-form-clean">
+                <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <input type="text" name="name" placeholder="Your name" required>
+                    <input type="email" name="email" placeholder="Your email" required>
                 </div>
-                
-                <!-- Visual: Code snippet look -->
-                <div class="feathered-tile" style="background: #0d0d12; border: 1px solid #1a1a24; border-radius: 12px; padding: 2rem; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; line-height: 2;">
-                    <div style="color: #6b7280; margin-bottom: 1rem;"># Your data stays here</div>
-                    <div><span style="color: #f97316;">location:</span> <span style="color: #22c55e;">on-premise</span></div>
-                    <div><span style="color: #f97316;">cloud_apis:</span> <span style="color: #ef4444;">none</span></div>
-                    <div><span style="color: #f97316;">data_transfer:</span> <span style="color: #ef4444;">blocked</span></div>
-                    <div style="color: #6b7280; margin: 1rem 0;"># Who it's for</div>
-                    <div><span style="color: #f97316;">industries:</span></div>
-                    <div style="padding-left: 1rem;">- <span style="color: #a78bfa;">Law firms</span> <span style="color: #6b7280;"># privileged docs</span></div>
-                    <div style="padding-left: 1rem;">- <span style="color: #a78bfa;">Medical practices</span> <span style="color: #6b7280;"># HIPAA</span></div>
-                    <div style="padding-left: 1rem;">- <span style="color: #a78bfa;">Financial advisors</span> <span style="color: #6b7280;"># PII</span></div>
-                    <div style="padding-left: 1rem;">- <span style="color: #a78bfa;">Gov contractors</span> <span style="color: #6b7280;"># compliance</span></div>
-                </div>
-            </div>
+                <textarea name="message" placeholder="What tasks eat up your time?" required></textarea>
+                <button type="submit" class="story-cta" style="width: 100%; justify-content: center;">
+                    Get Your Free Strategy Call
+                    <span>→</span>
+                </button>
+            </form>
+            
+            <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Or email directly: <a href="mailto:hello@aibridges.org" style="color: var(--accent); text-decoration: none;">hello@aibridges.org</a>
+            </p>
         </div>
     </section>
 
-    <!-- FAQ: Clean accordion, no badges -->
-    <section id="faq" style="padding: 5rem 0; background: var(--bg-dark);">
-        <div class="section-container">
-            <div style="max-width: 700px; margin: 0 auto;">
-                <h2 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 3rem; text-align: center;">Questions & Answers</h2>
-                
-                <div style="display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
-                    <details style="border-bottom: 1px solid var(--border);">
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            What is an AI agent?
-                            <span style="color: var(--accent); transition: transform 0.3s;">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">Software that handles repetitive tasks autonomously — email triage, document processing, data entry, scheduling. Works 24/7, follows your rules, frees your team for higher-value work.</div>
-                    </details>
-                    
-                    <details style="border-bottom: 1px solid var(--border);">
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            How much does it cost?
-                            <span style="color: var(--accent);">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">Discovery call is free. Agent builds start at $400. Managed service from $99/month with usage caps so costs stay predictable.</div>
-                    </details>
-                    
-                    <details style="border-bottom: 1px solid var(--border);">
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            Is my data safe?
-                            <span style="color: var(--accent);">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">Yes. We offer private deployments that run entirely on your hardware — no cloud APIs, no third-party sharing. For law firms and medical practices, privileged data never leaves your building.</div>
-                    </details>
-                    
-                    <details style="border-bottom: 1px solid var(--border);">
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            Do you work with law firms?
-                            <span style="color: var(--accent);">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">Yes — legal tech is a core specialty. We've built SwiftShot for evidence capture, CaseVault for settlement data, document processing tools, and private AI deployments for sensitive client files.</div>
-                    </details>
-                    
-                    <details style="border-bottom: 1px solid var(--border);">
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            What's in the retainer?
-                            <span style="color: var(--accent);">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">24/7 monitoring, monthly performance reports, usage-capped API costs, prompt improvements, new agent builds as needed, and direct access to the engineer managing your system.</div>
-                    </details>
-                    
-                    <details>
-                        <summary style="padding: 1.5rem; font-weight: 600; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: var(--bg-card);">
-                            Do you work outside Rhode Island?
-                            <span style="color: var(--accent);">+</span>
-                        </summary>
-                        <div style="padding: 0 1.5rem 1.5rem; color: var(--text-muted); line-height: 1.7;">Yes. We're based in Cranston, RI but work with businesses across the US remotely. On-site deployment available in greater Providence and Boston areas.</div>
-                    </details>
-                </div>
-            </div>
-        </div>
-    </section>
+    <!-- Scroll animation script -->
+    <script>
+    // Story section fade-in on scroll
+    (function() {
+        const storyFades = document.querySelectorAll('.story-fade');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        storyFades.forEach(el => observer.observe(el));
+    })();
+    </script>
 
-    <section id="featured-blog" style="padding: 4rem 0; background: linear-gradient(180deg, rgba(20, 20, 35, 1) 0%, var(--bg-dark) 100%); overflow: hidden;">
-        <style>
-            .article-scroll {
-                display: flex;
-                gap: 1.5rem;
-                overflow-x: auto;
-                padding: 2rem 0 3rem;
-                scroll-snap-type: x mandatory;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                scrollbar-color: var(--primary) transparent;
-            }
-            .article-scroll::-webkit-scrollbar {
-                height: 6px;
-            }
-            .article-scroll::-webkit-scrollbar-track {
-                background: rgba(255,255,255,0.05);
-                border-radius: 3px;
-            }
-            .article-scroll::-webkit-scrollbar-thumb {
-                background: var(--primary);
-                border-radius: 3px;
-            }
-            .scroll-card {
-                flex: 0 0 280px;
-                min-height: 320px;
-                background: rgba(46, 26, 71, 0.95);
-                border-radius: 16px;
-                padding: 1.75rem;
-                position: relative;
-                overflow: hidden;
-                cursor: pointer;
-                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                            box-shadow 0.3s ease,
-                            z-index 0s 0.4s;
-                scroll-snap-align: start;
-                text-decoration: none;
-                display: flex;
-                flex-direction: column;
-                transform-style: preserve-3d;
-                perspective: 1000px;
-            }
-            .scroll-card::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                width: 4px;
-                background: linear-gradient(180deg, #2E1A47, #00E1E6);
-                border-radius: 16px 0 0 16px;
-                transition: width 0.3s ease;
-            }
-            .scroll-card:hover {
-                transform: translateY(-20px) scale(1.05) rotate3d(0, 1, 0, -5deg);
-                box-shadow: 0 25px 50px rgba(0, 81, 230, 0.3), 
-                            10px 10px 30px rgba(0, 225, 230, 0.15);
-                z-index: 10;
-                transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                            box-shadow 0.3s ease,
-                            z-index 0s 0s;
-            }
-            .scroll-card:hover::before {
-                width: 6px;
-            }
-            .scroll-card .card-type {
-                font-size: 0.8rem;
-                color: var(--text-muted);
-                margin-bottom: 0.75rem;
-            }
-            .scroll-card .card-type span {
-                color: var(--text);
-                font-weight: 500;
-            }
-            .scroll-card h3 {
-                font-size: 1.15rem;
-                font-weight: 700;
-                color: var(--text);
-                line-height: 1.4;
-                margin-bottom: 1rem;
-                flex: 1;
-            }
-            .scroll-card .card-tag {
-                font-size: 0.75rem;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                color: var(--accent);
-                margin-top: auto;
-            }
-            .scroll-header {
-                flex: 0 0 260px;
-                min-height: 320px;
-                background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-                border-radius: 16px;
-                padding: 2rem;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                scroll-snap-align: start;
-                position: relative;
-                overflow: hidden;
-            }
-            .scroll-header::before {
-                content: '';
-                position: absolute;
-                inset: 3px;
-                background: var(--bg-dark);
-                border-radius: 14px;
-            }
-            .scroll-header > * {
-                position: relative;
-                z-index: 1;
-            }
-            .scroll-header h2 {
-                font-size: 2rem;
-                font-weight: 900;
-                line-height: 1.2;
-                margin-bottom: 1.5rem;
-                background: linear-gradient(135deg, var(--primary), var(--accent));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
-            .scroll-header p {
-                color: var(--text-muted);
-                font-size: 0.9rem;
-            }
-            .scroll-header a {
-                color: var(--accent);
-                text-decoration: none;
-                font-weight: 600;
-            }
-        </style>
-        <div class="section-container">
-            <div class="article-scroll">
-                <!-- Header Card -->
-                <div class="scroll-header">
-                    <h2>Latest Articles</h2>
-                    <p>Powered by</p>
-                    <a href="blog.html">AIBridges Research →</a>
-                </div>
-
-                <!-- Card 0 - RI AI Task Force -->
-                <a href="blog-ri-ai-task-force" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Feb 16, 2026</div>
-                    <h3>RI AI Task Force: What Small Businesses Need to Know</h3>
-                    <div class="card-tag">Policy</div>
-                </a>
-
-                <!-- Card 1 - MA Settlements -->
-                <a href="blog-ma-car-accident-settlements-2026" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
-                    <h3>Average Car Accident Settlement in Massachusetts 2026</h3>
-                    <div class="card-tag">Legal Data</div>
-                </a>
-
-                <!-- Card 2 - CT Settlements -->
-                <a href="blog-ct-car-accident-settlements-2026" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Feb 7, 2026</div>
-                    <h3>Average Car Accident Settlement in Connecticut 2026</h3>
-                    <div class="card-tag">Legal Data</div>
-                </a>
-
-                <!-- Card 3 - AI Consciousness -->
-                <a href="blog-ai-agents-consciousness-moltbook" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Feb 2, 2026</div>
-                    <h3>AI Agents & Consciousness: What the Moltbook Reveals</h3>
-                    <div class="card-tag">AI Research</div>
-                </a>
-
-                <!-- Card 4 - Word Add-ins -->
-                <a href="blog-word-addins-lawyers" class="scroll-card">
-                    <div class="card-type"><span>Guide</span> on Jan 28, 2026</div>
-                    <h3>Word Add-ins for Lawyers: The Complete 2026 Guide</h3>
-                    <div class="card-tag">Legal Tech</div>
-                </a>
-
-                <!-- Card 5 - Document Automation -->
-                <a href="blog-legal-document-automation-2025" class="scroll-card">
-                    <div class="card-type"><span>Guide</span> on Jan 15, 2026</div>
-                    <h3>Legal Document Automation: 2025 Best Practices</h3>
-                    <div class="card-tag">Automation</div>
-                </a>
-
-                <!-- Card 6 - Small Business AI -->
-                <a href="blog-small-business-ai-guide" class="scroll-card">
-                    <div class="card-type"><span>Guide</span> on Jan 10, 2026</div>
-                    <h3>AI for Small Business: A Practical Implementation Guide</h3>
-                    <div class="card-tag">AI Strategy</div>
-                </a>
-
-                <!-- Card 7 - OneDrive Troubleshooting -->
-                <a href="blog-disk-space-onedrive-troubleshooting" class="scroll-card">
-                    <div class="card-type"><span>Tutorial</span> on Jan 5, 2026</div>
-                    <h3>OneDrive Disk Space Issues: The Complete Fix</h3>
-                    <div class="card-tag">IT Support</div>
-                </a>
-
-                <!-- Card 8 - IT Support RI -->
-                <a href="blog-it-support-rhode-island" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Dec 20, 2025</div>
-                    <h3>IT Support in Rhode Island: What Businesses Need in 2026</h3>
-                    <div class="card-tag">Local</div>
-                </a>
-
-                <!-- Card 9 - StaffSync -->
-                <a href="blog-staffsync-free-restaurant-scheduler" class="scroll-card">
-                    <div class="card-type"><span>Product</span> on Dec 15, 2025</div>
-                    <h3>StaffSync: Free Restaurant Staff Scheduling</h3>
-                    <div class="card-tag">Tools</div>
-                </a>
-
-                <!-- Card 10 - Shift Trading -->
-                <a href="blog-shift-trading-restaurant-staff" class="scroll-card">
-                    <div class="card-type"><span>Article</span> on Dec 10, 2025</div>
-                    <h3>Shift Trading for Restaurant Staff: Best Practices</h3>
-                    <div class="card-tag">Operations</div>
-                </a>
-
-                <!-- Card 11 - Sanctus Partnership -->
-                <a href="blog-sanctus-partnership-catholic-couples-app" class="scroll-card">
-                    <div class="card-type"><span>News</span> on Dec 1, 2025</div>
-                    <h3>Sanctus Partnership: Building the Catholic Couples App</h3>
-                    <div class="card-tag">Partnership</div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section -->
-    <section id="contact" class="cta-section">
-        <div class="section-container">
-            <div class="cta-content reveal">
-                <h2>Get a Free AI Strategy Consultation</h2>
-                <p>Tell us what your team spends too much time on. We'll show you how AI can streamline it — and what it'll cost. No pressure, no jargon.</p>
-
-                <!-- Contact Form -->
-                <form action="https://formspree.io/f/mvzrqler" method="POST" class="contact-form" style="max-width: 500px; margin: 2rem auto 0; text-align: left;">
-                    <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <input type="text" name="name" placeholder="Your Name" required style="padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; transition: all 0.3s;">
-                        <input type="email" name="email" placeholder="Your Email" required style="padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; transition: all 0.3s;">
-                    </div>
-                    <textarea name="message" placeholder="How can we help?" required style="width: 100%; padding: 1rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text); font-family: inherit; font-size: 1rem; min-height: 120px; resize: vertical; margin-bottom: 1rem; transition: all 0.3s;"></textarea>
-                    <button type="submit" class="btn btn-primary ripple" style="width: 100%; justify-content: center;">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                        Send Message
-                    </button>
-                </form>
-
-                <div style="margin-top: 1.5rem; display: flex; justify-content: center;">
-                    <a href="contact.html" class="btn btn-secondary ripple" role="button" aria-label="Contact AIBridges">
-                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-                        Contact Us
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     </main>
 

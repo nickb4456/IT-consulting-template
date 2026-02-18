@@ -1,0 +1,575 @@
+    <!-- ============================================
+         STORY-DRIVEN SECTIONS - Full Rebuild
+         Fresh CSS, no tiles, narrative flow
+         ============================================ -->
+    <style>
+        /* Story Section Base */
+        .story-section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+        
+        .story-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .story-wide {
+            max-width: 1100px;
+        }
+        
+        /* Big Text - Editorial Style */
+        .story-headline {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .story-subhead {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+        
+        /* Emphasis */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .text-red {
+            color: #dc2626;
+        }
+        
+        .text-muted {
+            color: var(--text-muted);
+        }
+        
+        /* Scroll-triggered fade-in */
+        .story-fade {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        
+        .story-fade.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Pull Quote */
+        .pull-quote {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            line-height: 1.4;
+            padding: 3rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            margin: 3rem 0;
+            position: relative;
+        }
+        
+        .pull-quote::before {
+            content: '"';
+            position: absolute;
+            top: 1.5rem;
+            left: -0.5rem;
+            font-size: 4rem;
+            color: var(--primary);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+            line-height: 1;
+        }
+        
+        /* Stats Row - Not tiles */
+        .stats-row {
+            display: flex;
+            gap: 4rem;
+            justify-content: center;
+            padding: 3rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 900;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        /* Divider Line */
+        .divider {
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 3rem auto;
+            border-radius: 2px;
+        }
+        
+        /* CTA Button - Clean */
+        .story-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.25rem 2.5rem;
+            background: var(--text);
+            color: var(--bg-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .story-cta:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 225, 230, 0.3);
+        }
+        
+        .story-cta-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+        
+        .story-cta-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: transparent;
+        }
+        
+        /* Process Steps - Vertical flow */
+        .process-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            padding-left: 80px;
+        }
+        
+        .process-flow::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+        }
+        
+        .process-step {
+            position: relative;
+            padding: 2.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .process-step:last-child {
+            border-bottom: none;
+        }
+        
+        .process-step::before {
+            content: attr(data-step);
+            position: absolute;
+            left: -80px;
+            top: 2.5rem;
+            width: 60px;
+            height: 60px;
+            background: var(--bg-dark);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        .process-step h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        
+        .process-step p {
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        /* Proof Section */
+        .proof-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .proof-item {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .proof-item .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .proof-item h4 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .proof-item p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        /* Final CTA - Full width dramatic */
+        .final-cta {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, #050508 100%);
+            text-align: center;
+            padding: 8rem 2rem;
+            position: relative;
+        }
+        
+        .final-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 100px;
+            background: linear-gradient(180deg, var(--accent), transparent);
+        }
+        
+        /* Contact Form - Clean */
+        .contact-form-clean {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        
+        .contact-form-clean input,
+        .contact-form-clean textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .contact-form-clean input:focus,
+        .contact-form-clean textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(76, 105, 245, 0.05);
+        }
+        
+        .contact-form-clean textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .story-section {
+                padding: 4rem 1.5rem;
+            }
+            
+            .stats-row {
+                gap: 2rem;
+            }
+            
+            .stat-item {
+                flex: 1 1 40%;
+            }
+            
+            .process-flow {
+                padding-left: 60px;
+            }
+            
+            .process-flow::before {
+                left: 20px;
+            }
+            
+            .process-step::before {
+                left: -60px;
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+            
+            .proof-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            
+            .pull-quote {
+                font-size: 1.3rem;
+                padding: 2rem 0;
+            }
+        }
+    </style>
+
+    <!-- CHAPTER 1: The Problem -->
+    <section class="story-section" style="background: var(--bg-dark);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 2rem;">THE PROBLEM</p>
+            
+            <h2 class="story-headline">
+                You didn't start a business to <span class="text-red">copy-paste data at 11pm.</span>
+            </h2>
+            
+            <p class="story-subhead">
+                But here you are. Buried in emails. Reformatting spreadsheets. Chasing invoices. Doing the same tasks over and over while the work you actually care about waits.
+            </p>
+            
+            <div class="pull-quote">
+                Every hour spent on repetitive tasks is an hour stolen from growth, from clients, from your life.
+            </div>
+            
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="stat-number text-red">40%</div>
+                    <div class="stat-label">of work is repetitive</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-red">2.5hrs</div>
+                    <div class="stat-label">wasted daily on email</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-red">$50K+</div>
+                    <div class="stat-label">lost per employee/year</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 2: The Hope -->
+    <section class="story-section" style="background: linear-gradient(180deg, var(--bg-dark) 0%, #0d0d14 100%);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); letter-spacing: 2px; margin-bottom: 2rem;">THE SOLUTION</p>
+            
+            <h2 class="story-headline">
+                What if AI handled <span class="text-gradient">the boring stuff?</span>
+            </h2>
+            
+            <p class="story-subhead">
+                Not someday. Not "when the tech matures." Right now — with systems we've already built and deployed for businesses like yours.
+            </p>
+            
+            <p style="color: var(--text-muted); line-height: 1.8; margin-bottom: 2rem;">
+                AI agents work 24/7. They don't forget steps. They don't need coffee breaks. They handle the repetitive work <em>exactly</em> the way you want it done — email triage, document processing, data entry, scheduling — so your team can focus on what actually matters.
+            </p>
+            
+            <div class="divider"></div>
+            
+            <div style="text-align: center;">
+                <a href="#contact" class="story-cta">
+                    See If AI Can Help Your Business
+                    <span>→</span>
+                </a>
+                <p style="margin-top: 1rem; color: var(--text-muted); font-size: 0.9rem;">Free 30-minute strategy call. No sales pitch.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 3: How It Works (Red Timeline) -->
+    <section id="process" class="scroll-timeline">
+        <div class="scroll-timeline-container">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 1rem;">HOW IT WORKS</p>
+                <h2 class="story-headline" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">From stuck to automated in 4 steps.</h2>
+            </div>
+            
+            <!-- The track (background line) -->
+            <div class="timeline-track"></div>
+            <!-- The fill (animated line) -->
+            <div class="timeline-fill" id="timelineFill"></div>
+
+            <!-- Step 1 -->
+            <div class="timeline-step" data-step="1">
+                <div class="step-node"></div>
+                <div class="step-number">01</div>
+                <div class="step-content">
+                    <span class="step-label">Step 1:</span>
+                    <h3 class="step-title">Discovery Call</h3>
+                    <p class="step-description">30 minutes. You tell us what eats your time. We listen, ask questions, and identify exactly where AI can help. No pitch — just clarity.</p>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="timeline-step" data-step="2">
+                <div class="step-node"></div>
+                <div class="step-number">02</div>
+                <div class="step-content">
+                    <span class="step-label">Step 2:</span>
+                    <h3 class="step-title">Build Your Agent</h3>
+                    <p class="step-description">We design an AI agent for your specific workflow. Custom rules, your tools, your voice. You approve before anything goes live.</p>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="timeline-step" data-step="3">
+                <div class="step-node"></div>
+                <div class="step-number">03</div>
+                <div class="step-content">
+                    <span class="step-label">Step 3:</span>
+                    <h3 class="step-title">Deploy & Monitor</h3>
+                    <p class="step-description">Your agent goes live with guardrails, cost caps, and real-time monitoring. We watch for errors and optimize weekly. You focus on your business.</p>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="timeline-step" data-step="4">
+                <div class="step-node"></div>
+                <div class="step-number">04</div>
+                <div class="step-content">
+                    <span class="step-label">Step 4:</span>
+                    <h3 class="step-title">Scale & Improve</h3>
+                    <p class="step-description">Once the first agent proves value, we expand. New workflows, compounding savings. Most clients see 3x ROI within 90 days.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 4: Why Us -->
+    <section class="story-section" style="background: linear-gradient(180deg, #050508 0%, var(--bg-dark) 100%);">
+        <div class="story-container story-fade">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 2rem;">WHY US</p>
+            
+            <h2 class="story-headline" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">
+                We've been where you are.
+            </h2>
+            
+            <p class="story-subhead">
+                Buried in repetitive tasks. Wishing for more hours. We built AI to fix that — and now we build it for you.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 2rem; margin-top: 3rem;">
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">🛡️</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">It Actually Works</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">Every AI has guardrails — automatic limits, error handling, human escalation. If something breaks at 2am, it fixes itself or alerts us. <em>Not you.</em></p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">💰</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">No Surprise Bills</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">AI gets expensive fast if nobody's watching. We cap costs upfront, batch requests smartly, and show you exactly what you're paying.</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 1.5rem; align-items: flex-start;">
+                    <span style="font-size: 2rem; line-height: 1;">📍</span>
+                    <div>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem;">One Person. One Number.</h4>
+                        <p style="color: var(--text-muted); line-height: 1.7;">Talk to the same engineer who builds your system — not a support queue. Based in Cranston, RI. Call or text anytime.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHAPTER 5: Social Proof (Brief) -->
+    <section class="story-section" style="background: var(--bg-dark); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+        <div class="story-container story-wide story-fade" style="text-align: center;">
+            <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 3rem;">TRUSTED BY</p>
+            
+            <div style="display: flex; justify-content: center; gap: 4rem; flex-wrap: wrap; opacity: 0.6;">
+                <span style="font-size: 1.1rem; font-weight: 600;">Law Firms</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Medical Practices</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Restaurants</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Real Estate</span>
+                <span style="font-size: 1.1rem; font-weight: 600;">Professional Services</span>
+            </div>
+            
+            <div class="divider"></div>
+            
+            <p style="font-size: 1.3rem; color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                "Finally — AI that doesn't require a PhD to use. We saved 15 hours a week on invoice processing alone."
+            </p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">— Operations Manager, Providence</p>
+        </div>
+    </section>
+
+    <!-- FINAL CTA -->
+    <section id="contact" class="final-cta">
+        <div class="story-container story-fade">
+            <h2 class="story-headline" style="margin-bottom: 1.5rem;">
+                Ready to get your <span class="text-gradient">hours back?</span>
+            </h2>
+            
+            <p class="story-subhead" style="max-width: 500px; margin: 0 auto 3rem;">
+                Tell us what your team spends too much time on. We'll show you how AI can fix it — and what it'll cost. Free call. No pressure.
+            </p>
+            
+            <form action="https://formspree.io/f/mvzrqler" method="POST" class="contact-form-clean">
+                <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <input type="text" name="name" placeholder="Your name" required>
+                    <input type="email" name="email" placeholder="Your email" required>
+                </div>
+                <textarea name="message" placeholder="What tasks eat up your time?" required></textarea>
+                <button type="submit" class="story-cta" style="width: 100%; justify-content: center;">
+                    Get Your Free Strategy Call
+                    <span>→</span>
+                </button>
+            </form>
+            
+            <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                Or email directly: <a href="mailto:hello@aibridges.org" style="color: var(--accent); text-decoration: none;">hello@aibridges.org</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Scroll animation script -->
+    <script>
+    // Story section fade-in on scroll
+    (function() {
+        const storyFades = document.querySelectorAll('.story-fade');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, {
+            threshold: 0.15,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        storyFades.forEach(el => observer.observe(el));
+    })();
+    </script>

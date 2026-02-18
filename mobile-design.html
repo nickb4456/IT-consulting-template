@@ -4,8 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>iOS Design Patterns That Go Viral | AIBridges</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --ios-blue: #007AFF;
@@ -23,23 +21,19 @@
       --ios-separator: rgba(84,84,88,0.65);
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
       background: var(--ios-bg);
       color: #fff;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
     
-    /* Hero Section */
+    /* Hero */
     .hero {
-      min-height: 100vh;
+      min-height: 60vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -47,7 +41,6 @@
       padding: 4rem 2rem;
       text-align: center;
       position: relative;
-      overflow: hidden;
     }
     
     .hero::before {
@@ -55,81 +48,35 @@
       position: absolute;
       width: 600px;
       height: 600px;
-      background: radial-gradient(circle, rgba(0,122,255,0.15) 0%, transparent 70%);
-      top: 10%;
+      background: radial-gradient(circle, rgba(0,122,255,0.12) 0%, transparent 70%);
+      top: 0;
       left: 50%;
       transform: translateX(-50%);
       pointer-events: none;
     }
     
     .hero h1 {
-      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-size: clamp(2.5rem, 8vw, 4rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       margin-bottom: 1rem;
-      background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.7) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
     
     .hero p {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       color: var(--ios-gray);
-      max-width: 600px;
-      margin-bottom: 3rem;
+      max-width: 500px;
     }
     
-    /* Phone Mockup */
-    .phone-showcase {
-      display: flex;
-      gap: 2rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 2rem 0;
-    }
-    
-    .phone {
-      width: 280px;
-      height: 580px;
-      background: var(--ios-gray-6);
-      border-radius: 40px;
-      padding: 12px;
-      position: relative;
-      box-shadow: 
-        0 0 0 3px var(--ios-gray-5),
-        0 25px 50px -12px rgba(0,0,0,0.8);
-    }
-    
-    .phone-screen {
-      width: 100%;
-      height: 100%;
-      background: var(--ios-bg);
-      border-radius: 32px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .notch {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      height: 30px;
-      background: #000;
-      border-radius: 0 0 20px 20px;
-      z-index: 10;
-    }
-    
-    /* Pattern Sections */
+    /* Section */
     .section {
-      padding: 6rem 2rem;
-      max-width: 1200px;
+      padding: 4rem 2rem;
+      max-width: 1400px;
       margin: 0 auto;
     }
     
     .section-header {
-      margin-bottom: 3rem;
+      margin-bottom: 2rem;
     }
     
     .section-label {
@@ -142,444 +89,108 @@
     }
     
     .section-title {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin-bottom: 1rem;
     }
     
-    .section-desc {
-      font-size: 1.125rem;
-      color: var(--ios-gray);
-      max-width: 600px;
-    }
-    
-    /* Pattern Cards */
+    /* Pattern Grid */
     .pattern-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
     }
     
     .pattern-card {
       background: var(--ios-card);
-      border-radius: 20px;
+      border-radius: 16px;
       overflow: hidden;
-      transition: transform 0.3s ease;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid transparent;
     }
     
     .pattern-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
+      border-color: var(--ios-gray-4);
+    }
+    
+    .pattern-card.active {
+      border-color: var(--ios-blue);
     }
     
     .pattern-preview {
-      height: 280px;
+      height: 200px;
       background: var(--ios-gray-5);
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
       overflow: hidden;
     }
     
     .pattern-info {
-      padding: 1.5rem;
+      padding: 1.25rem;
     }
     
     .pattern-name {
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .pattern-name .viral-badge {
+      font-size: 0.625rem;
+      padding: 0.15rem 0.4rem;
+      background: var(--ios-red);
+      border-radius: 4px;
+      font-weight: 600;
     }
     
     .pattern-desc {
-      font-size: 0.875rem;
-      color: var(--ios-gray);
-      margin-bottom: 1rem;
-    }
-    
-    .pattern-tags {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    .tag {
-      font-size: 0.75rem;
-      padding: 0.25rem 0.75rem;
-      background: var(--ios-gray-5);
-      border-radius: 100px;
+      font-size: 0.8125rem;
       color: var(--ios-gray);
     }
     
-    .tag.viral {
-      background: rgba(255,59,48,0.2);
-      color: var(--ios-red);
-    }
-    
-    /* Live Demo Components */
-    
-    /* 1. Shimmer Loading */
-    .shimmer-demo {
-      width: 200px;
-    }
-    
-    .shimmer-line {
-      height: 16px;
-      background: linear-gradient(90deg, var(--ios-gray-5) 0%, var(--ios-gray-4) 50%, var(--ios-gray-5) 100%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s ease-in-out infinite;
-      border-radius: 4px;
-      margin-bottom: 8px;
-    }
-    
-    .shimmer-line:last-child {
-      width: 60%;
-    }
-    
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    
-    /* 2. Pull to Refresh */
-    .pull-demo {
-      width: 240px;
-      height: 200px;
-      background: var(--ios-gray-6);
-      border-radius: 12px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .pull-indicator {
-      position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 28px;
-      height: 28px;
-      border: 2px solid var(--ios-gray-3);
-      border-top-color: var(--ios-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: translateX(-50%) rotate(360deg); }
-    }
-    
-    .pull-content {
-      margin-top: 60px;
-      padding: 12px;
-    }
-    
-    .pull-row {
-      height: 44px;
-      background: var(--ios-gray-5);
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-    
-    /* 3. Haptic Button */
-    .haptic-btn {
-      padding: 16px 32px;
-      background: var(--ios-blue);
-      border: none;
-      border-radius: 14px;
-      color: #fff;
-      font-size: 17px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    .haptic-btn:active {
-      transform: scale(0.96);
-    }
-    
-    /* 4. iOS Modal Sheet */
-    .sheet-demo {
-      width: 260px;
-      height: 220px;
-      position: relative;
-      perspective: 500px;
-    }
-    
-    .sheet-bg {
-      position: absolute;
-      inset: 0;
-      background: var(--ios-gray-6);
-      border-radius: 12px;
-      transform: scale(0.94) translateY(-8px);
-      opacity: 0.6;
-    }
-    
-    .sheet-card {
-      position: absolute;
+    /* Code Panel */
+    .code-panel {
+      position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
-      height: 180px;
-      background: var(--ios-gray-5);
-      border-radius: 20px 20px 0 0;
-      padding: 12px 16px;
-    }
-    
-    .sheet-handle {
-      width: 36px;
-      height: 5px;
-      background: var(--ios-gray-3);
-      border-radius: 3px;
-      margin: 0 auto 16px;
-    }
-    
-    .sheet-title {
-      font-size: 17px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-    
-    .sheet-options {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .sheet-option {
-      padding: 12px;
-      background: var(--ios-gray-4);
-      border-radius: 10px;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .sheet-icon {
-      width: 28px;
-      height: 28px;
-      background: var(--ios-blue);
-      border-radius: 6px;
-    }
-    
-    /* 5. Glassmorphism */
-    .glass-demo {
-      width: 260px;
-      height: 180px;
-      position: relative;
-    }
-    
-    .glass-bg {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 20px;
-    }
-    
-    .glass-card {
-      position: absolute;
-      top: 30px;
-      left: 20px;
-      right: 20px;
-      bottom: 30px;
-      background: rgba(255,255,255,0.15);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    
-    .glass-title {
-      font-size: 13px;
-      font-weight: 500;
-      opacity: 0.8;
-    }
-    
-    .glass-value {
-      font-size: 32px;
-      font-weight: 700;
-    }
-    
-    /* 6. Segmented Control */
-    .segment-demo {
-      width: 280px;
-    }
-    
-    .segment-control {
-      display: flex;
-      background: var(--ios-gray-5);
-      border-radius: 9px;
-      padding: 2px;
-      position: relative;
-    }
-    
-    .segment-bg {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: calc(33.33% - 2px);
-      height: calc(100% - 4px);
-      background: var(--ios-gray-3);
-      border-radius: 7px;
-      transition: transform 0.2s ease;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    .segment-btn {
-      flex: 1;
-      padding: 8px 16px;
-      border: none;
-      background: transparent;
-      color: var(--ios-gray);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      position: relative;
-      z-index: 1;
-      transition: color 0.2s;
-    }
-    
-    .segment-btn.active {
-      color: #fff;
-    }
-    
-    /* 7. Spring Animation */
-    .spring-demo {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .spring-card {
-      width: 80px;
-      height: 80px;
-      background: var(--ios-green);
-      border-radius: 20px;
-      cursor: pointer;
-      animation: springBounce 2s ease-in-out infinite;
-    }
-    
-    .spring-card:nth-child(2) {
-      animation-delay: 0.2s;
-      background: var(--ios-orange);
-    }
-    
-    .spring-card:nth-child(3) {
-      animation-delay: 0.4s;
-      background: var(--ios-blue);
-    }
-    
-    @keyframes springBounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-    
-    /* 8. Context Menu */
-    .context-demo {
-      position: relative;
-    }
-    
-    .context-item {
-      width: 200px;
-      height: 200px;
-      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-    }
-    
-    .context-menu {
-      position: absolute;
-      top: 50%;
-      left: 220px;
-      transform: translateY(-50%);
-      width: 220px;
-      background: rgba(30,30,30,0.9);
-      backdrop-filter: blur(50px);
-      -webkit-backdrop-filter: blur(50px);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-    }
-    
-    .context-option {
-      padding: 12px 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 15px;
-      border-bottom: 1px solid var(--ios-separator);
-    }
-    
-    .context-option:last-child {
-      border-bottom: none;
-    }
-    
-    .context-option.destructive {
-      color: var(--ios-red);
-    }
-    
-    /* 9. Notification Badge */
-    .badge-demo {
-      display: flex;
-      gap: 24px;
-    }
-    
-    .app-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 14px;
-      position: relative;
-    }
-    
-    .app-icon.messages { background: linear-gradient(180deg, #5AC8FA 0%, #007AFF 100%); }
-    .app-icon.mail { background: linear-gradient(180deg, #5AC8FA 0%, #007AFF 100%); }
-    .app-icon.settings { background: linear-gradient(180deg, #8E8E93 0%, #636366 100%); }
-    
-    .badge {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      min-width: 22px;
-      height: 22px;
-      background: var(--ios-red);
-      border-radius: 11px;
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 6px;
-      box-shadow: 0 2px 4px rgba(255,59,48,0.4);
-      animation: badgePop 0.3s ease;
-    }
-    
-    @keyframes badgePop {
-      0% { transform: scale(0); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    
-    /* Code Block */
-    .code-section {
       background: var(--ios-gray-6);
-      border-radius: 12px;
-      margin-top: 1.5rem;
-      overflow: hidden;
+      border-top: 1px solid var(--ios-gray-4);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      max-height: 50vh;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
     }
     
-    .code-header {
+    .code-panel.open {
+      transform: translateY(0);
+    }
+    
+    .code-panel-header {
       display: flex;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: var(--ios-gray-5);
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--ios-gray-4);
+      flex-shrink: 0;
+    }
+    
+    .code-panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    .code-tabs {
+      display: flex;
+      gap: 0.25rem;
     }
     
     .code-tab {
@@ -591,6 +202,11 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      font-family: inherit;
+    }
+    
+    .code-tab:hover {
+      background: var(--ios-gray-5);
     }
     
     .code-tab.active {
@@ -598,74 +214,342 @@
       color: #fff;
     }
     
-    .code-content {
-      padding: 1rem;
-      font-family: 'SF Mono', Menlo, monospace;
-      font-size: 0.8125rem;
-      line-height: 1.6;
-      color: #e5e5e7;
-      overflow-x: auto;
+    .close-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--ios-gray-4);
+      border: none;
+      color: var(--ios-gray);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
-    .code-content .keyword { color: #FF7AB2; }
-    .code-content .string { color: #FF8170; }
-    .code-content .number { color: #D0BF69; }
-    .code-content .comment { color: #6C7986; }
+    .close-btn:hover {
+      background: var(--ios-gray-3);
+      color: #fff;
+    }
+    
+    .code-content {
+      flex: 1;
+      overflow: auto;
+      padding: 1.5rem;
+    }
+    
+    .code-block {
+      display: none;
+      font-family: 'SF Mono', Menlo, Monaco, monospace;
+      font-size: 0.8125rem;
+      line-height: 1.7;
+      white-space: pre;
+      color: #e5e5e7;
+    }
+    
+    .code-block.active {
+      display: block;
+    }
+    
+    .code-block .k { color: #FF7AB2; }
+    .code-block .s { color: #FF8170; }
+    .code-block .n { color: #D0BF69; }
+    .code-block .c { color: #6C7986; }
+    .code-block .p { color: #ACF2E4; }
+    .code-block .f { color: #67B7A4; }
+    
+    /* Copy Button */
+    .copy-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      background: var(--ios-gray-4);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    
+    .copy-btn:hover {
+      background: var(--ios-gray-3);
+    }
+    
+    .code-wrapper {
+      position: relative;
+    }
+    
+    /* Live Demos */
+    
+    /* 1. Shimmer */
+    .shimmer-demo { width: 180px; }
+    .shimmer-line {
+      height: 14px;
+      background: linear-gradient(90deg, var(--ios-gray-5) 0%, var(--ios-gray-4) 50%, var(--ios-gray-5) 100%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .shimmer-line:last-child { width: 60%; }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* 2. Pull to Refresh */
+    .pull-demo {
+      width: 200px;
+      height: 160px;
+      background: var(--ios-gray-6);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+    .pull-indicator {
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--ios-gray-3);
+      border-top-color: var(--ios-blue);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: translateX(-50%) rotate(360deg); } }
+    .pull-content { margin-top: 50px; padding: 10px; }
+    .pull-row {
+      height: 36px;
+      background: var(--ios-gray-5);
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    
+    /* 3. Haptic Button */
+    .haptic-btn {
+      padding: 14px 28px;
+      background: var(--ios-blue);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s;
+      font-family: inherit;
+    }
+    .haptic-btn:active { transform: scale(0.95); }
+    
+    /* 4. Modal Sheet */
+    .sheet-demo {
+      width: 220px;
+      height: 180px;
+      position: relative;
+    }
+    .sheet-bg {
+      position: absolute;
+      inset: 0;
+      background: var(--ios-gray-6);
+      border-radius: 12px;
+      transform: scale(0.92) translateY(-10px);
+      opacity: 0.5;
+    }
+    .sheet-card {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 140px;
+      background: var(--ios-gray-5);
+      border-radius: 16px 16px 0 0;
+      padding: 10px 14px;
+    }
+    .sheet-handle {
+      width: 32px;
+      height: 4px;
+      background: var(--ios-gray-3);
+      border-radius: 2px;
+      margin: 0 auto 12px;
+    }
+    .sheet-row {
+      padding: 10px;
+      background: var(--ios-gray-4);
+      border-radius: 8px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    
+    /* 5. Glassmorphism */
+    .glass-demo {
+      width: 220px;
+      height: 150px;
+      position: relative;
+    }
+    .glass-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 16px;
+    }
+    .glass-card {
+      position: absolute;
+      top: 25px;
+      left: 18px;
+      right: 18px;
+      bottom: 25px;
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .glass-label { font-size: 11px; opacity: 0.8; }
+    .glass-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+    
+    /* 6. Segmented Control */
+    .segment-demo { width: 240px; }
+    .segment-control {
+      display: flex;
+      background: var(--ios-gray-5);
+      border-radius: 8px;
+      padding: 2px;
+      position: relative;
+    }
+    .segment-pill {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: calc(33.33% - 2px);
+      height: calc(100% - 4px);
+      background: var(--ios-gray-3);
+      border-radius: 6px;
+      transition: transform 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .segment-btn {
+      flex: 1;
+      padding: 7px 14px;
+      border: none;
+      background: transparent;
+      color: var(--ios-gray);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+      transition: color 0.2s;
+      font-family: inherit;
+    }
+    .segment-btn.active { color: #fff; }
+    
+    /* 7. Spring Animation */
+    .spring-demo { display: flex; gap: 16px; }
+    .spring-card {
+      width: 60px;
+      height: 60px;
+      border-radius: 16px;
+      animation: springBounce 2s ease-in-out infinite;
+    }
+    .spring-card:nth-child(1) { background: var(--ios-green); }
+    .spring-card:nth-child(2) { background: var(--ios-orange); animation-delay: 0.15s; }
+    .spring-card:nth-child(3) { background: var(--ios-blue); animation-delay: 0.3s; }
+    @keyframes springBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+    
+    /* 8. Context Menu */
+    .context-demo { position: relative; display: flex; gap: 16px; align-items: center; }
+    .context-item {
+      width: 100px;
+      height: 100px;
+      background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    .context-menu {
+      width: 160px;
+      background: rgba(40,40,40,0.95);
+      backdrop-filter: blur(40px);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .context-opt {
+      padding: 10px 14px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--ios-separator);
+      display: flex;
+      justify-content: space-between;
+    }
+    .context-opt:last-child { border: none; color: var(--ios-red); }
+    
+    /* 9. Badge */
+    .badge-demo { display: flex; gap: 20px; }
+    .app-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 12px;
+      position: relative;
+      background: linear-gradient(180deg, #5AC8FA 0%, #007AFF 100%);
+    }
+    .app-icon:nth-child(2) { background: linear-gradient(180deg, #34C759 0%, #30B353 100%); }
+    .app-icon:nth-child(3) { background: linear-gradient(180deg, #8E8E93 0%, #636366 100%); }
+    .badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 20px;
+      height: 20px;
+      background: var(--ios-red);
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+    }
     
     /* Footer */
     footer {
-      padding: 4rem 2rem;
+      padding: 3rem 2rem;
       text-align: center;
       border-top: 1px solid var(--ios-separator);
-    }
-    
-    footer p {
       color: var(--ios-gray);
       font-size: 0.875rem;
     }
     
-    /* Responsive */
     @media (max-width: 768px) {
-      .phone-showcase {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .pattern-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .context-menu {
-        display: none;
-      }
+      .code-panel { max-height: 60vh; }
+      .context-menu { display: none; }
     }
   </style>
 </head>
 <body>
   <section class="hero">
     <h1>iOS Design Patterns<br>That Go Viral</h1>
-    <p>The micro-interactions, animations, and patterns behind the apps everyone can't stop talking about.</p>
-    
-    <div class="phone-showcase">
-      <div class="phone">
-        <div class="phone-screen">
-          <div class="notch"></div>
-          <!-- Demo content would go here -->
-        </div>
-      </div>
-    </div>
+    <p>Click any pattern to see the code. Real implementations, not concepts.</p>
   </section>
   
   <section class="section">
     <div class="section-header">
       <div class="section-label">Pattern Library</div>
-      <h2 class="section-title">What makes an app feel premium</h2>
-      <p class="section-desc">Every viral app nails these details. They're not accidents — they're deliberate design decisions that create emotional responses.</p>
+      <h2 class="section-title">Click to view code</h2>
     </div>
     
     <div class="pattern-grid">
-      <!-- 1. Shimmer Loading -->
-      <div class="pattern-card">
+      <!-- 1. Shimmer -->
+      <div class="pattern-card" data-pattern="shimmer">
         <div class="pattern-preview">
           <div class="shimmer-demo">
             <div class="shimmer-line"></div>
@@ -674,115 +558,80 @@
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Shimmer Loading</h3>
-          <p class="pattern-desc">Skeleton screens with shimmer effect reduce perceived wait time by 40%. Used by Facebook, LinkedIn, YouTube.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Loading State</span>
-            <span class="tag">Animation</span>
-          </div>
+          <div class="pattern-name">Shimmer Loading <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Skeleton screens reduce perceived wait time by 40%</div>
         </div>
       </div>
       
-      <!-- 2. Pull to Refresh -->
-      <div class="pattern-card">
+      <!-- 2. Pull Refresh -->
+      <div class="pattern-card" data-pattern="pull">
         <div class="pattern-preview">
           <div class="pull-demo">
             <div class="pull-indicator"></div>
             <div class="pull-content">
               <div class="pull-row"></div>
               <div class="pull-row"></div>
-              <div class="pull-row"></div>
             </div>
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Pull to Refresh</h3>
-          <p class="pattern-desc">The gesture Twitter made famous. Custom animations here create brand identity — Mailchimp's high-five, Snapchat's ghost.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Gesture</span>
-            <span class="tag">Feedback</span>
-          </div>
+          <div class="pattern-name">Pull to Refresh <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Custom animations create brand identity</div>
         </div>
       </div>
       
-      <!-- 3. Haptic Feedback -->
-      <div class="pattern-card">
+      <!-- 3. Haptic -->
+      <div class="pattern-card" data-pattern="haptic">
         <div class="pattern-preview">
-          <button class="haptic-btn">Press & Hold</button>
+          <button class="haptic-btn">Press Me</button>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Haptic Feedback</h3>
-          <p class="pattern-desc">Subtle vibrations on interaction. Three levels: light, medium, heavy. The "click" feel on toggle switches is pure dopamine.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Tactile</span>
-            <span class="tag">Native Feel</span>
-          </div>
+          <div class="pattern-name">Haptic Feedback <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Tactile vibrations on interaction. Pure dopamine.</div>
         </div>
       </div>
       
-      <!-- 4. iOS Modal Sheet -->
-      <div class="pattern-card">
+      <!-- 4. Sheet -->
+      <div class="pattern-card" data-pattern="sheet">
         <div class="pattern-preview">
           <div class="sheet-demo">
             <div class="sheet-bg"></div>
             <div class="sheet-card">
               <div class="sheet-handle"></div>
-              <div class="sheet-title">Share</div>
-              <div class="sheet-options">
-                <div class="sheet-option">
-                  <div class="sheet-icon"></div>
-                  <span>AirDrop</span>
-                </div>
-                <div class="sheet-option">
-                  <div class="sheet-icon"></div>
-                  <span>Messages</span>
-                </div>
-              </div>
+              <div class="sheet-row">Share to...</div>
+              <div class="sheet-row">Copy Link</div>
             </div>
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Modal Sheet</h3>
-          <p class="pattern-desc">iOS 13+ presentation style. Background scales down, sheet slides up with grab handle. Swipe down to dismiss. Native feel.</p>
-          <div class="pattern-tags">
-            <span class="tag">iOS 15+</span>
-            <span class="tag">Navigation</span>
-            <span class="tag">Gesture</span>
-          </div>
+          <div class="pattern-name">Modal Sheet</div>
+          <div class="pattern-desc">iOS 15+ presentation. Swipe down to dismiss.</div>
         </div>
       </div>
       
-      <!-- 5. Glassmorphism -->
-      <div class="pattern-card">
+      <!-- 5. Glass -->
+      <div class="pattern-card" data-pattern="glass">
         <div class="pattern-preview">
           <div class="glass-demo">
             <div class="glass-bg"></div>
             <div class="glass-card">
-              <div class="glass-title">BALANCE</div>
+              <div class="glass-label">BALANCE</div>
               <div class="glass-value">$4,280</div>
             </div>
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Glassmorphism</h3>
-          <p class="pattern-desc">Frosted glass effect with blur and transparency. Control Center, widgets, app backgrounds. Blur radius 20-40px typical.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Visual</span>
-            <span class="tag">Depth</span>
-          </div>
+          <div class="pattern-name">Glassmorphism <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Frosted glass with blur. Control Center style.</div>
         </div>
       </div>
       
-      <!-- 6. Segmented Control -->
-      <div class="pattern-card">
+      <!-- 6. Segment -->
+      <div class="pattern-card" data-pattern="segment">
         <div class="pattern-preview">
           <div class="segment-demo">
             <div class="segment-control">
-              <div class="segment-bg"></div>
+              <div class="segment-pill"></div>
               <button class="segment-btn active">Day</button>
               <button class="segment-btn">Week</button>
               <button class="segment-btn">Month</button>
@@ -790,18 +639,13 @@
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Segmented Control</h3>
-          <p class="pattern-desc">Sliding pill indicator. Background slides smoothly between options. Feels physical, like a toggle switch.</p>
-          <div class="pattern-tags">
-            <span class="tag">iOS Native</span>
-            <span class="tag">Control</span>
-            <span class="tag">Animation</span>
-          </div>
+          <div class="pattern-name">Segmented Control</div>
+          <div class="pattern-desc">Sliding pill indicator. Feels physical.</div>
         </div>
       </div>
       
-      <!-- 7. Spring Animation -->
-      <div class="pattern-card">
+      <!-- 7. Spring -->
+      <div class="pattern-card" data-pattern="spring">
         <div class="pattern-preview">
           <div class="spring-demo">
             <div class="spring-card"></div>
@@ -810,126 +654,779 @@
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Spring Physics</h3>
-          <p class="pattern-desc">Natural motion with overshoot and settle. Parameters: stiffness, damping, mass. Makes UI feel alive, not robotic.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Animation</span>
-            <span class="tag">Physics</span>
-          </div>
+          <div class="pattern-name">Spring Physics <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Natural motion with overshoot. Makes UI feel alive.</div>
         </div>
       </div>
       
-      <!-- 8. Context Menu -->
-      <div class="pattern-card">
+      <!-- 8. Context -->
+      <div class="pattern-card" data-pattern="context">
         <div class="pattern-preview">
           <div class="context-demo">
             <div class="context-item">📸</div>
             <div class="context-menu">
-              <div class="context-option">
-                <span>Copy</span>
-                <span>⌘C</span>
-              </div>
-              <div class="context-option">
-                <span>Share...</span>
-                <span>↗</span>
-              </div>
-              <div class="context-option">
-                <span>Save to Photos</span>
-                <span>↓</span>
-              </div>
-              <div class="context-option destructive">
-                <span>Delete</span>
-                <span>⌫</span>
-              </div>
+              <div class="context-opt"><span>Copy</span><span>⌘C</span></div>
+              <div class="context-opt"><span>Share</span><span>↗</span></div>
+              <div class="context-opt"><span>Delete</span></div>
             </div>
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Context Menu</h3>
-          <p class="pattern-desc">Long-press reveals options. Background blurs, item scales up. Preview + actions. Destructive actions in red at bottom.</p>
-          <div class="pattern-tags">
-            <span class="tag">iOS 13+</span>
-            <span class="tag">Interaction</span>
-            <span class="tag">3D Touch</span>
-          </div>
+          <div class="pattern-name">Context Menu</div>
+          <div class="pattern-desc">Long-press reveals options. Background blurs.</div>
         </div>
       </div>
       
-      <!-- 9. Notification Badge -->
-      <div class="pattern-card">
+      <!-- 9. Badge -->
+      <div class="pattern-card" data-pattern="badge">
         <div class="pattern-preview">
           <div class="badge-demo">
-            <div class="app-icon messages">
-              <div class="badge">3</div>
-            </div>
-            <div class="app-icon mail">
-              <div class="badge">128</div>
-            </div>
-            <div class="app-icon settings">
-              <div class="badge">1</div>
-            </div>
+            <div class="app-icon"><div class="badge">3</div></div>
+            <div class="app-icon"><div class="badge">99+</div></div>
+            <div class="app-icon"><div class="badge">1</div></div>
           </div>
         </div>
         <div class="pattern-info">
-          <h3 class="pattern-name">Badge Animation</h3>
-          <p class="pattern-desc">Scale-in with overshoot on new notification. Creates urgency, drives engagement. Red = action required. Position: top-right, overlapping.</p>
-          <div class="pattern-tags">
-            <span class="tag viral">Viral</span>
-            <span class="tag">Notification</span>
-            <span class="tag">Engagement</span>
-          </div>
+          <div class="pattern-name">Badge Animation <span class="viral-badge">VIRAL</span></div>
+          <div class="pattern-desc">Scale-in with overshoot. Drives engagement.</div>
         </div>
       </div>
     </div>
   </section>
   
-  <section class="section">
-    <div class="section-header">
-      <div class="section-label">Implementation</div>
-      <h2 class="section-title">SwiftUI Code</h2>
-      <p class="section-desc">Production-ready implementations you can use today.</p>
-    </div>
-    
-    <div class="code-section">
-      <div class="code-header">
-        <button class="code-tab active">Shimmer.swift</button>
-        <button class="code-tab">Spring.swift</button>
-        <button class="code-tab">Haptic.swift</button>
+  <footer>
+    <p>Built by AIBridges • Inspired by Apple HIG</p>
+  </footer>
+  
+  <!-- Code Panel -->
+  <div class="code-panel" id="codePanel">
+    <div class="code-panel-header">
+      <div class="code-panel-title" id="panelTitle">Shimmer Loading</div>
+      <div class="code-tabs">
+        <button class="code-tab active" data-lang="css">CSS</button>
+        <button class="code-tab" data-lang="swift">SwiftUI</button>
       </div>
-      <pre class="code-content"><span class="keyword">struct</span> ShimmerModifier: ViewModifier {
-    <span class="keyword">@State private var</span> phase: CGFloat = <span class="number">0</span>
+      <button class="close-btn" onclick="closePanel()">×</button>
+    </div>
+    <div class="code-content">
+      <div class="code-wrapper">
+        <button class="copy-btn" onclick="copyCode()">Copy</button>
+        <pre class="code-block active" id="cssCode"></pre>
+        <pre class="code-block" id="swiftCode"></pre>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const patterns = {
+      shimmer: {
+        name: 'Shimmer Loading',
+        css: `.shimmer {
+  background: linear-gradient(
+    90deg,
+    #2C2C2E 0%,
+    #3A3A3C 50%,
+    #2C2C2E 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Usage */
+.skeleton-line {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line:last-child {
+  width: 60%;
+}`,
+        swift: `import SwiftUI
+
+struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = 0
     
-    <span class="keyword">func</span> body(content: Content) -> <span class="keyword">some</span> View {
+    func body(content: Content) -> some View {
         content
             .overlay(
                 LinearGradient(
-                    colors: [.clear, .white.opacity(<span class="number">0.4</span>), .clear],
+                    colors: [
+                        .clear,
+                        .white.opacity(0.4),
+                        .clear
+                    ],
                     startPoint: .leading,
                     endPoint: .trailing
                 )
-                .rotationEffect(.degrees(<span class="number">20</span>))
+                .rotationEffect(.degrees(20))
                 .offset(x: phase)
             )
             .mask(content)
             .onAppear {
-                <span class="keyword">withAnimation</span>(.linear(duration: <span class="number">1.5</span>).repeatForever(autoreverses: <span class="keyword">false</span>)) {
-                    phase = <span class="number">400</span>
+                withAnimation(
+                    .linear(duration: 1.5)
+                    .repeatForever(autoreverses: false)
+                ) {
+                    phase = 400
                 }
             }
     }
 }
 
-<span class="keyword">extension</span> View {
-    <span class="keyword">func</span> shimmer() -> <span class="keyword">some</span> View {
+extension View {
+    func shimmer() -> some View {
         modifier(ShimmerModifier())
     }
-}</pre>
-    </div>
-  </section>
-  
-  <footer>
-    <p>Built by AIBridges • Inspired by Apple Human Interface Guidelines</p>
-  </footer>
+}
+
+// Usage
+RoundedRectangle(cornerRadius: 4)
+    .fill(Color.gray.opacity(0.3))
+    .frame(height: 16)
+    .shimmer()`
+      },
+      
+      pull: {
+        name: 'Pull to Refresh',
+        css: `.refresh-indicator {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #48484A;
+  border-top-color: #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Custom pull animation */
+.pull-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.pull-content {
+  transition: transform 0.3s ease;
+}
+
+.pulling .pull-content {
+  transform: translateY(60px);
+}`,
+        swift: `import SwiftUI
+
+struct PullToRefresh: View {
+    @State private var isRefreshing = false
+    
+    var body: some View {
+        List {
+            ForEach(0..<20) { i in
+                Text("Row \\(i)")
+            }
+        }
+        .refreshable {
+            // Haptic feedback
+            let generator = UIImpactFeedbackGenerator(style: .medium)
+            generator.impactOccurred()
+            
+            // Async refresh
+            await refresh()
+        }
+    }
+    
+    func refresh() async {
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
+    }
+}
+
+// Custom indicator
+struct CustomRefreshView: View {
+    var body: some View {
+        ProgressView()
+            .progressViewStyle(.circular)
+            .tint(.blue)
+            .scaleEffect(1.2)
+    }
+}`
+      },
+      
+      haptic: {
+        name: 'Haptic Feedback',
+        css: `/* CSS can't trigger haptics, but scale feedback helps */
+.haptic-btn {
+  padding: 16px 32px;
+  background: #007AFF;
+  border: none;
+  border-radius: 14px;
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.haptic-btn:active {
+  transform: scale(0.96);
+}
+
+/* For web, use Vibration API */
+// navigator.vibrate(10);`,
+        swift: `import SwiftUI
+
+struct HapticButton: View {
+    var body: some View {
+        Button("Press Me") {
+            // Light impact
+            let light = UIImpactFeedbackGenerator(style: .light)
+            light.impactOccurred()
+        }
+        .buttonStyle(ScaleButtonStyle())
+    }
+}
+
+struct ScaleButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(.horizontal, 32)
+            .padding(.vertical, 16)
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .font(.headline)
+            .cornerRadius(14)
+            .scaleEffect(configuration.isPressed ? 0.96 : 1)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
+    }
+}
+
+// Haptic types
+UIImpactFeedbackGenerator(style: .light)   // Subtle
+UIImpactFeedbackGenerator(style: .medium)  // Standard
+UIImpactFeedbackGenerator(style: .heavy)   // Strong
+UINotificationFeedbackGenerator()          // Success/Error/Warning
+UISelectionFeedbackGenerator()             // Selection tick`
+      },
+      
+      sheet: {
+        name: 'Modal Sheet',
+        css: `/* iOS-style sheet presentation */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+}
+
+.sheet-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #2C2C2E;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 16px 34px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.sheet-container.open {
+  transform: translateY(0);
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: #48484A;
+  border-radius: 3px;
+  margin: 0 auto 16px;
+}
+
+/* Background scale effect */
+.main-content.sheet-open {
+  transform: scale(0.94) translateY(-20px);
+  border-radius: 12px;
+  overflow: hidden;
+}`,
+        swift: `import SwiftUI
+
+struct SheetExample: View {
+    @State private var showSheet = false
+    
+    var body: some View {
+        Button("Show Sheet") {
+            showSheet = true
+        }
+        .sheet(isPresented: $showSheet) {
+            SheetContent()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(20)
+        }
+    }
+}
+
+struct SheetContent: View {
+    @Environment(\\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            List {
+                Button("Share") { }
+                Button("Copy Link") { }
+                Button("Delete", role: .destructive) { }
+            }
+            .navigationTitle("Actions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}`
+      },
+      
+      glass: {
+        name: 'Glassmorphism',
+        css: `.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+/* Dark glass variant */
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient background for depth */
+.glass-container {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px;
+  border-radius: 24px;
+}`,
+        swift: `import SwiftUI
+
+struct GlassCard: View {
+    var body: some View {
+        ZStack {
+            // Gradient background
+            LinearGradient(
+                colors: [.purple, .blue],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            // Glass card
+            VStack(alignment: .leading) {
+                Text("BALANCE")
+                    .font(.caption)
+                    .opacity(0.8)
+                Text("$4,280")
+                    .font(.largeTitle.bold())
+            }
+            .padding(20)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.ultraThinMaterial)
+            .cornerRadius(16)
+            .padding(40)
+        }
+    }
+}
+
+// Material options:
+// .ultraThinMaterial  - Most transparent
+// .thinMaterial
+// .regularMaterial
+// .thickMaterial
+// .ultraThickMaterial - Most opaque`
+      },
+      
+      segment: {
+        name: 'Segmented Control',
+        css: `.segment-control {
+  display: flex;
+  background: #2C2C2E;
+  border-radius: 9px;
+  padding: 2px;
+  position: relative;
+}
+
+.segment-pill {
+  position: absolute;
+  top: 2px;
+  height: calc(100% - 4px);
+  background: #48484A;
+  border-radius: 7px;
+  transition: transform 0.2s ease, width 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: #8E8E93;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  transition: color 0.2s;
+}
+
+.segment-btn.active {
+  color: #fff;
+}
+
+/* JS to move pill */
+// pill.style.transform = \`translateX(\${index * 100}%)\`;`,
+        swift: `import SwiftUI
+
+struct SegmentedExample: View {
+    @State private var selection = 0
+    let options = ["Day", "Week", "Month"]
+    
+    var body: some View {
+        Picker("Time", selection: $selection) {
+            ForEach(0..<options.count, id: \\.self) { i in
+                Text(options[i]).tag(i)
+            }
+        }
+        .pickerStyle(.segmented)
+    }
+}
+
+// Custom animated segment
+struct CustomSegment: View {
+    @Binding var selection: Int
+    let options: [String]
+    @Namespace private var namespace
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<options.count, id: \\.self) { i in
+                Button(options[i]) {
+                    withAnimation(.spring(response: 0.3)) {
+                        selection = i
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background {
+                    if selection == i {
+                        RoundedRectangle(cornerRadius: 7)
+                            .fill(Color.gray.opacity(0.3))
+                            .matchedGeometryEffect(id: "pill", in: namespace)
+                    }
+                }
+                .foregroundColor(selection == i ? .white : .gray)
+            }
+        }
+        .padding(2)
+        .background(Color.gray.opacity(0.2))
+        .cornerRadius(9)
+    }
+}`
+      },
+      
+      spring: {
+        name: 'Spring Physics',
+        css: `/* CSS approximation of spring physics */
+.spring-card {
+  animation: springBounce 2s ease-in-out infinite;
+}
+
+@keyframes springBounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-20px); }
+  60% { transform: translateY(-18px); }  /* Slight overshoot settle */
+}
+
+/* CSS spring() function (limited support) */
+.spring-element {
+  transition: transform 0.5s;
+  transition-timing-function: 
+    cubic-bezier(0.34, 1.56, 0.64, 1);  /* Overshoot */
+}
+
+/* Better: linear() for custom easing */
+.spring-linear {
+  transition-timing-function: linear(
+    0, 0.01, 0.04 1.5%, 0.161 3.2%, 
+    0.815 9.4%, 1.05 12%, 1.1 13.3%,
+    1.1 14.7%, 1.08 16.6%, 0.99 23%,
+    1.01 35%, 1 50%, 1 100%
+  );
+}`,
+        swift: `import SwiftUI
+
+struct SpringExample: View {
+    @State private var isAnimating = false
+    
+    var body: some View {
+        Circle()
+            .fill(Color.green)
+            .frame(width: 80, height: 80)
+            .offset(y: isAnimating ? -100 : 0)
+            .onAppear {
+                withAnimation(
+                    .spring(
+                        response: 0.5,      // Duration
+                        dampingFraction: 0.6, // Bounciness (0-1)
+                        blendDuration: 0
+                    ).repeatForever()
+                ) {
+                    isAnimating = true
+                }
+            }
+    }
+}
+
+// Spring presets
+.spring()  // Default
+.spring(response: 0.3, dampingFraction: 0.5)  // Bouncy
+.spring(response: 0.6, dampingFraction: 0.8)  // Smooth
+.interactiveSpring()  // For gestures
+
+// iOS 17+ spring
+.spring(duration: 0.5, bounce: 0.3)  // New API`
+      },
+      
+      context: {
+        name: 'Context Menu',
+        css: `.context-menu {
+  position: absolute;
+  background: rgba(30, 30, 30, 0.9);
+  backdrop-filter: blur(50px);
+  -webkit-backdrop-filter: blur(50px);
+  border-radius: 14px;
+  overflow: hidden;
+  min-width: 200px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.context-option {
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(84,84,88,0.65);
+}
+
+.context-option:last-child {
+  border: none;
+}
+
+.context-option:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.context-option.destructive {
+  color: #FF3B30;
+}`,
+        swift: `import SwiftUI
+
+struct ContextMenuExample: View {
+    var body: some View {
+        Image(systemName: "photo")
+            .font(.system(size: 60))
+            .frame(width: 120, height: 120)
+            .background(
+                LinearGradient(
+                    colors: [.red, .orange],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .cornerRadius(20)
+            .contextMenu {
+                Button {
+                    UIPasteboard.general.image = UIImage()
+                } label: {
+                    Label("Copy", systemImage: "doc.on.doc")
+                }
+                
+                Button {
+                    // Share
+                } label: {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                
+                Divider()
+                
+                Button(role: .destructive) {
+                    // Delete
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            } preview: {
+                // Custom preview
+                Image(systemName: "photo")
+                    .resizable()
+                    .frame(width: 300, height: 300)
+            }
+    }
+}`
+      },
+      
+      badge: {
+        name: 'Badge Animation',
+        css: `.app-icon {
+  position: relative;
+  width: 60px;
+  height: 60px;
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 22px;
+  height: 22px;
+  background: #FF3B30;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  color: white;
+  animation: badgePop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badgePop {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Update animation */
+.badge.updated {
+  animation: badgeUpdate 0.2s ease;
+}
+
+@keyframes badgeUpdate {
+  50% { transform: scale(1.15); }
+}`,
+        swift: `import SwiftUI
+
+struct BadgeView: View {
+    let count: Int
+    @State private var animate = false
+    
+    var body: some View {
+        ZStack {
+            // App icon
+            RoundedRectangle(cornerRadius: 14)
+                .fill(LinearGradient(
+                    colors: [.cyan, .blue],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ))
+                .frame(width: 60, height: 60)
+            
+            // Badge
+            if count > 0 {
+                Text(count > 99 ? "99+" : "\\(count)")
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 6)
+                    .frame(minWidth: 22, minHeight: 22)
+                    .background(Color.red)
+                    .clipShape(Capsule())
+                    .offset(x: 25, y: -25)
+                    .scaleEffect(animate ? 1 : 0)
+                    .onAppear {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                            animate = true
+                        }
+                    }
+            }
+        }
+    }
+}
+
+// TabView badge
+TabView {
+    HomeView()
+        .tabItem { Label("Home", systemImage: "house") }
+        .badge(3)  // Built-in badge
+}`
+      }
+    };
+    
+    let currentPattern = null;
+    let currentLang = 'css';
+    
+    document.querySelectorAll('.pattern-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const patternId = card.dataset.pattern;
+        openPanel(patternId);
+        
+        document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+      });
+    });
+    
+    document.querySelectorAll('.code-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const lang = tab.dataset.lang;
+        switchLang(lang);
+      });
+    });
+    
+    function openPanel(patternId) {
+      currentPattern = patterns[patternId];
+      document.getElementById('panelTitle').textContent = currentPattern.name;
+      document.getElementById('cssCode').textContent = currentPattern.css;
+      document.getElementById('swiftCode').textContent = currentPattern.swift;
+      document.getElementById('codePanel').classList.add('open');
+      switchLang('css');
+    }
+    
+    function closePanel() {
+      document.getElementById('codePanel').classList.remove('open');
+      document.querySelectorAll('.pattern-card').forEach(c => c.classList.remove('active'));
+    }
+    
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.code-tab[data-lang="${lang}"]`).classList.add('active');
+      document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+      document.getElementById(lang === 'css' ? 'cssCode' : 'swiftCode').classList.add('active');
+    }
+    
+    function copyCode() {
+      const code = currentLang === 'css' ? currentPattern.css : currentPattern.swift;
+      navigator.clipboard.writeText(code).then(() => {
+        const btn = document.querySelector('.copy-btn');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+      });
+    }
+    
+    // Close on escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closePanel();
+    });
+  </script>
 </body>
 </html>

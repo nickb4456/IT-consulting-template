@@ -379,15 +379,25 @@
         </div>
         <div class="robot">
             <model-viewer
+                id="robot-model"
                 src="robot-realtor.glb"
                 alt="AI Realtor Assistant"
-                auto-rotate
-                rotation-per-second="15deg"
                 interaction-prompt="none"
                 camera-orbit="0deg 80deg 105%"
                 camera-target="0m 0.1m 0m"
                 field-of-view="30deg"
             ></model-viewer>
+            <script>
+                const robot = document.getElementById('robot-model');
+                let angle = 0;
+                function sway() {
+                    angle += 0.02;
+                    const rotation = Math.sin(angle) * 15;
+                    robot.setAttribute('camera-orbit', rotation + 'deg 80deg 105%');
+                    requestAnimationFrame(sway);
+                }
+                robot.addEventListener('load', sway);
+            </script>
         </div>
     </div>
 

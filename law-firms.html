@@ -2,140 +2,851 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="shortcut icon" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI & IT Services for Law Firms | AIBridges Rhode Island</title>
-    <meta name="description" content="Specialized AI and IT services for Rhode Island law firms. Document automation, trust account compliance (TRUSTLOCK), deadline tracking, and legal tech consulting.">
+    <title>AI for Rhode Island Law Firms | AIBridges</title>
+    <meta name="description" content="AI assistant for Rhode Island law firms. Document review, intake automation, research assistance. Cut 2.4 hours of daily admin work.">
     <link rel="canonical" href="https://aibridges.org/law-firms">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
     
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
         "@type": "Service",
         "serviceType": "Legal Technology Services",
-        "provider": {"@type": "LocalBusiness", "name": "AIBridges"},
+        "provider": {"@type": "LocalBusiness", "name": "AIBridges", "telephone": "+14013272971"},
         "areaServed": "Rhode Island",
         "audience": {"@type": "Audience", "audienceType": "Law Firms"}
     }
     </script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Lato', sans-serif;
+            background: #050508;
+            color: #fff;
+            line-height: 1.6;
+        }
+        
+        nav {
+            padding: 20px 24px;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+        nav a:not(.logo) {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 24px;
+        }
+        nav a:not(.logo):hover { color: #fff; }
+        
+        .s {
+            padding: 4rem 24px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            color: #444;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        
+        h1, h2 {
+            font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 1.25rem;
+        }
+        
+        .text {
+            color: #777;
+            line-height: 1.85;
+            margin-bottom: 1.25rem;
+            font-size: 1.02rem;
+        }
+        
+        .em { color: #fff; }
+        .red { color: #ef4444; }
+        .green { color: #22c55e; }
+        
+        /* Scenario box */
+        .scenario {
+            background: #0a0a0f;
+            border-left: 3px solid #22c55e;
+            padding: 1.75rem;
+            margin: 2rem 0;
+        }
+        
+        .scenario-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #22c55e;
+            margin-bottom: 0.75rem;
+        }
+        
+        .scenario-msg {
+            color: #999;
+            font-style: italic;
+            line-height: 1.7;
+        }
+        
+        .scenario-msg strong {
+            color: #fff;
+            font-style: normal;
+        }
+        
+        /* Hero with robot */
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 220px;
+            gap: 2rem;
+            align-items: start;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 4rem 24px 2rem;
+        }
+        
+        .robot {
+            width: 220px;
+            height: 280px;
+        }
+        
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            --poster-color: transparent;
+        }
+        
+        /* Comparison with rotating glow */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .compare-col {
+            position: relative;
+            padding: 1.5rem;
+            background: #0a0a0f;
+            overflow: hidden;
+        }
+        
+        .compare-col::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            animation: rotateGlow 4s linear infinite;
+            z-index: 0;
+        }
+        
+        .compare-col.bad::before {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(239, 68, 68, 0.4) 30deg,
+                rgba(239, 68, 68, 0.6) 60deg,
+                rgba(239, 68, 68, 0.4) 90deg,
+                transparent 120deg,
+                transparent 360deg
+            );
+        }
+        
+        .compare-col.good::before {
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                rgba(34, 197, 94, 0.4) 30deg,
+                rgba(34, 197, 94, 0.6) 60deg,
+                rgba(34, 197, 94, 0.4) 90deg,
+                transparent 120deg,
+                transparent 360deg
+            );
+        }
+        
+        .compare-col::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: #0a0a0f;
+            z-index: 1;
+        }
+        
+        @keyframes rotateGlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .compare-col h4 {
+            position: relative;
+            z-index: 2;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .compare-col.bad h4 { color: #ef4444; }
+        .compare-col.good h4 { color: #22c55e; }
+        
+        .compare-item {
+            position: relative;
+            z-index: 2;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #151515;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .compare-item:last-child { border-bottom: none; }
+        
+        .compare-item .time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+        
+        .compare-col.bad .time { color: #ef4444; }
+        .compare-col.good .time { color: #22c55e; }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 70px;
+            margin: 2rem 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, #22c55e 80%, #1a1a1a);
+        }
+        
+        .step {
+            position: relative;
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #111;
+        }
+        
+        .step:last-child { border-bottom: none; }
+        
+        .step-num {
+            position: absolute;
+            left: -70px;
+            top: 1.25rem;
+            width: 32px;
+            height: 32px;
+            background: #050508;
+            border: 2px solid #22c55e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #22c55e;
+        }
+        
+        .step h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        
+        .step p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .step .metric {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            padding: 2px 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid #1a1a1a;
+            border-bottom: 1px solid #1a1a1a;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .stat-n {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .stat-l {
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Products grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .product-card {
+            border: 1px solid #1a1a1a;
+            padding: 1.5rem;
+        }
+        
+        .product-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .product-price {
+            margin-top: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #22c55e;
+            font-size: 0.85rem;
+        }
+        
+        /* Services list */
+        .services-list {
+            margin: 2rem 0;
+        }
+        
+        .service-item {
+            padding: 1.25rem 0;
+            border-bottom: 1px solid #111;
+        }
+        
+        .service-item:last-child { border-bottom: none; }
+        
+        .service-item h3 {
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+        
+        .service-item p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Pricing */
+        .price-box {
+            border: 1px solid #1a1a1a;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .price-main {
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+        
+        .price-sub {
+            color: #22c55e;
+            margin-bottom: 1.5rem;
+        }
+        
+        .price-list {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        
+        .price-list li {
+            padding: 0.5rem 0;
+            color: #666;
+            border-bottom: 1px solid #111;
+            font-size: 0.9rem;
+        }
+        
+        .price-list li:last-child { border-bottom: none; }
+        
+        .btn {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: #fff;
+            color: #000;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        
+        .btn:hover { background: #22c55e; }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+        }
+        
+        .btn-outline:hover { 
+            background: #22c55e; 
+            border-color: #22c55e;
+            color: #000;
+        }
+        
+        /* Form */
+        .form {
+            margin-top: 2rem;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .form input,
+        .form textarea,
+        .form select {
+            width: 100%;
+            padding: 1rem;
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            color: #fff;
+            font-family: inherit;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .form input:focus,
+        .form textarea:focus,
+        .form select:focus {
+            outline: none;
+            border-color: #22c55e;
+        }
+        
+        .form textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+        }
+        
+        .form button {
+            width: 100%;
+            padding: 1rem;
+            background: #fff;
+            color: #000;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .form button:hover { background: #22c55e; }
+        
+        footer {
+            padding: 2rem;
+            text-align: center;
+            color: #444;
+            font-size: 0.85rem;
+            border-top: 1px solid #111;
+        }
+        
+        footer a { color: #666; }
+        
+        @media (max-width: 700px) {
+            .hero-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .robot {
+                width: 160px;
+                height: 200px;
+                margin: 0 auto;
+                order: -1;
+            }
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            .timeline { padding-left: 55px; }
+            .timeline::before { left: 20px; }
+            .step-num { left: -55px; width: 28px; height: 28px; font-size: 0.7rem; }
+            nav a:not(.logo) { display: none; }
+            .stats { justify-content: center; }
+        }
+    </style>
 </head>
 <body>
-    <nav class="nav" id="nav">
-        <div class="nav-container">
-            <a href="/" class="logo"><span class="logo-icon">△</span><span class="logo-text">AIBridges</span></a>
-            <div class="nav-links">
-                <a href="/#services">Services</a>
-                <a href="/#products">Products</a>
-                <a href="/#contact" class="nav-cta">Get Started</a>
-            </div>
+    <nav>
+        <a href="/" class="logo">AIBridges</a>
+        <div>
+            <a href="#products">Products</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
         </div>
     </nav>
 
-    <main id="main">
-        <section class="hero" style="min-height: 60vh; padding-top: 140px;">
-            <div class="hero-bg"><div class="gradient-orb orb-1"></div><div class="gradient-orb orb-2"></div></div>
-            <div class="hero-content">
-                <div class="hero-badge"><span class="pulse"></span><span>Legal Tech Specialists</span></div>
-                <h1 class="hero-title">AI & IT for<br><span class="gradient-text">Rhode Island Law Firms</span></h1>
-                <p class="hero-subtitle">We understand legal workflows, compliance requirements, and the unique challenges of running a law practice. Let us handle the tech so you can focus on your clients.</p>
-                <div class="hero-cta">
-                    <a href="tel:+14013272971" class="btn btn-primary">📞 (401) 327-2971</a>
-                    <a href="/#contact" class="btn btn-secondary">Free Consultation</a>
-                </div>
-            </div>
-        </section>
-
-        <section class="products" style="padding: 80px 0;">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">LEGAL TECH PRODUCTS</span>
-                    <h2 class="section-title">Built for Law Firms</h2>
-                </div>
-                <div class="products-grid">
-                    <article class="product-card glass-card">
-                        <div class="product-badge">Legal Tech</div>
-                        <div class="product-icon">📸</div>
-                        <h3>Smart Screenshot</h3>
-                        <p>Court-ready web captures with timestamps, metadata, and certified authenticity. Perfect for evidence collection.</p>
-                        <div class="product-price">$9<span>/mo</span></div>
-                    </article>
-                    <article class="product-card glass-card">
-                        <div class="product-badge">Compliance</div>
-                        <div class="product-icon">🔐</div>
-                        <h3>TRUSTLOCK</h3>
-                        <p>Trust account reconciliation that keeps you IOLTA compliant. Automatic tracking, audit-ready reports.</p>
-                        <div class="product-price">$49<span>/mo</span></div>
-                    </article>
-                    <article class="product-card glass-card">
-                        <div class="product-badge">Calendaring</div>
-                        <div class="product-icon">⏰</div>
-                        <h3>DEADLINE</h3>
-                        <p>Never miss a filing deadline. Jurisdiction-specific rules, automatic calculations, team notifications.</p>
-                        <div class="product-price">$25<span>/mo</span></div>
-                    </article>
-                    <article class="product-card glass-card">
-                        <div class="product-badge">AI</div>
-                        <div class="product-icon">📄</div>
-                        <h3>Document Automation</h3>
-                        <p>AI-powered contract drafting, clause libraries, and template management. Cut document prep time by 70%.</p>
-                        <div class="product-price">Custom</div>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="services" style="padding: 80px 0;">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">SERVICES</span>
-                    <h2 class="section-title">Legal IT Services</h2>
-                </div>
-                <div class="services-grid">
-                    <article class="service-card glass-card">
-                        <div class="service-icon">🔒</div>
-                        <h3>Security & Compliance</h3>
-                        <p>Client confidentiality is paramount. We implement security measures that meet bar association standards.</p>
-                    </article>
-                    <article class="service-card glass-card">
-                        <div class="service-icon">☁️</div>
-                        <h3>Practice Management Setup</h3>
-                        <p>Clio, MyCase, PracticePanther—we set up and optimize your practice management software.</p>
-                    </article>
-                    <article class="service-card glass-card">
-                        <div class="service-icon">🎓</div>
-                        <h3>Staff Training</h3>
-                        <p>Get your paralegals and support staff comfortable with legal tech. Hands-on training at your office.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="cta-section" style="padding: 60px 0; text-align: center;">
-            <div class="container">
-                <div class="section-header">
-                    <span class="section-tag">SERVICE AREAS</span>
-                    <h2 class="section-title">Serving Rhode Island Law Firms</h2>
-                </div>
-                <p style="color: #aaa; margin-bottom: 30px;">On-site and remote support for firms across the state</p>
-                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
-                    <a href="/providence-law-firms-ai" class="btn btn-primary" style="padding: 15px 30px;">⚖️ Providence Law Firms</a>
-                    <a href="/cranston-ri" class="btn btn-secondary" style="padding: 15px 30px;">Cranston</a>
-                    <a href="/warwick-ri" class="btn btn-secondary" style="padding: 15px 30px;">Warwick</a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-bottom"><p>&copy; 2025 AIBridges. Legal Technology Services in Rhode Island.</p></div>
+    <!-- HERO -->
+    <div class="hero-grid">
+        <div>
+            <p class="label">For Rhode Island Law Firms</p>
+            <h1>It's 9:47 PM. Tomorrow's deposition starts at 9 AM. You have 847 pages of discovery to review.</h1>
+            <p class="text">
+                The plaintiff's counsel dumped them at 4:30 PM. You've been reading since 6. Your eyes hurt. The coffee stopped working an hour ago. But somewhere in these documents is the contradiction that wins this case.
+            </p>
+            <p class="text">
+                You just need to find it.
+            </p>
         </div>
+        <div class="robot">
+            <model-viewer
+                id="robot-model"
+                src="robot-realtor.glb"
+                alt="AI Legal Assistant"
+                interaction-prompt="none"
+                camera-orbit="0deg 80deg 105%"
+                camera-target="0m 0.1m 0m"
+                field-of-view="30deg"
+            ></model-viewer>
+            <script>
+                const robot = document.getElementById('robot-model');
+                let angle = 0;
+                function sway() {
+                    angle += 0.02;
+                    const rotation = Math.sin(angle) * 15;
+                    robot.setAttribute('camera-orbit', rotation + 'deg 80deg 105%');
+                    requestAnimationFrame(sway);
+                }
+                robot.addEventListener('load', sway);
+            </script>
+        </div>
+    </div>
+
+    <!-- THE SCENARIO -->
+    <section class="s">
+        <div class="scenario" style="border-color: #ef4444;">
+            <div class="scenario-time" style="color: #ef4444;">9:47 PM — Page 412 of 847</div>
+            <div class="scenario-msg">
+                You think you saw something relevant around page 200. Or was it 300? The witness's timeline doesn't match what you read an hour ago. But you can't remember which document. You start flipping back. Your partner texts asking about tomorrow. You don't respond.
+            </div>
+        </div>
+        
+        <p class="text">
+            This is how attorneys lose cases. Not in court. At 10 PM, exhausted, missing the one inconsistency buried on page 673 that would have changed everything.
+        </p>
+        <p class="text">
+            It doesn't have to be this way.
+        </p>
+    </section>
+
+    <!-- TWO PATHS -->
+    <section class="s" style="border-top: 1px solid #111;">
+        <p class="label">Two Paths</p>
+        <h2>What happens next determines your prep time — and your case.</h2>
+        
+        <div class="comparison">
+            <div class="compare-col bad">
+                <h4>Without AI</h4>
+                <div class="compare-item">Manual page-by-page review <span class="time">4.5 hrs</span></div>
+                <div class="compare-item">Ctrl+F searches for keywords <span class="time">+45 min</span></div>
+                <div class="compare-item">Cross-reference with prior docs <span class="time">+1.5 hrs</span></div>
+                <div class="compare-item">Create summary notes <span class="time">+1 hr</span></div>
+                <div class="compare-item">Finish at 2:15 AM</div>
+                <div class="compare-item" style="color: #ef4444;">Miss the timeline contradiction on page 673</div>
+            </div>
+            <div class="compare-col good">
+                <h4>With AI</h4>
+                <div class="compare-item">Upload 847 pages <span class="time">12 sec</span></div>
+                <div class="compare-item">AI extracts key facts + timeline <span class="time">3 min</span></div>
+                <div class="compare-item">Flags contradictions + inconsistencies <span class="time">2 min</span></div>
+                <div class="compare-item">Generates deposition questions <span class="time">1 min</span></div>
+                <div class="compare-item">Finish at 9:55 PM</div>
+                <div class="compare-item" style="color: #22c55e;">Page 673 contradiction highlighted in red</div>
+            </div>
+        </div>
+        
+        <p class="text" style="margin-top: 2rem;">
+            <span class="em">Total time saved: 7+ hours.</span> But that's not the point. The point is you found what you needed, got 7 hours of sleep, and walked into that deposition prepared.
+        </p>
+    </section>
+
+    <!-- WHAT AI FOUND -->
+    <section class="s" style="border-top: 1px solid #111;" id="solution">
+        <p class="label green">What the AI found in 6 minutes</p>
+        
+        <div class="scenario" style="border-color: #22c55e;">
+            <div class="scenario-time">AI Analysis Complete — 847 pages processed</div>
+            <div class="scenario-msg">
+                <strong>CRITICAL: Timeline Contradiction Detected</strong>
+                <br><br>
+                <strong>Page 673:</strong> Witness states "I was not present at the meeting on March 15"
+                <br>
+                <strong>Page 218:</strong> Email from witness dated March 15: "As discussed in today's meeting..."
+                <br><br>
+                <strong>Additional findings:</strong><br>
+                • 3 instances where damages claims conflict with submitted invoices<br>
+                • Medical records reference treatment date before alleged injury<br>
+                • Contract clause on page 89 contradicts plaintiff's interpretation on page 445<br>
+                <br><br>
+                <strong>Suggested deposition questions generated:</strong> 12 questions targeting inconsistencies
+            </div>
+        </div>
+        
+        <p class="text">
+            That contradiction on page 673? It took you 4 hours to miss. It took the AI 6 minutes to find — along with 3 other issues you didn't even know to look for.
+        </p>
+    </section>
+
+    <!-- THE MATH -->
+    <section class="s" style="border-top: 1px solid #111;">
+        <p class="label">The Math</p>
+        <h2>2.4 hours saved. Per day. Per attorney.</h2>
+        
+        <p class="text">
+            The average attorney spends <span class="em">2.4 hours daily</span> on administrative tasks that AI can do faster and better. Document review. Email triage. Research memos. Client intake forms.
+        </p>
+        
+        <div class="timeline">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Document review</h3>
+                <p>Summarizing depositions, contracts, discovery. Finding relevant passages across hundreds of pages.</p>
+                <span class="metric">Manual: 4-8 hrs → AI: 5-15 min</span>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Email triage</h3>
+                <p>Sorting urgent client matters from routine inquiries. Drafting standard responses.</p>
+                <span class="metric">Manual: 45 min/day → AI: 5 min review</span>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Research assistance</h3>
+                <p>Finding relevant case law, statutes, and precedents. Summarizing holdings.</p>
+                <span class="metric">Manual: 2-4 hrs → AI: 10-20 min</span>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h3>Client intake</h3>
+                <p>Gathering initial case information, conflict checks, scheduling consultations.</p>
+                <span class="metric">Manual: 30 min/client → AI: 3 min review</span>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div>
+                <div class="stat-n green">2.4 hrs</div>
+                <div class="stat-l">saved daily</div>
+            </div>
+            <div>
+                <div class="stat-n green">$89K</div>
+                <div class="stat-l">saved yearly at $150/hr</div>
+            </div>
+            <div>
+                <div class="stat-n red">62%</div>
+                <div class="stat-l">attorney burnout rate</div>
+            </div>
+        </div>
+        
+        <p class="text">
+            That 62% burnout rate? It's not from practicing law. It's from the 2.4 hours of admin work that comes with it. Every. Single. Day.
+        </p>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="s" style="border-top: 1px solid #111;" id="products">
+        <p class="label">Products</p>
+        <h2>Built for law firms. Ready to deploy.</h2>
+        
+        <div class="products-grid">
+            <div class="product-card">
+                <h3>Document AI</h3>
+                <p>Upload any legal document. Get summaries, key facts, timeline extraction, and contradiction detection in minutes.</p>
+                <div class="product-price">From $199/mo</div>
+            </div>
+            <div class="product-card">
+                <h3>Intake Agent</h3>
+                <p>24/7 client intake via web chat or phone. Gathers case details, runs conflict checks, schedules consultations.</p>
+                <div class="product-price">From $149/mo</div>
+            </div>
+            <div class="product-card">
+                <h3>TrustLock</h3>
+                <p>Trust account reconciliation that keeps you IOLTA compliant. Automatic tracking, audit-ready reports.</p>
+                <div class="product-price">From $99/mo</div>
+            </div>
+            <div class="product-card">
+                <h3>Deadline</h3>
+                <p>Never miss a filing deadline. Jurisdiction-specific rules, automatic calculations, team notifications.</p>
+                <div class="product-price">From $49/mo</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="s" style="border-top: 1px solid #111;" id="services">
+        <p class="label">Services</p>
+        <h2>Custom solutions for your practice.</h2>
+        
+        <div class="services-list">
+            <div class="service-item">
+                <h3>Custom AI Agents</h3>
+                <p>AI trained on your firm's voice, your practice areas, your document templates. Handles client communication, document drafting, research — the way you would do it.</p>
+            </div>
+            <div class="service-item">
+                <h3>Practice Management Integration</h3>
+                <p>Connect AI to Clio, MyCase, PracticePanther, or your existing systems. Automatic matter updates, time entry, document filing.</p>
+            </div>
+            <div class="service-item">
+                <h3>Document Automation</h3>
+                <p>Turn your best templates into intelligent documents. Dynamic clause selection, client intake auto-fill, version tracking.</p>
+            </div>
+            <div class="service-item">
+                <h3>Security Auditing</h3>
+                <p>Bar association compliance review. Client data protection assessment. Penetration testing. Encrypted backup verification.</p>
+            </div>
+            <div class="service-item">
+                <h3>Staff Training</h3>
+                <p>Get your paralegals and support staff comfortable with legal AI. Hands-on training at your office or remote.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPLIANCE -->
+    <section class="s" style="border-top: 1px solid #111;">
+        <p class="label">Compliance</p>
+        <h2>Built with attorney-client privilege in mind.</h2>
+        
+        <p class="text">
+            We understand that confidentiality isn't optional. Every AI system we deploy is:
+        </p>
+        
+        <div class="timeline">
+            <div class="step">
+                <div class="step-num">1</div>
+                <h3>Private deployment</h3>
+                <p>Your data never leaves your infrastructure. On-premise or private cloud options available.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">2</div>
+                <h3>Encrypted at rest and in transit</h3>
+                <p>AES-256 encryption. TLS 1.3. Zero-knowledge architecture where applicable.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">3</div>
+                <h3>Audit logging</h3>
+                <p>Complete access logs for bar compliance. Who accessed what, when, from where.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">4</div>
+                <h3>Model isolation</h3>
+                <p>Your firm's data is never used to train models. Strict data isolation guarantees.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="s" style="border-top: 1px solid #111;" id="pricing">
+        <p class="label">Getting Started</p>
+        <h2>Free strategy call. No sales pitch.</h2>
+        
+        <p class="text">
+            Every firm is different. We'll spend 30 minutes understanding your workflow, identifying where AI can help, and giving you a realistic assessment — even if the answer is "you don't need this."
+        </p>
+        
+        <div class="price-box">
+            <div class="price-main">Free</div>
+            <div class="price-sub">30-minute strategy call</div>
+            <ul class="price-list">
+                <li>Workflow assessment</li>
+                <li>AI opportunity identification</li>
+                <li>Compliance considerations review</li>
+                <li>Realistic timeline and pricing</li>
+                <li>No obligation, no sales pressure</li>
+            </ul>
+            <a href="#contact" class="btn">Schedule Call</a>
+        </div>
+        
+        <p class="text" style="text-align: center; margin-top: 2rem;">
+            Or, if you know what you need:
+        </p>
+        
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem;">
+            <a href="#contact" class="btn btn-outline">Document AI Demo</a>
+            <a href="#contact" class="btn btn-outline">Security Audit Quote</a>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="s" id="contact" style="text-align: center; border-top: 1px solid #111;">
+        <h2>Stop reviewing 847 pages at midnight.</h2>
+        <p class="text" style="max-width: 400px; margin: 0 auto;">
+            Your competitors are already using AI. The firms winning cases aren't working harder — they're finding contradictions on page 673 while you're still on page 200.
+        </p>
+        <form action="https://formspree.io/f/mvzrqler" method="POST" class="form">
+            <input type="hidden" name="_next" value="https://aibridges.org/thank-you">
+            <input type="hidden" name="_subject" value="Law Firm AI Inquiry">
+            <input type="text" name="name" placeholder="Name" required>
+            <input type="text" name="firm" placeholder="Firm Name">
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="phone" placeholder="Phone">
+            <select name="interest">
+                <option value="">What are you interested in?</option>
+                <option value="document-ai">Document AI</option>
+                <option value="intake-agent">Intake Agent</option>
+                <option value="custom-build">Custom AI Build</option>
+                <option value="security-audit">Security Audit</option>
+                <option value="consultation">General Consultation</option>
+            </select>
+            <button type="submit">Schedule Free Call</button>
+        </form>
+        <p style="margin-top: 1.5rem; color: #555; font-size: 0.9rem;">
+            Or call: <a href="tel:4013272971" style="color: #fff;">(401) 327-2971</a>
+        </p>
+    </section>
+
+    <footer>
+        &copy; 2026 AIBridges &middot; Cranston, RI &middot; <a href="/providence-law-firms-ai">Providence Law Firms</a>
     </footer>
 </body>
 </html>

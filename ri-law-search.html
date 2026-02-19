@@ -3,355 +3,563 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rhode Island Law Search | Free RI General Laws Database | AIBridges</title>
-    <meta name="description" content="Search Rhode Island General Laws instantly. Free access to 49 titles, 2,782 chapters, and 32,849 sections.">
+    <title>Rhode Island Law Search | AIBridges</title>
+    <meta name="description" content="Search Rhode Island General Laws. 49 titles, 2,782 chapters, fully searchable.">
     <link rel="canonical" href="https://aibridges.org/ri-law-search">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', -apple-system, sans-serif;
-            background: #fff;
-            color: #111;
-            line-height: 1.6;
-            min-height: 100vh;
+        :root {
+            --paper: #faf9f7;
+            --ink: #1a1a1a;
+            --faded: #666;
+            --line: #e0ddd8;
+            --highlight: #fff3cd;
+            --seal: #8b0000;
         }
         
-        nav {
-            padding: 16px 24px;
-            border-bottom: 1px solid #e5e5e5;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Source Serif 4', Georgia, serif;
+            background: #f0eeea;
+            color: var(--ink);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        .document {
+            max-width: 900px;
+            margin: 40px auto;
+            background: var(--paper);
+            box-shadow: 0 2px 40px rgba(0,0,0,0.08), 0 0 0 1px var(--line);
+            position: relative;
+        }
+        
+        /* Red margin line like legal paper */
+        .document::before {
+            content: '';
+            position: absolute;
+            left: 60px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(139, 0, 0, 0.2);
+        }
+
+        header {
+            padding: 48px 48px 32px 80px;
+            border-bottom: 2px solid var(--ink);
+            position: relative;
+        }
+        
+        .seal {
+            position: absolute;
+            top: 40px;
+            right: 48px;
+            width: 80px;
+            height: 80px;
+            border: 2px solid var(--seal);
+            border-radius: 50%;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            max-width: 800px;
-            margin: 0 auto;
+            justify-content: center;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--seal);
+            text-align: center;
+            line-height: 1.2;
+            opacity: 0.7;
         }
-        .logo {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #111;
-            text-decoration: none;
-        }
-        nav a:not(.logo) {
-            color: #666;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-        nav a:not(.logo):hover { color: #111; }
-
-        main {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 48px 24px;
-        }
-
+        
         h1 {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 4px;
+        }
+        .state {
+            font-size: 2rem;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         .subtitle {
-            color: #666;
-            margin-bottom: 32px;
+            font-size: 0.9rem;
+            color: var(--faded);
         }
 
-        .search-box {
+        .search-section {
+            padding: 32px 48px 32px 80px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(to bottom, #fff, var(--paper));
+        }
+        
+        .search-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--faded);
+            margin-bottom: 8px;
+        }
+        
+        .search-row {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            gap: 12px;
         }
-        .search-box input {
+        
+        .search-input {
             flex: 1;
-            padding: 12px 16px;
-            font-size: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: #fff;
+            padding: 14px 18px;
             font-family: inherit;
+            font-size: 1.1rem;
+            border: 1px solid var(--line);
+            background: #fff;
+            transition: all 0.2s;
         }
-        .search-box input:focus {
+        .search-input:focus {
             outline: none;
-            border-color: #111;
+            border-color: var(--ink);
+            box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
         }
-        .search-box button {
-            padding: 12px 24px;
-            font-size: 0.875rem;
+        
+        .search-btn {
+            padding: 14px 28px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
             font-weight: 500;
-            border: none;
-            border-radius: 6px;
-            background: #111;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 2px solid var(--ink);
+            background: var(--ink);
             color: #fff;
             cursor: pointer;
+            transition: all 0.2s;
         }
-        .search-box button:hover {
+        .search-btn:hover {
             background: #333;
         }
         
-        .hints {
-            color: #999;
-            font-size: 0.8rem;
-            margin-bottom: 48px;
+        .quick-links {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--faded);
         }
-        .hints a {
-            color: #666;
-            text-decoration: underline;
+        .quick-links a {
+            color: var(--ink);
+            text-decoration: none;
+            border-bottom: 1px solid var(--line);
             cursor: pointer;
+            margin-right: 16px;
+        }
+        .quick-links a:hover {
+            border-color: var(--ink);
         }
 
-        .stats {
-            display: flex;
-            gap: 32px;
-            padding: 16px 0;
-            border-top: 1px solid #e5e5e5;
-            border-bottom: 1px solid #e5e5e5;
-            margin-bottom: 32px;
-            font-size: 0.8rem;
-            color: #666;
+        .results-section {
+            padding: 32px 48px 48px 80px;
+            min-height: 300px;
         }
-        .stats strong {
-            color: #111;
+        
+        .results-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--faded);
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 24px;
         }
-
+        
         .loading {
             text-align: center;
-            padding: 48px;
-            color: #999;
+            padding: 60px;
+            color: var(--faded);
+            font-style: italic;
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px;
+            color: var(--faded);
         }
 
-        .results-header {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
+        /* Result cards */
         .result {
-            padding: 20px 0;
-            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .result:last-child {
+        
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid var(--line);
+            transition: all 0.2s;
+        }
+        .result:hover .result-header {
+            border-color: var(--ink);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .result.expanded .result-header {
             border-bottom: none;
         }
+        
+        .result-number {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--seal);
+            min-width: 60px;
+        }
+        
+        .result-content {
+            flex: 1;
+        }
+        
         .result-title {
-            font-size: 0.75rem;
-            color: #999;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: var(--faded);
             margin-bottom: 4px;
         }
+        
         .result-chapter {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 8px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
+        
         .result-meta {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--faded);
         }
-        .result-preview {
-            font-size: 0.9rem;
-            color: #444;
-            line-height: 1.7;
+        
+        .result-arrow {
+            font-size: 1.2rem;
+            color: var(--faded);
+            transition: transform 0.2s;
         }
-        .result-preview mark {
-            background: #fef3c7;
-            padding: 0 2px;
+        .result.expanded .result-arrow {
+            transform: rotate(90deg);
         }
-
-        .related {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px dashed #e5e5e5;
+        
+        /* Expanded content */
+        .result-body {
+            display: none;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-top: none;
+            font-size: 0.95rem;
+        }
+        .result.expanded .result-body {
+            display: block;
+        }
+        
+        .result-text {
+            line-height: 1.8;
+            color: #333;
+        }
+        .result-text mark {
+            background: var(--highlight);
+            padding: 1px 3px;
+        }
+        
+        .result-actions {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed var(--line);
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 8px 14px;
+            border: 1px solid var(--line);
+            background: var(--paper);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .action-btn:hover {
+            border-color: var(--ink);
+            background: #fff;
+        }
+        
+        .related-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--line);
         }
         .related-label {
-            font-size: 0.75rem;
-            color: #999;
-            margin-bottom: 6px;
-        }
-        .related-tag {
-            display: inline-block;
-            font-size: 0.75rem;
-            color: #666;
-            background: #f5f5f5;
-            padding: 4px 10px;
-            border-radius: 4px;
-            margin-right: 6px;
-            margin-bottom: 6px;
-            cursor: pointer;
-        }
-        .related-tag:hover {
-            background: #eee;
-            color: #111;
-        }
-
-        .error {
-            text-align: center;
-            padding: 48px;
-            color: #666;
-        }
-
-        .cta {
-            margin-top: 48px;
-            padding: 32px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .cta h2 {
-            font-size: 1.1rem;
-            font-weight: 500;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--faded);
             margin-bottom: 8px;
         }
-        .cta p {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 16px;
-        }
-        .cta a {
+        .related-chip {
             display: inline-block;
-            padding: 10px 20px;
-            background: #111;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 0.875rem;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .related-chip:hover {
+            border-color: var(--ink);
+            background: #fff;
+        }
+        .related-chip .pct {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--faded);
+            margin-left: 4px;
         }
 
-        footer {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 32px 24px;
-            border-top: 1px solid #e5e5e5;
-            font-size: 0.8rem;
-            color: #999;
+        /* Footer */
+        .document-footer {
+            padding: 24px 48px 24px 80px;
+            border-top: 1px solid var(--line);
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--faded);
         }
-        footer a {
-            color: #666;
+        .document-footer a {
+            color: var(--ink);
             text-decoration: none;
         }
+        
+        .cta-box {
+            margin: 32px 0;
+            padding: 24px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-left: 3px solid var(--seal);
+        }
+        .cta-box h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .cta-box p {
+            font-size: 0.9rem;
+            color: var(--faded);
+            margin-bottom: 12px;
+        }
+        .cta-box a {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ink);
+        }
 
-        @media (max-width: 600px) {
-            .search-box { flex-direction: column; }
-            .stats { flex-wrap: wrap; gap: 16px; }
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--ink);
+            color: #fff;
+            padding: 12px 24px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 700px) {
+            .document { margin: 0; }
+            .document::before { left: 20px; }
+            header, .search-section, .results-section, .document-footer { padding-left: 36px; padding-right: 24px; }
+            .seal { display: none; }
+            .search-row { flex-direction: column; }
+            h1 { font-size: 0.9rem; }
+            .state { font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-    <nav>
-        <a href="/" class="logo">AIBridges</a>
-        <a href="/law-firms">AI for Law Firms</a>
-    </nav>
+    <div class="document">
+        <header>
+            <h1>General Laws of the</h1>
+            <div class="state">State of Rhode Island</div>
+            <div class="subtitle">Title 1 – 49 · Complete & Searchable</div>
+            <div class="seal">STATE<br>OF<br>RHODE<br>ISLAND</div>
+        </header>
 
-    <main>
-        <h1>Rhode Island General Laws</h1>
-        <p class="subtitle">Search 49 titles, 2,782 chapters</p>
+        <section class="search-section">
+            <div class="search-label">Search the Statutes</div>
+            <div class="search-row">
+                <input type="text" class="search-input" id="q" placeholder="Enter keywords..." autofocus>
+                <button class="search-btn" onclick="search()">Search</button>
+            </div>
+            <div class="quick-links">
+                <a onclick="go('divorce')">Divorce</a>
+                <a onclick="go('child custody')">Child Custody</a>
+                <a onclick="go('landlord tenant')">Landlord-Tenant</a>
+                <a onclick="go('DUI')">DUI</a>
+                <a onclick="go('small claims')">Small Claims</a>
+            </div>
+        </section>
 
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search statutes..." autofocus>
-            <button onclick="search()">Search</button>
-        </div>
-        <div class="hints">
-            Try: <a onclick="searchFor('divorce')">divorce</a> · 
-            <a onclick="searchFor('child custody')">child custody</a> · 
-            <a onclick="searchFor('landlord tenant')">landlord tenant</a>
-        </div>
+        <section class="results-section" id="results">
+            <div class="empty">
+                Enter a search term to find relevant Rhode Island statutes.
+            </div>
+        </section>
 
-        <div class="stats">
-            <span><strong>49</strong> Titles</span>
-            <span><strong>2,782</strong> Chapters</span>
-            <span><strong>32,849</strong> Sections</span>
-        </div>
+        <footer class="document-footer">
+            <span>Updated Feb 2026 · Not legal advice</span>
+            <a href="/law-firms">AI Tools for Attorneys →</a>
+        </footer>
+    </div>
 
-        <div id="results"></div>
-
-        <div class="cta">
-            <h2>Need help with Rhode Island law?</h2>
-            <p>We help attorneys research faster with AI-powered document analysis.</p>
-            <a href="/law-firms">Learn more →</a>
-        </div>
-    </main>
-
-    <footer>
-        <span>Data from RI General Laws · Not legal advice</span>
-        <a href="tel:+14013272971">(401) 327-2971</a>
-    </footer>
+    <div class="toast" id="toast">Copied to clipboard</div>
 
     <script>
         const API = 'https://law.aibridges.org';
-        const results = document.getElementById('results');
-        const input = document.getElementById('searchInput');
+        const $ = id => document.getElementById(id);
+        const q = $('q');
+        const results = $('results');
+        let currentQuery = '';
 
-        input.addEventListener('keypress', e => { if (e.key === 'Enter') search(); });
+        q.addEventListener('keypress', e => { if (e.key === 'Enter') search(); });
 
-        function searchFor(q) { input.value = q; search(); }
+        function go(query) { q.value = query; search(); }
+
+        function toast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            toast('Citation copied');
+        }
+
+        function toggle(el) {
+            el.closest('.result').classList.toggle('expanded');
+        }
 
         async function search() {
-            const q = input.value.trim();
-            if (!q) return;
+            const query = q.value.trim();
+            if (!query) return;
+            currentQuery = query;
 
-            results.innerHTML = '<div class="loading">Searching...</div>';
+            results.innerHTML = '<div class="loading">Searching the General Laws...</div>';
 
             try {
-                const res = await fetch(`${API}/api/search?q=${encodeURIComponent(q)}`);
-                if (!res.ok) throw new Error('API error');
+                const res = await fetch(`${API}/api/search?q=${encodeURIComponent(query)}`);
+                if (!res.ok) throw new Error('Failed');
                 const data = await res.json();
-                
+
                 if (!data.results?.length) {
-                    results.innerHTML = '<div class="error">No results found.</div>';
+                    results.innerHTML = '<div class="empty">No statutes found matching your query.</div>';
                     return;
                 }
 
-                let html = `<div class="results-header">${data.count} results for "${q}"</div>`;
+                results.innerHTML = `
+                    <div class="results-header">${data.count} Chapters Found · Query: "${query}"</div>
+                    ${data.results.map((r, i) => renderResult(r, i + 1)).join('')}
+                    <div class="cta-box">
+                        <h3>Need deeper legal research?</h3>
+                        <p>Our AI tools help Rhode Island attorneys analyze documents and research case law 10x faster.</p>
+                        <a href="/law-firms">Learn about AI for Law Firms →</a>
+                    </div>
+                `;
 
-                for (const r of data.results) {
-                    let preview = r.preview || '';
-                    q.split(/\s+/).forEach(w => {
-                        if (w.length >= 3) preview = preview.replace(new RegExp(`(${w})`, 'gi'), '<mark>$1</mark>');
-                    });
-
-                    html += `
-                        <div class="result">
-                            <div class="result-title">${r.title}</div>
-                            <div class="result-chapter">${r.chapter}</div>
-                            <div class="result-meta">${r.sectionCount} sections · Chapter ${r.chapterNumber}</div>
-                            <div class="result-preview">${preview.substring(0, 300)}...</div>
-                            <div class="related" id="rel-${r.chapterNumber.replace(/\./g, '-')}"></div>
-                        </div>
-                    `;
-                }
-
-                results.innerHTML = html;
-
-                // Load related chapters
-                data.results.slice(0, 5).forEach(r => loadRelated(r.chapterNumber));
+                // Load connections
+                data.results.slice(0, 5).forEach(r => loadConnections(r.chapterNumber));
 
             } catch (e) {
-                results.innerHTML = '<div class="error">Search failed. Try again.</div>';
-                console.error(e);
+                results.innerHTML = '<div class="empty">Search failed. Please try again.</div>';
             }
         }
 
-        async function loadRelated(ch) {
-            const el = document.getElementById(`rel-${ch.replace(/\./g, '-')}`);
+        function renderResult(r, num) {
+            let preview = (r.preview || '').substring(0, 600);
+            currentQuery.split(/\s+/).forEach(w => {
+                if (w.length >= 3) preview = preview.replace(new RegExp(`(${w})`, 'gi'), '<mark>$1</mark>');
+            });
+
+            const citation = `R.I. Gen. Laws § ${r.chapterNumber}`;
+
+            return `
+                <div class="result" onclick="toggle(this)">
+                    <div class="result-header">
+                        <div class="result-number">§ ${r.chapterNumber}</div>
+                        <div class="result-content">
+                            <div class="result-title">${r.title}</div>
+                            <div class="result-chapter">${r.chapter}</div>
+                            <div class="result-meta">${r.sectionCount} sections</div>
+                        </div>
+                        <div class="result-arrow">›</div>
+                    </div>
+                    <div class="result-body">
+                        <div class="result-text">${preview}...</div>
+                        <div class="result-actions">
+                            <button class="action-btn" onclick="event.stopPropagation(); copyText('${citation}')">
+                                Copy Citation
+                            </button>
+                            <button class="action-btn" onclick="event.stopPropagation(); window.open('https://law.justia.com/codes/rhode-island/', '_blank')">
+                                View on Justia
+                            </button>
+                        </div>
+                        <div class="related-section" id="rel-${r.chapterNumber.replace(/\./g, '-')}">
+                            <div class="related-label">Loading related chapters...</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadConnections(ch) {
+            const el = $(`rel-${ch.replace(/\./g, '-')}`);
             if (!el) return;
             try {
                 const res = await fetch(`${API}/api/connections/${encodeURIComponent(ch)}`);
                 const data = await res.json();
                 if (data.connections?.length) {
                     el.innerHTML = `
-                        <div class="related-label">Related:</div>
-                        ${data.connections.slice(0, 4).map(c => 
-                            `<span class="related-tag" onclick="searchFor('${c.chapter.replace(/'/g, "\\'")}')">${c.chapter}</span>`
+                        <div class="related-label">Semantically Related</div>
+                        ${data.connections.slice(0, 5).map(c => 
+                            `<span class="related-chip" onclick="event.stopPropagation(); go('${c.chapter.replace(/'/g, "\\'")}')">
+                                ${c.chapter}<span class="pct">${c.similarity}%</span>
+                            </span>`
                         ).join('')}
                     `;
+                } else {
+                    el.innerHTML = '';
                 }
-            } catch {}
+            } catch { el.innerHTML = ''; }
         }
     </script>
 </body>

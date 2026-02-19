@@ -4514,75 +4514,146 @@
             margin: 2.5rem 0;
         }
         
+        /* Flip Card Container */
         .service-card-new {
-            background: linear-gradient(180deg, rgba(20, 25, 20, 0.9) 0%, rgba(10, 15, 10, 0.6) 100%);
-            padding: 2.5rem 2rem;
-            transition: all 0.4s ease;
-            text-align: center;
+            perspective: 1000px;
+            height: 280px;
+        }
+        
+        .flip-card-inner {
             position: relative;
-            border: none;
-            border-radius: 0;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
         }
         
-        /* Feathered edge effect using mask */
-        .service-card-new::before {
-            content: '';
+        .service-card-new:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front,
+        .flip-card-back {
             position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, transparent 50%, rgba(34, 197, 94, 0.05) 100%);
-            mask-image: 
-                linear-gradient(to right, transparent, black 15%, black 85%, transparent),
-                linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            mask-composite: intersect;
-            -webkit-mask-image: 
-                linear-gradient(to right, transparent, black 15%, black 85%, transparent),
-                linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            -webkit-mask-composite: source-in;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.4s ease;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+            border: 1px solid rgba(255,255,255,0.08);
         }
         
-        .service-card-new:hover::before {
-            opacity: 1;
+        .flip-card-front {
+            background: linear-gradient(180deg, rgba(20, 25, 20, 0.95) 0%, rgba(12, 16, 12, 0.9) 100%);
         }
         
-        /* Soft glow line at top */
-        .service-card-new::after {
+        .flip-card-front::before {
             content: '';
             position: absolute;
             top: 0;
             left: 20%;
             right: 20%;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), transparent);
-            transition: all 0.4s ease;
+            background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.4), transparent);
         }
         
-        .service-card-new:hover::after {
+        .flip-card-back {
+            background: linear-gradient(180deg, rgba(34, 197, 94, 0.15) 0%, rgba(12, 16, 12, 0.95) 100%);
+            transform: rotateY(180deg);
+            border-color: rgba(34, 197, 94, 0.2);
+        }
+        
+        .flip-card-back::before {
+            content: '';
+            position: absolute;
+            top: 0;
             left: 10%;
             right: 10%;
+            height: 2px;
             background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.6), transparent);
-            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
         }
         
-        .service-card-new:hover {
-            transform: translateY(-4px);
-            background: linear-gradient(180deg, rgba(25, 35, 25, 0.95) 0%, rgba(15, 20, 15, 0.7) 100%);
+        .flip-card-front h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
         }
         
-        .service-card-new .icon {
-            font-size: 2rem;
-            margin-bottom: 1.25rem;
-            display: block;
+        .flip-card-front p {
+            color: #888;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .flip-card-back h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
             color: #22c55e;
-            transition: transform 0.3s ease;
+            margin-bottom: 1rem;
         }
         
-        .service-card-new:hover .icon {
-            transform: scale(1.1);
+        .flip-card-back ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
         }
         
+        .flip-card-back li {
+            color: #ccc;
+            font-size: 0.85rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-left: 1rem;
+            position: relative;
+        }
+        
+        .flip-card-back li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-size: 0.75rem;
+        }
+        
+        .flip-card-back li:last-child {
+            border-bottom: none;
+        }
+        
+        .flip-hint {
+            position: absolute;
+            bottom: 0.75rem;
+            right: 1rem;
+            font-size: 0.7rem;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        
+        /* Mobile: tap instead of hover */
+        @media (hover: none) {
+            .service-card-new:active .flip-card-inner {
+                transform: rotateY(180deg);
+            }
+            .flip-hint::after {
+                content: 'Tap';
+            }
+        }
+        
+        @media (hover: hover) {
+            .flip-hint::after {
+                content: 'Hover';
+            }
+        }
+        
+        /* Keep existing h3 styling for backwards compat */
         .service-card-new h3 {
             font-size: 1.15rem;
             margin-bottom: 0.75rem;
@@ -5042,19 +5113,64 @@
             
             <div class="services-grid-new">
                 <div class="service-card-new">
-                    <span class="icon"><i class="fas fa-wrench"></i></span>
-                    <h3>IT Support</h3>
-                    <p>Computers, networks, printers, email, cloud setup, backups. The stuff that breaks and needs to work again. Usually fixed same-day.</p>
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h3>IT Support</h3>
+                            <p>The stuff that breaks and needs to work again. Usually fixed same-day.</p>
+                            <span class="flip-hint"></span>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>What I handle</h4>
+                            <ul>
+                                <li>Computer & laptop issues</li>
+                                <li>Network & WiFi problems</li>
+                                <li>Email & Microsoft 365</li>
+                                <li>Printers & peripherals</li>
+                                <li>Cloud setup & backups</li>
+                                <li>Security & updates</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="service-card-new">
-                    <span class="icon"><i class="fas fa-robot"></i></span>
-                    <h3>AI Agents</h3>
-                    <p>Software that handles repetitive tasks automatically. Email triage, document processing, lead response. Works 24/7.</p>
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h3>AI Agents</h3>
+                            <p>Software that handles repetitive tasks automatically. Works 24/7.</p>
+                            <span class="flip-hint"></span>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Automate the boring stuff</h4>
+                            <ul>
+                                <li>Email triage & response</li>
+                                <li>Document processing</li>
+                                <li>Lead qualification</li>
+                                <li>Data entry & extraction</li>
+                                <li>Scheduling & reminders</li>
+                                <li>Custom workflows</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 <div class="service-card-new">
-                    <span class="icon"><i class="fas fa-bolt"></i></span>
-                    <h3>Custom Software</h3>
-                    <p>Workflow tools built for how your business actually works. Not off-the-shelf — software that does exactly what you need.</p>
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <h3>Custom Software</h3>
+                            <p>Tools built for how your business actually works. Not off-the-shelf.</p>
+                            <span class="flip-hint"></span>
+                        </div>
+                        <div class="flip-card-back">
+                            <h4>Built for you</h4>
+                            <ul>
+                                <li>Internal dashboards</li>
+                                <li>Client portals</li>
+                                <li>Workflow automation</li>
+                                <li>Integration bridges</li>
+                                <li>Reporting tools</li>
+                                <li>Mobile-friendly apps</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
             

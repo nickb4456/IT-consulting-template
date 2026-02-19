@@ -267,6 +267,14 @@
         .result-text {
             line-height: 1.8;
             color: #333;
+            max-height: 600px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .result-text strong {
+            color: var(--seal);
+            display: block;
+            margin-top: 16px;
         }
         .result-text mark {
             background: var(--highlight);
@@ -529,8 +537,11 @@
                             <button class="action-btn" onclick="event.stopPropagation(); copyText('${citation}')">
                                 Copy Citation
                             </button>
+                            <button class="action-btn" onclick="event.stopPropagation(); loadFullChapter('${r.chapterNumber}', this)">
+                                Load Full Chapter
+                            </button>
                             <button class="action-btn" onclick="event.stopPropagation(); window.open('https://webserver.rilegislature.gov/Statutes/TITLE${r.chapterNumber.split('-')[0]}/INDEX.HTM', '_blank')">
-                                View Official Source
+                                Official Source ↗
                             </button>
                         </div>
                         <div class="related-section" id="rel-${r.chapterNumber.replace(/\./g, '-')}">
@@ -539,6 +550,34 @@
                     </div>
                 </div>
             `;
+        }
+
+        async function loadFullChapter(chapterNum, btn) {
+            btn.textContent = 'Loading...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`${API}/api/chapter/${encodeURIComponent(chapterNum)}`);
+                const data = await res.json();
+                
+                if (data.fullText) {
+                    const resultEl = btn.closest('.result');
+                    const textEl = resultEl.querySelector('.result-text');
+                    
+                    // Format sections nicely
+                    let formatted = data.fullText
+                        .replace(/§ ([\d.-]+):/g, '\n\n<strong>§ $1</strong>\n')
+                        .replace(/\n{3,}/g, '\n\n');
+                    
+                    textEl.innerHTML = formatted;
+                    btn.textContent = '✓ Loaded';
+                    
+                    toast(`Loaded ${data.sectionCount} sections`);
+                }
+            } catch (e) {
+                btn.textContent = 'Failed';
+                console.error(e);
+            }
         }
 
         async function loadConnections(ch) {

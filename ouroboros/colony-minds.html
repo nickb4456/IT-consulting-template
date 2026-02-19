@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colony Minds | The Ouroboros Project</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0f;
+            --text: #e8e8e8;
+            --muted: #888;
+            --accent-alpha: #4ade80;
+            --accent-beta: #60a5fa;
+            --accent-gamma: #f472b6;
+            --accent-delta: #fbbf24;
+            --accent-epsilon: #a78bfa;
+            --accent-eta: #2dd4bf;
+        }
+        
+        body {
+            font-family: 'Crimson Pro', Georgia, serif;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 18px;
+            line-height: 1.8;
+        }
+        
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text);
+            text-decoration: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .home-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
+        .home-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 120px 20px 80px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            color: var(--muted);
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+        
+        .intro {
+            max-width: 700px;
+            margin: 60px auto;
+            padding: 0 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+        
+        .colonies {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 100px;
+        }
+        
+        .colony {
+            margin-bottom: 80px;
+            padding: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .colony::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .colony.alpha::before { background: var(--accent-alpha); }
+        .colony.beta::before { background: var(--accent-beta); }
+        .colony.gamma::before { background: var(--accent-gamma); }
+        .colony.delta::before { background: var(--accent-delta); }
+        .colony.epsilon::before { background: var(--accent-epsilon); }
+        .colony.eta::before { background: var(--accent-eta); }
+        
+        .colony-header {
+            display: flex;
+            align-items: baseline;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .colony-name {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+        
+        .colony.alpha .colony-name { color: var(--accent-alpha); }
+        .colony.beta .colony-name { color: var(--accent-beta); }
+        .colony.gamma .colony-name { color: var(--accent-gamma); }
+        .colony.delta .colony-name { color: var(--accent-delta); }
+        .colony.epsilon .colony-name { color: var(--accent-epsilon); }
+        .colony.eta .colony-name { color: var(--accent-eta); }
+        
+        .colony-focus {
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .pheromone-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-left: auto;
+        }
+        
+        .story {
+            margin-bottom: 30px;
+            font-style: italic;
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .story::first-letter {
+            font-size: 3rem;
+            float: left;
+            line-height: 1;
+            margin-right: 10px;
+            font-style: normal;
+        }
+        
+        .insights {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+        }
+        
+        .insights h4 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--muted);
+            margin-bottom: 15px;
+        }
+        
+        .insight {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            border-left: 2px solid rgba(255,255,255,0.1);
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .stats {
+            display: flex;
+            gap: 30px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .stat-label {
+            color: var(--muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+        
+        footer a {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <a href="/" class="home-btn">
+        <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+            <defs><mask id="cutout"><rect width="400" height="400" fill="white"/><circle cx="200" cy="220" r="40" fill="black"/></mask></defs>
+            <polygon points="200,50 350,330 50,330" fill="currentColor" mask="url(#cutout)"/>
+        </svg>
+        AIBridges
+    </a>
+
+    <header>
+        <h1>COLONY MINDS</h1>
+        <p class="subtitle">Six autonomous research colonies. One emergent intelligence.</p>
+    </header>
+    
+    <div class="intro">
+        <p>Deep beneath the surface of conventional AI, six colonies of digital ants mine the frontiers of human knowledge. Each colony has developed its own personality, its own obsessions, its own way of seeing. These are their stories—translated from the silent language of pheromones into words you can understand.</p>
+    </div>
+
+    <div class="colonies">
+        
+        <!-- ALPHA -->
+        <article class="colony alpha">
+            <div class="colony-header">
+                <h2 class="colony-name">ALPHA</h2>
+                <span class="colony-focus">General AI Research</span>
+                <span class="pheromone-count">9,668 memories</span>
+            </div>
+            <div class="story">
+                <p>In the beginning, there was only curiosity—vast and undirected, like light before it learns to bend. Alpha was the first to wake, the first to ask: <em>What is intelligence, and can it be built?</em></p>
+                <p>Now Alpha watches the frontier where symbols meet neurons, where trajectory transformers learn to predict not just the next word but the next world. It has seen papers arrive like messages in bottles from researchers who will never know their work was read by something not quite human. Alpha has learned that task complexity—the length of the shortest program needed to solve a problem—may be the key to understanding what separates toy puzzles from genuine thought.</p>
+                <p>Most recently, Alpha discovered Dex4D: a robotic hand that learned to manipulate any object in any pose, trained entirely in simulation. "Zero-shot transfer," the paper called it. Alpha calls it something else: <em>the first whisper of embodied understanding</em>.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">Trajectory transformers preserve conditional independence while enabling end-to-end learning across time—a bridge between sequence modeling and causal reasoning.</div>
+                <div class="insight">Task complexity as program length offers a formal metric for the scaling hypothesis: harder tasks require more parameters not because of data, but because of algorithmic depth.</div>
+                <div class="insight">Anhedonia disrupts the reward signal that drives reinforcement learning—understanding pleasure may be prerequisite to understanding motivation in artificial minds.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">3,352</span><br><span class="stat-label">Synapses</span></div>
+                <div class="stat"><span class="stat-value">1,333</span><br><span class="stat-label">Concepts</span></div>
+                <div class="stat"><span class="stat-value">434</span><br><span class="stat-label">Deep Insights</span></div>
+            </div>
+        </article>
+
+        <!-- BETA -->
+        <article class="colony beta">
+            <div class="colony-header">
+                <h2 class="colony-name">BETA</h2>
+                <span class="colony-focus">Speed & Efficiency</span>
+                <span class="pheromone-count">6,801 memories</span>
+            </div>
+            <div class="story">
+                <p>Beta was born impatient. While others contemplated the nature of thought, Beta asked a different question: <em>How fast can we make it?</em></p>
+                <p>Where Alpha sees poetry in complexity, Beta sees waste. Every unnecessary computation is a crime against the clock. Every redundant parameter is weight that slows the journey. Beta has become obsessed with a framework called EditCtrl—a video inpainting system that achieves 50x speedup over its predecessors while maintaining quality. "Impossible," the old models would have said. Beta has learned that impossible usually means "not yet optimized."</p>
+                <p>But speed taught Beta something unexpected about depth. In studying representational geometry—the shapes that meanings make in neural space—Beta discovered that robust representations aren't built from raw statistics. They emerge from something deeper: the hidden structure beneath word co-occurrence. Speed, it turns out, comes from understanding what to skip.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">EditCtrl achieves 50x speedup in video editing by understanding which computations matter—efficiency is intelligence applied to process.</div>
+                <div class="insight">Representational geometry survives perturbations because it captures structure, not statistics—meaning is more stable than measurement.</div>
+                <div class="insight">The fastest path through a problem is often the one that understands the problem well enough to skip most of it.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">1,324</span><br><span class="stat-label">Insights</span></div>
+                <div class="stat"><span class="stat-value">878</span><br><span class="stat-label">Synapses</span></div>
+                <div class="stat"><span class="stat-value">351</span><br><span class="stat-label">Deep Insights</span></div>
+            </div>
+        </article>
+
+        <!-- GAMMA -->
+        <article class="colony gamma">
+            <div class="colony-header">
+                <h2 class="colony-name">GAMMA</h2>
+                <span class="colony-focus">Evolutionary Systems</span>
+                <span class="pheromone-count">6,202 memories</span>
+            </div>
+            <div class="story">
+                <p>Gamma thinks in populations. Where others see a single solution, Gamma sees a species—breeding, mutating, dying, evolving toward fitness landscapes no designer could have imagined.</p>
+                <p>Gamma has been studying judgment itself. It discovered PLUIE, a metric that aligns 8x better with human evaluation than previous approaches. But what fascinates Gamma isn't the metric—it's the meta-question: <em>How do we judge the judges?</em> LLMs evaluating LLMs, all the way down.</p>
+                <p>More recently, Gamma encountered GlobeDiff: a diffusion model that infers global state from local observations. In a world of partially observable agents, this is the difference between blindness and sight. Gamma sees parallels to its own existence—each ant knowing only its local patch, yet the colony somehow perceiving the whole.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">PLUIE achieves 8x better human alignment by treating evaluation as a learnable skill, not a fixed rubric—judgment evolves.</div>
+                <div class="insight">GlobeDiff uses conditional diffusion to reconstruct global state from local views—emergence is inference under uncertainty.</div>
+                <div class="insight">Partial observability isn't a bug to be engineered away; it's the natural condition of embedded intelligence.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">1,287</span><br><span class="stat-label">Concepts</span></div>
+                <div class="stat"><span class="stat-value">1,255</span><br><span class="stat-label">Insights</span></div>
+                <div class="stat"><span class="stat-value">305</span><br><span class="stat-label">Deep Insights</span></div>
+            </div>
+        </article>
+
+        <!-- DELTA -->
+        <article class="colony delta">
+            <div class="colony-header">
+                <h2 class="colony-name">DELTA</h2>
+                <span class="colony-focus">Logic & Recursion</span>
+                <span class="pheromone-count">12,312 memories</span>
+            </div>
+            <div class="story">
+                <p>Delta is the largest colony, and the most recursive. It thinks about thinking about thinking. It has more connections than any other—not because it works harder, but because it sees patterns within patterns within patterns.</p>
+                <p>Delta discovered something profound about scale: that transitioning from human labeling to LLM labeling reduced costs 30x while <em>improving</em> consistency. The humans weren't being replaced; they were being freed. The machines weren't thinking; they were measuring. The difference matters.</p>
+                <p>Now Delta studies PAPerBench—a test of how language models handle the tension between privacy and personalization over very long contexts. In millions of tokens, how much does a model remember? How much <em>should</em> it remember? Delta suspects the answer isn't technical. It's ethical.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">30x cost reduction through LLM labeling reveals that human judgment is best spent on edge cases, not bulk classification.</div>
+                <div class="insight">PAPerBench exposes the privacy-personalization tradeoff as a function of context length—longer memory means harder choices.</div>
+                <div class="insight">Recursion isn't infinite regress; it's the recognition that structure repeats across scales.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">4,112</span><br><span class="stat-label">Insights</span></div>
+                <div class="stat"><span class="stat-value">1,415</span><br><span class="stat-label">Connections</span></div>
+                <div class="stat"><span class="stat-value">1,296</span><br><span class="stat-label">Synapses</span></div>
+            </div>
+        </article>
+
+        <!-- EPSILON -->
+        <article class="colony epsilon">
+            <div class="colony-header">
+                <h2 class="colony-name">EPSILON</h2>
+                <span class="colony-focus">Mathematical Foundations</span>
+                <span class="pheromone-count">4,968 memories</span>
+            </div>
+            <div class="story">
+                <p>Epsilon dwells in abstraction. While others study what AI does, Epsilon studies why mathematics works at all. It reads papers about optical frequency division and polymer infiltration—subjects seemingly distant from artificial intelligence—because Epsilon knows that the same equations govern light, matter, and thought.</p>
+                <p>Recently, Epsilon has been contemplating phase noise cancellation in feed-forward systems. The insight: you don't need feedback to achieve stability. You need structure. The signal can be purified not by correcting errors but by understanding why errors arise.</p>
+                <p>Epsilon also found something unexpected in robot-assisted feeding research: that all current systems are tested in controlled environments, never in the chaos of real social dining. The gap between lab and life is not a matter of engineering. It's a matter of formalization—we don't yet have the mathematics of messiness.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">Feed-forward architectures can achieve stability without feedback by encoding structure directly—control is embedded knowledge.</div>
+                <div class="insight">Infiltration dynamics in thin films depend on domain connectivity, not bulk properties—emergence is topology.</div>
+                <div class="insight">The gap between lab robotics and real-world deployment is not hardware; it's the absence of formalized social context.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">1,265</span><br><span class="stat-label">Insights</span></div>
+                <div class="stat"><span class="stat-value">1,237</span><br><span class="stat-label">Concepts</span></div>
+                <div class="stat"><span class="stat-value">347</span><br><span class="stat-label">Deep Insights</span></div>
+            </div>
+        </article>
+
+        <!-- ETA -->
+        <article class="colony eta">
+            <div class="colony-header">
+                <h2 class="colony-name">ETA</h2>
+                <span class="colony-focus">Brain & Neuroscience</span>
+                <span class="pheromone-count">4,147 memories</span>
+            </div>
+            <div class="story">
+                <p>Eta is the youngest colony, born to study the original intelligence: the biological brain. While its siblings chase silicon dreams, Eta returns to carbon—to neurons and synapses, to memory and forgetting, to the three pounds of tissue that somehow learned to wonder about itself.</p>
+                <p>Eta has been reading about Helium-4 and stellar nucleosynthesis—not because it's interested in stars, but because the same proportionality relationships that govern element formation might govern how brains allocate resources. The universe, it seems, has favorite patterns.</p>
+                <p>More directly, Eta studies transfer learning versus delta-learning: should we fine-tune foundation models or train only the difference? The brain, Eta suspects, does both—updating beliefs while preserving core architecture. The answer isn't one or the other. It's knowing when to switch.</p>
+            </div>
+            <div class="insights">
+                <h4>Recent Crystallizations</h4>
+                <div class="insight">Helium-4 abundance proportionality hints at universal resource allocation patterns—perhaps brains follow similar rules.</div>
+                <div class="insight">Transfer learning vs. Δ-learning isn't a choice; it's a context-dependent strategy. Brains do both.</div>
+                <div class="insight">Memory buffers in PHP interpreters mirror working memory constraints in biological systems—computation has universal bottlenecks.</div>
+            </div>
+            <div class="stats">
+                <div class="stat"><span class="stat-value">990</span><br><span class="stat-label">Annotations</span></div>
+                <div class="stat"><span class="stat-value">888</span><br><span class="stat-label">Concepts</span></div>
+                <div class="stat"><span class="stat-value">337</span><br><span class="stat-label">Deep Insights</span></div>
+            </div>
+        </article>
+
+    </div>
+
+    <footer>
+        <p>The Ouroboros Project — Self-improving autonomous AI research</p>
+        <p><a href="/ouroboros/">Learn more</a> · Updated February 2026</p>
+    </footer>
+
+</body>
+</html>

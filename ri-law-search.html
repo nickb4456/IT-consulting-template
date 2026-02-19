@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhode Island Law Search | Free RI General Laws Database | AIBridges</title>
+    <meta name="description" content="Search Rhode Island General Laws instantly. Free access to 49 titles, 2,782 chapters, and 32,849 sections. Find divorce law, criminal statutes, business regulations, and more.">
+    <link rel="canonical" href="https://aibridges.org/ri-law-search">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Rhode Island Law Search",
+        "description": "Free search tool for Rhode Island General Laws",
+        "url": "https://aibridges.org/ri-law-search",
+        "applicationCategory": "Legal",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "provider": {
+            "@type": "LocalBusiness",
+            "name": "AIBridges",
+            "telephone": "+14013272971"
+        }
+    }
+    </script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Lato', sans-serif;
+            background: #050508;
+            color: #fff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        nav {
+            padding: 20px 24px;
+            border-bottom: 1px solid #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+        }
+        .nav-links a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-left: 24px;
+        }
+        .nav-links a:hover { color: #fff; }
+
+        .hero {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #00E1E6, #0051E6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            color: #888;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #00E1E6;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .search-container {
+            max-width: 700px;
+            margin: 0 auto 60px;
+            padding: 0 24px;
+        }
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #0a0a0f;
+            color: #fff;
+            font-family: inherit;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #0051E6;
+        }
+        .search-box input::placeholder {
+            color: #555;
+        }
+        .search-box button {
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0051E6, #00E1E6);
+            color: #fff;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .search-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 81, 230, 0.4);
+        }
+        .search-hints {
+            color: #555;
+            font-size: 0.85rem;
+        }
+        .search-hints a {
+            color: #0051E6;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .search-hints a:hover {
+            text-decoration: underline;
+        }
+
+        .results {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px 60px;
+        }
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .results-count {
+            color: #888;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .result-card {
+            background: #0a0a0f;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
+        }
+        .result-card:hover {
+            border-color: #333;
+        }
+        .result-title {
+            color: #00E1E6;
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+        .result-chapter {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .result-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .result-meta span {
+            color: #666;
+            font-size: 0.85rem;
+        }
+        .result-preview {
+            color: #999;
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+        .result-preview mark {
+            background: rgba(0, 81, 230, 0.3);
+            color: #fff;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .connections {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #1a1a1a;
+        }
+        .connections-title {
+            color: #666;
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+        }
+        .connection-tag {
+            display: inline-block;
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.8rem;
+            color: #888;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .connection-tag:hover {
+            border-color: #0051E6;
+            color: #fff;
+        }
+        .connection-tag .sim {
+            color: #0051E6;
+            margin-left: 4px;
+        }
+
+        .cta-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            text-align: center;
+            border-top: 1px solid #1a1a1a;
+        }
+        .cta-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 16px;
+        }
+        .cta-section p {
+            color: #888;
+            margin-bottom: 24px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .cta-btn {
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: transform 0.2s;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px);
+        }
+        .cta-btn.primary {
+            background: linear-gradient(135deg, #0051E6, #00E1E6);
+            color: #fff;
+        }
+        .cta-btn.secondary {
+            background: transparent;
+            border: 1px solid #333;
+            color: #fff;
+        }
+
+        footer {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            border-top: 1px solid #1a1a1a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        footer a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.85rem;
+        }
+        footer a:hover { color: #fff; }
+        .footer-note {
+            color: #444;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.8rem; }
+            .stats { gap: 24px; }
+            .search-box { flex-direction: column; }
+            .search-box button { width: 100%; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">AIBridges</a>
+        <div class="nav-links">
+            <a href="/law-firms">AI for Law Firms</a>
+            <a href="/providence-law-firms-ai">Providence Attorneys</a>
+            <a href="tel:+14013272971">(401) 327-2971</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Rhode Island Law Search</h1>
+        <p>Instantly search the complete Rhode Island General Laws. Free, fast, and connected by AI-powered semantic links.</p>
+        <div class="stats" id="stats">
+            <div class="stat">
+                <div class="stat-value">49</div>
+                <div class="stat-label">Titles</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">2,782</div>
+                <div class="stat-label">Chapters</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">152,931</div>
+                <div class="stat-label">Semantic Links</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search RI laws (e.g., divorce, child custody, DUI)" autofocus>
+            <button onclick="search()">Search</button>
+        </div>
+        <div class="search-hints">
+            Try: <a onclick="searchFor('divorce')">divorce</a> · 
+            <a onclick="searchFor('child custody')">child custody</a> · 
+            <a onclick="searchFor('DUI penalties')">DUI penalties</a> · 
+            <a onclick="searchFor('landlord tenant')">landlord tenant</a> · 
+            <a onclick="searchFor('small claims')">small claims</a>
+        </div>
+    </section>
+
+    <section class="results" id="results">
+        <!-- Results appear here -->
+    </section>
+
+    <section class="cta-section">
+        <h2>Need Help Interpreting RI Law?</h2>
+        <p>Our AI tools help Rhode Island attorneys research faster and automate document review. Save 2+ hours daily.</p>
+        <div class="cta-buttons">
+            <a href="/law-firms" class="cta-btn primary">AI for Law Firms →</a>
+            <a href="tel:+14013272971" class="cta-btn secondary">Call (401) 327-2971</a>
+        </div>
+    </section>
+
+    <footer>
+        <div>
+            <a href="/">Home</a> · 
+            <a href="/law-firms">Law Firms</a> · 
+            <a href="/about">About</a>
+        </div>
+        <div class="footer-note">
+            Data from RI General Laws. Not legal advice. © 2026 AIBridges
+        </div>
+    </footer>
+
+    <script>
+        const API_BASE = 'https://law.aibridges.org';
+        const resultsDiv = document.getElementById('results');
+        const searchInput = document.getElementById('searchInput');
+
+        // Search on Enter
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
+        function searchFor(query) {
+            searchInput.value = query;
+            search();
+        }
+
+        async function search() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            resultsDiv.innerHTML = '<div class="loading">Searching Rhode Island General Laws</div>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.results.length === 0) {
+                    resultsDiv.innerHTML = `
+                        <div class="results-header">
+                            <span class="results-count">No results found for "${query}"</span>
+                        </div>
+                        <p style="color: #666; text-align: center; padding: 40px;">
+                            Try different keywords or browse by topic.
+                        </p>
+                    `;
+                    return;
+                }
+
+                let html = `
+                    <div class="results-header">
+                        <span class="results-count">${data.count} chapters found for "${query}"</span>
+                    </div>
+                `;
+
+                for (const result of data.results) {
+                    // Highlight search terms in preview
+                    let preview = result.preview || '';
+                    const words = query.toLowerCase().split(/\s+/);
+                    words.forEach(word => {
+                        if (word.length >= 3) {
+                            const regex = new RegExp(`(${word})`, 'gi');
+                            preview = preview.replace(regex, '<mark>$1</mark>');
+                        }
+                    });
+
+                    html += `
+                        <div class="result-card" data-chapter="${result.chapterNumber}">
+                            <div class="result-title">${result.title}</div>
+                            <div class="result-chapter">${result.chapter}</div>
+                            <div class="result-meta">
+                                <span>📄 ${result.sectionCount} sections</span>
+                                <span>Chapter ${result.chapterNumber}</span>
+                            </div>
+                            <div class="result-preview">${preview}...</div>
+                            <div class="connections" id="conn-${result.chapterNumber.replace(/\./g, '-')}">
+                                <div class="connections-title">🔗 Related chapters loading...</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                resultsDiv.innerHTML = html;
+
+                // Load connections for each result
+                for (const result of data.results.slice(0, 5)) {
+                    loadConnections(result.chapterNumber);
+                }
+
+            } catch (err) {
+                resultsDiv.innerHTML = `
+                    <div style="color: #ff6b6b; text-align: center; padding: 40px;">
+                        Error searching. Please try again.
+                    </div>
+                `;
+                console.error(err);
+            }
+        }
+
+        async function loadConnections(chapterNum) {
+            const connDiv = document.getElementById(`conn-${chapterNum.replace(/\./g, '-')}`);
+            if (!connDiv) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/connections/${encodeURIComponent(chapterNum)}`);
+                const data = await response.json();
+
+                if (data.connections && data.connections.length > 0) {
+                    const tags = data.connections.slice(0, 5).map(c => 
+                        `<span class="connection-tag" onclick="searchFor('${c.chapter.replace(/'/g, "\\'")}')">
+                            ${c.chapter}<span class="sim">${c.similarity}%</span>
+                        </span>`
+                    ).join('');
+                    
+                    connDiv.innerHTML = `
+                        <div class="connections-title">🔗 Related by semantic analysis:</div>
+                        ${tags}
+                    `;
+                } else {
+                    connDiv.innerHTML = '';
+                }
+            } catch (err) {
+                connDiv.innerHTML = '';
+            }
+        }
+
+        // Load stats on page load
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_BASE}/api/stats`);
+                const data = await response.json();
+                // Stats are already hardcoded but could be dynamic
+            } catch (err) {
+                console.error('Failed to load stats:', err);
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>

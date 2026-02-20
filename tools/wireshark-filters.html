@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wireshark Filter King 👑</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    
+    .subtitle {
+      text-align: center;
+      color: #8b949e;
+      margin-bottom: 2rem;
+    }
+    
+    /* Filter Builder */
+    .builder {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .builder h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #58a6ff;
+    }
+    
+    .builder-output {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    
+    #filterOutput {
+      flex: 1;
+      background: #0d1117;
+      border: 2px solid #238636;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 1.1rem;
+      color: #7ee787;
+      min-height: 50px;
+    }
+    
+    .copy-big {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .copy-big:hover { background: #2ea043; }
+    .copy-big:active { transform: scale(0.98); }
+    
+    .clear-btn {
+      background: #da3633;
+      color: white;
+      border: none;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    /* Categories */
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .category {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .category h3 {
+      background: #21262d;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      border-bottom: 1px solid #30363d;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .filters {
+      padding: 0.5rem;
+    }
+    
+    .filter {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .filter:hover {
+      background: #21262d;
+    }
+    
+    .filter-code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #79c0ff;
+      background: #0d1117;
+      padding: 0.35rem 0.6rem;
+      border-radius: 4px;
+      margin-right: 1rem;
+      flex-shrink: 0;
+    }
+    
+    .filter-desc {
+      color: #8b949e;
+      font-size: 0.9rem;
+      flex: 1;
+    }
+    
+    .filter-add {
+      background: #238636;
+      color: white;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    
+    .filter:hover .filter-add {
+      opacity: 1;
+    }
+    
+    .filter-copy {
+      background: #30363d;
+      color: #e6edf3;
+      border: none;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      margin-left: 0.5rem;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    
+    .filter:hover .filter-copy {
+      opacity: 1;
+    }
+    
+    /* Input filters */
+    .input-filter {
+      padding: 0.75rem;
+    }
+    
+    .input-filter label {
+      display: block;
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-bottom: 0.5rem;
+    }
+    
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .input-filter input {
+      flex: 1;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: #e6edf3;
+      font-family: 'SF Mono', Monaco, monospace;
+    }
+    
+    .input-filter input:focus {
+      outline: none;
+      border-color: #58a6ff;
+    }
+    
+    .input-filter button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    
+    /* Operators */
+    .operators {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    
+    .op-btn {
+      background: #30363d;
+      color: #e6edf3;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-weight: 600;
+    }
+    
+    .op-btn:hover { background: #484f58; }
+    
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #238636;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    /* Quick examples */
+    .examples {
+      margin-top: 2rem;
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    
+    .examples h3 {
+      margin-bottom: 1rem;
+      color: #f0883e;
+    }
+    
+    .example {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .example:hover { background: #21262d; }
+    
+    .example-code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 0.85rem;
+      color: #ffa657;
+      background: #0d1117;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      margin-right: 1rem;
+    }
+    
+    .example-desc {
+      color: #8b949e;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>👑 Wireshark Filter King</h1>
+    <p class="subtitle">Click to add filters. Click again to copy. Even a caveman could do it.</p>
+    
+    <!-- Filter Builder -->
+    <div class="builder">
+      <h2>🔨 Your Filter (click filters below to build)</h2>
+      <div class="operators">
+        <button class="op-btn" onclick="addOperator(' && ')">AND</button>
+        <button class="op-btn" onclick="addOperator(' || ')">OR</button>
+        <button class="op-btn" onclick="addOperator('!')">NOT</button>
+        <button class="op-btn" onclick="addOperator('(')">(</button>
+        <button class="op-btn" onclick="addOperator(')')">)</button>
+      </div>
+      <div class="builder-output">
+        <div id="filterOutput">Click filters below to start building...</div>
+        <button class="copy-big" onclick="copyMain()">📋 Copy</button>
+        <button class="clear-btn" onclick="clearFilter()">🗑️ Clear</button>
+      </div>
+    </div>
+    
+    <!-- Filter Categories -->
+    <div class="categories">
+      
+      <!-- IP Addresses -->
+      <div class="category">
+        <h3>🌐 IP Addresses</h3>
+        <div class="filters">
+          <div class="input-filter">
+            <label>Filter by specific IP:</label>
+            <div class="input-row">
+              <input type="text" id="ipInput" placeholder="192.168.1.1">
+              <button onclick="addIP()">+ Add</button>
+            </div>
+          </div>
+          <div class="filter" onclick="addFilter('ip.src == 192.168.1.1')">
+            <span class="filter-code">ip.src == X</span>
+            <span class="filter-desc">Source IP equals X</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('ip.dst == 192.168.1.1')">
+            <span class="filter-code">ip.dst == X</span>
+            <span class="filter-desc">Destination IP equals X</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('ip.addr == 192.168.1.1')">
+            <span class="filter-code">ip.addr == X</span>
+            <span class="filter-desc">Either source OR dest is X</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('ip.src == 192.168.1.0/24')">
+            <span class="filter-code">ip.src == X/24</span>
+            <span class="filter-desc">Source is in subnet (e.g., 192.168.1.*)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Protocols -->
+      <div class="category">
+        <h3>📡 Protocols</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('tcp')">
+            <span class="filter-code">tcp</span>
+            <span class="filter-desc">All TCP traffic</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('udp')">
+            <span class="filter-code">udp</span>
+            <span class="filter-desc">All UDP traffic</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('icmp')">
+            <span class="filter-code">icmp</span>
+            <span class="filter-desc">Ping / ICMP traffic</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('arp')">
+            <span class="filter-code">arp</span>
+            <span class="filter-desc">ARP (who has this IP?)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns')">
+            <span class="filter-code">dns</span>
+            <span class="filter-desc">DNS lookups</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http')">
+            <span class="filter-code">http</span>
+            <span class="filter-desc">HTTP traffic (unencrypted web)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tls')">
+            <span class="filter-code">tls</span>
+            <span class="filter-desc">TLS/SSL (encrypted)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('ssh')">
+            <span class="filter-code">ssh</span>
+            <span class="filter-desc">SSH connections</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('ftp')">
+            <span class="filter-code">ftp</span>
+            <span class="filter-desc">FTP file transfers</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dhcp')">
+            <span class="filter-code">dhcp</span>
+            <span class="filter-desc">DHCP (IP assignment)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Ports -->
+      <div class="category">
+        <h3>🚪 Ports</h3>
+        <div class="filters">
+          <div class="input-filter">
+            <label>Filter by specific port:</label>
+            <div class="input-row">
+              <input type="text" id="portInput" placeholder="443">
+              <button onclick="addPort()">+ Add</button>
+            </div>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.port == 80')">
+            <span class="filter-code">tcp.port == 80</span>
+            <span class="filter-desc">HTTP (port 80)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.port == 443')">
+            <span class="filter-code">tcp.port == 443</span>
+            <span class="filter-desc">HTTPS (port 443)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.port == 22')">
+            <span class="filter-code">tcp.port == 22</span>
+            <span class="filter-desc">SSH (port 22)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.port == 3389')">
+            <span class="filter-code">tcp.port == 3389</span>
+            <span class="filter-desc">RDP (Windows Remote Desktop)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('udp.port == 53')">
+            <span class="filter-code">udp.port == 53</span>
+            <span class="filter-desc">DNS (port 53)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.dstport == 445')">
+            <span class="filter-code">tcp.dstport == 445</span>
+            <span class="filter-desc">SMB (file sharing)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- HTTP Specific -->
+      <div class="category">
+        <h3>🌍 HTTP/Web</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('http.request')">
+            <span class="filter-code">http.request</span>
+            <span class="filter-desc">HTTP requests only</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.response')">
+            <span class="filter-code">http.response</span>
+            <span class="filter-desc">HTTP responses only</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.request.method == \"GET\"')">
+            <span class="filter-code">http...method == "GET"</span>
+            <span class="filter-desc">GET requests</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.request.method == \"POST\"')">
+            <span class="filter-code">http...method == "POST"</span>
+            <span class="filter-desc">POST requests (forms, uploads)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.host contains \"google\"')">
+            <span class="filter-code">http.host contains "X"</span>
+            <span class="filter-desc">Requests to hosts containing X</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.response.code == 200')">
+            <span class="filter-code">http.response.code == 200</span>
+            <span class="filter-desc">Successful responses (200 OK)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.response.code >= 400')">
+            <span class="filter-code">http.response.code >= 400</span>
+            <span class="filter-desc">Error responses (4xx, 5xx)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TCP Flags & States -->
+      <div class="category">
+        <h3>🚦 TCP Flags & States</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('tcp.flags.syn == 1')">
+            <span class="filter-code">tcp.flags.syn == 1</span>
+            <span class="filter-desc">SYN packets (new connections)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.flags.syn == 1 && tcp.flags.ack == 0')">
+            <span class="filter-code">SYN && !ACK</span>
+            <span class="filter-desc">Initial SYN only (connection starts)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.flags.fin == 1')">
+            <span class="filter-code">tcp.flags.fin == 1</span>
+            <span class="filter-desc">FIN packets (connection closing)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.flags.reset == 1')">
+            <span class="filter-code">tcp.flags.reset == 1</span>
+            <span class="filter-desc">RST packets (connection reset)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.analysis.retransmission')">
+            <span class="filter-code">tcp.analysis.retransmission</span>
+            <span class="filter-desc">Retransmitted packets (problems!)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.analysis.duplicate_ack')">
+            <span class="filter-code">tcp.analysis.duplicate_ack</span>
+            <span class="filter-desc">Duplicate ACKs (packet loss indicator)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.analysis.zero_window')">
+            <span class="filter-code">tcp.analysis.zero_window</span>
+            <span class="filter-desc">Zero window (receiver overwhelmed)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- DNS -->
+      <div class="category">
+        <h3>🔍 DNS</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('dns.qry.name contains \"google\"')">
+            <span class="filter-code">dns.qry.name contains "X"</span>
+            <span class="filter-desc">DNS queries for domains with X</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns.flags.response == 1')">
+            <span class="filter-code">dns.flags.response == 1</span>
+            <span class="filter-desc">DNS responses only</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns.flags.response == 0')">
+            <span class="filter-code">dns.flags.response == 0</span>
+            <span class="filter-desc">DNS queries only</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns.flags.rcode != 0')">
+            <span class="filter-code">dns.flags.rcode != 0</span>
+            <span class="filter-desc">Failed DNS lookups</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns.qry.type == 1')">
+            <span class="filter-code">dns.qry.type == 1</span>
+            <span class="filter-desc">A records (IPv4)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('dns.qry.type == 28')">
+            <span class="filter-code">dns.qry.type == 28</span>
+            <span class="filter-desc">AAAA records (IPv6)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Troubleshooting -->
+      <div class="category">
+        <h3>🔧 Troubleshooting</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('tcp.analysis.flags')">
+            <span class="filter-code">tcp.analysis.flags</span>
+            <span class="filter-desc">All TCP problems flagged by Wireshark</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.time_delta > 1')">
+            <span class="filter-code">tcp.time_delta > 1</span>
+            <span class="filter-desc">Slow responses (>1 second gap)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('frame.time_delta > 0.5')">
+            <span class="filter-code">frame.time_delta > 0.5</span>
+            <span class="filter-desc">Long gaps between packets</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('icmp.type == 3')">
+            <span class="filter-code">icmp.type == 3</span>
+            <span class="filter-desc">ICMP Destination Unreachable</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('icmp.type == 11')">
+            <span class="filter-code">icmp.type == 11</span>
+            <span class="filter-desc">ICMP Time Exceeded (traceroute)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Security / Suspicious -->
+      <div class="category">
+        <h3>🛡️ Security</h3>
+        <div class="filters">
+          <div class="filter" onclick="addFilter('tcp.port == 4444')">
+            <span class="filter-code">tcp.port == 4444</span>
+            <span class="filter-desc">Metasploit default port</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.flags == 0x029')">
+            <span class="filter-code">tcp.flags == 0x029</span>
+            <span class="filter-desc">Xmas scan (FIN+PSH+URG)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.flags == 0x000')">
+            <span class="filter-code">tcp.flags == 0x000</span>
+            <span class="filter-desc">Null scan (no flags)</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.request.uri contains \"..\"')">
+            <span class="filter-code">http.request.uri contains ".."</span>
+            <span class="filter-desc">Path traversal attempts</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('http.user_agent contains \"sqlmap\"')">
+            <span class="filter-code">http.user_agent contains "sqlmap"</span>
+            <span class="filter-desc">SQL injection tool</span>
+            <button class="filter-add">+</button>
+          </div>
+          <div class="filter" onclick="addFilter('tcp.dstport == 23')">
+            <span class="filter-code">tcp.dstport == 23</span>
+            <span class="filter-desc">Telnet (unencrypted! bad!)</span>
+            <button class="filter-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Ready-Made Examples -->
+    <div class="examples">
+      <h3>🎯 Copy-Paste Combos (Real World)</h3>
+      <div class="example" onclick="setFilter('ip.addr == 192.168.1.100 && tcp.port == 443')">
+        <span class="example-code">ip.addr == 192.168.1.100 && tcp.port == 443</span>
+        <span class="example-desc">All HTTPS traffic to/from specific host</span>
+      </div>
+      <div class="example" onclick="setFilter('tcp.flags.syn == 1 && tcp.flags.ack == 0 && ip.dst == 10.0.0.0/8')">
+        <span class="example-code">SYN && !ACK to internal network</span>
+        <span class="example-desc">New connections to internal IPs (scan detection)</span>
+      </div>
+      <div class="example" onclick="setFilter('dns.qry.name contains \"malware\" || dns.qry.name contains \"evil\"')">
+        <span class="example-code">dns.qry.name contains "malware" || "evil"</span>
+        <span class="example-desc">DNS lookups for suspicious domains</span>
+      </div>
+      <div class="example" onclick="setFilter('tcp.analysis.retransmission || tcp.analysis.duplicate_ack || tcp.analysis.lost_segment')">
+        <span class="example-code">retransmission || dup_ack || lost</span>
+        <span class="example-desc">All network problems (troubleshooting)</span>
+      </div>
+      <div class="example" onclick="setFilter('http.request && !(http.host contains \"google\" || http.host contains \"microsoft\")')">
+        <span class="example-code">http.request && !google && !microsoft</span>
+        <span class="example-desc">HTTP requests excluding common sites</span>
+      </div>
+      <div class="example" onclick="setFilter('frame.len > 1400')">
+        <span class="example-code">frame.len > 1400</span>
+        <span class="example-desc">Large packets (possible data exfil)</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast" id="toast">Copied! 📋</div>
+  
+  <script>
+    let currentFilter = '';
+    
+    function addFilter(filter) {
+      if (currentFilter === '' || currentFilter === 'Click filters below to start building...') {
+        currentFilter = filter;
+      } else {
+        currentFilter += ' ' + filter;
+      }
+      updateDisplay();
+    }
+    
+    function addOperator(op) {
+      if (currentFilter && currentFilter !== 'Click filters below to start building...') {
+        currentFilter += op;
+        updateDisplay();
+      }
+    }
+    
+    function setFilter(filter) {
+      currentFilter = filter;
+      updateDisplay();
+      copyMain();
+    }
+    
+    function updateDisplay() {
+      document.getElementById('filterOutput').textContent = currentFilter || 'Click filters below to start building...';
+    }
+    
+    function clearFilter() {
+      currentFilter = '';
+      updateDisplay();
+    }
+    
+    function copyMain() {
+      if (currentFilter && currentFilter !== 'Click filters below to start building...') {
+        navigator.clipboard.writeText(currentFilter);
+        showToast();
+      }
+    }
+    
+    function addIP() {
+      const ip = document.getElementById('ipInput').value.trim();
+      if (ip) {
+        addFilter(`ip.addr == ${ip}`);
+        document.getElementById('ipInput').value = '';
+      }
+    }
+    
+    function addPort() {
+      const port = document.getElementById('portInput').value.trim();
+      if (port) {
+        addFilter(`tcp.port == ${port}`);
+        document.getElementById('portInput').value = '';
+      }
+    }
+    
+    function showToast() {
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+    
+    // Enter key handlers
+    document.getElementById('ipInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addIP();
+    });
+    document.getElementById('portInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') addPort();
+    });
+  </script>
+</body>
+</html>

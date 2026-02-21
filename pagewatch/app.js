@@ -12,6 +12,48 @@ const state = {
   turnstileMonitorToken: null,
 };
 
+// Flip view state
+state.flipInterval = null;
+state.flipShowingBaseline = true;
+
+function toggleFlipImage() {
+  state.flipShowingBaseline = !state.flipShowingBaseline;
+  const img = $('#diff-flip-img');
+  const label = $('.diff-flip-label');
+  if (!img) return;
+  if (state.flipShowingBaseline) {
+    img.src = $('#diff-baseline-img').src;
+    if (label) label.textContent = 'Baseline';
+  } else {
+    img.src = $('#diff-current-img').src;
+    if (label) label.textContent = 'Current';
+  }
+}
+
+function startFlipInterval() {
+  const speed = parseInt($('#flip-speed')?.value || '1000');
+  state.flipInterval = setInterval(toggleFlipImage, speed);
+  const btn = $('#flip-toggle-btn');
+  if (btn) btn.textContent = 'Auto-flip: On';
+}
+
+function stopFlipInterval() {
+  if (state.flipInterval) {
+    clearInterval(state.flipInterval);
+    state.flipInterval = null;
+  }
+  const btn = $('#flip-toggle-btn');
+  if (btn) btn.textContent = 'Auto-flip: Off';
+}
+
+function getChangeSummary(status, diffScore) {
+  if (status === 'error') return '';
+  if (status === 'no_change') return 'Page looks the same';
+  if (diffScore < 10) return 'Minor visual changes detected';
+  if (diffScore < 30) return 'Moderate layout or content change';
+  return 'Major visual change detected';
+}
+
 // ── Helpers ──
 async function api(method, path, body) {
   const headers = { 'Content-Type': 'application/json' };
@@ -269,14 +311,17 @@ function initDashboard() {
       return;
     }
     try {
-      await api('POST', '/monitors', {
+      const addBody = {
         url: monitorUrl,
         name: $('#monitor-name').value,
         interval: parseInt($('#monitor-interval').value),
         threshold: parseInt($('#monitor-threshold').value),
         alertEmail: $('#monitor-email').value || state.email,
         turnstileToken: state.turnstileMonitorToken,
-      });
+      };
+      const webhookVal = $('#monitor-webhook').value.trim();
+      if (webhookVal) addBody.webhookUrl = webhookVal;
+      await api('POST', '/monitors', addBody);
       closeAddModal();
       toast('Monitor added');
       await loadMonitors();
@@ -296,6 +341,7 @@ function initDashboard() {
         interval: parseInt($('#edit-interval').value),
         threshold: parseInt($('#edit-threshold').value),
         alertEmail: $('#edit-email').value,
+        webhookUrl: $('#edit-webhook').value.trim(),
       });
       closeEditModal();
       toast('Monitor updated');
@@ -340,19 +386,119 @@ function initDashboard() {
     if (state.selectedMonitor) selectMonitor(state.selectedMonitor.monitorId);
   });
 
-  // Diff toggle
+  // Diff toggle (side-by-side, overlay, slider, flip)
   $$('.diff-toggle .btn').forEach(btn => {
     btn.addEventListener('click', () => {
       $$('.diff-toggle .btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      if (btn.dataset.view === 'overlay') {
-        hide($('#diff-content-sidebyside'));
-        show($('#diff-content-overlay'));
-      } else {
+      const view = btn.dataset.view;
+      // Hide all diff containers
+      hide($('#diff-content-sidebyside'));
+      hide($('#diff-content-overlay'));
+      hide($('#diff-content-slider'));
+      hide($('#diff-content-flip'));
+      // Stop flip auto-play when switching away
+      if (view !== 'flip') stopFlipInterval();
+
+      if (view === 'side-by-side') {
         show($('#diff-content-sidebyside'));
-        hide($('#diff-content-overlay'));
+      } else if (view === 'overlay') {
+        show($('#diff-content-overlay'));
+      } else if (view === 'slider') {
+        show($('#diff-content-slider'));
+        // Set slider images from same sources as side-by-side
+        $('#diff-slider-baseline').src = $('#diff-baseline-img').src;
+        $('#diff-slider-current').src = $('#diff-current-img').src;
+        // Fix overlay width: image inside needs container-relative width
+        const container = document.querySelector('.diff-slider-container');
+        if (container) {
+          const overlayImg = $('#diff-slider-current');
+          overlayImg.style.width = container.offsetWidth + 'px';
+        }
+      } else if (view === 'flip') {
+        show($('#diff-content-flip'));
+        state.flipShowingBaseline = true;
+        $('#diff-flip-img').src = $('#diff-baseline-img').src;
+        $('.diff-flip-label').textContent = 'Baseline';
       }
     });
+  });
+
+  // Slider handle
+  const sliderHandle = document.querySelector('.diff-slider-handle');
+  if (sliderHandle) {
+    sliderHandle.addEventListener('input', (e) => {
+      const pct = e.target.value;
+      const overlay = document.querySelector('.diff-slider-overlay');
+      if (overlay) overlay.style.width = pct + '%';
+    });
+  }
+
+  // Flip click toggle
+  const flipContainer = document.querySelector('.diff-flip-container');
+  if (flipContainer) {
+    flipContainer.addEventListener('click', () => {
+      toggleFlipImage();
+    });
+  }
+
+  // Flip auto-play button
+  const flipToggleBtn = $('#flip-toggle-btn');
+  if (flipToggleBtn) {
+    flipToggleBtn.addEventListener('click', () => {
+      if (state.flipInterval) {
+        stopFlipInterval();
+      } else {
+        startFlipInterval();
+      }
+    });
+  }
+
+  // Flip speed slider
+  const flipSpeed = $('#flip-speed');
+  if (flipSpeed) {
+    flipSpeed.addEventListener('input', () => {
+      if (state.flipInterval) {
+        stopFlipInterval();
+        startFlipInterval();
+      }
+    });
+  }
+
+  // Report Issue button
+  $('#report-btn').addEventListener('click', () => {
+    if (!state.selectedMonitor) return;
+    show($('#report-modal'));
+  });
+  $('#cancel-report-btn').addEventListener('click', () => {
+    hide($('#report-modal'));
+    $('#report-form').reset();
+  });
+  $('#report-modal').addEventListener('click', (e) => {
+    if (e.target === $('#report-modal')) { hide($('#report-modal')); $('#report-form').reset(); }
+  });
+  $('#report-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!state.selectedMonitor) return;
+    try {
+      await api('POST', `/monitors/${state.selectedMonitor.monitorId}/report`, {
+        type: $('#report-type').value,
+        details: $('#report-details').value,
+      });
+      hide($('#report-modal'));
+      $('#report-form').reset();
+      toast('Issue reported — we\'ll look into it');
+    } catch (err) {
+      toast('Error: ' + err.message);
+    }
+  });
+
+  // Date filter buttons
+  $('#filter-apply').addEventListener('click', () => renderTimeline());
+  $('#filter-clear').addEventListener('click', () => {
+    $('#filter-from').value = '';
+    $('#filter-to').value = '';
+    renderTimeline();
   });
 
   // Billing buttons
@@ -384,6 +530,7 @@ function openEditModal() {
   $('#edit-threshold').value = m.threshold;
   $('#edit-threshold-value').textContent = m.threshold + '%';
   $('#edit-email').value = m.alertEmail || '';
+  $('#edit-webhook').value = m.webhookUrl || '';
   show($('#edit-modal'));
 }
 function closeEditModal() { hide($('#edit-modal')); }
@@ -451,7 +598,26 @@ function renderTimeline() {
     el.innerHTML = '<div class="empty-state"><h3>No captures yet</h3><p>The first check will happen shortly.</p></div>';
     return;
   }
-  el.innerHTML = state.results.map(r => `
+
+  // Apply date filters
+  let filtered = state.results;
+  const fromVal = $('#filter-from')?.value;
+  const toVal = $('#filter-to')?.value;
+  if (fromVal) {
+    const fromDate = new Date(fromVal);
+    filtered = filtered.filter(r => new Date(r.checkedAt) >= fromDate);
+  }
+  if (toVal) {
+    const toDate = new Date(toVal + 'T23:59:59');
+    filtered = filtered.filter(r => new Date(r.checkedAt) <= toDate);
+  }
+
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="empty-state"><h3>No results in range</h3><p>Try adjusting the date filter.</p></div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(r => `
     <div class="timeline-entry" data-ts="${esc(r.checkedAt)}">
       <div class="timeline-thumb">
         ${r.screenshotKey ? '<img src="" data-key="' + esc(r.screenshotKey) + '" alt="Screenshot">' : ''}
@@ -462,6 +628,7 @@ function renderTimeline() {
           ${r.status === 'changed' ? 'Changed' : r.status === 'error' ? 'Error' : 'No change'}
           ${r.errorMsg ? ' — ' + esc(r.errorMsg) : ''}
         </div>
+        <div class="timeline-summary">${esc(getChangeSummary(r.status, r.diffScore))}</div>
       </div>
       <div class="timeline-score" style="color: ${Number(r.diffScore) > Number(state.selectedMonitor?.threshold || 5) ? 'var(--red)' : 'var(--text-muted)'}">
         ${r.diffScore != null ? Number(r.diffScore) + '%' : '—'}
@@ -487,12 +654,24 @@ async function showDiffView(ts) {
   const r = state.results.find(r => r.checkedAt === ts);
   if (!r) return;
 
+  // Stop any running flip animation
+  stopFlipInterval();
+
   hide($('#view-timeline'));
   show($('#view-diff'));
   hide($('#view-empty'));
   hide($('#view-account'));
 
-  $('#diff-time').textContent = formatTime(r.checkedAt);
+  // Reset to side-by-side view
+  $$('.diff-toggle .btn').forEach(b => b.classList.remove('active'));
+  $$('.diff-toggle .btn')[0]?.classList.add('active');
+  show($('#diff-content-sidebyside'));
+  hide($('#diff-content-overlay'));
+  hide($('#diff-content-slider'));
+  hide($('#diff-content-flip'));
+
+  const summary = getChangeSummary(r.status, r.diffScore);
+  $('#diff-time').textContent = formatTime(r.checkedAt) + (summary ? ' — ' + summary : '');
   $('#diff-score-display').textContent = (r.diffScore != null ? r.diffScore + '%' : '—');
 
   // Load images
@@ -520,6 +699,7 @@ async function showDiffView(ts) {
 }
 
 function showTimelineView() {
+  stopFlipInterval();
   show($('#view-timeline'));
   hide($('#view-empty'));
   hide($('#view-diff'));

@@ -13,6 +13,7 @@
     <div class="container">
       <a href="/" class="logo"><img src="logo.svg" alt="" width="80" height="80" style="vertical-align: middle; margin-right: 10px; border-radius: 8px;">PageWatch <span>monitor</span></a>
       <div class="nav-links">
+        <a href="mailto:nickbilodeau1150@yahoo.com" id="nav-support">Support</a>
         <a href="#" id="nav-account">Account</a>
         <a href="#" id="nav-logout">Log out</a>
       </div>
@@ -54,8 +55,17 @@
           <div class="flex gap-sm">
             <button class="btn btn-secondary btn-sm" id="pause-btn">Pause</button>
             <button class="btn btn-secondary btn-sm" id="edit-btn">Edit</button>
+            <button class="btn btn-secondary btn-sm" id="report-btn">Report Issue</button>
             <button class="btn btn-danger btn-sm" id="delete-btn">Delete</button>
           </div>
+        </div>
+        <div class="timeline-filters" style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+          <label style="font-size: 13px; color: var(--text-muted);">From:</label>
+          <input type="date" id="filter-from" style="font-size: 13px;">
+          <label style="font-size: 13px; color: var(--text-muted);">To:</label>
+          <input type="date" id="filter-to" style="font-size: 13px;">
+          <button class="btn btn-secondary btn-sm" id="filter-apply">Filter</button>
+          <button class="btn btn-secondary btn-sm" id="filter-clear">Clear</button>
         </div>
         <div id="timeline" class="timeline">
           <!-- Populated by JS -->
@@ -77,6 +87,8 @@
           <div class="diff-toggle">
             <button class="btn btn-secondary btn-sm active" data-view="side-by-side">Side by Side</button>
             <button class="btn btn-secondary btn-sm" data-view="overlay">Overlay</button>
+            <button class="btn btn-secondary btn-sm" data-view="slider">Slider</button>
+            <button class="btn btn-secondary btn-sm" data-view="flip">Flip</button>
           </div>
         </div>
         <div id="diff-content-sidebyside" class="diff-viewer">
@@ -93,6 +105,26 @@
           <div class="diff-pane">
             <div class="diff-pane-header">Diff Overlay (changes in red)</div>
             <img id="diff-overlay-img" src="" alt="Diff overlay">
+          </div>
+        </div>
+        <div id="diff-content-slider" class="hidden" style="margin-top: 16px;">
+          <div class="diff-slider-container">
+            <img id="diff-slider-baseline" src="" alt="Baseline">
+            <div class="diff-slider-overlay">
+              <img id="diff-slider-current" src="" alt="Current">
+            </div>
+            <input type="range" class="diff-slider-handle" min="0" max="100" value="50">
+          </div>
+        </div>
+        <div id="diff-content-flip" class="hidden" style="margin-top: 16px;">
+          <div class="diff-flip-container">
+            <img id="diff-flip-img" src="" alt="Flip view">
+            <div class="diff-flip-label">Baseline</div>
+          </div>
+          <div style="margin-top: 8px; text-align: center;">
+            <button class="btn btn-secondary btn-sm" id="flip-toggle-btn">Auto-flip: Off</button>
+            <span style="margin-left: 8px; font-size: 13px; color: var(--text-muted);">Speed:</span>
+            <input type="range" id="flip-speed" min="300" max="2000" value="1000" style="width: 100px; vertical-align: middle;">
           </div>
         </div>
       </div>
@@ -178,6 +210,10 @@
           <label for="monitor-email">Alert email</label>
           <input type="email" id="monitor-email" placeholder="alerts@example.com">
         </div>
+        <div class="form-group">
+          <label for="monitor-webhook">Webhook URL <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+          <input type="url" id="monitor-webhook" placeholder="https://hooks.slack.com/... or Teams webhook">
+        </div>
         <!-- Turnstile CAPTCHA — uncomment and add real site key before production
         <div class="cf-turnstile" data-sitekey="YOUR_REAL_SITE_KEY" data-callback="onTurnstileMonitor"></div>
         -->
@@ -215,9 +251,43 @@
           <label for="edit-email">Alert email</label>
           <input type="email" id="edit-email">
         </div>
+        <div class="form-group">
+          <label for="edit-webhook">Webhook URL <span style="font-weight: 400; color: var(--text-muted);">(optional)</span></label>
+          <input type="url" id="edit-webhook" placeholder="https://hooks.slack.com/... or Teams webhook">
+        </div>
         <div class="modal-actions">
           <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
           <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Report Issue Modal -->
+  <div id="report-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Report an Issue</h3>
+      <form id="report-form" class="auth-form">
+        <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 8px;">
+          Let us know if this monitor isn't capturing correctly.
+        </p>
+        <div class="form-group">
+          <label for="report-type">Issue type</label>
+          <select id="report-type">
+            <option value="not_loading">Page not loading</option>
+            <option value="wrong_content">Capturing wrong content</option>
+            <option value="false_alerts">Too many false alerts</option>
+            <option value="no_alerts">Not detecting changes</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="report-details">Details (optional)</label>
+          <textarea id="report-details" rows="3" style="padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: var(--font); resize: vertical;"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-report-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Report</button>
         </div>
       </form>
     </div>

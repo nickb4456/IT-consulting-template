@@ -637,6 +637,65 @@
             align-items: center;
         }
 
+        .mobile-menu-section {
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .mobile-menu-header {
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu.active .mobile-menu-header {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mobile-menu-header:hover {
+            color: var(--primary);
+        }
+
+        .mobile-submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .mobile-submenu.open {
+            max-height: 500px;
+        }
+
+        .mobile-submenu a {
+            font-size: 1.1rem;
+            font-weight: 400;
+            padding: 0.5rem 2rem;
+            color: var(--text-secondary);
+            justify-content: center;
+        }
+
+        .mobile-submenu a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu.active .mobile-submenu a {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .mobile-cta {
+            background: var(--primary);
+            color: var(--bg-dark) !important;
+            margin-top: 1rem;
+        }
+
         .mobile-menu.active a {
             opacity: 1;
             transform: translateY(0);
@@ -4162,16 +4221,56 @@
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Navigation menu" aria-hidden="true">
-        <a href="#services" data-mobile-link>Services</a>
-        <a href="/providence-law-firms-ai" data-mobile-link>Providence Lawyers</a>
-        <a href="products.html" data-mobile-link>Products</a>
-        <a href="/pagewatch/" data-mobile-link>PageWatch</a>
-        <a href="ri-report" data-mobile-link>RI Real Estate</a>
-        <a href="realtors-ai" data-mobile-link>Realtors AI</a>
-        <a href="ri-law-search.html" data-mobile-link>RI Law Search</a>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header" data-mobile-toggle>Services ▾</div>
+            <div class="mobile-submenu">
+                <a href="/providence-law-firms-ai" data-mobile-link>Providence Lawyers</a>
+                <a href="/realtors-ai" data-mobile-link>Realtors AI</a>
+                <a href="/ai-consulting" data-mobile-link>AI Consulting</a>
+                <a href="/it-support" data-mobile-link>IT Support</a>
+            </div>
+        </div>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header" data-mobile-toggle>Products ▾</div>
+            <div class="mobile-submenu">
+                <a href="/swiftshot" data-mobile-link>SwiftShot</a>
+                <a href="/pagewatch/" data-mobile-link>PageWatch</a>
+                <a href="/draftbridge" data-mobile-link>DraftBridge</a>
+                <a href="casevault.html" data-mobile-link>CaseVault</a>
+                <a href="products.html" data-mobile-link>View All Products</a>
+            </div>
+        </div>
         <a href="#demo" data-mobile-link>AI Demo</a>
         <a href="blog.html" data-mobile-link>Blog</a>
-        <a href="#contact" data-mobile-link>Contact Us</a>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header" data-mobile-toggle>Tools ▾</div>
+            <div class="mobile-submenu">
+                <a href="/ri-report.html" data-mobile-link>RI Real Estate</a>
+                <a href="/realtors-ai" data-mobile-link>Realtors AI</a>
+                <a href="/youtube-trends" data-mobile-link>YouTube Trends</a>
+                <a href="/kb.html" data-mobile-link>Knowledge Base</a>
+                <a href="/css-tricks.html" data-mobile-link>CSS Tricks</a>
+                <a href="/ri-law-search.html" data-mobile-link>RI Law Search</a>
+            </div>
+        </div>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header" data-mobile-toggle>Research ▾</div>
+            <div class="mobile-submenu">
+                <a href="/ouroboros/" data-mobile-link>Ouroboros Colony</a>
+                <a href="/ouroboros/research-paper.html" data-mobile-link>Research Paper</a>
+            </div>
+        </div>
+        <div class="mobile-menu-section">
+            <div class="mobile-menu-header" data-mobile-toggle>Arcade ▾</div>
+            <div class="mobile-submenu">
+                <a href="mouse-game.html" data-mobile-link>Mouse Trap!</a>
+                <a href="rocket-game.html" data-mobile-link>Rocket Blaster</a>
+                <a href="racecar-game.html" data-mobile-link>Apex Drift</a>
+                <a href="dolphin-game.html" data-mobile-link>Dolphin Splash!</a>
+                <a href="dino-game.html" data-mobile-link>Dino Roam!</a>
+            </div>
+        </div>
+        <a href="#contact" data-mobile-link class="mobile-cta">Contact Us</a>
     </div>
 
     <!-- Navigation -->
@@ -5763,6 +5862,28 @@
         }
 
         hamburger.addEventListener('click', toggleMobileMenu);
+
+        // Toggle mobile submenus
+        document.querySelectorAll('[data-mobile-toggle]').forEach(header => {
+            header.addEventListener('click', function() {
+                const submenu = this.nextElementSibling;
+                const isOpen = submenu.classList.contains('open');
+                
+                // Close all other submenus
+                document.querySelectorAll('.mobile-submenu').forEach(sm => {
+                    sm.classList.remove('open');
+                });
+                document.querySelectorAll('[data-mobile-toggle]').forEach(h => {
+                    h.textContent = h.textContent.replace('▴', '▾');
+                });
+                
+                // Toggle this submenu
+                if (!isOpen) {
+                    submenu.classList.add('open');
+                    this.textContent = this.textContent.replace('▾', '▴');
+                }
+            });
+        });
 
         // Close mobile menu on link click
         document.querySelectorAll('[data-mobile-link]').forEach(link => {

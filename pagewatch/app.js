@@ -16,6 +16,36 @@ const state = {
 state.flipInterval = null;
 state.flipShowingBaseline = true;
 
+// ── Session Inactivity Timeout (15 minutes) ──
+const SESSION_TIMEOUT_MS = 15 * 60 * 1000;
+let inactivityTimer = null;
+
+function resetInactivityTimer() {
+  if (inactivityTimer) clearTimeout(inactivityTimer);
+  localStorage.setItem('pw_lastActivity', Date.now().toString());
+  inactivityTimer = setTimeout(logoutInactive, SESSION_TIMEOUT_MS);
+}
+
+function logoutInactive() {
+  localStorage.removeItem('pw_apiKey');
+  localStorage.removeItem('pw_email');
+  localStorage.removeItem('pw_lastActivity');
+  window.location.href = 'index.html?reason=inactive';
+}
+
+function startInactivityWatch() {
+  // Check if session already expired (e.g. tab was left open)
+  const lastActivity = parseInt(localStorage.getItem('pw_lastActivity') || '0');
+  if (lastActivity && Date.now() - lastActivity > SESSION_TIMEOUT_MS) {
+    logoutInactive();
+    return;
+  }
+  ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'click'].forEach(evt => {
+    document.addEventListener(evt, resetInactivityTimer, { passive: true });
+  });
+  resetInactivityTimer();
+}
+
 function toggleFlipImage() {
   state.flipShowingBaseline = !state.flipShowingBaseline;
   const img = $('#diff-flip-img');
@@ -110,6 +140,22 @@ function initLanding() {
   if (state.apiKey) {
     window.location.href = 'dashboard.html';
     return;
+  }
+
+  // Show inactivity message if redirected
+  const landingParams = new URLSearchParams(window.location.search);
+  if (landingParams.get('reason') === 'inactive') {
+    window.history.replaceState({}, '', window.location.pathname);
+    setTimeout(() => {
+      const t = document.getElementById('inactive-toast');
+      if (!t) {
+        const div = document.createElement('div');
+        div.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:12px 20px;background:#111;color:#fff;border-radius:8px;font-size:14px;z-index:300;animation:slideUp 0.3s ease;';
+        div.textContent = 'Logged out due to inactivity';
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+      }
+    }, 100);
   }
 
   // Auth tabs
@@ -262,11 +308,15 @@ function initDashboard() {
     return;
   }
 
+  // Start inactivity timer
+  startInactivityWatch();
+
   // Logout
   $('#nav-logout').addEventListener('click', (e) => {
     e.preventDefault();
     localStorage.removeItem('pw_apiKey');
     localStorage.removeItem('pw_email');
+    localStorage.removeItem('pw_lastActivity');
     window.location.href = 'index.html';
   });
 

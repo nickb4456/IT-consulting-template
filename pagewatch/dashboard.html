@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.amazonaws.com data:; connect-src 'self' https://*.execute-api.us-east-1.amazonaws.com; frame-src https://challenges.cloudflare.com;">
+  <title>Dashboard — PageWatch</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo"><img src="logo.svg" alt="" width="80" height="80" style="vertical-align: middle; margin-right: 10px; border-radius: 8px;">PageWatch <span>monitor</span></a>
+      <div class="nav-links">
+        <a href="#" id="nav-account">Account</a>
+        <a href="#" id="nav-logout">Log out</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard">
+    <!-- Sidebar: Monitor List -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <h3>Monitors</h3>
+        <button class="btn btn-primary btn-sm" id="add-monitor-btn">+ Add</button>
+      </div>
+      <div id="monitor-list" class="monitor-list">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Empty state -->
+      <div id="view-empty" class="empty-state">
+        <h3>No monitor selected</h3>
+        <p>Add a URL to start monitoring, or select one from the sidebar.</p>
+        <button class="btn btn-primary" id="empty-add-btn">+ Add Monitor</button>
+      </div>
+
+      <!-- Monitor Detail / Timeline View -->
+      <div id="view-timeline" class="hidden">
+        <div class="timeline-header">
+          <div>
+            <h2 id="detail-name">—</h2>
+            <div class="timeline-meta">
+              <span id="detail-url"></span> &middot;
+              <span id="detail-interval"></span> &middot;
+              <span id="detail-status"></span>
+            </div>
+          </div>
+          <div class="flex gap-sm">
+            <button class="btn btn-secondary btn-sm" id="pause-btn">Pause</button>
+            <button class="btn btn-secondary btn-sm" id="edit-btn">Edit</button>
+            <button class="btn btn-danger btn-sm" id="delete-btn">Delete</button>
+          </div>
+        </div>
+        <div id="timeline" class="timeline">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Diff Viewer -->
+      <div id="view-diff" class="hidden">
+        <div style="margin-bottom: 16px;">
+          <a href="#" id="back-to-timeline" style="font-size: 13px;">&larr; Back to timeline</a>
+        </div>
+        <div class="timeline-header">
+          <div>
+            <h2>Visual Diff</h2>
+            <div class="timeline-meta">
+              <span id="diff-time"></span> &middot; Diff score: <strong id="diff-score-display"></strong>
+            </div>
+          </div>
+          <div class="diff-toggle">
+            <button class="btn btn-secondary btn-sm active" data-view="side-by-side">Side by Side</button>
+            <button class="btn btn-secondary btn-sm" data-view="overlay">Overlay</button>
+          </div>
+        </div>
+        <div id="diff-content-sidebyside" class="diff-viewer">
+          <div class="diff-pane">
+            <div class="diff-pane-header">Baseline</div>
+            <img id="diff-baseline-img" src="" alt="Baseline">
+          </div>
+          <div class="diff-pane">
+            <div class="diff-pane-header">Current</div>
+            <img id="diff-current-img" src="" alt="Current">
+          </div>
+        </div>
+        <div id="diff-content-overlay" class="hidden" style="margin-top: 16px;">
+          <div class="diff-pane">
+            <div class="diff-pane-header">Diff Overlay (changes in red)</div>
+            <img id="diff-overlay-img" src="" alt="Diff overlay">
+          </div>
+        </div>
+      </div>
+
+      <!-- Account View -->
+      <div id="view-account" class="hidden">
+        <div class="timeline-header">
+          <h2>Account</h2>
+        </div>
+        <div class="account-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="account-monitors">0</div>
+            <div class="stat-label">Active monitors</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="account-checks">0</div>
+            <div class="stat-label">Checks today</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="account-plan">Free</div>
+            <div class="stat-label">Current plan</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="account-limit">5</div>
+            <div class="stat-label">Monitor limit</div>
+          </div>
+        </div>
+        <div style="margin-top: 24px;">
+          <h3 style="font-size: 16px; margin-bottom: 12px;">API Key</h3>
+          <div class="api-key-display" id="account-api-key">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Monitor Modal -->
+  <div id="add-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Add Monitor</h3>
+      <form id="add-monitor-form" class="auth-form">
+        <div id="add-error" class="auth-error hidden"></div>
+        <div class="form-group">
+          <label for="monitor-url">URL</label>
+          <input type="url" id="monitor-url" required placeholder="https://example.com">
+        </div>
+        <div class="form-group">
+          <label for="monitor-name">Name</label>
+          <input type="text" id="monitor-name" required placeholder="My Website">
+        </div>
+        <div class="form-group">
+          <label for="monitor-interval">Check interval</label>
+          <select id="monitor-interval">
+            <option value="5">Every 5 minutes</option>
+            <option value="15">Every 15 minutes</option>
+            <option value="30" selected>Every 30 minutes</option>
+            <option value="60">Every hour</option>
+            <option value="1440">Once a day</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="monitor-threshold">Change threshold (%)</label>
+          <div class="flex items-center gap-sm">
+            <input type="range" id="monitor-threshold" min="1" max="50" value="5" style="flex:1;">
+            <span id="threshold-value" style="font-family: var(--mono); font-size: 14px; min-width: 36px;">5%</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="monitor-email">Alert email</label>
+          <input type="email" id="monitor-email" placeholder="alerts@example.com">
+        </div>
+        <!-- Turnstile CAPTCHA — uncomment and add real site key before production
+        <div class="cf-turnstile" data-sitekey="YOUR_REAL_SITE_KEY" data-callback="onTurnstileMonitor"></div>
+        -->
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-add-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="submit-add-btn">Add Monitor</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Monitor Modal -->
+  <div id="edit-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3>Edit Monitor</h3>
+      <form id="edit-monitor-form" class="auth-form">
+        <div class="form-group">
+          <label for="edit-interval">Check interval</label>
+          <select id="edit-interval">
+            <option value="5">Every 5 minutes</option>
+            <option value="15">Every 15 minutes</option>
+            <option value="30">Every 30 minutes</option>
+            <option value="60">Every hour</option>
+            <option value="1440">Once a day</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="edit-threshold">Change threshold (%)</label>
+          <div class="flex items-center gap-sm">
+            <input type="range" id="edit-threshold" min="1" max="50" value="5" style="flex:1;">
+            <span id="edit-threshold-value" style="font-family: var(--mono); font-size: 14px; min-width: 36px;">5%</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="edit-email">Alert email</label>
+          <input type="email" id="edit-email">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -136,10 +136,8 @@
       gap: 6px;
     }
     
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
+    .legend-arrow {
+      font-size: 1.2rem;
     }
     
     .controls {
@@ -167,7 +165,7 @@
     <div class="info-panel">
       <h3>What You're Seeing</h3>
       <p>
-        <strong style="color: #00ff88;">Green streams</strong> = Mamba's selective state space: 
+        <strong style="color: #00ff88;">Green arrows</strong> = Mamba's selective state space: 
         information flows linearly through hidden states, with selective gating choosing what to remember.
       </p>
       <p>
@@ -190,15 +188,15 @@
   
   <div class="legend">
     <div class="legend-item">
-      <div class="legend-dot" style="background: #00ff88;"></div>
-      <span>SSM Hidden State</span>
+      <span class="legend-arrow" style="color: #00ff88;">→</span>
+      <span>SSM Data Flow</span>
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="background: #00ccff;"></div>
+      <span class="legend-arrow" style="color: #00ccff;">⊙</span>
       <span>Selective Gate</span>
     </div>
     <div class="legend-item">
-      <div class="legend-dot" style="background: #ff6b6b;"></div>
+      <span class="legend-arrow" style="color: #ff6b6b;">⬚</span>
       <span>Attention (O(n²))</span>
     </div>
   </div>
@@ -266,11 +264,22 @@
       opacity: 0.3
     });
     
-    const lineMaterial = new THREE.LineBasicMaterial({ 
-      color: 0x00ff88, 
-      transparent: true, 
-      opacity: 0.6 
-    });
+    // Helper function to create an arrow
+    function createArrow(from, to, color, headLength = 0.15, headWidth = 0.08) {
+      const direction = new THREE.Vector3().subVectors(to, from);
+      const length = direction.length();
+      direction.normalize();
+      
+      const arrowHelper = new THREE.ArrowHelper(
+        direction,
+        from,
+        length,
+        color,
+        headLength,
+        headWidth
+      );
+      return arrowHelper;
+    }
     
     // SSM Chain (Mamba's linear recurrence)
     const ssmGroup = new THREE.Group();
@@ -281,37 +290,38 @@
       // Hidden state node
       const stateGeo = new THREE.SphereGeometry(0.3, 32, 32);
       const state = new THREE.Mesh(stateGeo, ssmMaterial.clone());
-      state.position.set(i * stateSpacing - (numStates * stateSpacing) / 2, 0, 0);
+      const xPos = i * stateSpacing - (numStates * stateSpacing) / 2;
+      state.position.set(xPos, 0, 0);
       state.userData = { baseY: 0, phase: i * 0.5 };
       ssmGroup.add(state);
       
-      // Selective gate (delta)
+      // Selective gate (delta) and arrow
       if (i < numStates - 1) {
+        // Gate ring
         const gateGeo = new THREE.TorusGeometry(0.2, 0.05, 16, 32);
         const gate = new THREE.Mesh(gateGeo, gateMaterial);
-        gate.position.set(i * stateSpacing - (numStates * stateSpacing) / 2 + stateSpacing / 2, 0, 0);
+        gate.position.set(xPos + stateSpacing / 2, 0, 0);
         gate.rotation.y = Math.PI / 2;
         gate.userData = { baseScale: 1, phase: i * 0.3 };
         ssmGroup.add(gate);
         
-        // Connection line
-        const lineGeo = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(i * stateSpacing - (numStates * stateSpacing) / 2 + 0.35, 0, 0),
-          new THREE.Vector3((i + 1) * stateSpacing - (numStates * stateSpacing) / 2 - 0.35, 0, 0)
-        ]);
-        const line = new THREE.Line(lineGeo, lineMaterial);
-        ssmGroup.add(line);
+        // Arrow from current state through gate to next state
+        const fromPos = new THREE.Vector3(xPos + 0.35, 0, 0);
+        const toPos = new THREE.Vector3(xPos + stateSpacing - 0.35, 0, 0);
+        const arrow = createArrow(fromPos, toPos, 0x00ff88, 0.2, 0.1);
+        ssmGroup.add(arrow);
       }
     }
     ssmGroup.position.y = 2;
     scene.add(ssmGroup);
     
-    // Attention matrix (Transformer's O(n²))
+    // Attention matrix (Transformer's O(n²)) with arrows
     const attentionGroup = new THREE.Group();
     const gridSize = 6;
     const cellSize = 0.3;
     const cellGap = 0.4;
     
+    // Create attention grid cells
     for (let i = 0; i < gridSize; i++) {
       for (let j = 0; j < gridSize; j++) {
         const cellGeo = new THREE.BoxGeometry(cellSize, cellSize * 0.1, cellSize);
@@ -328,6 +338,32 @@
         attentionGroup.add(cell);
       }
     }
+    
+    // Add some attention arrows (showing n² connections)
+    const arrowMaterial = 0xff6b6b;
+    for (let i = 0; i < 8; i++) {
+      const fromI = Math.floor(Math.random() * gridSize);
+      const fromJ = Math.floor(Math.random() * gridSize);
+      const toI = Math.floor(Math.random() * gridSize);
+      const toJ = Math.floor(Math.random() * gridSize);
+      
+      if (fromI !== toI || fromJ !== toJ) {
+        const fromPos = new THREE.Vector3(
+          fromI * cellGap - (gridSize * cellGap) / 2,
+          0.1,
+          fromJ * cellGap - (gridSize * cellGap) / 2
+        );
+        const toPos = new THREE.Vector3(
+          toI * cellGap - (gridSize * cellGap) / 2,
+          0.1,
+          toJ * cellGap - (gridSize * cellGap) / 2
+        );
+        const arrow = createArrow(fromPos, toPos, arrowMaterial, 0.1, 0.05);
+        arrow.userData = { phase: i * 0.5 };
+        attentionGroup.add(arrow);
+      }
+    }
+    
     attentionGroup.position.y = -2;
     scene.add(attentionGroup);
     
@@ -354,30 +390,28 @@
     scene.add(createLabel('h(t) = Āh(t-1) + B̄x(t)', new THREE.Vector3(0, 2.8, 2), '#00ccff'));
     scene.add(createLabel('ATTENTION (Quadratic)', new THREE.Vector3(0, -0.5, 0), '#ff6b6b'));
     
-    // Data flow particles
-    const particleCount = 50;
-    const particleGeo = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(particleCount * 3);
-    const particleVelocities = [];
+    // Animated flowing arrows (data flow through SSM)
+    const flowArrows = [];
+    const numFlowArrows = 6;
     
-    for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = -8 + Math.random() * 2;
-      particlePositions[i * 3 + 1] = 2;
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 2;
-      particleVelocities.push(0.05 + Math.random() * 0.05);
+    for (let i = 0; i < numFlowArrows; i++) {
+      const arrowGeo = new THREE.ConeGeometry(0.08, 0.25, 8);
+      const arrowMat = new THREE.MeshPhongMaterial({
+        color: 0x00ff88,
+        emissive: 0x00ff88,
+        emissiveIntensity: 0.5,
+        transparent: true,
+        opacity: 0.9
+      });
+      const arrow = new THREE.Mesh(arrowGeo, arrowMat);
+      arrow.rotation.z = -Math.PI / 2; // Point right
+      arrow.position.y = 2;
+      arrow.position.x = -8 + i * 2.5;
+      arrow.position.z = (Math.random() - 0.5) * 0.5;
+      arrow.userData = { speed: 0.06 + Math.random() * 0.03, startX: -8 };
+      scene.add(arrow);
+      flowArrows.push(arrow);
     }
-    
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
-    
-    const particleMat = new THREE.PointsMaterial({
-      color: 0x00ff88,
-      size: 0.1,
-      transparent: true,
-      opacity: 0.8
-    });
-    
-    const particles = new THREE.Points(particleGeo, particleMat);
-    scene.add(particles);
     
     // Animation
     const clock = new THREE.Clock();
@@ -389,10 +423,10 @@
       // Animate SSM states
       ssmGroup.children.forEach((child, i) => {
         if (child.userData.phase !== undefined) {
-          if (child.geometry.type === 'SphereGeometry') {
+          if (child.geometry && child.geometry.type === 'SphereGeometry') {
             child.position.y = child.userData.baseY + Math.sin(time * 2 + child.userData.phase) * 0.15;
             child.material.emissiveIntensity = 0.3 + Math.sin(time * 3 + child.userData.phase) * 0.2;
-          } else if (child.geometry.type === 'TorusGeometry') {
+          } else if (child.geometry && child.geometry.type === 'TorusGeometry') {
             const scale = child.userData.baseScale + Math.sin(time * 4 + child.userData.phase) * 0.2;
             child.scale.set(scale, scale, scale);
           }
@@ -401,20 +435,20 @@
       
       // Animate attention cells
       attentionGroup.children.forEach((child) => {
-        if (child.userData.phase !== undefined) {
+        if (child.userData.phase !== undefined && child.material) {
           child.material.opacity = child.userData.baseOpacity + Math.sin(time * 2 + child.userData.phase) * 0.1;
         }
       });
       
-      // Animate particles (data flow)
-      const positions = particles.geometry.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3] += particleVelocities[i];
-        if (positions[i * 3] > 8) {
-          positions[i * 3] = -8;
+      // Animate flowing arrows
+      flowArrows.forEach((arrow) => {
+        arrow.position.x += arrow.userData.speed;
+        if (arrow.position.x > 8) {
+          arrow.position.x = arrow.userData.startX;
         }
-      }
-      particles.geometry.attributes.position.needsUpdate = true;
+        // Pulse the arrow
+        arrow.material.emissiveIntensity = 0.5 + Math.sin(time * 5 + arrow.position.x) * 0.3;
+      });
       
       // Pulse lights
       pointLight1.intensity = 1 + Math.sin(time * 2) * 0.3;

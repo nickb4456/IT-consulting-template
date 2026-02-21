@@ -355,6 +355,16 @@ function initDashboard() {
     });
   });
 
+  // Billing buttons
+  const checkoutStarter = $('#checkout-starter');
+  if (checkoutStarter) checkoutStarter.addEventListener('click', () => startCheckout('starter'));
+  const checkoutPro = $('#checkout-pro');
+  if (checkoutPro) checkoutPro.addEventListener('click', () => startCheckout('pro'));
+  const checkoutBusiness = $('#checkout-business');
+  if (checkoutBusiness) checkoutBusiness.addEventListener('click', () => startCheckout('business'));
+  const portalBtn = $('#billing-portal-btn');
+  if (portalBtn) portalBtn.addEventListener('click', () => openBillingPortal());
+
   // Handle checkout return
   const params = new URLSearchParams(window.location.search);
   if (params.get('checkout') === 'success') {

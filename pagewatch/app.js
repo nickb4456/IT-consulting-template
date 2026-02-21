@@ -1,5 +1,5 @@
 // PageWatch — SPA Client Logic
-const API_BASE = window.PAGEWATCH_API || 'https://4wvv0at4ea.execute-api.us-east-1.amazonaws.com/prod';
+const API_BASE = window.PAGEWATCH_API || 'https://zp0d2duqd2.execute-api.us-east-1.amazonaws.com/prod';
 
 // ── State ──
 const state = {

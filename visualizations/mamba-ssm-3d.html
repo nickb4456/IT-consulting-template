@@ -120,6 +120,12 @@
       color: #fff;
     }
     
+    .comparison-item .example {
+      font-size: 0.65rem;
+      color: #888;
+      margin-top: 0.25rem;
+    }
+    
     .legend {
       position: fixed;
       bottom: 20px;
@@ -177,11 +183,16 @@
         <div class="comparison-item transformer">
           <div class="label">Transformer</div>
           <div class="value">O(n²)</div>
+          <div class="example">1000 tokens = 1M ops</div>
         </div>
         <div class="comparison-item mamba">
           <div class="label">Mamba</div>
           <div class="value">O(n)</div>
+          <div class="example">1000 tokens = 1K ops</div>
         </div>
+      </div>
+      <div style="text-align: center; margin-top: 0.75rem; font-size: 0.8rem; color: #ff6b6b;">
+        ⚠️ 1000x more compute at scale
       </div>
     </div>
   </div>
@@ -238,6 +249,11 @@
     const pointLight2 = new THREE.PointLight(0x00ccff, 0.8, 30);
     pointLight2.position.set(-5, 3, -5);
     scene.add(pointLight2);
+    
+    // Red danger light over attention matrix
+    const redLight = new THREE.PointLight(0xff4444, 1.2, 20);
+    redLight.position.set(0, -1, 0);
+    scene.add(redLight);
     
     // Materials
     const ssmMaterial = new THREE.MeshPhongMaterial({ 
@@ -315,57 +331,139 @@
     ssmGroup.position.y = 2;
     scene.add(ssmGroup);
     
-    // Attention matrix (Transformer's O(n²)) with arrows
+    // Attention matrix (Transformer's O(n²)) with arrows - DRAMATIC VERSION
     const attentionGroup = new THREE.Group();
     const gridSize = 6;
-    const cellSize = 0.3;
-    const cellGap = 0.4;
+    const cellSize = 0.35;
+    const cellGap = 0.45;
     
-    // Create attention grid cells
+    // Create attention grid cells with more visible red glow
     for (let i = 0; i < gridSize; i++) {
       for (let j = 0; j < gridSize; j++) {
-        const cellGeo = new THREE.BoxGeometry(cellSize, cellSize * 0.1, cellSize);
-        const cell = new THREE.Mesh(cellGeo, attentionMaterial.clone());
+        const cellGeo = new THREE.BoxGeometry(cellSize, cellSize * 0.15, cellSize);
+        const cellMat = new THREE.MeshPhongMaterial({
+          color: 0xff4444,
+          emissive: 0xff2222,
+          emissiveIntensity: 0.3,
+          transparent: true,
+          opacity: 0.5
+        });
+        const cell = new THREE.Mesh(cellGeo, cellMat);
         cell.position.set(
           i * cellGap - (gridSize * cellGap) / 2,
           0,
           j * cellGap - (gridSize * cellGap) / 2
         );
         cell.userData = { 
-          baseOpacity: 0.1 + Math.random() * 0.3,
-          phase: (i + j) * 0.2
+          baseOpacity: 0.4 + Math.random() * 0.3,
+          phase: (i + j) * 0.2,
+          row: i,
+          col: j
         };
         attentionGroup.add(cell);
       }
     }
     
-    // Add some attention arrows (showing n² connections)
-    const arrowMaterial = 0xff6b6b;
-    for (let i = 0; i < 8; i++) {
-      const fromI = Math.floor(Math.random() * gridSize);
-      const fromJ = Math.floor(Math.random() * gridSize);
-      const toI = Math.floor(Math.random() * gridSize);
-      const toJ = Math.floor(Math.random() * gridSize);
-      
-      if (fromI !== toI || fromJ !== toJ) {
-        const fromPos = new THREE.Vector3(
-          fromI * cellGap - (gridSize * cellGap) / 2,
-          0.1,
-          fromJ * cellGap - (gridSize * cellGap) / 2
-        );
-        const toPos = new THREE.Vector3(
-          toI * cellGap - (gridSize * cellGap) / 2,
-          0.1,
-          toJ * cellGap - (gridSize * cellGap) / 2
-        );
-        const arrow = createArrow(fromPos, toPos, arrowMaterial, 0.1, 0.05);
-        arrow.userData = { phase: i * 0.5 };
-        attentionGroup.add(arrow);
+    // ALL-TO-ALL arrows - show the chaos of n² connections
+    const attentionArrows = [];
+    const arrowColor = 0xff4444;
+    
+    // Create arrows from each row to multiple columns (showing all-to-all)
+    for (let fromRow = 0; fromRow < gridSize; fromRow++) {
+      for (let toRow = 0; toRow < gridSize; toRow++) {
+        if (fromRow !== toRow && Math.random() > 0.3) { // 70% of connections shown
+          const fromX = fromRow * cellGap - (gridSize * cellGap) / 2;
+          const toX = toRow * cellGap - (gridSize * cellGap) / 2;
+          const fromZ = (Math.random() * 2 - 1) * (gridSize * cellGap) / 2;
+          const toZ = (Math.random() * 2 - 1) * (gridSize * cellGap) / 2;
+          
+          const fromPos = new THREE.Vector3(fromX, 0.2, fromZ);
+          const toPos = new THREE.Vector3(toX, 0.2, toZ);
+          
+          const arrow = createArrow(fromPos, toPos, arrowColor, 0.12, 0.06);
+          arrow.userData = { 
+            phase: fromRow + toRow,
+            baseOpacity: 0.6
+          };
+          attentionArrows.push(arrow);
+          attentionGroup.add(arrow);
+        }
       }
     }
     
-    attentionGroup.position.y = -2;
+    // Add vertical "computation beam" lines rising from hot cells
+    for (let i = 0; i < 8; i++) {
+      const beamGeo = new THREE.CylinderGeometry(0.02, 0.02, 1.5, 8);
+      const beamMat = new THREE.MeshPhongMaterial({
+        color: 0xff6666,
+        emissive: 0xff4444,
+        emissiveIntensity: 0.8,
+        transparent: true,
+        opacity: 0.6
+      });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.set(
+        (Math.random() * gridSize - gridSize/2) * cellGap,
+        0.75,
+        (Math.random() * gridSize - gridSize/2) * cellGap
+      );
+      beam.userData = { phase: i * 0.7, baseY: 0.75 };
+      attentionGroup.add(beam);
+    }
+    
+    attentionGroup.position.y = -2.5;
     scene.add(attentionGroup);
+    
+    // RED RINGS showing what attention WOULD need (O(n²) all-to-all)
+    // These orbit around Mamba showing "what you'd need without SSM"
+    const attentionRingsGroup = new THREE.Group();
+    
+    for (let i = 0; i < numStates; i++) {
+      const xPos = i * stateSpacing - (numStates * stateSpacing) / 2;
+      
+      // Large red ring around each state showing "attention scope"
+      const ringGeo = new THREE.TorusGeometry(0.5, 0.03, 16, 64);
+      const ringMat = new THREE.MeshPhongMaterial({
+        color: 0xff4444,
+        emissive: 0xff4444,
+        emissiveIntensity: 0.6,
+        transparent: true,
+        opacity: 0.8
+      });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.position.set(xPos, 2, 0);
+      ring.rotation.x = Math.PI / 2; // Horizontal ring
+      ring.userData = { phase: i * 0.4, baseScale: 1 };
+      attentionRingsGroup.add(ring);
+    }
+    
+    // Red connecting lines showing attention's all-to-all pattern
+    const lineMaterial = new THREE.LineBasicMaterial({ 
+      color: 0xff4444, 
+      transparent: true, 
+      opacity: 0.3 
+    });
+    
+    for (let i = 0; i < numStates; i++) {
+      for (let j = i + 1; j < numStates; j++) {
+        const fromX = i * stateSpacing - (numStates * stateSpacing) / 2;
+        const toX = j * stateSpacing - (numStates * stateSpacing) / 2;
+        
+        const points = [
+          new THREE.Vector3(fromX, 2 + 0.6, 0),
+          new THREE.Vector3((fromX + toX) / 2, 2 + 0.8 + (j - i) * 0.15, 0),
+          new THREE.Vector3(toX, 2 + 0.6, 0)
+        ];
+        
+        const curve = new THREE.QuadraticBezierCurve3(points[0], points[1], points[2]);
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(20));
+        const line = new THREE.Line(lineGeo, lineMaterial);
+        line.userData = { phase: i + j };
+        attentionRingsGroup.add(line);
+      }
+    }
+    
+    scene.add(attentionRingsGroup);
     
     // Labels
     const createLabel = (text, position, color) => {
@@ -388,7 +486,9 @@
     
     scene.add(createLabel('MAMBA (Linear)', new THREE.Vector3(0, 3.5, 0), '#00ff88'));
     scene.add(createLabel('h(t) = Āh(t-1) + B̄x(t)', new THREE.Vector3(0, 2.8, 2), '#00ccff'));
-    scene.add(createLabel('ATTENTION (Quadratic)', new THREE.Vector3(0, -0.5, 0), '#ff6b6b'));
+    scene.add(createLabel('8 ops for 8 tokens ✓', new THREE.Vector3(5, 2, 0), '#00ff88'));
+    scene.add(createLabel('ATTENTION (Quadratic)', new THREE.Vector3(0, -1, 0), '#ff6b6b'));
+    scene.add(createLabel('64 ops for 8 tokens ✗', new THREE.Vector3(5, -2.5, 0), '#ff6b6b'));
     
     // Animated flowing arrows (data flow through SSM)
     const flowArrows = [];
@@ -433,10 +533,40 @@
         }
       });
       
-      // Animate attention cells
+      // Animate attention cells - AGGRESSIVE pulsing
       attentionGroup.children.forEach((child) => {
         if (child.userData.phase !== undefined && child.material) {
-          child.material.opacity = child.userData.baseOpacity + Math.sin(time * 2 + child.userData.phase) * 0.1;
+          const pulse = Math.sin(time * 3 + child.userData.phase);
+          
+          // Grid cells pulse red
+          if (child.geometry && child.geometry.type === 'BoxGeometry') {
+            child.material.opacity = child.userData.baseOpacity + pulse * 0.25;
+            child.material.emissiveIntensity = 0.3 + pulse * 0.4;
+            // Random "firing" cells light up brighter
+            if (Math.random() < 0.01) {
+              child.material.emissiveIntensity = 1.0;
+            }
+          }
+          
+          // Vertical beams rise and fall
+          if (child.geometry && child.geometry.type === 'CylinderGeometry') {
+            child.position.y = child.userData.baseY + Math.sin(time * 4 + child.userData.phase) * 0.3;
+            child.material.opacity = 0.4 + Math.sin(time * 5 + child.userData.phase) * 0.3;
+          }
+        }
+      });
+      
+      // Animate red attention rings (pulse outward to show "expansion cost")
+      attentionRingsGroup.children.forEach((child) => {
+        if (child.userData.phase !== undefined) {
+          if (child.geometry && child.geometry.type === 'TorusGeometry') {
+            // Pulse scale and opacity
+            const pulse = Math.sin(time * 1.5 + child.userData.phase) * 0.2;
+            const scale = child.userData.baseScale + pulse;
+            child.scale.set(scale, scale, scale);
+            child.material.opacity = 0.4 + Math.sin(time * 2 + child.userData.phase) * 0.3;
+            child.material.emissiveIntensity = 0.4 + pulse;
+          }
         }
       });
       
@@ -453,6 +583,7 @@
       // Pulse lights
       pointLight1.intensity = 1 + Math.sin(time * 2) * 0.3;
       pointLight2.intensity = 0.8 + Math.sin(time * 2.5) * 0.2;
+      redLight.intensity = 1.2 + Math.sin(time * 3) * 0.5; // Ominous red pulse
       
       controls.update();
       renderer.render(scene, camera);

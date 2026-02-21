@@ -321,6 +321,36 @@
             display: block;
             margin-top: 16px;
         }
+        .summary-box {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,212,255,0.05));
+            border: 1px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .summary-label {
+            font-size: 0.75rem;
+            color: #00d4ff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .summary-text {
+            color: #fff;
+            line-height: 1.6;
+        }
+        .summary-note {
+            font-size: 0.7rem;
+            color: #666;
+            margin-top: 0.75rem;
+            font-style: italic;
+        }
+        .summarize-btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc) !important;
+            color: #000 !important;
+        }
+        .summarize-btn:hover {
+            opacity: 0.9;
+        }
         .result-text mark {
             background: var(--highlight);
             padding: 1px 3px;
@@ -593,6 +623,9 @@
                     <div class="result-body">
                         <div class="result-text">${preview}...</div>
                         <div class="result-actions">
+                            <button class="action-btn summarize-btn" onclick="event.stopPropagation(); summarizeLaw(${r.id}, this)">
+                                ⚡ Quick Summary
+                            </button>
                             <button class="action-btn" onclick="event.stopPropagation(); copyText('${citation}')">
                                 Copy Citation
                             </button>
@@ -603,12 +636,44 @@
                                 Official Source ↗
                             </button>
                         </div>
+                        <div class="summary-box" id="summary-${r.id}" style="display:none;"></div>
                         <div class="related-section" id="rel-${r.chapterNumber.replace(/\./g, '-')}">
                             <div class="related-label">Loading related chapters...</div>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        async function summarizeLaw(id, btn) {
+            btn.textContent = '⏳ Summarizing...';
+            btn.disabled = true;
+            
+            try {
+                const res = await fetch(`${API}/api/summarize/${id}`);
+                const data = await res.json();
+                
+                if (data.summary) {
+                    const summaryBox = document.getElementById(`summary-${id}`);
+                    summaryBox.innerHTML = `
+                        <div class="summary-label">⚡ AI Summary ${data.cached ? '(cached)' : ''}</div>
+                        <div class="summary-text">${data.summary}</div>
+                        <div class="summary-note">Powered by Gemini Flash · Not legal advice</div>
+                    `;
+                    summaryBox.style.display = 'block';
+                    btn.textContent = '✓ Summarized';
+                    toast('Summary generated');
+                } else {
+                    btn.textContent = '⚡ Quick Summary';
+                    btn.disabled = false;
+                    toast(data.error || 'Failed to summarize');
+                }
+            } catch (e) {
+                btn.textContent = '⚡ Quick Summary';
+                btn.disabled = false;
+                console.error(e);
+                toast('Summary failed');
+            }
         }
 
         async function loadFullChapter(chapterNum, btn) {

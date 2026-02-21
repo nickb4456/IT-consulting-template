@@ -351,6 +351,20 @@
         .summarize-btn:hover {
             opacity: 0.9;
         }
+        .speed-read-btn {
+            background: linear-gradient(135deg, #a855f7, #7c3aed) !important;
+            color: #fff !important;
+        }
+        .speed-read-btn:hover {
+            opacity: 0.9;
+        }
+        .speed-read-btn.playing {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
         .result-text mark {
             background: var(--highlight);
             padding: 1px 3px;
@@ -623,8 +637,11 @@
                     <div class="result-body">
                         <div class="result-text">${preview}...</div>
                         <div class="result-actions">
-                            <button class="action-btn summarize-btn" onclick="event.stopPropagation(); summarizeLaw(${r.id}, this)">
+                            <button class="action-btn summarize-btn" onclick="event.stopPropagation(); summarizeLaw('${r.id}', this)">
                                 ⚡ Quick Summary
+                            </button>
+                            <button class="action-btn speed-read-btn" onclick="event.stopPropagation(); speedRead('${r.id}', this)">
+                                🎧 Speed Read
                             </button>
                             <button class="action-btn" onclick="event.stopPropagation(); copyText('${citation}')">
                                 Copy Citation
@@ -643,6 +660,76 @@
                     </div>
                 </div>
             `;
+        }
+
+        // Speed Read using Web Speech API
+        let currentUtterance = null;
+        let currentSpeedReadBtn = null;
+        
+        async function speedRead(id, btn) {
+            // If already playing this one, stop it
+            if (currentSpeedReadBtn === btn && speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                btn.textContent = '🎧 Speed Read';
+                btn.classList.remove('playing');
+                currentSpeedReadBtn = null;
+                return;
+            }
+            
+            // Stop any existing speech
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                if (currentSpeedReadBtn) {
+                    currentSpeedReadBtn.textContent = '🎧 Speed Read';
+                    currentSpeedReadBtn.classList.remove('playing');
+                }
+            }
+            
+            btn.textContent = '⏳ Loading...';
+            
+            try {
+                // First get a summary to read
+                const res = await fetch(`${API}/api/summarize/${id}`);
+                const data = await res.json();
+                
+                if (data.summary) {
+                    const utterance = new SpeechSynthesisUtterance(data.summary);
+                    utterance.rate = 1.3; // Slightly faster for "speed read"
+                    utterance.pitch = 1;
+                    
+                    // Try to use a good voice
+                    const voices = speechSynthesis.getVoices();
+                    const goodVoice = voices.find(v => v.name.includes('Samantha') || v.name.includes('Google') || v.name.includes('Microsoft'));
+                    if (goodVoice) utterance.voice = goodVoice;
+                    
+                    utterance.onend = () => {
+                        btn.textContent = '🎧 Speed Read';
+                        btn.classList.remove('playing');
+                        currentSpeedReadBtn = null;
+                    };
+                    
+                    utterance.onerror = () => {
+                        btn.textContent = '🎧 Speed Read';
+                        btn.classList.remove('playing');
+                        currentSpeedReadBtn = null;
+                    };
+                    
+                    currentUtterance = utterance;
+                    currentSpeedReadBtn = btn;
+                    btn.textContent = '⏹️ Stop';
+                    btn.classList.add('playing');
+                    speechSynthesis.speak(utterance);
+                    
+                    toast('Reading summary...');
+                } else {
+                    btn.textContent = '🎧 Speed Read';
+                    toast(data.error || 'Failed to load summary');
+                }
+            } catch (e) {
+                btn.textContent = '🎧 Speed Read';
+                console.error(e);
+                toast('Speed read failed');
+            }
         }
 
         async function summarizeLaw(id, btn) {

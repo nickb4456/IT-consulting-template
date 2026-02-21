@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.amazonaws.com data:; connect-src 'self' https://zp0d2duqd2.execute-api.us-east-1.amazonaws.com; frame-src https://challenges.cloudflare.com;">
+  <title>PageWatch — Website Change Monitoring</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body>
+  <nav>
+    <div class="container">
+      <a href="/" class="logo"><img src="logo.svg" alt="" width="80" height="80" style="vertical-align: middle; margin-right: 10px; border-radius: 8px;">PageWatch <span>monitor</span></a>
+      <div class="nav-links">
+        <a href="#pricing">Pricing</a>
+        <a href="#auth" id="nav-login">Log in</a>
+        <a href="#auth" class="btn btn-primary btn-sm" id="nav-signup">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero container">
+    <h1>Know when websites change.</h1>
+    <p>Automated visual monitoring with pixel-perfect diff detection. Get alerted the moment a page looks different.</p>
+    <div class="hero-badges">
+      <span class="badge">Full-page screenshots</span>
+      <span class="badge">Pixel-level diffs</span>
+      <span class="badge">Email alerts</span>
+      <span class="badge">5-min intervals</span>
+    </div>
+    <div style="margin-top: 32px;">
+      <a href="#auth" class="btn btn-primary" id="hero-cta">Start Monitoring — Free</a>
+    </div>
+  </section>
+
+  <!-- How it Works -->
+  <section style="padding: 60px 0; background: var(--bg-secondary);">
+    <div class="container" style="text-align: center;">
+      <h2 style="font-size: 28px; margin-bottom: 40px;">How it works</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; max-width: 800px; margin: 0 auto;">
+        <div>
+          <div style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">1</div>
+          <h3 style="font-size: 16px; margin-bottom: 8px;">Add a URL</h3>
+          <p style="font-size: 14px; color: var(--text-secondary);">Enter any webpage you want to monitor for visual changes.</p>
+        </div>
+        <div>
+          <div style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">2</div>
+          <h3 style="font-size: 16px; margin-bottom: 8px;">We screenshot it</h3>
+          <p style="font-size: 14px; color: var(--text-secondary);">Headless Chrome captures the full page on your chosen interval.</p>
+        </div>
+        <div>
+          <div style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">3</div>
+          <h3 style="font-size: 16px; margin-bottom: 8px;">Get alerted</h3>
+          <p style="font-size: 14px; color: var(--text-secondary);">Pixel diff detects changes — you get an email with the visual diff.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Beta Banner -->
+  <section style="background: #111; color: #fff; text-align: center; padding: 14px 0; font-size: 14px;">
+    Early access beta — discounted pricing for founding users. <a href="#pricing" style="color: #00E5FF; text-decoration: underline;">Lock in your rate.</a>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing-section container" id="pricing">
+    <h2>Simple pricing</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-top: -24px; margin-bottom: 32px;">Pay per check, not per monitor. Beta users keep these rates forever.</p>
+    <div class="pricing-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="pricing-card">
+        <div class="plan-name">Free</div>
+        <div class="price">$0</div>
+        <div class="price-period">forever</div>
+        <ul>
+          <li>200 checks/month</li>
+          <li>5 monitors</li>
+          <li>1-hour intervals</li>
+          <li>7-day history</li>
+          <li>Email alerts</li>
+        </ul>
+        <a href="#auth" class="btn btn-secondary" style="width: 100%; display: block; text-align: center; text-decoration: none;">Get Started</a>
+      </div>
+      <div class="pricing-card">
+        <div class="plan-name">Starter</div>
+        <div class="price"><span style="text-decoration: line-through; color: var(--text-muted); font-size: 20px;">$12</span> $8</div>
+        <div class="price-period">/month &middot; beta</div>
+        <ul>
+          <li>2,000 checks/month</li>
+          <li>25 monitors</li>
+          <li>15-minute intervals</li>
+          <li>30-day history</li>
+          <li>Email alerts</li>
+        </ul>
+        <a href="#auth" class="btn btn-primary" style="width: 100%;" onclick="handlePricingClick(event, 'starter')">Start Beta</a>
+      </div>
+      <div class="pricing-card featured">
+        <div class="plan-name">Pro</div>
+        <div class="price"><span style="text-decoration: line-through; color: var(--text-muted); font-size: 20px;">$39</span> $25</div>
+        <div class="price-period">/month &middot; beta</div>
+        <ul>
+          <li>15,000 checks/month</li>
+          <li>100 monitors</li>
+          <li>5-minute intervals</li>
+          <li>90-day history</li>
+          <li>Priority alerts</li>
+        </ul>
+        <a href="#auth" class="btn btn-primary" style="width: 100%;" onclick="handlePricingClick(event, 'pro')">Start Beta</a>
+      </div>
+      <div class="pricing-card">
+        <div class="plan-name">Business</div>
+        <div class="price"><span style="text-decoration: line-through; color: var(--text-muted); font-size: 20px;">$99</span> $84</div>
+        <div class="price-period">/month &middot; beta</div>
+        <ul>
+          <li>50,000 checks/month</li>
+          <li>500 monitors</li>
+          <li>2-minute intervals</li>
+          <li>365-day history</li>
+          <li>Digest + instant alerts</li>
+        </ul>
+        <a href="#auth" class="btn btn-secondary" style="width: 100%;" onclick="handlePricingClick(event, 'business')">Start Beta</a>
+      </div>
+    </div>
+    <p style="text-align: center; margin-top: 24px; font-size: 13px; color: var(--text-muted);">Need evidence-grade captures? Check out <a href="https://swiftshot.dev" style="color: var(--text); font-weight: 500;">SwiftShot</a> for legal &amp; compliance screenshots.</p>
+  </section>
+
+  <!-- Auth Section -->
+  <section class="auth-section" id="auth">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Log In</button>
+      <button class="auth-tab" data-tab="signup">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" class="auth-form">
+      <div id="login-error" class="auth-error hidden"></div>
+      <div class="form-group">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required placeholder="Min. 8 characters">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Log In</button>
+      <a href="#" id="forgot-pw-link" style="display: block; text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-muted);">Forgot password?</a>
+    </form>
+
+    <!-- Forgot Password Form -->
+    <form id="forgot-form" class="auth-form hidden">
+      <div id="forgot-error" class="auth-error hidden"></div>
+      <div id="forgot-success" class="auth-success hidden"></div>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 16px;">Enter your email and we'll send you a password reset link.</p>
+      <div class="form-group">
+        <label for="forgot-email">Email</label>
+        <input type="email" id="forgot-email" required placeholder="you@example.com">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Send Reset Link</button>
+      <a href="#" id="back-to-login" style="display: block; text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-muted);">Back to login</a>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signup-form" class="auth-form hidden">
+      <div id="signup-error" class="auth-error hidden"></div>
+      <div id="signup-success" class="auth-success hidden"></div>
+      <div class="form-group">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" required minlength="8" placeholder="Min. 8 characters">
+      </div>
+      <div class="form-group">
+        <label for="signup-password-confirm">Confirm Password</label>
+        <input type="password" id="signup-password-confirm" required minlength="8" placeholder="Confirm password">
+      </div>
+      <!-- Turnstile CAPTCHA — uncomment and add real site key before production
+      <div class="cf-turnstile" data-sitekey="YOUR_REAL_SITE_KEY" data-callback="onTurnstileSuccess"></div>
+      -->
+      <button type="submit" class="btn btn-primary" id="signup-btn" style="width: 100%;">Create Account</button>
+    </form>
+  </section>
+
+  <footer style="text-align: center; padding: 40px 0; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 13px;">
+    PageWatch &copy; 2026. Powered by SwiftShot. &middot; <a href="privacy.html" style="color: var(--text-muted);">Privacy Policy</a>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

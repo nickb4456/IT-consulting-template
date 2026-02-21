@@ -1,0 +1,188 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="100%" height="100%">
+    <defs>
+        <!-- Gradients -->
+        <linearGradient id="hawk-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" />
+            <stop offset="40%" stop-color="#E2E8F0" />
+            <stop offset="100%" stop-color="#94A3B8" />
+        </linearGradient>
+
+        <linearGradient id="cyber-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9" />
+            <stop offset="100%" stop-color="#00E5FF" stop-opacity="0" />
+        </linearGradient>
+
+        <radialGradient id="pupil-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FFFFFF" />
+            <stop offset="30%" stop-color="#00E5FF" />
+            <stop offset="100%" stop-color="#0088CC" stop-opacity="0" />
+        </radialGradient>
+
+        <!-- Filters -->
+        <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="8" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+
+        <filter id="subtle-glow" x="-10%" y="-10%" width="120%" height="120%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+            </feMerge>
+        </filter>
+
+        <!-- Clip Path for the Eye -->
+        <clipPath id="eye-clip">
+            <path d="M 330 150 C 380 140, 430 130, 490 120 L 450 180 C 410 190, 360 180, 330 150 Z" />
+        </clipPath>
+    </defs>
+
+    <style>
+        /* Base Environment Animations */
+        .radar-sweep {
+            transform-origin: 395px 154px;
+            animation: sweep 5s linear infinite;
+        }
+        .radar-ping {
+            transform-origin: 395px 154px;
+            animation: ping 4s ease-out infinite;
+        }
+        .radar-ping-2 {
+            animation-delay: 2s;
+        }
+        .reticle {
+            transform-origin: 395px 154px;
+            animation: sweep 12s linear infinite reverse;
+        }
+
+        /* Mascot Animations */
+        .mascot {
+            animation: hover 6s ease-in-out infinite;
+        }
+        .pupil-group {
+            animation: scan 5s infinite;
+        }
+        .pupil-blink {
+            transform-origin: 395px 154px;
+            animation: blink 5s infinite;
+        }
+
+        /* Core Keyframes */
+        @keyframes sweep {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes ping {
+            0% { transform: scale(0.1); opacity: 1; stroke-width: 8px; }
+            100% { transform: scale(4); opacity: 0; stroke-width: 1px; }
+        }
+
+        @keyframes hover {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+        }
+
+        @keyframes scan {
+            0%, 15% { transform: translate(0, 0); }
+            20%, 35% { transform: translate(-10px, 4px); }
+            40%, 55% { transform: translate(12px, -3px); }
+            60%, 75% { transform: translate(0, 0) scale(1.2); }
+            80%, 100% { transform: translate(0, 0) scale(1); }
+        }
+
+        @keyframes blink {
+            0%, 46%, 50%, 54%, 100% { transform: scaleY(1); opacity: 1; }
+            48%, 52% { transform: scaleY(0.1); opacity: 0.5; }
+        }
+    </style>
+
+    <!-- Deep Tech Background -->
+    <rect width="100%" height="100%" fill="#090B10" />
+
+    <!-- Radar / Watching Emitting Background -->
+    <g class="radar" opacity="0.4">
+        <!-- Animated Radar Pings -->
+        <circle cx="395" cy="154" r="50" fill="none" stroke="#00E5FF" class="radar-ping" />
+        <circle cx="395" cy="154" r="50" fill="none" stroke="#00E5FF" class="radar-ping radar-ping-2" />
+
+        <!-- Rotating Radar Sweep -->
+        <path d="M 395 154 L 395 -150 A 304 304 0 0 1 547 23 Z" fill="url(#cyber-grad)" class="radar-sweep" />
+
+        <!-- Rotating Target Reticle -->
+        <g class="reticle" stroke="#00E5FF" stroke-width="2" opacity="0.6">
+            <circle cx="395" cy="154" r="180" fill="none" stroke-dasharray="10 30" />
+            <circle cx="395" cy="154" r="140" fill="none" stroke-dasharray="2 15" stroke-width="4" />
+            <!-- Crosshairs -->
+            <line x1="395" y1="-50" x2="395" y2="40" opacity="0.5" />
+            <line x1="395" y1="268" x2="395" y2="358" opacity="0.5" />
+            <line x1="191" y1="154" x2="281" y2="154" opacity="0.5" />
+            <line x1="509" y1="154" x2="599" y2="154" opacity="0.5" />
+        </g>
+    </g>
+
+    <!-- Main Hawk Mascot Graphic -->
+    <g class="mascot">
+
+        <!-- Line Art Group -->
+        <g fill="none" stroke="url(#hawk-grad)" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" filter="url(#subtle-glow)">
+
+            <!-- Outer Head, Back & Outer Tail Feather Profile -->
+            <path d="M 380 740
+                     L 524 560
+                     C 600 450, 650 350, 620 250
+                     C 600 160, 550 70, 420 70
+                     C 320 70, 260 130, 240 210
+                     C 235 230, 230 250, 240 260
+                     C 250 240, 260 230, 280 225
+                     L 340 225" />
+
+            <!-- Closed Wing & Chest Loop -->
+            <path d="M 180 400
+                     C 180 280, 220 250, 270 240
+                     C 300 250, 320 280, 350 300
+                     C 400 300, 450 340, 400 420
+                     C 380 460, 370 480, 360 500
+                     L 180 725
+                     Z" />
+
+            <!-- Inner Wing Layered Feathers -->
+            <!-- Top Wing Feather -->
+            <line x1="180" y1="500" x2="260" y2="400" />
+            <!-- Middle Wing Feather -->
+            <line x1="180" y1="613" x2="320" y2="438" />
+
+            <!-- Inner Tail Feather -->
+            <line x1="310" y1="705" x2="450" y2="530" />
+
+            <!-- Eye Lower Semi-Circle Ring -->
+            <path d="M 363 145 A 32 32 0 0 0 425 137" />
+        </g>
+
+        <!-- Nostril Dot -->
+        <circle cx="265" cy="195" r="9" fill="url(#hawk-grad)" filter="url(#subtle-glow)"/>
+
+        <!-- Animated Cyber Pupil (Placed behind the dark brow, inside the eye area) -->
+        <g clip-path="url(#eye-clip)">
+            <g class="pupil-group">
+                <g class="pupil-blink">
+                    <circle cx="395" cy="154" r="14" fill="url(#pupil-glow)" filter="url(#neon-glow)" />
+                    <!-- Pupil Core -->
+                    <circle cx="395" cy="154" r="5" fill="#FFFFFF" />
+                    <!-- Scouter Targeting Dot inside Eye -->
+                    <circle cx="395" cy="154" r="2" fill="#FF0055" />
+                </g>
+            </g>
+        </g>
+
+        <!-- Sharp Angry Hawk Brow (Solid Shape overlapping the eye ring) -->
+        <path d="M 320 152
+                 C 380 142, 440 132, 500 122
+                 L 455 148
+                 C 420 155, 370 160, 320 152 Z"
+              fill="url(#hawk-grad)" filter="url(#subtle-glow)"/>
+    </g>
+</svg>
